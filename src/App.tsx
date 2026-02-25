@@ -1,34 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { Avatar, Button, Card, Chip, Spinner, Switch } from '@heroui/react'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <main
+      style={{
+        display: 'grid',
+        gap: '16px',
+        margin: '0 auto',
+        maxWidth: '720px',
+        padding: '24px',
+      }}
+    >
+      <Card>
+        <Card.Header>
+          <Card.Title>HeroUI v3 Demo</Card.Title>
+          <Card.Description>
+            App.tsx を HeroUI v3 コンポーネントで構成したサンプルです。
+          </Card.Description>
+        </Card.Header>
+        <Card.Content
+          style={{
+            alignItems: 'center',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '12px',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ alignItems: 'center', display: 'flex', gap: '12px' }}>
+            <Avatar color="accent">
+              <Avatar.Fallback>AV</Avatar.Fallback>
+            </Avatar>
+            <Chip color="success" variant="soft">
+              <Chip.Label>Visualizer Ready</Chip.Label>
+            </Chip>
+          </div>
+          <Spinner color="accent" size="sm" />
+        </Card.Content>
+        <Card.Footer style={{ alignItems: 'center', display: 'flex', gap: '12px' }}>
+          <Switch defaultSelected>オーディオ解析を有効化</Switch>
+          <Button>再生</Button>
+          <Button variant="secondary">停止</Button>
+        </Card.Footer>
+      </Card>
+    </main>
   )
 }
 

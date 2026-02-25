@@ -6,13 +6,17 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": " @biomejs/biome lint",
-    "format": " @biomejs/biome format",
+    "lint": "biome lint",
+    "format": "biome format",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@heroui/react": "^3.0.0-beta.7",
+    "@heroui/styles": "^3.0.0-beta.7",
+    "@tailwindcss/vite": "^4.2.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "tailwindcss": "^4.2.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.4",
