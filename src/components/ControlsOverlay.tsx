@@ -1,8 +1,6 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, LogIn, Pause, Play, RadioTower, Square } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { audioElementAtom } from "../atoms/audio";
 import { isPlayingAtom, progressAtom, volumeAtom, currentSrcAtom, queueAtom } from "../atoms/player";
@@ -122,54 +120,76 @@ export function ControlsOverlay() {
 
 	return (
 		<div className="absolute inset-0 flex w-full flex-col gap-2">
+			{/* Header */}
 			<div className="group relative flex flex-col justify-center">
-				<div className="absolute inset-0 bg-gradient-to-b from-gray-600/50 to-transparent opacity-50 transition-all duration-500 group-hover:opacity-100" />
-				<div className="z-10 flex w-full items-center justify-between px-2 py-1">
+				<div className="absolute inset-0 bg-linear-to-b from-gray-600/50 to-transparent opacity-50 transition-all duration-500 group-hover:opacity-100" />
+				<div className="z-10 flex w-full items-center px-2 py-1">
 					<span className="truncate text-sm">
 						{currentSrc === "off" ? "ALL OFF" : `${currentRadio?.name ?? "局未選択"}`}
 					</span>
-					<Badge variant={currentSrc === "off" ? "secondary" : "success"}>
-						{currentSrc === "off" ? "OFF" : "ON AIR"}
-					</Badge>
 				</div>
 				<SourceSheet>
-					<Button className="z-10 w-full" variant="ghost">
-						▼
+					<Button variant={null} className="z-10 w-full">
+						<ChevronDown className="scale-x-150" />
 					</Button>
 				</SourceSheet>
 			</div>
+			{/* Sidebar */}
 			<div className="flex h-full items-center justify-between">
 				<MenuSheet>
-					<Button variant="secondary" size="icon">
+					<Button
+						variant={null}
+						className="h-full group/btn relative pr-12"
+					>
+						<div className="absolute inset-0 opacity-0 from-gray-600/50 bg-[radial-gradient(80%_60%_at_left,var(--tw-gradient-from),transparent)] transition-all duration-500 group-hover/btn:opacity-100" />
 						<ChevronRight className="scale-y-150" />
 					</Button>
 				</MenuSheet>
 				<QueueSheet>
-					<Button variant="secondary" size="icon">
+					<Button
+						variant={null}
+						className="h-full group/btn relative pl-12"
+					>
+						<div className="absolute inset-0 opacity-0 from-gray-600/50 bg-[radial-gradient(80%_60%_at_right,var(--tw-gradient-from),transparent)] transition-all duration-500 group-hover/btn:opacity-100" />
 						<ChevronLeft className="scale-y-150" />
 					</Button>
 				</QueueSheet>
 			</div>
-			<div className="bg-gradient-to-t from-gray-500/50 to-transparent px-12 pb-8 pt-16">
-				<div className="grid gap-4">
-					<ProgressSlider />
-					<div className="flex items-center gap-8">
-						<Avatar size="lg">
-							{currentRadio?.logo ? <AvatarImage src={currentRadio.logo} /> : <AvatarFallback>AV</AvatarFallback>}
-						</Avatar>
-						<SongInfo
-							title={title}
-							artist={currentSrc === "radio" ? (currentRadio?.type === "AM" ? "AM Band" : "FM Band") : ""}
-							album={currentSrc === "radio" ? (currentRadio?.source === "radiko" ? "Radiko" : "NHKラジオ らじる★らじる") : ""}
-						/>
-						<div className="flex items-center gap-2">
-						<Button onClick={() => void onPlay()}>再生</Button>
-						<Button variant="secondary" onClick={onPause}>一時停止</Button>
-						<Button variant="ghost" onClick={onStop}>停止</Button>
-					<Badge variant={isPlaying ? "success" : "secondary"}>
-							{isPlaying ? "PLAY" : "STOP"}
-						</Badge>
-						</div>
+			{/* Footer */}
+			<div className="flex flex-col gap-4 bg-linear-to-t from-gray-500/50 to-transparent px-12 pb-8 pt-16">
+				<ProgressSlider />
+				<div className="flex items-center gap-8">
+					{/* Cover image */}
+					<div className="size-20 shrink-0 text-2xl rounded-md shadow-lg grid place-content-center bg-gray-500/50">
+						{currentSrc === "radio" ? (
+							<RadioTower />
+						) : currentSrc === "aux" ? (
+							<LogIn />
+						) : null}
+					</div>
+					<SongInfo
+						title={title}
+						artist={currentSrc === "radio" ? (currentRadio?.type === "AM" ? "AM Band" : "FM Band") : ""}
+						album={currentSrc === "radio" ? (currentRadio?.source === "radiko" ? "Radiko" : "NHKラジオ らじる★らじる") : ""}
+					/>
+					{/* Control buttons */}
+					<div className="ml-auto flex shrink-0 gap-4">
+						<Button
+							size="icon-lg"
+							variant="ghost"
+							className="p-2 text-white text-4xl"
+							onClick={async () => isPlaying ? onPause() : await onPlay()}
+						>
+							{isPlaying ? <Pause /> : <Play />}
+						</Button>
+						<Button
+							size="icon-lg"
+							variant="ghost"
+							className="p-2 text-white text-2xl"
+							onClick={onStop}
+						>
+							<Square />
+						</Button>
 					</div>
 				</div>
 			</div>
