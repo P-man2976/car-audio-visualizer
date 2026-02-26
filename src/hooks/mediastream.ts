@@ -5,11 +5,13 @@ export function useMediaStream() {
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 	const [mediaStream, setMediaStream] = useAtom(mediaStreamAtom);
 
-	const connect = (stream: MediaStream) => {
+	const connect = async (stream: MediaStream) => {
 		if (mediaStream) {
 			mediaStream.getTracks().forEach((track) => track.stop());
 		}
 
+		// Safari: AudioContext starts suspended until user gesture
+		await audioMotionAnalyzer.audioCtx.resume();
 		const source = audioMotionAnalyzer.audioCtx.createMediaStreamSource(stream);
 		const gainNode = audioMotionAnalyzer.audioCtx.createGain();
 		gainNode.gain.value = 3;

@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import type { ReactNode } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { FileEntries } from "./FileEntries";
@@ -13,6 +14,41 @@ import { audioElementAtom } from "@/atoms/audio";
 import { currentSongAtom, currentSrcAtom, songQueueAtom } from "@/atoms/player";
 import { LuFolderOpen, LuLoader } from "react-icons/lu";
 import type { SelectedFile } from "@/types/explorer";
+import type { Song } from "@/types/player";
+
+const hasFSAPI = "showDirectoryPicker" in window;
+
+async function fileToSong(
+	file: File,
+	audioElement: HTMLAudioElement,
+): Promise<Song | undefined> {
+	if (!audioElement.canPlayType(mime.getType(file.name) ?? "")) return;
+	const url = URL.createObjectURL(file);
+	const {
+		common: { title, track, album, artists, genre, date, year, picture },
+		format: { duration },
+	} = await parseBlob(file);
+	return {
+		id: crypto.randomUUID(),
+		filename: file.name,
+		url,
+		title,
+		track: { no: track.no ?? undefined, of: track.of ?? undefined },
+		album,
+		artists,
+		genre,
+		date,
+		year,
+		duration,
+		artwork: picture?.[0]
+			? URL.createObjectURL(
+					new Blob([new Uint8Array(picture[0].data)], {
+						type: picture[0].format,
+					}),
+				)
+			: undefined,
+	};
+}
 
 export function ExplorerDialog({ children }: { children: ReactNode }) {
 	const audioElement = useAtomValue(audioElementAtom);
@@ -21,6 +57,7 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 	const [currentSong, setCurrentSong] = useAtom(currentSongAtom);
 	const setCurrentSrc = useSetAtom(currentSrcAtom);
 	const { stack, push } = useAddress();
+	const fallbackInputRef = useRef<HTMLInputElement>(null);
 
 	const handleSelectRoot = async () => {
 		const handle = await showDirectoryPicker({ mode: "read" }).catch(() => null);
@@ -63,36 +100,26 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 		return results;
 	};
 
-	const queueFile = async (handle: FileSystemFileHandle) => {
-		const file = await handle.getFile();
-		if (!audioElement.canPlayType(mime.getType(file.name) ?? "")) return;
+	const queueFile = (handle: FileSystemFileHandle) =>
+		handle.getFile().then((file) => fileToSong(file, audioElement));
 
-		const url = URL.createObjectURL(file);
-		const {
-			common: { title, track, album, artists, genre, date, year, picture },
-			format: { duration },
-		} = await parseBlob(file);
-
-		const song = {
-			id: crypto.randomUUID(),
-			filename: file.name,
-			url,
-			title,
-			track: { no: track.no ?? undefined, of: track.of ?? undefined },
-			album,
-			artists,
-			genre,
-			date,
-			year,
-			duration,
-			artwork: picture?.[0]
-				? URL.createObjectURL(
-						new Blob([new Uint8Array(picture[0].data)], { type: picture[0].format }),
-					)
-				: undefined,
-		};
-
-		return song;
+	const handleFallbackChange = async (
+		e: React.ChangeEvent<HTMLInputElement>,
+	) => {
+		const files = Array.from(e.target.files ?? []);
+		if (!files.length) return;
+		const songs = (
+			await Promise.all(files.map((f) => fileToSong(f, audioElement)))
+		).filter((s) => s !== undefined);
+		if (!currentSong && songs.length > 0) {
+			const [first, ...rest] = songs;
+			setCurrentSong(first);
+			setQueue((prev) => [...prev, ...rest]);
+		} else {
+			setQueue((prev) => [...prev, ...songs]);
+		}
+		setCurrentSrc("file");
+		e.target.value = "";
 	};
 
 	const { mutate, isPending } = useMutation({
@@ -116,6 +143,27 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 			setSelected([]);
 		},
 	});
+
+	if (!hasFSAPI) {
+		return (
+			<>
+				<input
+					ref={fallbackInputRef}
+					type="file"
+					multiple
+					accept="audio/*"
+					className="sr-only"
+					onChange={handleFallbackChange}
+				/>
+				<span
+					className="contents"
+					onClick={() => fallbackInputRef.current?.click()}
+				>
+					{children}
+				</span>
+			</>
+		);
+	}
 
 	return (
 		<Dialog>
