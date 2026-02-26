@@ -15,6 +15,8 @@ import { ExternalInput } from "./source/ExternalInput";
 import { RadioStation } from "./source/RadioStation";
 import { RadiruStation } from "./source/RadiruStation";
 import { ScreenShare } from "./source/ScreenShare";
+import { ExplorerDialog } from "./explorer/ExplorerDialog";
+import { FilePicker } from "./FilePicker";
 import { LayoutGrid, LayoutList } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,12 +35,13 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 				<Tabs
 					value={currentSrc}
 					onValueChange={(value) => {
-						setCurrentSrc(value as "off" | "radio" | "aux");
+						setCurrentSrc(value as "off" | "file" | "radio" | "aux");
 						if (value !== "aux") disconnect();
 					}}
 				>
-					<TabsList className="grid grid-cols-3 w-full">
+					<TabsList className="grid grid-cols-4 w-full">
 						<TabsTrigger value="off">ALL OFF</TabsTrigger>
+						<TabsTrigger value="file">ファイル</TabsTrigger>
 						<TabsTrigger value="radio">ラジオ</TabsTrigger>
 						<TabsTrigger value="aux">外部入力</TabsTrigger>
 					</TabsList>
@@ -46,6 +49,19 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 					<TabsContent className="py-4" value="off">
 						<div className="flex w-full items-center justify-center py-8">
 							<span className="text-gray-400 text-lg">ＡＬＬ　ＯＦＦ</span>
+						</div>
+					</TabsContent>
+
+					<TabsContent className="py-4" value="file">
+						<div className="flex w-full flex-col items-center gap-4">
+							<div className="flex w-full h-12 gap-4 items-center">
+								<FilePicker />
+								<ExplorerDialog>
+									<Button className="w-full h-full">
+										組み込みのエクスプローラーから読み込み
+									</Button>
+								</ExplorerDialog>
+							</div>
 						</div>
 					</TabsContent>
 
