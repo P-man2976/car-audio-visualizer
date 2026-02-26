@@ -10,15 +10,16 @@ import { useAddress } from "@/hooks/explorer";
 import { Button } from "../ui/button";
 import { parseBlob } from "music-metadata-browser";
 import { audioElementAtom } from "@/atoms/audio";
-import { currentSongAtom, queueAtom } from "@/atoms/player";
+import { currentSongAtom, currentSrcAtom, songQueueAtom } from "@/atoms/player";
 import { LuFolderOpen, LuLoader2 } from "react-icons/lu";
 import type { SelectedFile } from "@/types/explorer";
 
 export function ExplorerDialog({ children }: { children: ReactNode }) {
 	const audioElement = useAtomValue(audioElementAtom);
 	const [selected, setSelected] = useAtom(explorerSelectedFilesAtom);
-	const setQueue = useSetAtom(queueAtom);
+	const setQueue = useSetAtom(songQueueAtom);
 	const [currentSong, setCurrentSong] = useAtom(currentSongAtom);
+	const setCurrentSrc = useSetAtom(currentSrcAtom);
 	const { stack, push } = useAddress();
 
 	const handleSelectRoot = async () => {
@@ -110,6 +111,7 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 			} else {
 				setQueue((prev) => [...prev, ...songs]);
 			}
+			setCurrentSrc("file");
 
 			setSelected([]);
 		},

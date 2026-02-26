@@ -25,4 +25,13 @@ describe("buildDisplayString", () => {
 	it("returns AUX MODE in aux mode", () => {
 		expect(buildDisplayString("aux", undefined, 0).trim()).toBe("AUX MODE");
 	});
+
+	it("returns CD display in file mode without song", () => {
+		expect(buildDisplayString("file", undefined, 0)).toBe("CD---   0:00");
+	});
+
+	it("returns CD display in file mode with song and progress", () => {
+		const song = { id: "1", filename: "track.mp3", url: "", track: { no: 3 } };
+		expect(buildDisplayString("file", undefined, 65, song)).toBe("CD-03   1:05");
+	});
 });

@@ -1,14 +1,15 @@
 import { parseBlob } from "music-metadata-browser";
 import { Button } from "./ui/button";
 import { useAtom, useSetAtom } from "jotai";
-import { currentSongAtom, queueAtom } from "@/atoms/player";
+import { currentSongAtom, currentSrcAtom, songQueueAtom } from "@/atoms/player";
 import { displayStringAtom } from "@/atoms/display";
 import { StepBack } from "lucide-react";
 
 export function FilePicker() {
 	const [currentSong, setCurrentSong] = useAtom(currentSongAtom);
-	const setQueue = useSetAtom(queueAtom);
+	const setQueue = useSetAtom(songQueueAtom);
 	const setDisplayString = useSetAtom(displayStringAtom);
+	const setCurrentSrc = useSetAtom(currentSrcAtom);
 
 	return (
 		<Button
@@ -66,6 +67,7 @@ export function FilePicker() {
 					setCurrentSong(current);
 					setQueue(queue);
 				}
+				setCurrentSrc("file");
 
 				console.log("load finished", songs);
 			}}

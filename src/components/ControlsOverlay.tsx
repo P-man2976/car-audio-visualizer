@@ -1,13 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { ChevronDown, ChevronLeft, ChevronRight, LogIn, Pause, Play, RadioTower, Square } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { ChevronDown, ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, LogIn, Pause, Play, RadioTower, Square } from "lucide-react";
+import { useEffect, useMemo, useRef } from "react";
 import { audioElementAtom } from "../atoms/audio";
-import { isPlayingAtom, progressAtom, volumeAtom, currentSrcAtom, queueAtom } from "../atoms/player";
+import { currentSongAtom, currentSrcAtom, progressAtom, queueAtom, volumeAtom } from "../atoms/player";
 import { currentRadioAtom } from "../atoms/radio";
 import { displayStringAtom } from "../atoms/display";
 import { buildDisplayString } from "../lib/display";
 import { useHLS } from "../hooks/hls";
+import { usePlayer } from "../hooks/player";
 import { useRadikoM3u8Url } from "../services/radiko";
 import { MenuSheet } from "./MenuSheet";
 import { QueueSheet } from "./QueueSheet";
@@ -18,51 +19,62 @@ import { SourceSheet } from "./SourceSheet";
 export function ControlsOverlay() {
 	const audioElement = useAtomValue(audioElementAtom);
 	const setDisplayString = useSetAtom(displayStringAtom);
-	const [currentSrc, setCurrentSrc] = useAtom(currentSrcAtom);
+	const currentSrc = useAtomValue(currentSrcAtom);
 	const currentRadio = useAtomValue(currentRadioAtom);
-	const [isPlaying, setIsPlaying] = useAtom(isPlayingAtom);
+	const currentSong = useAtomValue(currentSongAtom);
 	const volume = useAtomValue(volumeAtom);
 	const progress = useAtomValue(progressAtom);
 	const [queue, setQueue] = useAtom(queueAtom);
+	const { isPlaying, play, pause, stop, next, prev } = usePlayer();
 	const { load, unLoad } = useHLS();
 	const { mutate } = useRadikoM3u8Url();
+
+	/** Set to true just before next() so the src effect auto-plays the incoming song */
+	const autoPlayNextRef = useRef(false);
 
 	useEffect(() => {
 		audioElement.crossOrigin = "anonymous";
 		audioElement.volume = volume / 100;
 	}, [audioElement, volume]);
 
+	// File mode: set audio src when song changes; auto-play if advancing from onEnded
+	useEffect(() => {
+		if (currentSrc !== "file" || !currentSong) return;
+		audioElement.src = currentSong.url;
+		audioElement.load();
+		if (autoPlayNextRef.current) {
+			autoPlayNextRef.current = false;
+			play().catch(console.error);
+		}
+	}, [audioElement, currentSrc, currentSong, play]);
+
+	// File mode: auto-advance at track end
 	useEffect(() => {
 		const onEnded = () => {
-			setIsPlaying(false);
+			if (currentSrc === "file") {
+				autoPlayNextRef.current = true;
+				next();
+			}
 		};
-
 		audioElement.addEventListener("ended", onEnded);
+		return () => audioElement.removeEventListener("ended", onEnded);
+	}, [audioElement, currentSrc, next]);
 
-		return () => {
-			audioElement.removeEventListener("ended", onEnded);
-		};
-	}, [audioElement, setIsPlaying]);
-
+	// Radio mode: HLS load/unload; off mode: stop
 	useEffect(() => {
 		if (currentSrc === "off") {
 			unLoad();
 			audioElement.pause();
-			setIsPlaying(false);
 			return;
 		}
 
 		if (currentSrc === "radio" && currentRadio) {
 			if (currentRadio.source === "radiko") {
 				mutate(currentRadio.id, {
-					onSuccess: (m3u8) => {
-						load(m3u8);
-						setIsPlaying(true);
-					},
+					onSuccess: (m3u8) => load(m3u8),
 				});
 			} else if (currentRadio.source === "radiru") {
 				load(currentRadio.url);
-				setIsPlaying(true);
 			}
 
 			if (!queue.includes(currentRadio.name)) {
@@ -73,48 +85,47 @@ export function ControlsOverlay() {
 		return () => {
 			unLoad();
 		};
-	}, [audioElement, currentSrc, currentRadio, load, mutate, queue, setIsPlaying, setQueue, unLoad]);
+	}, [currentSrc, currentRadio, audioElement, load, unLoad, mutate, queue, setQueue]);
 
+	// Dot matrix display string
 	useEffect(() => {
-		setDisplayString(buildDisplayString(currentSrc, currentRadio, progress));
-	}, [currentSrc, currentRadio, progress, setDisplayString]);
+		setDisplayString(buildDisplayString(currentSrc, currentRadio, progress, currentSong));
+	}, [currentSrc, currentRadio, progress, currentSong, setDisplayString]);
 
 	const title = useMemo(() => {
-		if (currentSrc === "off") {
-			return "ALL OFF";
+		switch (currentSrc) {
+			case "file":
+				return currentSong?.title ?? currentSong?.filename ?? "タイトル不明";
+			case "radio":
+				return currentRadio?.name ?? "局未選択";
+			case "aux":
+				return "外部入力";
+			case "off":
+				return "ALL OFF";
 		}
+	}, [currentSrc, currentSong, currentRadio]);
 
+	const artist = useMemo(() => {
+		if (currentSrc === "file") return currentSong?.artists?.join(", ");
 		if (currentSrc === "radio") {
-			return currentRadio?.name ?? "局未選択";
+			return currentRadio?.frequency
+				? currentRadio.type === "AM"
+					? `${currentRadio.frequency}kHz`
+					: `${currentRadio.frequency.toFixed(1)}MHz`
+				: undefined;
 		}
+		return undefined;
+	}, [currentSrc, currentSong, currentRadio]);
 
-		return "外部入力";
-	}, [currentSrc, currentRadio]);
-
-	const onPlay = async () => {
-		if (currentSrc === "off") {
-			return;
+	const album = useMemo(() => {
+		if (currentSrc === "file") return currentSong?.album;
+		if (currentSrc === "radio") {
+			return currentRadio?.source === "radiko" ? "Radiko" : "NHKラジオ らじる★らじる";
 		}
+		return undefined;
+	}, [currentSrc, currentSong, currentRadio]);
 
-		try {
-			await audioElement.play();
-			setIsPlaying(true);
-		} catch {
-			setIsPlaying(false);
-		}
-	};
-
-	const onPause = () => {
-		audioElement.pause();
-		setIsPlaying(false);
-	};
-
-	const onStop = () => {
-		audioElement.pause();
-		audioElement.currentTime = 0;
-		setIsPlaying(false);
-		setCurrentSrc("off");
-	};
+	const coverSrc = currentSrc === "file" ? currentSong?.artwork : undefined;
 
 	return (
 		<div className="absolute inset-0 flex w-full flex-col gap-2">
@@ -122,9 +133,7 @@ export function ControlsOverlay() {
 			<div className="group relative flex flex-col justify-center">
 				<div className="absolute inset-0 bg-linear-to-b from-gray-600/50 to-transparent opacity-50 transition-all duration-500 group-hover:opacity-100" />
 				<div className="z-10 flex w-full items-center px-2 py-1">
-					<span className="truncate text-sm">
-						{currentSrc === "off" ? "ALL OFF" : `${currentRadio?.name ?? "局未選択"}`}
-					</span>
+					<span className="truncate text-sm">{title}</span>
 				</div>
 				<SourceSheet>
 					<Button variant={null} className="z-10 w-full">
@@ -157,35 +166,38 @@ export function ControlsOverlay() {
 			<div className="flex flex-col gap-4 bg-linear-to-t from-gray-500/50 to-transparent px-12 pb-8 pt-16">
 				<ProgressSlider />
 				<div className="flex items-center gap-8">
-					{/* Cover image */}
-					<div className="size-20 shrink-0 text-2xl rounded-md shadow-lg grid place-content-center bg-gray-500/50">
-						{currentSrc === "radio" ? (
+					{/* Cover image / icon */}
+					<div className="size-20 shrink-0 rounded-md shadow-lg overflow-hidden bg-gray-500/50 grid place-content-center text-2xl">
+						{coverSrc ? (
+							<img src={coverSrc} alt="cover" className="size-full object-cover" />
+						) : currentSrc === "radio" ? (
 							<RadioTower />
 						) : currentSrc === "aux" ? (
 							<LogIn />
 						) : null}
 					</div>
-					<SongInfo
-						title={title}
-						artist={currentSrc === "radio" ? (currentRadio?.type === "AM" ? "AM Band" : "FM Band") : ""}
-						album={currentSrc === "radio" ? (currentRadio?.source === "radiko" ? "Radiko" : "NHKラジオ らじる★らじる") : ""}
-					/>
+					<SongInfo title={title} artist={artist} album={album} />
 					{/* Control buttons */}
-					<div className="ml-auto flex shrink-0 gap-4">
+					<div className="ml-auto flex shrink-0 gap-2">
+						{currentSrc === "file" && (
+							<Button size="icon-lg" variant="ghost" className="p-2" onClick={prev}>
+								<ChevronFirst />
+							</Button>
+						)}
 						<Button
 							size="icon-lg"
 							variant="ghost"
-							className="p-2 text-white text-4xl"
-							onClick={async () => isPlaying ? onPause() : await onPlay()}
+							className="p-2"
+							onClick={async () => (isPlaying ? pause() : await play())}
 						>
 							{isPlaying ? <Pause /> : <Play />}
 						</Button>
-						<Button
-							size="icon-lg"
-							variant="ghost"
-							className="p-2 text-white text-2xl"
-							onClick={onStop}
-						>
+						{currentSrc === "file" && (
+							<Button size="icon-lg" variant="ghost" className="p-2" onClick={next}>
+								<ChevronLast />
+							</Button>
+						)}
+						<Button size="icon-lg" variant="ghost" className="p-2" onClick={stop}>
 							<Square />
 						</Button>
 					</div>
