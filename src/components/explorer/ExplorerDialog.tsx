@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { FileEntries } from "./FileEntries";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -11,7 +11,7 @@ import { Button } from "../ui/button";
 import { parseBlob } from "music-metadata-browser";
 import { audioElementAtom } from "@/atoms/audio";
 import { currentSongAtom, currentSrcAtom, songQueueAtom } from "@/atoms/player";
-import { LuFolderOpen, LuLoader2 } from "react-icons/lu";
+import { LuFolderOpen, LuLoader } from "react-icons/lu";
 import type { SelectedFile } from "@/types/explorer";
 
 export function ExplorerDialog({ children }: { children: ReactNode }) {
@@ -78,7 +78,7 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 			filename: file.name,
 			url,
 			title,
-			track,
+			track: { no: track.no ?? undefined, of: track.of ?? undefined },
 			album,
 			artists,
 			genre,
@@ -87,7 +87,7 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 			duration,
 			artwork: picture?.[0]
 				? URL.createObjectURL(
-						new Blob([picture[0].data], { type: picture[0].format }),
+						new Blob([new Uint8Array(picture[0].data)], { type: picture[0].format }),
 					)
 				: undefined,
 		};
@@ -120,7 +120,7 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>{children}</DialogTrigger>
-			<DialogContent className="flex flex-col h-[calc(100dvh_-_8rem)] max-w-screen-md">
+			<DialogContent className="flex flex-col h-[calc(100dvh-8rem)] max-w-3xl">
 				<Address />
 				<div className="flex gap-1 overflow-auto h-full">
 					{/* Sidebar */}
@@ -146,7 +146,7 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 					onClick={() => mutate(selected)}
 				>
 					{isPending ? (
-						<LuLoader2 className="animate-spin" />
+						<LuLoader className="animate-spin" />
 					) : (
 						`選択したファイルを読み込む (${selected.length}件)`
 					)}

@@ -13,7 +13,7 @@ export function FilePicker() {
 
 	return (
 		<Button
-			className="p-4 w-full h-full max-w-screen-md gap-4"
+			className="p-4 w-full h-full max-w-3xl gap-4"
 			onClick={async () => {
 				const handles = await showOpenFilePicker({
 					multiple: true,
@@ -44,7 +44,7 @@ export function FilePicker() {
 							filename: file.name,
 							url,
 							title,
-							track,
+							track: { no: track.no ?? undefined, of: track.of ?? undefined },
 							album,
 							artists,
 							genre,
@@ -53,7 +53,7 @@ export function FilePicker() {
 							duration,
 							artwork: picture?.[0]
 								? URL.createObjectURL(
-										new Blob([picture[0].data], { type: picture[0].format }),
+										new Blob([new Uint8Array(picture[0].data)], { type: picture[0].format }),
 									)
 								: undefined,
 						};

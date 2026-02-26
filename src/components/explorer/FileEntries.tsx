@@ -102,7 +102,7 @@ function Entry({ name, handle, isDirectory }: EntryInfo) {
 			<Checkbox
 				disabled={isDisabled}
 				checked={isSelected}
-				onClick={(e) => {
+			onClick={(e: React.MouseEvent) => {
 					e.stopPropagation();
 					toggleSelected();
 				}}
