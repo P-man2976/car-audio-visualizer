@@ -18,7 +18,7 @@
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-query-devtools": "^5.91.3",
     "@tanstack/react-router": "^1.163.2",
-    "audiomotion-analyzer": "^4.5.4",
+    "audiomotion-analyzer": "github:p-man2976/audioMotion-analyzer",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "hls.js": "^1.6.15",

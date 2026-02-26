@@ -41,3 +41,27 @@ export type RadiruStation = {
 	r2hls: string;
 	fmhls: string;
 };
+
+export type FrequencyArea = {
+	area: string[];
+	frequency: number;
+	primary: boolean;
+};
+
+export type FrequencyStation =
+	| {
+			area: string[];
+			type: "AM";
+			name: string;
+			frequencies_fm?: FrequencyArea[];
+			frequencies_am: FrequencyArea[];
+	  }
+	| {
+			area: string[];
+			type: "FM";
+			name: string;
+			frequencies_fm: FrequencyArea[];
+			frequencies_am?: never;
+	  };
+
+export type FrequencyList = Record<string, FrequencyStation>;

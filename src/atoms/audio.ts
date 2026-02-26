@@ -21,6 +21,7 @@ function getAnalyzer() {
 		mode: 8,
 		ansiBands: true,
 		weightingFilter: "A",
+		peakFallSpeed: 0.05,
 	});
 
 	return analyzerInstance;
