@@ -1,51 +1,42 @@
-import { Avatar, Button, Card, Chip, Spinner, Switch } from '@heroui/react'
-import './App.css'
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Loader2 } from "lucide-react";
 
 function App() {
-  return (
-    <main
-      style={{
-        display: 'grid',
-        gap: '16px',
-        margin: '0 auto',
-        maxWidth: '720px',
-        padding: '24px',
-      }}
-    >
-      <Card>
-        <Card.Header>
-          <Card.Title>HeroUI v3 Demo</Card.Title>
-          <Card.Description>
-            App.tsx を HeroUI v3 コンポーネントで構成したサンプルです。
-          </Card.Description>
-        </Card.Header>
-        <Card.Content
-          style={{
-            alignItems: 'center',
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '12px',
-            justifyContent: 'space-between',
-          }}
-        >
-          <div style={{ alignItems: 'center', display: 'flex', gap: '12px' }}>
-            <Avatar color="accent">
-              <Avatar.Fallback>AV</Avatar.Fallback>
-            </Avatar>
-            <Chip color="success" variant="soft">
-              <Chip.Label>Visualizer Ready</Chip.Label>
-            </Chip>
-          </div>
-          <Spinner color="accent" size="sm" />
-        </Card.Content>
-        <Card.Footer style={{ alignItems: 'center', display: 'flex', gap: '12px' }}>
-          <Switch defaultSelected>オーディオ解析を有効化</Switch>
-          <Button>再生</Button>
-          <Button variant="secondary">停止</Button>
-        </Card.Footer>
-      </Card>
-    </main>
-  )
+	return (
+		<main className="mx-auto grid w-full max-w-[720px] gap-4 p-6">
+			<Card>
+				<CardHeader>
+					<CardTitle>shadcn/ui Demo</CardTitle>
+					<CardDescription>
+						App.tsx を shadcn/ui コンポーネントで構成したサンプルです。
+					</CardDescription>
+				</CardHeader>
+				<CardContent className="flex flex-wrap items-center justify-between gap-3">
+					<div className="flex items-center gap-3">
+						<Avatar>
+							<AvatarFallback>AV</AvatarFallback>
+						</Avatar>
+						<Badge className="bg-green-600/60 text-green-100 border-transparent">
+							Visualizer Ready
+						</Badge>
+					</div>
+					<Loader2 className="size-4 animate-spin" />
+				</CardContent>
+				<CardFooter className="flex flex-wrap items-center gap-3">
+					<div className="flex items-center gap-2">
+						<Switch defaultChecked />
+						<span className="text-sm">オーディオ解析を有効化</span>
+					</div>
+					<Button>再生</Button>
+					<Button variant="secondary">停止</Button>
+				</CardFooter>
+			</Card>
+		</main>
+	);
 }
 
-export default App
+export default App;

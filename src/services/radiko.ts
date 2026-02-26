@@ -1,0 +1,123 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Parser as M3U8Parser } from "m3u8-parser";
+import type { RadikoStation } from "../types/radio";
+
+export function useRadikoToken() {
+	return useQuery({
+		queryKey: ["radio", "radiko", "token"],
+		queryFn: async () => {
+			const authKey = "bcd151073c03b352e1ef2fd66c32209da9ca0afa";
+
+			const resAuth1 = await fetch("/radiko-api/v2/api/auth1", {
+				headers: {
+					"X-Radiko-App": "pc_html5",
+					"X-Radiko-App-Version": "0.0.1",
+					"X-Radiko-Device": "pc",
+					"X-Radiko-User": "dummy_user",
+				},
+			});
+
+			if (!resAuth1.ok) {
+				throw new Error("[Error] Radiko Auth1 failed");
+			}
+
+			const authToken = resAuth1.headers.get("x-radiko-authtoken");
+			const keyLength = Number(resAuth1.headers.get("x-radiko-keylength"));
+			const keyOffset = Number(resAuth1.headers.get("x-radiko-keyoffset"));
+			const partialKey = btoa(authKey.slice(keyOffset, keyOffset + keyLength));
+
+			if (!authToken) {
+				throw new Error("[Error] Failed to get X-Radiko-AuthToken");
+			}
+
+			const resAuth2 = await fetch("/radiko-api/v2/api/auth2", {
+				headers: {
+					"X-Radiko-AuthToken": authToken,
+					"X-Radiko-PartialKey": partialKey,
+					"X-Radiko-Device": "pc",
+					"X-Radiko-User": "dummy_user",
+				},
+			});
+
+			if (!resAuth2.ok) {
+				throw new Error("[Error] Radiko Auth2 failed");
+			}
+
+			return authToken;
+		},
+		refetchInterval: 1000 * 60 * 8,
+	});
+}
+
+export function useRadikoArea() {
+	return useQuery({
+		queryKey: ["radio", "radiko", "area"],
+		queryFn: async () => {
+			const res = await fetch("/radiko-api/area");
+			const html = await res.text();
+			return html.match(/class="(.*)"/)?.[1];
+		},
+	});
+}
+
+export function useRadikoStationList(areaId?: string) {
+	const { data } = useRadikoArea();
+
+	return useQuery({
+		queryKey: ["radio", "radiko", areaId ?? data, "stations"],
+		queryFn: async () => {
+			const res = await fetch(`/radiko-api/v3/station/list/${areaId ?? data}.xml`);
+			const xml = await res.text();
+			const doc = new DOMParser().parseFromString(xml, "application/xml");
+			const stationNodes = Array.from(doc.querySelectorAll("station"));
+
+			return stationNodes.map((node) => {
+				const logo = Array.from(node.querySelectorAll("logo")).map((logoNode) => logoNode.textContent ?? "");
+				return {
+					id: node.querySelector("id")?.textContent ?? "",
+					name: node.querySelector("name")?.textContent ?? "",
+					ascii_name: node.querySelector("ascii_name")?.textContent ?? "",
+					ruby: node.querySelector("ruby")?.textContent ?? "",
+					areafree: Number(node.querySelector("areafree")?.textContent ?? "0") as 0 | 1,
+					timefree: Number(node.querySelector("timefree")?.textContent ?? "0") as 0 | 1,
+					logo,
+					banner: node.querySelector("banner")?.textContent ?? "",
+					href: node.querySelector("href")?.textContent ?? "",
+					simul_max_delay: Number(node.querySelector("simul_max_delay")?.textContent ?? "0"),
+					tf_max_delay: Number(node.querySelector("tf_max_delay")?.textContent ?? "0"),
+				} satisfies RadikoStation;
+			});
+		},
+		enabled: Boolean(areaId ?? data),
+	});
+}
+
+export function useRadikoM3u8Url() {
+	const { data: token } = useRadikoToken();
+
+	return useMutation<string, Error, string>({
+		mutationFn: async (stationId: string) => {
+			if (!token) {
+				throw new Error("Radiko token is not ready");
+			}
+
+			const m3u8Parser = new M3U8Parser();
+			const response = await fetch(
+				`/si-radiko/so/playlist.m3u8?station_id=${stationId}&type=b&l=15&lsid=11cbd3124cef9e8004f9b5e9f77b66`,
+				{
+					headers: { "X-Radiko-AuthToken": token },
+				},
+			);
+
+			m3u8Parser.push(await response.text());
+			m3u8Parser.end();
+
+			const playlist = (m3u8Parser.manifest as { playlists?: Array<{ uri?: string }> }).playlists?.[0];
+			if (!playlist?.uri) {
+				throw new Error("Radiko playlist not found");
+			}
+
+			return playlist.uri;
+		},
+	});
+}

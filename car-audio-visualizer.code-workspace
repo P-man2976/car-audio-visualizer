@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../2din-spectrogram"
+		}
+	],
+	"settings": {
+		"chat.tools.terminal.autoApprove": {
+			"npm run test": true,
+			"npm i": true,
+			"npx shadcn@latest": true
+		}
+	}
+}
