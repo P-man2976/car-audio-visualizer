@@ -27,7 +27,7 @@
     "lucide-react": "^0.575.0",
     "m3u8-parser": "^7.2.0",
     "mime": "^4.1.0",
-    "music-metadata-browser": "^2.5.11",
+    "music-metadata": "^11.12.1",
     "radix-ui": "^1.4.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

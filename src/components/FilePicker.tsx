@@ -1,4 +1,4 @@
-import { parseBlob } from "music-metadata-browser";
+import { parseBlob } from "music-metadata";
 import { Button } from "./ui/button";
 import { useAtom, useSetAtom } from "jotai";
 import { currentSongAtom, currentSrcAtom, songQueueAtom } from "@/atoms/player";

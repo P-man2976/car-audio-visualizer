@@ -8,7 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Address } from "./Address";
 import { useAddress } from "@/hooks/explorer";
 import { Button } from "../ui/button";
-import { parseBlob } from "music-metadata-browser";
+import { parseBlob } from "music-metadata";
 import { audioElementAtom } from "@/atoms/audio";
 import { currentSongAtom, currentSrcAtom, songQueueAtom } from "@/atoms/player";
 import { LuFolderOpen, LuLoader } from "react-icons/lu";
