@@ -1,4 +1,4 @@
-import { audioElementAtom } from "../atoms/audio";
+import { audioElementAtom, audioMotionAnalyzerAtom } from "../atoms/audio";
 import { hlsAtom } from "../atoms/hls";
 import Hls from "hls.js";
 import { useAtomValue } from "jotai";
@@ -7,10 +7,15 @@ import { useCallback } from "react";
 export function useHLS() {
 	const hls = useAtomValue(hlsAtom);
 	const audioElement = useAtomValue(audioElementAtom);
+	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 
 	const onAttached = useCallback(() => {
-		void audioElement.play().catch(() => undefined);
-	}, [audioElement]);
+		void audioMotionAnalyzer.audioCtx
+			.resume()
+			.then(() => audioElement.play())
+			.then(() => audioMotionAnalyzer.start())
+			.catch(() => undefined);
+	}, [audioElement, audioMotionAnalyzer]);
 
 	const onDetached = useCallback(() => {
 		return;
@@ -27,9 +32,13 @@ export function useHLS() {
 			}
 
 			audioElement.src = source;
-			void audioElement.play().catch(() => undefined);
+			void audioMotionAnalyzer.audioCtx
+				.resume()
+				.then(() => audioElement.play())
+				.then(() => audioMotionAnalyzer.start())
+				.catch(() => undefined);
 		},
-		[hls, audioElement, onAttached, onDetached],
+		[hls, audioElement, audioMotionAnalyzer, onAttached, onDetached],
 	);
 
 	const unLoad = useCallback(() => {
