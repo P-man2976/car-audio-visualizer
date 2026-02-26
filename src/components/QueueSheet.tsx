@@ -1,10 +1,10 @@
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import { type ReactNode } from "react";
 import { queueAtom } from "../atoms/player";
 
 export function QueueSheet({ children }: { children: ReactNode }) {
-	const [queue] = useAtom(queueAtom);
+	const queue = useAtomValue(queueAtom);
 
 	return (
 		<Sheet>

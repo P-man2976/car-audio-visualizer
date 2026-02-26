@@ -33,7 +33,6 @@ export function ControlsOverlay() {
 	}, [audioElement, volume]);
 
 	useEffect(() => {
-
 		const onEnded = () => {
 			setIsPlaying(false);
 		};
@@ -50,7 +49,6 @@ export function ControlsOverlay() {
 			unLoad();
 			audioElement.pause();
 			setIsPlaying(false);
-			setDisplayString("ALL OFF".padEnd(12, " "));
 			return;
 		}
 
@@ -75,7 +73,7 @@ export function ControlsOverlay() {
 		return () => {
 			unLoad();
 		};
-	}, [audioElement, currentSrc, currentRadio, load, mutate, queue, setDisplayString, setIsPlaying, setQueue, unLoad]);
+	}, [audioElement, currentSrc, currentRadio, load, mutate, queue, setIsPlaying, setQueue, unLoad]);
 
 	useEffect(() => {
 		setDisplayString(buildDisplayString(currentSrc, currentRadio, progress));
