@@ -68,7 +68,7 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 									size="icon"
 									onClick={() => setRadioStationSize((size) => (size === "lg" ? "sm" : "lg"))}
 								>
-									{radioStationSize === "lg" ? <LayoutGrid className="size-4" /> : <LayoutList className="size-4" />}
+									{radioStationSize === "lg" ? <LayoutGrid /> : <LayoutList />}
 								</Button>
 							</div>
 							<div
