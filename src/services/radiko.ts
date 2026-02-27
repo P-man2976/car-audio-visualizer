@@ -6,47 +6,13 @@ export function useRadikoToken() {
 	return useQuery({
 		queryKey: ["radio", "radiko", "token"],
 		queryFn: async () => {
-			const authKey = "bcd151073c03b352e1ef2fd66c32209da9ca0afa";
-
-			const resAuth1 = await fetch("/api/radiko/v2/api/auth1", {
-				headers: {
-					"X-Radiko-App": "pc_html5",
-					"X-Radiko-App-Version": "0.0.1",
-					"X-Radiko-Device": "pc",
-					"X-Radiko-User": "dummy_user",
-				},
-			});
-
-			if (!resAuth1.ok) {
-				throw new Error("[Error] Radiko Auth1 failed");
+			// auth1 + auth2 を同一 Worker インスタンスで完結させるため専用ルートを使用
+			const res = await fetch("/api/radiko/auth");
+			if (!res.ok) {
+				const { error } = await res.json() as { error: string };
+				throw new Error(`[Error] Radiko auth failed: ${error}`);
 			}
-
-			const authToken = resAuth1.headers.get("x-radiko-authtoken");
-			const keyLength = Number(resAuth1.headers.get("x-radiko-keylength"));
-			const keyOffset = Number(resAuth1.headers.get("x-radiko-keyoffset"));
-			const partialKey = btoa(authKey.slice(keyOffset, keyOffset + keyLength));
-
-			if (!authToken) {
-				throw new Error("[Error] Failed to get X-Radiko-AuthToken");
-			}
-
-			const resAuth2 = await fetch("/api/radiko/v2/api/auth2", {
-				headers: {
-					"X-Radiko-AuthToken": authToken,
-					"X-Radiko-PartialKey": partialKey,
-					"X-Radiko-Device": "pc",
-					"X-Radiko-User": "dummy_user",
-				},
-			});
-
-			if (!resAuth2.ok) {
-				throw new Error("[Error] Radiko Auth2 failed");
-			}
-
-			const auth2Text = await resAuth2.text();
-			const areaId = auth2Text.trim().split(",")[0] ?? "JP13";
-
-			return { authToken, areaId };
+			return res.json() as Promise<{ authToken: string; areaId: string }>;
 		},
 		refetchInterval: 1000 * 60 * 8,
 		refetchOnWindowFocus: false,

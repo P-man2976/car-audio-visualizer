@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from "./routes/__root";
 import { Route as IndexRouteImport } from "./routes/index";
+import { Route as ApiRadikoAuthRouteImport } from "./routes/api/radiko/auth";
 import { Route as ApiRadikoSplatRouteImport } from "./routes/api/radiko/$";
 
 const IndexRoute = IndexRouteImport.update({
   id: "/",
   path: "/",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const ApiRadikoAuthRoute = ApiRadikoAuthRouteImport.update({
+  id: "/api/radiko/auth",
+  path: "/api/radiko/auth",
   getParentRoute: () => rootRouteImport,
 } as any);
 const ApiRadikoSplatRoute = ApiRadikoSplatRouteImport.update({
@@ -26,27 +32,31 @@ const ApiRadikoSplatRoute = ApiRadikoSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/api/radiko/$": typeof ApiRadikoSplatRoute;
+  "/api/radiko/auth": typeof ApiRadikoAuthRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/api/radiko/$": typeof ApiRadikoSplatRoute;
+  "/api/radiko/auth": typeof ApiRadikoAuthRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/api/radiko/$": typeof ApiRadikoSplatRoute;
+  "/api/radiko/auth": typeof ApiRadikoAuthRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/api/radiko/$";
+  fullPaths: "/" | "/api/radiko/$" | "/api/radiko/auth";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/api/radiko/$";
-  id: "__root__" | "/" | "/api/radiko/$";
+  to: "/" | "/api/radiko/$" | "/api/radiko/auth";
+  id: "__root__" | "/" | "/api/radiko/$" | "/api/radiko/auth";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   ApiRadikoSplatRoute: typeof ApiRadikoSplatRoute;
+  ApiRadikoAuthRoute: typeof ApiRadikoAuthRoute;
 }
 
 declare module "@tanstack/react-router" {
@@ -56,6 +66,13 @@ declare module "@tanstack/react-router" {
       path: "/";
       fullPath: "/";
       preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/api/radiko/auth": {
+      id: "/api/radiko/auth";
+      path: "/api/radiko/auth";
+      fullPath: "/api/radiko/auth";
+      preLoaderRoute: typeof ApiRadikoAuthRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/api/radiko/$": {
@@ -71,6 +88,7 @@ declare module "@tanstack/react-router" {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiRadikoSplatRoute: ApiRadikoSplatRoute,
+  ApiRadikoAuthRoute: ApiRadikoAuthRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

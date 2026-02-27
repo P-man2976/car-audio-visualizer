@@ -24,12 +24,14 @@ export const Route = createFileRoute("/api/radiko/$")({
 				// Forward headers, exclude hop-by-hop / origin headers
 				const forwardHeaders = new Headers();
 				for (const [key, value] of request.headers) {
-					if (!["host", "origin", "referer", "x-forwarded-host"].includes(key.toLowerCase())) {
-						forwardHeaders.set(key, value);
-					}
+				if (![
+					"host", "origin", "referer",
+					"x-forwarded-host", "x-forwarded-for",
+					"cf-ray", "cf-connecting-ip", "cf-ipcountry", "cf-visitor",
+				].includes(key.toLowerCase())) {
+					forwardHeaders.set(key, value);
 				}
-
-				forwardHeaders.set("X-Forwarded-Host", 'localhost:5173');
+			}
 
 				const response = await fetch(upstreamUrl.toString(), {
 					headers: forwardHeaders,
