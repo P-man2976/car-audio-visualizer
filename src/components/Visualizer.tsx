@@ -1,8 +1,8 @@
 import { Line, Plane, Text } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import type { AnalyzerBarData } from "audiomotion-analyzer";
 import { atom, getDefaultStore, useAtomValue } from "jotai";
-import { Fragment, useMemo, useRef } from "react";
+import { Fragment, useEffect, useMemo, useRef } from "react";
 import type { MeshStandardMaterial } from "three";
 import * as THREE from "three";
 import { audioMotionAnalyzerAtom } from "../atoms/audio";
@@ -26,11 +26,18 @@ export function Visualizer() {
 	const meshRef = useRef<THREE.Mesh>(null);
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 	const isPlaying = useAtomValue(isPlayingAtom);
+	const { invalidate } = useThree();
 
-	useFrame(({ invalidate }) => {
+	// isPlaying が true になった瞬間に最初のフレームをキックして
+	// useFrame の自己スケジュールループを始動させる
+	useEffect(() => {
+		if (isPlaying) invalidate();
+	}, [isPlaying, invalidate]);
+
+	useFrame(({ invalidate: inv }) => {
 		store.set(spectrogramAtom, audioMotionAnalyzer.getBars() as AnalyzerBarData[]);
 		// demand モードで再生中は次フレームを自己スケジュール → 60fps 連続描画
-		if (isPlaying) invalidate();
+		if (isPlaying) inv();
 	});
 
 	return (
