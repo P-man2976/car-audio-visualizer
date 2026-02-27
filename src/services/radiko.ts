@@ -8,8 +8,8 @@ export function useRadikoToken() {
 		queryFn: async () => {
 			// 自身のパブリックIPを取得してサーバーに渡す
 			// (Radiko はトークンをIPに紐付けるため、Worker が同じIPで auth1/auth2 を送れるようにする)
-			const ipRes = await fetch("http://ip-api.com/json/");
-			const { query: clientIp } = await ipRes.json() as { query: string };
+			const ipRes = await fetch("https://api.ipify.org?format=json");
+			const { ip: clientIp } = await ipRes.json() as { ip: string };
 
 			const res = await fetch(`/api/radiko/auth?ip=${encodeURIComponent(clientIp)}`);
 			if (!res.ok) {
