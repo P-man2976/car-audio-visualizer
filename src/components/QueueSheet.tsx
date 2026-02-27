@@ -1,11 +1,11 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Reorder, useDragControls } from "framer-motion";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { GripVertical, RadioTower } from "lucide-react";
 import { type ReactNode, useRef } from "react";
 import { currentSrcAtom, queueAtom, songQueueAtom } from "../atoms/player";
-import { currentRadioAtom } from "../atoms/radio";
+import { useSelectRadio } from "../hooks/radio";
 import type { Radio } from "../types/radio";
 import type { Song } from "../types/player";
 import { usePlayer } from "../hooks/player";
@@ -134,8 +134,7 @@ function RadioQueueList() {
 }
 
 function RadioQueueCard({ station }: { station: Radio }) {
-	const setCurrentRadio = useSetAtom(currentRadioAtom);
-	const setCurrentSrc = useSetAtom(currentSrcAtom);
+	const selectRadio = useSelectRadio();
 
 	const name = station.name;
 	const logo = station.logo;
@@ -152,8 +151,7 @@ function RadioQueueCard({ station }: { station: Radio }) {
 		<div
 			className="rounded-md bg-neutral-800/50 flex items-center gap-2 pr-3 py-2 cursor-pointer select-none hover:bg-neutral-700/50 transition-colors"
 			onClick={() => {
-				setCurrentRadio(station);
-				setCurrentSrc("radio");
+				selectRadio(station);
 			}}
 		>
 			{logo ? (

@@ -1,7 +1,8 @@
 import { cn } from "@/lib/utils";
-import { useAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import { currentRadioAtom } from "../../atoms/radio";
 import { currentSrcAtom } from "../../atoms/player";
+import { useSelectRadio } from "../../hooks/radio";
 import type { RadiruStation as RadiruStationType, RadioType } from "../../types/radio";
 
 type RadiruChannel = {
@@ -29,8 +30,9 @@ export function RadiruStation({ areajp, fmhls, r1hls, r2hls }: RadiruStationType
 }
 
 function RadiruChannelCard({ areajp, type, label, name, url }: RadiruChannel) {
-	const [currentRadio, setCurrentRadio] = useAtom(currentRadioAtom);
-	const [currentSrc, setCurrentSrc] = useAtom(currentSrcAtom);
+	const currentRadio = useAtomValue(currentRadioAtom);
+	const currentSrc = useAtomValue(currentSrcAtom);
+	const selectRadio = useSelectRadio();
 	const isSelected = currentSrc === "radio" && currentRadio?.source === "radiru" && currentRadio.url === url;
 
 	return (
@@ -41,8 +43,7 @@ function RadiruChannelCard({ areajp, type, label, name, url }: RadiruChannel) {
 				isSelected && "bg-gray-500/30 border",
 			)}
 			onClick={() => {
-				setCurrentSrc("radio");
-				setCurrentRadio({ type, source: "radiru", url, name });
+				selectRadio({ type, source: "radiru", url, name });
 			}}
 		>
 			<span className="text-gray-300 text-sm">{areajp}</span>

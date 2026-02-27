@@ -1,4 +1,4 @@
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { audioElementAtom } from "../atoms/audio";
 import { currentSrcAtom, isPlayingAtom, queueAtom } from "../atoms/player";
@@ -16,6 +16,42 @@ const AM_MIN = 531;
 const AM_MAX = 1602;
 
 /**
+ * 局を選択してそのまま HLS ロードまで一気に行うフック。
+ * イベントハンドラー内で直接呼ぶことで effect の二重実行問題を回避する。
+ */
+export function useSelectRadio() {
+	const setCurrentRadio = useSetAtom(currentRadioAtom);
+	const setCurrentSrc = useSetAtom(currentSrcAtom);
+	const setQueue = useSetAtom(queueAtom);
+	const { load, unLoad } = useHLS();
+	const { mutate } = useRadikoM3u8Url();
+
+	return useCallback(
+		(radio: Radio) => {
+			setCurrentSrc("radio");
+			setCurrentRadio(radio);
+			unLoad();
+			if (radio.source === "radiko") {
+				mutate(radio.id, { onSuccess: (m3u8) => load(m3u8) });
+			} else if (radio.source === "radiru") {
+				load(radio.url);
+			}
+			setQueue((current) => {
+				const alreadyIn = current.some((r) =>
+					r.source === "radiko" && radio.source === "radiko"
+						? r.id === radio.id
+						: r.source === "radiru" && radio.source === "radiru"
+							? r.url === radio.url
+							: false,
+				);
+				return alreadyIn ? current : [radio, ...current].slice(0, 20);
+			});
+		},
+		[setCurrentSrc, setCurrentRadio, unLoad, mutate, load, setQueue],
+	);
+}
+
+/**
  * ラジオ再生に関わるすべてのロジックを集約するカスタムフック。
  * HLS ロード／アンロード、選局アニメーション（100ms 間隔）、
  * tuningFreqAtom への書き込みを担う。
@@ -23,8 +59,7 @@ const AM_MAX = 1602;
 export function useRadioPlayer() {
 	const audioElement = useAtomValue(audioElementAtom);
 	const currentSrc = useAtomValue(currentSrcAtom);
-	const [currentRadio, setCurrentRadio] = useAtom(currentRadioAtom);
-	const [queue, setQueue] = useAtom(queueAtom);
+	const currentRadio = useAtomValue(currentRadioAtom);
 	const setIsPlaying = useSetAtom(isPlayingAtom);
 	const setTuningFreq = useSetAtom(tuningFreqAtom);
 	const customFreqList = useAtomValue(customFrequencyAreaAtom);
@@ -32,46 +67,10 @@ export function useRadioPlayer() {
 	const { mutate } = useRadikoM3u8Url();
 	const { data: frequencies } = useRadioFrequencies();
 	const { data: radikoStationList } = useRadikoStationList();
+	const selectRadio = useSelectRadio();
 
 	const tuningTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const animFreqRef = useRef<number>(0);
-	// mutate・queue は毎レンダーで参照が変わりうるため ref 経由で参照し、
-	// effect の依存配列から除外して不要な再実行を防ぐ
-	const mutateRef = useRef(mutate);
-	mutateRef.current = mutate;
-	const queueRef = useRef(queue);
-	queueRef.current = queue;
-
-	// ラジオモード: HLS をロード。currentRadio / currentSrc が変わるたびに再ロード
-	useEffect(() => {
-		if (currentSrc !== "radio" || !currentRadio) return;
-
-		if (currentRadio.source === "radiko") {
-			mutateRef.current(currentRadio.id, { onSuccess: (m3u8) => load(m3u8) });
-		} else if (currentRadio.source === "radiru") {
-			load(currentRadio.url);
-		}
-
-		return () => {
-			unLoad();
-		};
-	}, [currentSrc, currentRadio, load, unLoad]);
-
-	// キューへの追加は HLS ロードとは独立して管理
-	useEffect(() => {
-		if (currentSrc !== "radio" || !currentRadio) return;
-
-		const alreadyInQueue = queueRef.current.some((r) =>
-			r.source === "radiko" && currentRadio.source === "radiko"
-				? r.id === currentRadio.id
-				: r.source === "radiru" && currentRadio.source === "radiru"
-					? r.url === currentRadio.url
-					: false,
-		);
-		if (!alreadyInQueue) {
-			setQueue((current) => [currentRadio, ...current].slice(0, 20));
-		}
-	}, [currentSrc, currentRadio, setQueue]);
 
 	// off / aux モードへ切り替えたら HLS を即停止
 	useEffect(() => {
@@ -188,12 +187,13 @@ export function useRadioPlayer() {
 	/** 停止中に現在局を再ロードして再生 */
 	const playRadio = useCallback(() => {
 		if (!currentRadio) return;
+		unLoad();
 		if (currentRadio.source === "radiko") {
 			mutate(currentRadio.id, { onSuccess: (m3u8) => load(m3u8) });
 		} else if (currentRadio.source === "radiru") {
 			load(currentRadio.url);
 		}
-	}, [currentRadio, mutate, load]);
+	}, [currentRadio, mutate, load, unLoad]);
 
 	/** HLS をアンロードして停止 */
 	const stopRadio = useCallback(() => {
@@ -270,7 +270,7 @@ export function useRadioPlayer() {
 					tuningTimerRef.current = null;
 					animFreqRef.current = 0;
 					setTuningFreq(null);
-					setCurrentRadio(targetStation);
+						selectRadio(targetStation);
 				} else {
 					// バンド端での折り返しを考慮した現在周波数を算出
 					let curr = baseFreq + direction * distanceTraveled;
@@ -285,7 +285,7 @@ export function useRadioPlayer() {
 				}
 			}, 100);
 		},
-		[currentRadio, currentSrc, tunableStations, unLoad, setCurrentRadio, setTuningFreq],
+		[currentRadio, currentSrc, tunableStations, unLoad, selectRadio, setTuningFreq],
 	);
 
 	return { playRadio, stopRadio, tune };
