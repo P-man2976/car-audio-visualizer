@@ -1,9 +1,11 @@
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { audioMotionAnalyzerAtom, mediaStreamAtom } from "../atoms/audio";
+import { isPlayingAtom } from "../atoms/player";
 
 export function useMediaStream() {
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 	const [mediaStream, setMediaStream] = useAtom(mediaStreamAtom);
+	const setIsPlaying = useSetAtom(isPlayingAtom);
 
 	const connect = async (stream: MediaStream) => {
 		if (mediaStream) {
@@ -21,6 +23,7 @@ export function useMediaStream() {
 		audioMotionAnalyzer.connectInput(gainNode);
 		audioMotionAnalyzer.start();
 		setMediaStream(stream);
+		setIsPlaying(true);
 	};
 
 	const disconnect = () => {
@@ -28,7 +31,9 @@ export function useMediaStream() {
 			mediaStream.getTracks().forEach((track) => track.stop());
 		}
 
+		audioMotionAnalyzer.stop();
 		setMediaStream(null);
+		setIsPlaying(false);
 	};
 
 	return { connect, disconnect };
