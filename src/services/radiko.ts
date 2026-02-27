@@ -103,7 +103,7 @@ export function useRadikoM3u8Url() {
 
 			const m3u8Parser = new M3U8Parser();
 			const response = await fetch(
-				`/si-radiko/so/playlist.m3u8?station_id=${stationId}&type=b&l=15&lsid=11cbd3124cef9e8004f9b5e9f77b66`,
+				`https://si-f-radiko.smartstream.ne.jp/so/playlist.m3u8?station_id=${stationId}&type=b&l=15&lsid=11cbd3124cef9e8004f9b5e9f77b66`,
 				{
 					headers: { "X-Radiko-AuthToken": token },
 				},

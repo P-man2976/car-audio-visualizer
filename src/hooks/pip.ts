@@ -31,7 +31,7 @@ export function usePiP() {
 			return;
 		}
 
-		const canvas = document.querySelector("canvas");
+		const canvas = document.querySelector<HTMLCanvasElement>("#visualizer");
 		if (!canvas || pipWindowRef.current) return;
 
 		const pip = await window.documentPictureInPicture.requestWindow({
