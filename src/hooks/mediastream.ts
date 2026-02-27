@@ -33,6 +33,10 @@ export function useMediaStream() {
 		setIsPlaying(true);
 	};
 
+	/**
+	 * MediaStream を切断して audio ルーティングを元に戻す。
+	 * currentSrcAtom の更新は呼び出し元が責任を持つ。
+	 */
 	const disconnect = () => {
 		if (mediaStream) {
 			mediaStream.getTracks().forEach((track) => track.stop());
@@ -49,7 +53,6 @@ export function useMediaStream() {
 		audioMotionAnalyzer.volume = 1;
 		audioMotionAnalyzer.stop();
 		setMediaStream(null);
-		setCurrentSrc("off");
 		setIsPlaying(false);
 	};
 
