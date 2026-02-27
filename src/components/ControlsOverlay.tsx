@@ -1,12 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { ChevronDown, ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, LogIn, Pause, Play, RadioTower, Square } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 import { audioElementAtom } from "../atoms/audio";
-import { currentSongAtom, currentSrcAtom, progressAtom, queueAtom, volumeAtom } from "../atoms/player";
+import { currentSongAtom, currentSrcAtom, queueAtom, volumeAtom } from "../atoms/player";
 import { currentRadioAtom } from "../atoms/radio";
-import { displayStringAtom } from "../atoms/display";
-import { buildDisplayString } from "../lib/display";
 import { useHLS } from "../hooks/hls";
 import { usePlayer } from "../hooks/player";
 import { useRadikoM3u8Url } from "../services/radiko";
@@ -18,12 +16,10 @@ import { SourceSheet } from "./SourceSheet";
 
 export function ControlsOverlay() {
 	const audioElement = useAtomValue(audioElementAtom);
-	const setDisplayString = useSetAtom(displayStringAtom);
 	const currentSrc = useAtomValue(currentSrcAtom);
 	const currentRadio = useAtomValue(currentRadioAtom);
 	const currentSong = useAtomValue(currentSongAtom);
 	const volume = useAtomValue(volumeAtom);
-	const progress = useAtomValue(progressAtom);
 	const [queue, setQueue] = useAtom(queueAtom);
 	const { isPlaying, play, pause, stop, next, prev } = usePlayer();
 	const { load, unLoad } = useHLS();
@@ -87,10 +83,7 @@ export function ControlsOverlay() {
 		};
 	}, [currentSrc, currentRadio, audioElement, load, unLoad, mutate, queue, setQueue]);
 
-	// Dot matrix display string
-	useEffect(() => {
-		setDisplayString(buildDisplayString(currentSrc, currentRadio, progress, currentSong));
-	}, [currentSrc, currentRadio, progress, currentSong, setDisplayString]);
+	// Dot matrix display string is updated in ProgressSlider to avoid re-renders here
 
 	const title = useMemo(() => {
 		switch (currentSrc) {

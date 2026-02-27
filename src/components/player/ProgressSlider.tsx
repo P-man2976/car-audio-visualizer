@@ -1,8 +1,11 @@
 import { Slider } from "@/components/ui/slider";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect } from "react";
 import { audioElementAtom } from "../../atoms/audio";
-import { currentSrcAtom, progressAtom } from "../../atoms/player";
+import { currentSongAtom, currentSrcAtom, progressAtom } from "../../atoms/player";
+import { currentRadioAtom } from "../../atoms/radio";
+import { displayStringAtom } from "../../atoms/display";
+import { buildDisplayString } from "../../lib/display";
 
 function formatTime(seconds: number) {
 	if (!Number.isFinite(seconds) || seconds < 0) {
@@ -22,7 +25,10 @@ function formatTime(seconds: number) {
 export function ProgressSlider() {
 	const currentSrc = useAtomValue(currentSrcAtom);
 	const audioElement = useAtomValue(audioElementAtom);
+	const currentRadio = useAtomValue(currentRadioAtom);
+	const currentSong = useAtomValue(currentSongAtom);
 	const [progress, setProgress] = useAtom(progressAtom);
+	const setDisplayString = useSetAtom(displayStringAtom);
 
 	useEffect(() => {
 		const progressInterval = setInterval(() => {
@@ -36,6 +42,11 @@ export function ProgressSlider() {
 		};
 	}, [currentSrc, audioElement, setProgress]);
 
+	// Display string update — co-located here to avoid ControlsOverlay re-rendering on every tick
+	useEffect(() => {
+		setDisplayString(buildDisplayString(currentSrc, currentRadio, progress, currentSong));
+	}, [currentSrc, currentRadio, progress, currentSong, setDisplayString]);
+
 	if (currentSrc === "off") {
 		return (
 			<div className="relative mb-4 w-full">
@@ -48,7 +59,7 @@ export function ProgressSlider() {
 	if (currentSrc === "radio" || currentSrc === "aux") {
 		return (
 			<div className="relative mb-4 w-full">
-				<div className="h-2 w-full rounded-full bg-secondary shadow-lg [mask-image:linear-gradient(to_right,_black,_rgba(0,0,0,60%),_transparent,_transparent,_rgba(0,0,0,60%),_black)]" />
+				<div className="h-2 w-full rounded-full bg-secondary shadow-lg mask-[linear-gradient(to_right,black,rgba(0,0,0,60%),transparent,transparent,rgba(0,0,0,60%),black)]" />
 				<span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-lg">ＬＩＶＥ</span>
 			</div>
 		);
