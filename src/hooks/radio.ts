@@ -83,8 +83,10 @@ export function useRadioPlayer() {
 
 	/**
 	 * 周波数でソートされた選局可能な局一覧。
-	 * AM+FM 両方持つ局は customFrequencyAreaAtom の設定に関わらず
-	 * AM エントリ・FM エントリの両方を含む。
+	 *
+	 * - customFrequencyAreaAtom に設定がある局: その 1 エントリのみ追加
+	 * - AM+FM 併設局（設定なし）: AM primary + FM primary（primary:true がなければ FM は追加しない）
+	 * - FM 専用局（設定なし）: FM primary（なければ index 0 の周波数）
 	 */
 	const tunableStations = useMemo(() => {
 		if (!frequencies || !radikoStationList) return [];
@@ -104,13 +106,9 @@ export function useRadioPlayer() {
 			if (!freqData) continue;
 
 			const customFreq = customFreqList.find((s) => s.id === station.id);
-			const hasFM = (freqData.frequencies_fm?.length ?? 0) > 0;
-			// AM-type stations always have frequencies_am; frequencies_am is `never` for FM-type
-			const hasAM = freqData.type === "AM";
 
-			// ─── カスタム設定あり ───
+			// ─── カスタム設定あり: その周波数 1 件のみ ───
 			if (customFreq) {
-				// 設定された方
 				entries.push({
 					id: station.id,
 					name: station.name,
@@ -118,69 +116,48 @@ export function useRadioPlayer() {
 					freq: customFreq.freq,
 					logo: station.logo?.[0],
 				});
-				// 設定されていない方（デュアルバンド局のみ）
-				if (customFreq.type === "AM" && hasFM) {
-					const fmArea =
-						freqData.frequencies_fm!.find((a) => a.primary) ??
-						freqData.frequencies_fm![0];
+				continue;
+			}
+
+			// ─── カスタム設定なし ───
+			const hasAM = freqData.type === "AM";
+
+			if (hasAM) {
+				// AM エントリ（primary があれば優先、なければ index 0）
+				const amArea =
+					freqData.frequencies_am!.find((a) => a.primary) ??
+					freqData.frequencies_am![0];
+				entries.push({
+					id: station.id,
+					name: station.name,
+					type: "AM",
+					freq: amArea.frequency,
+					logo: station.logo?.[0],
+				});
+
+				// AM+FM 併設局: primary:true の FM 周波数がある場合のみ FM エントリを追加
+				const primaryFmArea = freqData.frequencies_fm?.find((a) => a.primary);
+				if (primaryFmArea) {
 					entries.push({
 						id: station.id,
 						name: station.name,
 						type: "FM",
-						freq: fmArea.frequency,
-						logo: station.logo?.[0],
-					});
-				} else if (customFreq.type === "FM" && hasAM) {
-					const amArea =
-						freqData.frequencies_am!.find((a) => a.primary) ??
-						freqData.frequencies_am![0];
-					entries.push({
-						id: station.id,
-						name: station.name,
-						type: "AM",
-						freq: amArea.frequency,
+						freq: primaryFmArea.frequency,
 						logo: station.logo?.[0],
 					});
 				}
 			} else {
-				// ─── カスタム設定なし: デフォルト種別エントリ ───
-				if (hasAM) {
-					const amArea =
-						freqData.frequencies_am!.find((a) => a.primary) ??
-						freqData.frequencies_am![0];
-					entries.push({
-						id: station.id,
-						name: station.name,
-						type: "AM",
-						freq: amArea.frequency,
-						logo: station.logo?.[0],
-					});
-					// デュアルバンド: FM エントリも追加
-					if (hasFM) {
-						const fmArea =
-							freqData.frequencies_fm!.find((a) => a.primary) ??
-							freqData.frequencies_fm![0];
-						entries.push({
-							id: station.id,
-							name: station.name,
-							type: "FM",
-							freq: fmArea.frequency,
-							logo: station.logo?.[0],
-						});
-					}
-				} else if (hasFM) {
-					// FM 専用局
-					const fmArea =
-						freqData.frequencies_fm!.find((a) => a.primary) ??
-						freqData.frequencies_fm![0];
-					entries.push({
-						id: station.id,
-						name: station.name,
-						type: "FM",
-						freq: fmArea.frequency,
-						logo: station.logo?.[0],
-					});
-				}
+				// FM 専用局（primary があれば優先、なければ index 0）
+				const fmArea =
+					freqData.frequencies_fm!.find((a) => a.primary) ??
+					freqData.frequencies_fm![0];
+				entries.push({
+					id: station.id,
+					name: station.name,
+					type: "FM",
+					freq: fmArea.frequency,
+					logo: station.logo?.[0],
+				});
 			}
 		}
 
