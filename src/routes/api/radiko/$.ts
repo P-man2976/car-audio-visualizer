@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-const RADIKO_BASE = "https://car-audio-visualizer.pman.workers.dev/api/radiko";
+const RADIKO_BASE = "https://radiko.jp";
 
 export const Route = createFileRoute("/api/radiko/$")({
 	server: {
