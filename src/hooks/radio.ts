@@ -46,8 +46,15 @@ export function useRadioPlayer() {
 			load(currentRadio.url);
 		}
 
-		if (!queue.includes(currentRadio.name)) {
-			setQueue((current) => [currentRadio.name, ...current].slice(0, 20));
+		const alreadyInQueue = queue.some((r) =>
+			r.source === "radiko" && currentRadio.source === "radiko"
+				? r.id === currentRadio.id
+				: r.source === "radiru" && currentRadio.source === "radiru"
+					? r.url === currentRadio.url
+					: false,
+		);
+		if (!alreadyInQueue) {
+			setQueue((current) => [currentRadio, ...current].slice(0, 20));
 		}
 
 		return () => {

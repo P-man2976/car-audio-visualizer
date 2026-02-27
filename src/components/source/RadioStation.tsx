@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAtom, useAtomValue } from "jotai";
 import { currentRadioAtom, customFrequencyAreaAtom, radioStationSizeAtom } from "../../atoms/radio";
-import { currentSrcAtom, queueAtom } from "../../atoms/player";
+import { currentSrcAtom } from "../../atoms/player";
 import { useRadioFrequencies } from "../../services/radio";
 import type { RadikoStation, RadioType } from "../../types/radio";
 
@@ -20,7 +20,6 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 	const [currentRadio, setCurrentRadio] = useAtom(currentRadioAtom);
 	const [currentSrc, setCurrentSrc] = useAtom(currentSrcAtom);
 	const size = useAtomValue(radioStationSizeAtom);
-	const [queue, setQueue] = useAtom(queueAtom);
 	const [customFreqList, setCustomFreqList] = useAtom(customFrequencyAreaAtom);
 
 	const { data: frequencies } = useRadioFrequencies();
@@ -50,9 +49,6 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 					onClick={() => {
 						setCurrentSrc("radio");
 						setCurrentRadio({ type, source: "radiko", id, name, logo: logo?.[0], frequency });
-						if (!queue.includes(name)) {
-							setQueue((current) => [name, ...current].slice(0, 20));
-						}
 					}}
 				>
 					<div

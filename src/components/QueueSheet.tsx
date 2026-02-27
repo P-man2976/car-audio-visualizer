@@ -1,10 +1,12 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Reorder, useDragControls } from "framer-motion";
-import { useAtom, useAtomValue } from "jotai";
-import { GripVertical } from "lucide-react";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { GripVertical, RadioTower } from "lucide-react";
 import { type ReactNode, useRef } from "react";
 import { currentSrcAtom, queueAtom, songQueueAtom } from "../atoms/player";
+import { currentRadioAtom } from "../atoms/radio";
+import type { Radio } from "../types/radio";
 import type { Song } from "../types/player";
 import { usePlayer } from "../hooks/player";
 
@@ -121,14 +123,50 @@ function RadioQueueList() {
 
 	return (
 		<div className="flex flex-col gap-2 mt-4">
-			{radioQueue.map((name, index) => (
-				<div
-					key={`${name}-${index}`}
-					className="rounded-md bg-neutral-800/50 px-3 py-2 text-sm"
-				>
-					{name}
-				</div>
+			{radioQueue.map((station, index) => (
+				<RadioQueueCard
+					key={station.source === "radiko" ? `${station.id}-${index}` : `${station.url}-${index}`}
+					station={station}
+				/>
 			))}
+		</div>
+	);
+}
+
+function RadioQueueCard({ station }: { station: Radio }) {
+	const setCurrentRadio = useSetAtom(currentRadioAtom);
+	const setCurrentSrc = useSetAtom(currentSrcAtom);
+
+	const name = station.name;
+	const logo = station.logo;
+	const subtitle =
+		station.frequency != null
+			? station.type === "AM"
+				? `${station.frequency} kHz`
+				: `${station.frequency.toFixed(1)} MHz`
+			: station.source === "radiru"
+				? "NHKラジオ らじる★らじる"
+				: "Radiko";
+
+	return (
+		<div
+			className="rounded-md bg-neutral-800/50 flex items-center gap-2 pr-3 py-2 cursor-pointer select-none hover:bg-neutral-700/50 transition-colors"
+			onClick={() => {
+				setCurrentRadio(station);
+				setCurrentSrc("radio");
+			}}
+		>
+			{logo ? (
+				<img src={logo} alt={name} className="h-10 w-10 rounded-sm object-cover shrink-0 ml-2" />
+			) : (
+				<div className="h-10 w-10 rounded-sm bg-neutral-700/60 shrink-0 grid place-content-center ml-2">
+					<RadioTower size={18} className="text-gray-400" />
+				</div>
+			)}
+			<div className="flex flex-col gap-0.5 overflow-hidden">
+				<span className="text-sm truncate">{name}</span>
+				<span className="text-xs text-gray-400 truncate">{subtitle}</span>
+			</div>
 		</div>
 	);
 }
