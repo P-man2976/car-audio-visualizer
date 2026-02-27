@@ -1,11 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { useAtomValue } from "jotai";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, LogIn, Minus, Pause, Play, Plus, RadioTower, Square } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, LogIn, Minus, Pause, PictureInPicture2, Play, Plus, RadioTower, Square } from "lucide-react";
 import { useMemo } from "react";
 import { currentSongAtom, currentSrcAtom } from "../atoms/player";
 import { currentRadioAtom, tuningFreqAtom } from "../atoms/radio";
 import { useFilePlayer } from "../hooks/file";
+import { useMediaSession } from "../hooks/mediaSession";
 import { usePlayer } from "../hooks/player";
+import { usePiP } from "../hooks/pip";
 import { useRadioPlayer } from "../hooks/radio";
 import { MenuSheet } from "./MenuSheet";
 import { QueueSheet } from "./QueueSheet";
@@ -22,6 +24,7 @@ export function ControlsOverlay() {
 	const { isPlaying, play, pause, stop, next, prev } = usePlayer();
 	const { playRadio, stopRadio, tune } = useRadioPlayer();
 	useFilePlayer();
+	const { isPiP, enterPiP, exitPiP, isSupported: isPiPSupported } = usePiP();
 
 	const title = useMemo(() => {
 		switch (currentSrc) {
@@ -57,6 +60,7 @@ export function ControlsOverlay() {
 	}, [currentSrc, currentSong, currentRadio]);
 
 	const coverSrc = currentSrc === "file" ? currentSong?.artwork : undefined;
+	useMediaSession({ title, artist, album, artwork: coverSrc ?? currentRadio?.logo });
 
 	return (
 		<div className="absolute inset-0 flex w-full flex-col gap-2">
@@ -98,14 +102,26 @@ export function ControlsOverlay() {
 				<ProgressSlider />
 				<div className="flex items-center gap-8">
 					{/* Cover image / icon */}
-					<div className="size-20 shrink-0 rounded-md shadow-lg overflow-hidden bg-gray-500/50 grid place-content-center text-2xl">
-						{coverSrc ? (
-							<img src={coverSrc} alt="cover" className="size-full object-cover" />
-						) : currentSrc === "radio" ? (
-							<RadioTower />
-						) : currentSrc === "aux" ? (
-							<LogIn />
-						) : null}
+					<div className="relative size-20 shrink-0 group/cover">
+						<div className="size-full rounded-md shadow-lg overflow-hidden bg-gray-500/50 grid place-content-center text-2xl">
+							{coverSrc ? (
+								<img src={coverSrc} alt="cover" className="size-full object-cover" />
+							) : currentSrc === "radio" ? (
+								<RadioTower />
+							) : currentSrc === "aux" ? (
+								<LogIn />
+							) : null}
+						</div>
+						{isPiPSupported && (
+							<button
+								type="button"
+								className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover/cover:opacity-100 transition-opacity rounded-md cursor-pointer"
+								onClick={isPiP ? exitPiP : enterPiP}
+								aria-label={isPiP ? "PiPを終了" : "PiPで表示"}
+							>
+								<PictureInPicture2 size={24} />
+							</button>
+						)}
 					</div>
 					<SongInfo title={title} artist={artist} album={album} />
 					{/* Control buttons */}
