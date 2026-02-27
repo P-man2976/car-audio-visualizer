@@ -6,6 +6,7 @@ import { Fragment, useMemo, useRef } from "react";
 import type { MeshStandardMaterial } from "three";
 import * as THREE from "three";
 import { audioMotionAnalyzerAtom } from "../atoms/audio";
+import { isPlayingAtom } from "../atoms/player";
 
 const spectrogramAtom = atom<AnalyzerBarData[] | null>(null);
 const store = getDefaultStore();
@@ -24,9 +25,12 @@ const ANALYZER_ANGLE_DEGREE = 24;
 export function Visualizer() {
 	const meshRef = useRef<THREE.Mesh>(null);
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
+	const isPlaying = useAtomValue(isPlayingAtom);
 
-	useFrame(() => {
+	useFrame(({ invalidate }) => {
 		store.set(spectrogramAtom, audioMotionAnalyzer.getBars() as AnalyzerBarData[]);
+		// demand モードで再生中は次フレームを自己スケジュール → 60fps 連続描画
+		if (isPlaying) invalidate();
 	});
 
 	return (
