@@ -10,7 +10,15 @@ export const Route = createFileRoute("/api/radiko/auth")({
 			// Radiko はトークンを auth1 の送信元 IP に紐付けるため、
 			// auth1/auth2 を別リクエストでプロキシすると異なるエッジノードに
 			// 振り分けられて 400 になることがある。
-			GET: async () => {
+			GET: async ({ request }) => {
+				const clientIp = new URL(request.url).searchParams.get("ip") ?? "";
+				if (!clientIp) {
+					return new Response(
+						JSON.stringify({ error: "Missing ip query parameter" }),
+						{ status: 400, headers: { "Content-Type": "application/json" } },
+					);
+				}
+
 				// --- auth1 ---
 				const resAuth1 = await fetch(`${RADIKO_BASE}/v2/api/auth1`, {
 					headers: {
@@ -18,6 +26,7 @@ export const Route = createFileRoute("/api/radiko/auth")({
 						"X-Radiko-App-Version": "0.0.1",
 						"X-Radiko-Device": "pc",
 						"X-Radiko-User": "dummy_user",
+						"X-Real-IP": clientIp,
 					},
 				});
 
@@ -49,6 +58,7 @@ export const Route = createFileRoute("/api/radiko/auth")({
 						"X-Radiko-PartialKey": partialKey,
 						"X-Radiko-Device": "pc",
 						"X-Radiko-User": "dummy_user",
+						"X-Real-IP": clientIp,
 					},
 				});
 
