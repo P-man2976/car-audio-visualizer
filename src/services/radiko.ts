@@ -8,7 +8,7 @@ export function useRadikoToken() {
 		queryFn: async () => {
 			const authKey = "bcd151073c03b352e1ef2fd66c32209da9ca0afa";
 
-			const resAuth1 = await fetch("/radiko-api/v2/api/auth1", {
+			const resAuth1 = await fetch("/api/radiko/v2/api/auth1", {
 				headers: {
 					"X-Radiko-App": "pc_html5",
 					"X-Radiko-App-Version": "0.0.1",
@@ -30,7 +30,7 @@ export function useRadikoToken() {
 				throw new Error("[Error] Failed to get X-Radiko-AuthToken");
 			}
 
-			const resAuth2 = await fetch("/radiko-api/v2/api/auth2", {
+			const resAuth2 = await fetch("/api/radiko/v2/api/auth2", {
 				headers: {
 					"X-Radiko-AuthToken": authToken,
 					"X-Radiko-PartialKey": partialKey,
@@ -53,7 +53,7 @@ export function useRadikoArea() {
 	return useQuery({
 		queryKey: ["radio", "radiko", "area"],
 		queryFn: async () => {
-			const res = await fetch("/radiko-api/area");
+			const res = await fetch("/api/radiko/area");
 			const html = await res.text();
 			return html.match(/class="(.*)"/)?.[1];
 		},
@@ -66,7 +66,7 @@ export function useRadikoStationList(areaId?: string) {
 	return useQuery({
 		queryKey: ["radio", "radiko", areaId ?? data, "stations"],
 		queryFn: async () => {
-			const res = await fetch(`/radiko-api/v3/station/list/${areaId ?? data}.xml`);
+			const res = await fetch(`/api/radiko/v3/station/list/${areaId ?? data}.xml`);
 			const xml = await res.text();
 			const doc = new DOMParser().parseFromString(xml, "application/xml");
 			const stationNodes = Array.from(doc.querySelectorAll("station"));

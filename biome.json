@@ -7,7 +7,7 @@
 	"linter": {
 		"enabled": true,
 		"rules": { "recommended": false },
-		"includes": ["**", "!dist"]
+		"includes": ["**", "!dist", "!src/routeTree.gen.ts"]
 	},
 	"javascript": { "formatter": { "quoteStyle": "double" } },
 	"overrides": [
