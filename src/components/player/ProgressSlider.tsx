@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { audioElementAtom } from "../../atoms/audio";
 import { currentSongAtom, currentSrcAtom, progressAtom } from "../../atoms/player";
 import { currentRadioAtom } from "../../atoms/radio";
+import { tuningFreqAtom } from "../../atoms/radio";
 import { displayStringAtom } from "../../atoms/display";
 import { buildDisplayString } from "../../lib/display";
 
@@ -27,6 +28,7 @@ export function ProgressSlider() {
 	const audioElement = useAtomValue(audioElementAtom);
 	const currentRadio = useAtomValue(currentRadioAtom);
 	const currentSong = useAtomValue(currentSongAtom);
+	const tuningFreq = useAtomValue(tuningFreqAtom);
 	const [progress, setProgress] = useAtom(progressAtom);
 	const setDisplayString = useSetAtom(displayStringAtom);
 
@@ -42,10 +44,10 @@ export function ProgressSlider() {
 		};
 	}, [currentSrc, audioElement, setProgress]);
 
-	// Display string update — co-located here to avoid ControlsOverlay re-rendering on every tick
+	// Display string update — tuningFreq を渡してドットマトリクスにアニメーションを反映
 	useEffect(() => {
-		setDisplayString(buildDisplayString(currentSrc, currentRadio, progress, currentSong));
-	}, [currentSrc, currentRadio, progress, currentSong, setDisplayString]);
+		setDisplayString(buildDisplayString(currentSrc, currentRadio, progress, currentSong, tuningFreq));
+	}, [currentSrc, currentRadio, progress, currentSong, tuningFreq, setDisplayString]);
 
 	if (currentSrc === "off") {
 		return <div className="mb-4 h-2 w-full rounded-full bg-secondary shadow-lg" />;

@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils";
 import { useAtom, useAtomValue } from "jotai";
 import { currentRadioAtom, customFrequencyAreaAtom, radioStationSizeAtom } from "../../atoms/radio";
 import { currentSrcAtom, queueAtom } from "../../atoms/player";
-import { audioElementAtom, audioMotionAnalyzerAtom } from "../../atoms/audio";
 import { useRadioFrequencies } from "../../services/radio";
 import type { RadikoStation, RadioType } from "../../types/radio";
 
@@ -23,8 +22,6 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 	const size = useAtomValue(radioStationSizeAtom);
 	const [queue, setQueue] = useAtom(queueAtom);
 	const [customFreqList, setCustomFreqList] = useAtom(customFrequencyAreaAtom);
-	const audioElement = useAtomValue(audioElementAtom);
-	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 
 	const { data: frequencies } = useRadioFrequencies();
 
@@ -51,11 +48,6 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 						isSelected && "bg-gray-500/30 border"
 					)}
 					onClick={() => {
-						// Safari: AudioContext と audioElement はユーザージェスチャー内で
-						// アンロックする必要がある。非同期の M3U8 取得後に resume()/play() しても
-						// ジェスチャーコンテキストが失効しているため、ここで先行してアンロックする。
-						void audioMotionAnalyzer.audioCtx.resume();
-						void audioElement.play().catch(() => undefined);
 						setCurrentSrc("radio");
 						setCurrentRadio({ type, source: "radiko", id, name, logo: logo?.[0], frequency });
 						if (!queue.includes(name)) {

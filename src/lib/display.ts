@@ -7,16 +7,19 @@ export function buildDisplayString(
 	radio: Radio | null | undefined,
 	progress: number,
 	song?: Song | null,
+	tuningFreq?: number | null,
 ): string {
 	if (source === "off") {
 		return "ALL OFF".padEnd(12, " ");
 	}
 
 	if (source === "radio") {
-		if (radio?.type === "AM") {
-			return `A1- ${radio.frequency?.toString().padStart(4, " ") ?? "----"} kHz`;
+		const type = radio?.type ?? "FM";
+		const freq = tuningFreq ?? radio?.frequency;
+		if (type === "AM") {
+			return `A1- ${freq?.toString().padStart(4, " ") ?? "----"} kHz`;
 		}
-		return `F1- ${radio?.frequency?.toFixed(1) ?? "--.-"} MHz`;
+		return `F1- ${freq?.toFixed(1) ?? "--.-"} MHz`;
 	}
 
 	if (source === "aux") {

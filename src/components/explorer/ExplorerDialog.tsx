@@ -168,7 +168,7 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>{children}</DialogTrigger>
-			<DialogContent className="flex flex-col h-[calc(100dvh-8rem)] max-w-3xl">
+			<DialogContent className="flex flex-col h-[calc(100dvh-8rem)] sm:max-w-4xl">
 				<Address />
 				<div className="flex gap-1 overflow-auto h-full">
 					{/* Sidebar */}
