@@ -50,13 +50,15 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 					<TabsContent className="py-4" value="file">
 						<div className="flex w-full flex-col gap-3">
 							<FilePicker />
+						{"showDirectoryPicker" in window && (
 							<ExplorerDialog>
 								<Button className="w-full">
 									組み込みのエクスプローラーから読み込み
 								</Button>
 							</ExplorerDialog>
-						</div>
-					</TabsContent>
+						)}
+					</div>
+				</TabsContent>
 
 					<TabsContent value="radio">
 						<div className="flex flex-col gap-4 py-4">
