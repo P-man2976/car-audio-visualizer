@@ -6,12 +6,7 @@ export function useRadikoToken() {
 	return useQuery({
 		queryKey: ["radio", "radiko", "token"],
 		queryFn: async () => {
-			// 自身のパブリックIPを取得してサーバーに渡す
-			// (Radiko はトークンをIPに紐付けるため、Worker が同じIPで auth1/auth2 を送れるようにする)
-			const ipRes = await fetch("https://api.ipify.org?format=json");
-			const { ip: clientIp } = await ipRes.json() as { ip: string };
-
-			const res = await fetch(`/api/radiko/auth?ip=${encodeURIComponent(clientIp)}`);
+			const res = await fetch("/api/radiko/auth");
 			if (!res.ok) {
 				const { error } = await res.json() as { error: string };
 				throw new Error(`[Error] Radiko auth failed: ${error}`);

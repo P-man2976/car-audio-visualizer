@@ -11,14 +11,6 @@ export const Route = createFileRoute("/api/radiko/auth")({
 			// auth1/auth2 を別リクエストでプロキシすると異なるエッジノードに
 			// 振り分けられて 400 になることがある。
 			GET: async ({ request }) => {
-				const clientIp = new URL(request.url).searchParams.get("ip") ?? "";
-				if (!clientIp) {
-					return new Response(
-						JSON.stringify({ error: "Missing ip query parameter" }),
-						{ status: 400, headers: { "Content-Type": "application/json" } },
-					);
-				}
-
 				// Cloudflare Workers の request.cf からクライアントの地域を取得
 				// auth2 の戻り値はエッジ(Worker)の地域になるため使わない
 				type CfProps = { country?: string; regionCode?: string };
@@ -35,7 +27,6 @@ export const Route = createFileRoute("/api/radiko/auth")({
 						"X-Radiko-App-Version": "0.0.1",
 						"X-Radiko-Device": "pc",
 						"X-Radiko-User": "dummy_user",
-						"X-Real-IP": clientIp,
 					},
 				});
 
@@ -60,14 +51,13 @@ export const Route = createFileRoute("/api/radiko/auth")({
 				// partialKey を Worker 上で計算
 				const partialKey = btoa(AUTH_KEY.slice(keyOffset, keyOffset + keyLength));
 
-				// --- auth2 (同一 Worker・同一 IP から送信) ---
+				// --- auth2 ---
 				const resAuth2 = await fetch(`${RADIKO_BASE}/v2/api/auth2`, {
 					headers: {
 						"X-Radiko-AuthToken": authToken,
 						"X-Radiko-PartialKey": partialKey,
 						"X-Radiko-Device": "pc",
 						"X-Radiko-User": "dummy_user",
-						"X-Real-IP": clientIp,
 					},
 				});
 
