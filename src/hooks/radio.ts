@@ -2,11 +2,18 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { audioElementAtom } from "../atoms/audio";
 import { currentSrcAtom, isPlayingAtom, queueAtom } from "../atoms/player";
-import { currentRadioAtom, tuningFreqAtom } from "../atoms/radio";
+import { currentRadioAtom, customFrequencyAreaAtom, tuningFreqAtom } from "../atoms/radio";
 import { useHLS } from "./hls";
 import { useRadikoM3u8Url, useRadikoStationList } from "../services/radiko";
 import { useRadioFrequencies } from "../services/radio";
 import type { Radio } from "../types/radio";
+
+/** FM バンド周波数範囲 (MHz) — 76〜99 MHz (ワイドFM含む日本の FM バンド全域) */
+const FM_MIN = 76.0;
+const FM_MAX = 99.0;
+/** AM バンド周波数範囲 (kHz) — 531〜1602 kHz (9kHz ステップ) */
+const AM_MIN = 531;
+const AM_MAX = 1602;
 
 /**
  * ラジオ再生に関わるすべてのロジックを集約するカスタムフック。
@@ -20,6 +27,7 @@ export function useRadioPlayer() {
 	const [queue, setQueue] = useAtom(queueAtom);
 	const setIsPlaying = useSetAtom(isPlayingAtom);
 	const setTuningFreq = useSetAtom(tuningFreqAtom);
+	const customFreqList = useAtomValue(customFrequencyAreaAtom);
 	const { load, unLoad } = useHLS();
 	const { mutate } = useRadikoM3u8Url();
 	const { data: frequencies } = useRadioFrequencies();
@@ -73,33 +81,114 @@ export function useRadioPlayer() {
 		};
 	}, []);
 
-	/** 周波数でソートされた選局可能な局一覧 */
+	/**
+	 * 周波数でソートされた選局可能な局一覧。
+	 * AM+FM 両方持つ局は customFrequencyAreaAtom の設定に関わらず
+	 * AM エントリ・FM エントリの両方を含む。
+	 */
 	const tunableStations = useMemo(() => {
 		if (!frequencies || !radikoStationList) return [];
-		return radikoStationList
-			.flatMap((station) => {
-				const freqData = frequencies[station.id];
-				if (!freqData) return [];
-				const primaryArea =
-					freqData.type === "AM"
-						? freqData.frequencies_am?.find((a) => a.primary)
-						: freqData.frequencies_fm?.find((a) => a.primary);
-				if (!primaryArea) return [];
-				return [
-					{
+
+		type Entry = {
+			id: string;
+			name: string;
+			type: "AM" | "FM";
+			freq: number;
+			logo: string | undefined;
+		};
+
+		const entries: Entry[] = [];
+
+		for (const station of radikoStationList) {
+			const freqData = frequencies[station.id];
+			if (!freqData) continue;
+
+			const customFreq = customFreqList.find((s) => s.id === station.id);
+			const hasFM = (freqData.frequencies_fm?.length ?? 0) > 0;
+			// AM-type stations always have frequencies_am; frequencies_am is `never` for FM-type
+			const hasAM = freqData.type === "AM";
+
+			// ─── カスタム設定あり ───
+			if (customFreq) {
+				// 設定された方
+				entries.push({
+					id: station.id,
+					name: station.name,
+					type: customFreq.type,
+					freq: customFreq.freq,
+					logo: station.logo?.[0],
+				});
+				// 設定されていない方（デュアルバンド局のみ）
+				if (customFreq.type === "AM" && hasFM) {
+					const fmArea =
+						freqData.frequencies_fm!.find((a) => a.primary) ??
+						freqData.frequencies_fm![0];
+					entries.push({
 						id: station.id,
 						name: station.name,
-						type: freqData.type,
-						freq: primaryArea.frequency,
+						type: "FM",
+						freq: fmArea.frequency,
 						logo: station.logo?.[0],
-					},
-				];
-			})
-			.sort((a, b) => {
-				if (a.type !== b.type) return a.type === "FM" ? -1 : 1;
-				return a.freq - b.freq;
-			});
-	}, [frequencies, radikoStationList]);
+					});
+				} else if (customFreq.type === "FM" && hasAM) {
+					const amArea =
+						freqData.frequencies_am!.find((a) => a.primary) ??
+						freqData.frequencies_am![0];
+					entries.push({
+						id: station.id,
+						name: station.name,
+						type: "AM",
+						freq: amArea.frequency,
+						logo: station.logo?.[0],
+					});
+				}
+			} else {
+				// ─── カスタム設定なし: デフォルト種別エントリ ───
+				if (hasAM) {
+					const amArea =
+						freqData.frequencies_am!.find((a) => a.primary) ??
+						freqData.frequencies_am![0];
+					entries.push({
+						id: station.id,
+						name: station.name,
+						type: "AM",
+						freq: amArea.frequency,
+						logo: station.logo?.[0],
+					});
+					// デュアルバンド: FM エントリも追加
+					if (hasFM) {
+						const fmArea =
+							freqData.frequencies_fm!.find((a) => a.primary) ??
+							freqData.frequencies_fm![0];
+						entries.push({
+							id: station.id,
+							name: station.name,
+							type: "FM",
+							freq: fmArea.frequency,
+							logo: station.logo?.[0],
+						});
+					}
+				} else if (hasFM) {
+					// FM 専用局
+					const fmArea =
+						freqData.frequencies_fm!.find((a) => a.primary) ??
+						freqData.frequencies_fm![0];
+					entries.push({
+						id: station.id,
+						name: station.name,
+						type: "FM",
+						freq: fmArea.frequency,
+						logo: station.logo?.[0],
+					});
+				}
+			}
+		}
+
+		return entries.sort((a, b) => {
+			if (a.type !== b.type) return a.type === "FM" ? -1 : 1;
+			return a.freq - b.freq;
+		});
+	}, [frequencies, radikoStationList, customFreqList]);
 
 	/** 停止中に現在局を再ロードして再生 */
 	const playRadio = useCallback(() => {
@@ -120,13 +209,20 @@ export function useRadioPlayer() {
 
 	/**
 	 * 選局アニメーション (+1 = 周波数↑, -1 = 周波数↓)
-	 * 100ms 間隔で tuningFreqAtom を更新し、ドットマトリクスにも反映させる。
+	 *
+	 * - FM: 76〜99 MHz の範囲内を巡回（端で折り返し）
+	 * - AM: 531〜1602 kHz の範囲内を巡回（端で折り返し）
+	 * - 100ms 間隔で tuningFreqAtom を更新し、ドットマトリクスに反映
 	 */
 	const tune = useCallback(
 		(direction: 1 | -1) => {
 			if (!currentRadio || currentSrc !== "radio") return;
 			const type = currentRadio.type;
 			const step = type === "FM" ? 0.1 : 9;
+			const bandMin = type === "FM" ? FM_MIN : AM_MIN;
+			const bandMax = type === "FM" ? FM_MAX : AM_MAX;
+			const bandSize = bandMax - bandMin;
+
 			const stations = tunableStations.filter((s) => s.type === type);
 			if (!stations.length) return;
 
@@ -135,13 +231,14 @@ export function useRadioPlayer() {
 					? animFreqRef.current
 					: (currentRadio.frequency ?? stations[0].freq);
 
+			// 進行方向に次の局を探す（端に達したら反対側の端へ折り返し）
 			let target: (typeof stations)[0] | undefined;
 			if (direction === 1) {
 				target = stations.find((s) => s.freq > baseFreq + step * 0.4);
-				if (!target) target = stations[0];
+				if (!target) target = stations[0]; // バンド最上部で折り返し
 			} else {
 				target = [...stations].reverse().find((s) => s.freq < baseFreq - step * 0.4);
-				if (!target) target = stations[stations.length - 1];
+				if (!target) target = stations[stations.length - 1]; // バンド最下部で折り返し
 			}
 			if (!target) return;
 
@@ -151,7 +248,6 @@ export function useRadioPlayer() {
 			}
 			unLoad();
 
-			animFreqRef.current = baseFreq;
 			const targetFreq = target.freq;
 			const targetStation: Radio = {
 				type: target.type,
@@ -162,23 +258,34 @@ export function useRadioPlayer() {
 				frequency: target.freq,
 			};
 
-			// 100ms 間隔で周波数を更新 → tuningFreqAtom 経由でドットマトリクスにも反映
+			// バンドを考慮した移動総距離（折り返しを含む）
+			const rawDiff = (targetFreq - baseFreq) * direction;
+			const totalDistance = rawDiff >= 0 ? rawDiff : rawDiff + bandSize;
+
+			animFreqRef.current = baseFreq;
+			let distanceTraveled = 0;
+
+			// 100ms 間隔でバンド内を巡回しながら目標周波数へ近づく
 			tuningTimerRef.current = setInterval(() => {
-				const diff = targetFreq - animFreqRef.current;
-				if (Math.abs(diff) < step * 0.45) {
+				distanceTraveled += step;
+
+				if (distanceTraveled >= totalDistance - step * 0.45) {
+					// アニメーション完了 → 局を選択
 					clearInterval(tuningTimerRef.current!);
 					tuningTimerRef.current = null;
 					animFreqRef.current = 0;
 					setTuningFreq(null);
 					setCurrentRadio(targetStation);
 				} else {
-					animFreqRef.current += direction * step;
-					if (direction === 1 && animFreqRef.current > targetFreq) animFreqRef.current = targetFreq;
-					if (direction === -1 && animFreqRef.current < targetFreq) animFreqRef.current = targetFreq;
+					// バンド端での折り返しを考慮した現在周波数を算出
+					let curr = baseFreq + direction * distanceTraveled;
+					if (curr > bandMax) curr -= bandSize;
+					if (curr < bandMin) curr += bandSize;
 					const rounded =
 						type === "FM"
-							? Math.round(animFreqRef.current * 10) / 10
-							: Math.round(animFreqRef.current / 9) * 9;
+							? Math.round(curr * 10) / 10
+							: Math.round(curr / 9) * 9;
+					animFreqRef.current = rounded;
 					setTuningFreq(rounded);
 				}
 			}, 100);
