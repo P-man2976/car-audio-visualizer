@@ -1,12 +1,13 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { audioMotionAnalyzerAtom, mediaStreamAtom } from "../atoms/audio";
-import { isPlayingAtom } from "../atoms/player";
+import { currentSrcAtom, isPlayingAtom } from "../atoms/player";
 import { useRef } from "react";
 
 export function useMediaStream() {
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 	const [mediaStream, setMediaStream] = useAtom(mediaStreamAtom);
 	const setIsPlaying = useSetAtom(isPlayingAtom);
+	const setCurrentSrc = useSetAtom(currentSrcAtom);
 	/** AUX 接続時に追加した gainNode の参照。disconnect() で選択的に切り離すために保持 */
 	const auxGainNodeRef = useRef<GainNode | null>(null);
 
@@ -28,6 +29,7 @@ export function useMediaStream() {
 		auxGainNodeRef.current = gainNode;
 		audioMotionAnalyzer.start();
 		setMediaStream(stream);
+		setCurrentSrc("aux");
 		setIsPlaying(true);
 	};
 
@@ -47,6 +49,7 @@ export function useMediaStream() {
 		audioMotionAnalyzer.volume = 1;
 		audioMotionAnalyzer.stop();
 		setMediaStream(null);
+		setCurrentSrc("off");
 		setIsPlaying(false);
 	};
 

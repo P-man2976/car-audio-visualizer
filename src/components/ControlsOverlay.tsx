@@ -56,9 +56,9 @@ export function ControlsOverlay() {
 		return () => audioElement.removeEventListener("ended", onEnded);
 	}, [audioElement, currentSrc, next]);
 
-	// Radio mode: HLS load/unload; off mode: stop
+	// Radio mode: HLS load/unload; off/aux mode: stop file and radio playback
 	useEffect(() => {
-		if (currentSrc === "off") {
+		if (currentSrc === "off" || currentSrc === "aux") {
 			unLoad();
 			audioElement.pause();
 			return;
