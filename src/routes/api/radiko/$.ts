@@ -29,6 +29,8 @@ export const Route = createFileRoute("/api/radiko/$")({
 					}
 				}
 
+				forwardHeaders.set("X-Forwarded-Host", 'localhost:5173');
+
 				const response = await fetch(upstreamUrl.toString(), {
 					headers: forwardHeaders,
 				});
