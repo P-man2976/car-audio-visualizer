@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from "./routes/__root";
 import { Route as IndexRouteImport } from "./routes/index";
+import { Route as ApiRadikoStreamRouteImport } from "./routes/api/radiko/stream";
 import { Route as ApiRadikoPlaylistRouteImport } from "./routes/api/radiko/playlist";
 import { Route as ApiRadikoAuthRouteImport } from "./routes/api/radiko/auth";
 import { Route as ApiRadikoSplatRouteImport } from "./routes/api/radiko/$";
@@ -17,6 +18,11 @@ import { Route as ApiRadikoSplatRouteImport } from "./routes/api/radiko/$";
 const IndexRoute = IndexRouteImport.update({
   id: "/",
   path: "/",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const ApiRadikoStreamRoute = ApiRadikoStreamRouteImport.update({
+  id: "/api/radiko/stream",
+  path: "/api/radiko/stream",
   getParentRoute: () => rootRouteImport,
 } as any);
 const ApiRadikoPlaylistRoute = ApiRadikoPlaylistRouteImport.update({
@@ -40,12 +46,14 @@ export interface FileRoutesByFullPath {
   "/api/radiko/$": typeof ApiRadikoSplatRoute;
   "/api/radiko/auth": typeof ApiRadikoAuthRoute;
   "/api/radiko/playlist": typeof ApiRadikoPlaylistRoute;
+  "/api/radiko/stream": typeof ApiRadikoStreamRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/api/radiko/$": typeof ApiRadikoSplatRoute;
   "/api/radiko/auth": typeof ApiRadikoAuthRoute;
   "/api/radiko/playlist": typeof ApiRadikoPlaylistRoute;
+  "/api/radiko/stream": typeof ApiRadikoStreamRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -53,6 +61,7 @@ export interface FileRoutesById {
   "/api/radiko/$": typeof ApiRadikoSplatRoute;
   "/api/radiko/auth": typeof ApiRadikoAuthRoute;
   "/api/radiko/playlist": typeof ApiRadikoPlaylistRoute;
+  "/api/radiko/stream": typeof ApiRadikoStreamRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
@@ -60,15 +69,22 @@ export interface FileRouteTypes {
     | "/"
     | "/api/radiko/$"
     | "/api/radiko/auth"
-    | "/api/radiko/playlist";
+    | "/api/radiko/playlist"
+    | "/api/radiko/stream";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/api/radiko/$" | "/api/radiko/auth" | "/api/radiko/playlist";
+  to:
+    | "/"
+    | "/api/radiko/$"
+    | "/api/radiko/auth"
+    | "/api/radiko/playlist"
+    | "/api/radiko/stream";
   id:
     | "__root__"
     | "/"
     | "/api/radiko/$"
     | "/api/radiko/auth"
-    | "/api/radiko/playlist";
+    | "/api/radiko/playlist"
+    | "/api/radiko/stream";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -76,6 +92,7 @@ export interface RootRouteChildren {
   ApiRadikoSplatRoute: typeof ApiRadikoSplatRoute;
   ApiRadikoAuthRoute: typeof ApiRadikoAuthRoute;
   ApiRadikoPlaylistRoute: typeof ApiRadikoPlaylistRoute;
+  ApiRadikoStreamRoute: typeof ApiRadikoStreamRoute;
 }
 
 declare module "@tanstack/react-router" {
@@ -85,6 +102,13 @@ declare module "@tanstack/react-router" {
       path: "/";
       fullPath: "/";
       preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/api/radiko/stream": {
+      id: "/api/radiko/stream";
+      path: "/api/radiko/stream";
+      fullPath: "/api/radiko/stream";
+      preLoaderRoute: typeof ApiRadikoStreamRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/api/radiko/playlist": {
@@ -116,6 +140,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiRadikoSplatRoute: ApiRadikoSplatRoute,
   ApiRadikoAuthRoute: ApiRadikoAuthRoute,
   ApiRadikoPlaylistRoute: ApiRadikoPlaylistRoute,
+  ApiRadikoStreamRoute: ApiRadikoStreamRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

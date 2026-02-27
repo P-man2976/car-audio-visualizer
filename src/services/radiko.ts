@@ -1,5 +1,4 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Parser as M3U8Parser } from "m3u8-parser";
 import type { RadikoStation } from "../types/radio";
 
 export function useRadikoToken() {
@@ -58,31 +57,15 @@ export function useRadikoStationList(areaId?: string) {
 }
 
 export function useRadikoM3u8Url() {
-	const { data: token } = useRadikoToken();
-
 	return useMutation<string, Error, string>({
 		mutationFn: async (stationId: string) => {
-			if (!token) {
-				throw new Error("Radiko token is not ready");
+			const res = await fetch(`/api/radiko/stream?station_id=${stationId}`);
+			if (!res.ok) {
+				const { error } = await res.json() as { error: string };
+				throw new Error(`[Error] Radiko stream failed: ${error}`);
 			}
-
-			const m3u8Parser = new M3U8Parser();
-			const response = await fetch(
-				`/api/radiko/playlist?station_id=${stationId}&type=b&l=15&lsid=11cbd3124cef9e8004f9b5e9f77b66`,
-				{
-					headers: { "X-Radiko-AuthToken": token.authToken },
-				},
-			);
-
-			m3u8Parser.push(await response.text());
-			m3u8Parser.end();
-
-			const playlist = (m3u8Parser.manifest as { playlists?: Array<{ uri?: string }> }).playlists?.[0];
-			if (!playlist?.uri) {
-				throw new Error("Radiko playlist not found");
-			}
-
-			return playlist.uri;
+			const { streamUri } = await res.json() as { streamUri: string };
+			return streamUri;
 		},
 	});
 }
