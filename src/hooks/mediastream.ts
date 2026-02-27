@@ -1,15 +1,19 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { audioMotionAnalyzerAtom, mediaStreamAtom } from "../atoms/audio";
 import { currentSrcAtom, isPlayingAtom } from "../atoms/player";
-import { useRef } from "react";
+
+/**
+ * AUX 接続時に追加した gainNode の参照。
+ * モジュールレベルでインスタンス間共有することで、hotkeys など
+ * 別 hook インスタンスからの connect/disconnect を整合させる。
+ */
+const _auxGainNodeRef: { current: GainNode | null } = { current: null };
 
 export function useMediaStream() {
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 	const [mediaStream, setMediaStream] = useAtom(mediaStreamAtom);
 	const setIsPlaying = useSetAtom(isPlayingAtom);
 	const setCurrentSrc = useSetAtom(currentSrcAtom);
-	/** AUX 接続時に追加した gainNode の参照。disconnect() で選択的に切り離すために保持 */
-	const auxGainNodeRef = useRef<GainNode | null>(null);
 
 	const connect = async (stream: MediaStream) => {
 		if (mediaStream) {
@@ -26,7 +30,7 @@ export function useMediaStream() {
 		// sharedAudioElement からの出力をミュートして MediaStream 入力のみを聞かせる
 		audioMotionAnalyzer.volume = 0;
 		audioMotionAnalyzer.connectInput(gainNode);
-		auxGainNodeRef.current = gainNode;
+		_auxGainNodeRef.current = gainNode;
 		audioMotionAnalyzer.start();
 		setMediaStream(stream);
 		setCurrentSrc("aux");
@@ -45,9 +49,9 @@ export function useMediaStream() {
 		// 追加した gainNode だけを選択的に切り離す
 		// (disconnectInput() 引数なしは sharedAudioElement の MediaElementSourceNode も
 		//  消してしまい、以降ファイル/ラジオモードでも analyzer に音声が届かなくなる)
-		if (auxGainNodeRef.current) {
-			audioMotionAnalyzer.disconnectInput(auxGainNodeRef.current);
-			auxGainNodeRef.current = null;
+		if (_auxGainNodeRef.current) {
+			audioMotionAnalyzer.disconnectInput(_auxGainNodeRef.current);
+			_auxGainNodeRef.current = null;
 		}
 		// gainNode 切断後に stop してから volume を戻す
 		// (stop より先に volume = 1 にすると切断前の音声が一瞬流れる)

@@ -17,7 +17,6 @@ import { SongInfo } from "./player/SongInfo";
 import { SourceSheet } from "./SourceSheet";
 
 export function ControlsOverlay() {
-	useAppHotkeys();
 	const currentSrc = useAtomValue(currentSrcAtom);
 	const currentRadio = useAtomValue(currentRadioAtom);
 	const currentSong = useAtomValue(currentSongAtom);
@@ -27,6 +26,7 @@ export function ControlsOverlay() {
 	const { playRadio, stopRadio, tune } = useRadioPlayer();
 	useFilePlayer();
 	const { isPiP, enterPiP, exitPiP, isSupported: isPiPSupported } = usePiP();
+	useAppHotkeys({ enterPiP, exitPiP, isPiP });
 
 	const title = useMemo(() => {
 		switch (currentSrc) {

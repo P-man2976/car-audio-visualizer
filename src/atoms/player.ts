@@ -8,6 +8,8 @@ export const currentSrcAtom = atom<Source>("off");
 export const isPlayingAtom = atom(false);
 export const progressAtom = atom(0);
 export const volumeAtom = atom(70);
+/** ミュート状態。true のとき audioElement.muted を true にする */
+export const muteAtom = atom(false);
 
 /** ファイル再生: シャッフル / リピートモード */
 export type RepeatMode = "off" | "one" | "all";

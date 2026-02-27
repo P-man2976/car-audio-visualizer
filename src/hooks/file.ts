@@ -1,7 +1,7 @@
 import { useAtomValue } from "jotai";
 import { useEffect, useRef } from "react";
 import { audioElementAtom } from "../atoms/audio";
-import { currentSongAtom, currentSrcAtom, isPlayingAtom, repeatModeAtom, volumeAtom } from "../atoms/player";
+import { currentSongAtom, currentSrcAtom, isPlayingAtom, muteAtom, repeatModeAtom, volumeAtom } from "../atoms/player";
 import { usePlayer } from "./player";
 
 /**
@@ -16,6 +16,7 @@ export function useFilePlayer() {
 	const currentSrc = useAtomValue(currentSrcAtom);
 	const currentSong = useAtomValue(currentSongAtom);
 	const volume = useAtomValue(volumeAtom);
+	const mute = useAtomValue(muteAtom);
 	const isPlaying = useAtomValue(isPlayingAtom);
 	const repeat = useAtomValue(repeatModeAtom);
 	const { play, next } = usePlayer();
@@ -30,11 +31,12 @@ export function useFilePlayer() {
 	/** next() 直後に src 変更が来たときに自動再生するためのフラグ（ended 経由専用） */
 	const autoPlayNextRef = useRef(false);
 
-	// 音量と crossOrigin を audioElement に同期
+	// 音量・ミュート・crossOrigin を audioElement に同期
 	useEffect(() => {
 		audioElement.crossOrigin = "anonymous";
 		audioElement.volume = volume / 100;
-	}, [audioElement, volume]);
+		audioElement.muted = mute;
+	}, [audioElement, volume, mute]);
 
 	// ファイルモード: 楽曲変更時に src を差し替え、必要なら自動再生
 	// isPlayingRef を使うことで「再生中にスキップ」した場合も確実に自動再生する
