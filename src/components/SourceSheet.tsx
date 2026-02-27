@@ -78,7 +78,7 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 								className={cn(
 									"grid gap-4",
 									radioStationSize === "lg"
-										? "grid-cols-3"
+										? "grid-cols-2 sm:grid-cols-3"
 										: "grid-cols-[repeat(auto-fit,minmax(100px,1fr))]"
 								)}
 							>
@@ -88,7 +88,7 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 							</div>
 							<Separator />
 							<h4 className="text-lg">NHKラジオ らじる★らじる</h4>
-							<div className="grid grid-cols-3 gap-4">
+							<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
 								{radiruStationList?.map((station) => (
 									<RadiruStation key={station.areakey} {...station} />
 								))}
