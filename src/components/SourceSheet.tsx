@@ -53,15 +53,13 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 					</TabsContent>
 
 					<TabsContent className="py-4" value="file">
-						<div className="flex w-full flex-col items-center gap-4">
-							<div className="flex w-full h-12 gap-4 items-center">
-								<FilePicker />
-								<ExplorerDialog>
-									<Button className="w-full h-full">
-										組み込みのエクスプローラーから読み込み
-									</Button>
-								</ExplorerDialog>
-							</div>
+						<div className="flex w-full flex-col gap-3">
+							<FilePicker />
+							<ExplorerDialog>
+								<Button className="w-full">
+									組み込みのエクスプローラーから読み込み
+								</Button>
+							</ExplorerDialog>
 						</div>
 					</TabsContent>
 
@@ -99,7 +97,7 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 					</TabsContent>
 
 					<TabsContent className="py-4" value="aux">
-						<div className="flex w-full items-center gap-4">
+						<div className="flex w-full flex-col gap-4">
 							{mediaStream ? (
 								<DisconnectInput />
 							) : (

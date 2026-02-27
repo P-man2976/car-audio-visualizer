@@ -13,7 +13,7 @@ export function FilePicker() {
 
 	return (
 		<Button
-			className="p-4 w-full h-full max-w-3xl gap-4"
+			className="w-full gap-4"
 			onClick={async () => {
 				const handles = await showOpenFilePicker({
 					multiple: true,
