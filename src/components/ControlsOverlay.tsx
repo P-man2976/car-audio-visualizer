@@ -67,9 +67,6 @@ export function ControlsOverlay() {
 			{/* Header */}
 			<div className="group relative flex flex-col justify-center">
 				<div className="absolute inset-0 bg-linear-to-b from-gray-600/50 to-transparent opacity-50 transition-all duration-500 group-hover:opacity-100" />
-				<div className="z-10 flex w-full items-center px-2 py-1">
-					<span className="truncate text-sm">{title}</span>
-				</div>
 				<SourceSheet>
 					<Button variant={null} className="z-10 w-full">
 						<ChevronDown className="scale-x-150" />

@@ -9,6 +9,11 @@ export const isPlayingAtom = atom(false);
 export const progressAtom = atom(0);
 export const volumeAtom = atom(70);
 
+/** ファイル再生: シャッフル / リピートモード */
+export type RepeatMode = "off" | "one" | "all";
+export const shuffleAtom = atom(false);
+export const repeatModeAtom = atom<RepeatMode>("off");
+
 /** Radio recently-played stations */
 export const queueAtom = atom<Radio[]>([]);
 

@@ -5,6 +5,8 @@ import {
 	currentSongAtom,
 	currentSrcAtom,
 	isPlayingAtom,
+	repeatModeAtom,
+	shuffleAtom,
 	songHistoryAtom,
 	songQueueAtom,
 } from "@/atoms/player";
@@ -17,6 +19,8 @@ export const usePlayer = () => {
 	const [songHistory, setSongHistory] = useAtom(songHistoryAtom);
 	const audioElement = useAtomValue(audioElementAtom);
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
+	const shuffle = useAtomValue(shuffleAtom);
+	const repeat = useAtomValue(repeatModeAtom);
 
 	const play = useCallback(
 		async (pos?: number) => {
@@ -43,15 +47,39 @@ export const usePlayer = () => {
 	}, [audioElement, setIsPlaying, setCurrentSrc]);
 
 	const next = useCallback(() => {
-		const [nextSong, ...newQueue] = songQueue;
-		if (currentSong) setSongHistory((prev) => [...prev, currentSong]);
+		// shuffle 時はキューからランダムに選択
+		let nextSong: (typeof songQueue)[number] | undefined;
+		let newQueue: typeof songQueue;
+		if (shuffle && songQueue.length > 0) {
+			const randomIndex = Math.floor(Math.random() * songQueue.length);
+			nextSong = songQueue[randomIndex];
+			newQueue = songQueue.filter((_, i) => i !== randomIndex);
+		} else {
+			[nextSong, ...newQueue] = songQueue;
+		}
+
+		const newHistory = currentSong ? [...songHistory, currentSong] : [...songHistory];
+
 		if (!nextSong) {
-			stop();
+			// repeat all: 履歴全曲をキューに戻して再開
+			if (repeat === "all" && newHistory.length > 0) {
+				const allSongs = shuffle
+					? [...newHistory].sort(() => Math.random() - 0.5)
+					: [...newHistory];
+				const [first, ...rest] = allSongs;
+				setSongHistory([]);
+				setCurrentSong(first);
+				setSongQueue(rest);
+			} else {
+				setSongHistory(newHistory);
+				stop();
+			}
 			return;
 		}
+		setSongHistory(newHistory);
 		setCurrentSong(nextSong);
 		setSongQueue(newQueue);
-	}, [currentSong, songQueue, setSongHistory, setCurrentSong, setSongQueue, stop]);
+	}, [currentSong, songQueue, songHistory, shuffle, repeat, setSongHistory, setCurrentSong, setSongQueue, stop]);
 
 	const prev = useCallback(() => {
 		const lastSong = songHistory.at(-1);
