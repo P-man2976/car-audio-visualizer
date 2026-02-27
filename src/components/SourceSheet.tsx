@@ -78,7 +78,7 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 								className={cn(
 									"grid gap-4",
 									radioStationSize === "lg"
-										? "grid-cols-2 sm:grid-cols-3"
+										? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
 										: "grid-cols-[repeat(auto-fit,minmax(100px,1fr))]"
 								)}
 							>
