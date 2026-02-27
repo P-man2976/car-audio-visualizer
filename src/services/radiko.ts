@@ -43,30 +43,28 @@ export function useRadikoToken() {
 				throw new Error("[Error] Radiko Auth2 failed");
 			}
 
-			return authToken;
+			const auth2Text = await resAuth2.text();
+			const areaId = auth2Text.trim().split(",")[0] ?? "JP13";
+
+			return { authToken, areaId };
 		},
 		refetchInterval: 1000 * 60 * 8,
 	});
 }
 
 export function useRadikoArea() {
-	return useQuery({
-		queryKey: ["radio", "radiko", "area"],
-		queryFn: async () => {
-			const res = await fetch("https://radiko.jp/area");
-			const html = await res.text();
-			return html.match(/class="(.*)"/)?.[1];
-		},
-	});
+	const { data } = useRadikoToken();
+	return data?.areaId;
 }
 
 export function useRadikoStationList(areaId?: string) {
-	const { data } = useRadikoArea();
+	const area = useRadikoArea();
+	const resolved = areaId ?? area;
 
 	return useQuery({
-		queryKey: ["radio", "radiko", areaId ?? data, "stations"],
+		queryKey: ["radio", "radiko", resolved, "stations"],
 		queryFn: async () => {
-			const res = await fetch(`/api/radiko/v3/station/list/${areaId ?? data}.xml`);
+			const res = await fetch(`/api/radiko/v3/station/list/${resolved}.xml`);
 			const xml = await res.text();
 			const doc = new DOMParser().parseFromString(xml, "application/xml");
 			const stationNodes = Array.from(doc.querySelectorAll("station"));
@@ -88,7 +86,7 @@ export function useRadikoStationList(areaId?: string) {
 				} satisfies RadikoStation;
 			});
 		},
-		enabled: Boolean(areaId ?? data),
+			enabled: Boolean(resolved),
 	});
 }
 
@@ -105,7 +103,7 @@ export function useRadikoM3u8Url() {
 			const response = await fetch(
 				`https://si-f-radiko.smartstream.ne.jp/so/playlist.m3u8?station_id=${stationId}&type=b&l=15&lsid=11cbd3124cef9e8004f9b5e9f77b66`,
 				{
-					headers: { "X-Radiko-AuthToken": token },
+					headers: { "X-Radiko-AuthToken": token.authToken },
 				},
 			);
 
