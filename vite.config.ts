@@ -12,6 +12,15 @@ export default defineConfig({
 			"@": path.resolve(__dirname, "./src"),
 		},
 	},
+	optimizeDeps: {
+		include: [
+			"react",
+			"react/jsx-runtime",
+			"react/jsx-dev-runtime",
+			"react-dom",
+			"react-dom/client",
+		],
+	},
 	plugins: [
 		cloudflare({ viteEnvironment: { name: "ssr" } }),
 		tanstackStart(),
