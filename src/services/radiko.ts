@@ -49,6 +49,8 @@ export function useRadikoToken() {
 			return { authToken, areaId };
 		},
 		refetchInterval: 1000 * 60 * 8,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
 	});
 }
 

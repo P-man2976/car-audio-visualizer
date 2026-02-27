@@ -24,7 +24,7 @@ export const Route = createFileRoute("/api/radiko/$")({
 				// Forward headers, exclude hop-by-hop / origin headers
 				const forwardHeaders = new Headers();
 				for (const [key, value] of request.headers) {
-					if (!["host", "origin", "referer"].includes(key.toLowerCase())) {
+					if (!["host", "origin", "referer", "x-forwarded-host"].includes(key.toLowerCase())) {
 						forwardHeaders.set(key, value);
 					}
 				}
