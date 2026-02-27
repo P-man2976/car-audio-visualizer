@@ -71,7 +71,7 @@ function QueueSongCard({ song }: { song: Song }) {
 			className="rounded-md bg-neutral-800/50 flex items-center gap-2 pr-3 py-2 cursor-default select-none"
 		>
 			<GripVertical
-				size={22}
+				size={20}
 				className="shrink-0 text-gray-500 hover:text-gray-300 hover:cursor-move touch-none ml-1"
 				onPointerDown={(e) => controls.start(e)}
 			/>
@@ -160,7 +160,7 @@ function RadioQueueCard({ station }: { station: Radio }) {
 				<img src={logo} alt={name} className="h-10 w-10 rounded-sm object-cover shrink-0 ml-2" />
 			) : (
 				<div className="h-10 w-10 rounded-sm bg-neutral-700/60 shrink-0 grid place-content-center ml-2">
-					<RadioTower size={22} className="text-gray-400" />
+					<RadioTower size={20} className="text-gray-400" />
 				</div>
 			)}
 			<div className="flex flex-col gap-0.5 overflow-hidden">
