@@ -1,12 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-const RADIKO_BASE = "https://radiko.jp";
+const RADIKO_BASE = "https://car-audio-visualizer.pman.workers.dev/api/radiko";
 
 export const Route = createFileRoute("/api/radiko/$")({
 	server: {
 		handlers: {
 			GET: async ({ request, params }) => {
 				const splat = params._splat ?? "";
+
+				// /area はクライアントから直接取得するため、プロキシしない
+				if (splat === "area") {
+					return new Response("Not proxied", { status: 404 });
+				}
+
 				const upstreamUrl = new URL(`${RADIKO_BASE}/${splat}`);
 
 				// Forward query params

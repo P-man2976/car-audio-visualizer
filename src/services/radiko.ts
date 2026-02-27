@@ -53,7 +53,7 @@ export function useRadikoArea() {
 	return useQuery({
 		queryKey: ["radio", "radiko", "area"],
 		queryFn: async () => {
-			const res = await fetch("/api/radiko/area");
+			const res = await fetch("https://radiko.jp/area");
 			const html = await res.text();
 			return html.match(/class="(.*)"/)?.[1];
 		},
