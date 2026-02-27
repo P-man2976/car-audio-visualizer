@@ -19,6 +19,15 @@ export const Route = createFileRoute("/api/radiko/auth")({
 					);
 				}
 
+				// Cloudflare Workers の request.cf からクライアントの地域を取得
+				// auth2 の戻り値はエッジ(Worker)の地域になるため使わない
+				type CfProps = { country?: string; regionCode?: string };
+				const cf = (request as Request & { cf?: CfProps }).cf;
+				const areaId =
+					cf?.country === "JP" && cf?.regionCode
+						? `JP${Number(cf.regionCode)}`
+						: "JP13"; // デフォルト: 東京
+
 				// --- auth1 ---
 				const resAuth1 = await fetch(`${RADIKO_BASE}/v2/api/auth1`, {
 					headers: {
@@ -69,8 +78,8 @@ export const Route = createFileRoute("/api/radiko/auth")({
 					);
 				}
 
-				const auth2Text = await resAuth2.text();
-				const areaId = auth2Text.trim().split(",")[0] ?? "JP13";
+				// auth2 のレスポンスボディは破棄（areaId は request.cf から取得済み）
+				await resAuth2.text();
 
 				return new Response(
 					JSON.stringify({ authToken, areaId }),
