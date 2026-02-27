@@ -35,18 +35,33 @@ export function useRadioPlayer() {
 
 	const tuningTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const animFreqRef = useRef<number>(0);
+	// mutate・queue は毎レンダーで参照が変わりうるため ref 経由で参照し、
+	// effect の依存配列から除外して不要な再実行を防ぐ
+	const mutateRef = useRef(mutate);
+	mutateRef.current = mutate;
+	const queueRef = useRef(queue);
+	queueRef.current = queue;
 
-	// ラジオモード: HLS をロード。currentRadio が変わるたびに再ロード
+	// ラジオモード: HLS をロード。currentRadio / currentSrc が変わるたびに再ロード
 	useEffect(() => {
 		if (currentSrc !== "radio" || !currentRadio) return;
 
 		if (currentRadio.source === "radiko") {
-			mutate(currentRadio.id, { onSuccess: (m3u8) => load(m3u8) });
+			mutateRef.current(currentRadio.id, { onSuccess: (m3u8) => load(m3u8) });
 		} else if (currentRadio.source === "radiru") {
 			load(currentRadio.url);
 		}
 
-		const alreadyInQueue = queue.some((r) =>
+		return () => {
+			unLoad();
+		};
+	}, [currentSrc, currentRadio, load, unLoad]);
+
+	// キューへの追加は HLS ロードとは独立して管理
+	useEffect(() => {
+		if (currentSrc !== "radio" || !currentRadio) return;
+
+		const alreadyInQueue = queueRef.current.some((r) =>
 			r.source === "radiko" && currentRadio.source === "radiko"
 				? r.id === currentRadio.id
 				: r.source === "radiru" && currentRadio.source === "radiru"
@@ -56,11 +71,7 @@ export function useRadioPlayer() {
 		if (!alreadyInQueue) {
 			setQueue((current) => [currentRadio, ...current].slice(0, 20));
 		}
-
-		return () => {
-			unLoad();
-		};
-	}, [currentSrc, currentRadio, load, unLoad, mutate, queue, setQueue]);
+	}, [currentSrc, currentRadio, setQueue]);
 
 	// off / aux モードへ切り替えたら HLS を即停止
 	useEffect(() => {
