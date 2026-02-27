@@ -1,27 +1,14 @@
-import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import tsConfigPaths from "vite-tsconfig-paths";
 import { cloudflare } from "@cloudflare/vite-plugin";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-	resolve: {
-		alias: {
-			"@": path.resolve(__dirname, "./src"),
-		},
-	},
-	optimizeDeps: {
-		include: [
-			"react",
-			"react/jsx-runtime",
-			"react/jsx-dev-runtime",
-			"react-dom",
-			"react-dom/client",
-		],
-	},
 	plugins: [
+    tsConfigPaths(),
 		cloudflare({ viteEnvironment: { name: "ssr" } }),
 		tanstackStart(),
 		react({

@@ -5,7 +5,7 @@ import { Visualizer } from "../components/Visualizer";
 
 export function HomePage() {
 	return (
-		<div className="relative h-[calc(100svh-2rem)] min-h-[640px] overflow-hidden rounded-xl border border-divider bg-black/90">
+		<div className="relative h-dvh min-h-160 overflow-hidden border border-divider bg-black/90">
 			<Container>
 				<DotMatrixArray />
 				<Visualizer />
