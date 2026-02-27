@@ -22,6 +22,7 @@
     "audiomotion-analyzer": "github:p-man2976/audioMotion-analyzer",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.34.3",
     "hls.js": "^1.6.15",
     "jotai": "^2.18.0",
     "lucide-react": "^0.575.0",
