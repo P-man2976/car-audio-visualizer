@@ -9,6 +9,7 @@ import { useMediaSession } from "../hooks/mediaSession";
 import { usePlayer } from "../hooks/player";
 import { usePiP } from "../hooks/pip";
 import { useRadioPlayer } from "../hooks/radio";
+import { useAppHotkeys } from "../hooks/hotkeys";
 import { MenuSheet } from "./MenuSheet";
 import { QueueSheet } from "./QueueSheet";
 import { ProgressSlider } from "./player/ProgressSlider";
@@ -16,6 +17,7 @@ import { SongInfo } from "./player/SongInfo";
 import { SourceSheet } from "./SourceSheet";
 
 export function ControlsOverlay() {
+	useAppHotkeys();
 	const currentSrc = useAtomValue(currentSrcAtom);
 	const currentRadio = useAtomValue(currentRadioAtom);
 	const currentSong = useAtomValue(currentSongAtom);
