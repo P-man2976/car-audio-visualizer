@@ -69,7 +69,7 @@ export function ControlsOverlay() {
 				<div className="absolute inset-0 bg-linear-to-b from-gray-600/50 to-transparent opacity-50 transition-all duration-500 group-hover:opacity-100" />
 				<SourceSheet>
 					<Button variant={null} className="z-10 w-full">
-						<ChevronDown className="scale-x-150" />
+						<ChevronDown className="size-7 scale-x-150" />
 					</Button>
 				</SourceSheet>
 			</div>
@@ -81,7 +81,7 @@ export function ControlsOverlay() {
 						className="h-full group/btn relative pr-12"
 					>
 						<div className="absolute inset-0 opacity-0 from-gray-600/50 bg-[radial-gradient(80%_60%_at_left,var(--tw-gradient-from),transparent)] transition-all duration-500 group-hover/btn:opacity-100" />
-						<ChevronRight className="scale-y-150" />
+						<ChevronRight className="size-7 scale-y-150" />
 					</Button>
 				</MenuSheet>
 				<QueueSheet>
@@ -90,7 +90,7 @@ export function ControlsOverlay() {
 						className="h-full group/btn relative pl-12"
 					>
 						<div className="absolute inset-0 opacity-0 from-gray-600/50 bg-[radial-gradient(80%_60%_at_right,var(--tw-gradient-from),transparent)] transition-all duration-500 group-hover/btn:opacity-100" />
-						<ChevronLeft className="scale-y-150" />
+						<ChevronLeft className="size-7 scale-y-150" />
 					</Button>
 				</QueueSheet>
 			</div>
