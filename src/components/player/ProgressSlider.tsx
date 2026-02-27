@@ -48,12 +48,7 @@ export function ProgressSlider() {
 	}, [currentSrc, currentRadio, progress, currentSong, setDisplayString]);
 
 	if (currentSrc === "off") {
-		return (
-			<div className="relative mb-4 w-full">
-				<div className="h-2 w-full rounded-full bg-secondary shadow-lg" />
-				<span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-lg">ＡＬＬ　ＯＦＦ</span>
-			</div>
-		);
+		return <div className="mb-4 h-2 w-full rounded-full bg-secondary shadow-lg" />;
 	}
 
 	if (currentSrc === "radio" || currentSrc === "aux") {

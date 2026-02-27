@@ -49,9 +49,10 @@ export function useMediaStream() {
 			audioMotionAnalyzer.disconnectInput(auxGainNodeRef.current);
 			auxGainNodeRef.current = null;
 		}
-		// ファイル/ラジオモードの音声が出るよう volume を戻す
-		audioMotionAnalyzer.volume = 1;
+		// gainNode 切断後に stop してから volume を戻す
+		// (stop より先に volume = 1 にすると切断前の音声が一瞬流れる)
 		audioMotionAnalyzer.stop();
+		audioMotionAnalyzer.volume = 1;
 		setMediaStream(null);
 		setIsPlaying(false);
 	};

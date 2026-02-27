@@ -33,24 +33,19 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 			<SheetTrigger asChild>{children}</SheetTrigger>
 			<SheetContent side="top" className="max-h-[80vh] overflow-y-auto">
 				<Tabs
-					value={currentSrc}
+					// currentSrc が "off" のときはどのタブも選択されていない状態にする
+					value={currentSrc === "off" ? "" : currentSrc}
 					onValueChange={(value) => {
-						setCurrentSrc(value as "off" | "file" | "radio" | "aux");
-						if (value !== "aux") disconnect();
+						// AUX 以外に切り替えるときは音声ルーティングをクリーンアップ
+						if (currentSrc === "aux") disconnect();
+						setCurrentSrc(value as "file" | "radio" | "aux");
 					}}
 				>
-					<TabsList className="grid grid-cols-4 w-full">
-						<TabsTrigger value="off">ALL OFF</TabsTrigger>
+					<TabsList className="grid grid-cols-3 w-full">
 						<TabsTrigger value="file">ファイル</TabsTrigger>
 						<TabsTrigger value="radio">ラジオ</TabsTrigger>
 						<TabsTrigger value="aux">外部入力</TabsTrigger>
 					</TabsList>
-
-					<TabsContent className="py-4" value="off">
-						<div className="flex w-full items-center justify-center py-8">
-							<span className="text-gray-400 text-lg">ＡＬＬ　ＯＦＦ</span>
-						</div>
-					</TabsContent>
 
 					<TabsContent className="py-4" value="file">
 						<div className="flex w-full flex-col gap-3">
