@@ -1,7 +1,8 @@
 import { cn } from "@/lib/utils";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { currentRadioAtom } from "../../atoms/radio";
 import { currentSrcAtom, queueAtom } from "../../atoms/player";
+import { audioElementAtom, audioMotionAnalyzerAtom } from "../../atoms/audio";
 import type { RadiruStation as RadiruStationType, RadioType } from "../../types/radio";
 
 type RadiruChannel = {
@@ -32,6 +33,8 @@ function RadiruChannelCard({ areajp, type, label, name, url }: RadiruChannel) {
 	const [currentRadio, setCurrentRadio] = useAtom(currentRadioAtom);
 	const [currentSrc, setCurrentSrc] = useAtom(currentSrcAtom);
 	const [queue, setQueue] = useAtom(queueAtom);
+	const audioElement = useAtomValue(audioElementAtom);
+	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 	const isSelected = currentSrc === "radio" && currentRadio?.source === "radiru" && currentRadio.url === url;
 
 	return (
@@ -42,6 +45,10 @@ function RadiruChannelCard({ areajp, type, label, name, url }: RadiruChannel) {
 				isSelected && "bg-gray-500/30 border",
 			)}
 			onClick={() => {
+				// Safari: AudioContext と audioElement はユーザージェスチャー内で
+				// アンロックする必要がある。非同期の HLS 再生前にここで先行してアンロックする。
+				void audioMotionAnalyzer.audioCtx.resume();
+				void audioElement.play().catch(() => undefined);
 				setCurrentSrc("radio");
 				setCurrentRadio({ type, source: "radiru", url, name });
 				if (!queue.includes(name)) {
