@@ -4,12 +4,13 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAtom } from "jotai";
-import { type KeyboardEvent, useState } from "react";
-import { type RepeatMode, repeatModeAtom, shuffleAtom } from "../../atoms/player";
+import { LogOut } from "lucide-react";
+import { type KeyboardEvent, useCallback, useState } from "react";
+import { lastfmSessionAtom } from "../../atoms/lastfm";
+import { getSession } from "../../lib/lastfm";
 import {
 	type HotkeyAction,
 	HOTKEY_ACTION_LABELS,
@@ -24,10 +25,45 @@ import {
 
 export function SettingsDialog() {
 	const [open, setOpen] = useAtom(settingsOpenAtom);
-	const [shuffle, setShuffle] = useAtom(shuffleAtom);
-	const [repeat, setRepeat] = useAtom(repeatModeAtom);
 	const [bindings, setBindings] = useAtom(hotkeyBindingsAtom);
 	const [capturing, setCapturing] = useState<HotkeyAction | null>(null);
+	const [lastfmSession, setLastfmSession] = useAtom(lastfmSessionAtom);
+	const [lastfmConnecting, setLastfmConnecting] = useState(false);
+
+	// Last.fm OAuth: popup からの postMessage を受信してセッションを取得する
+	const connectLastfm = useCallback(async () => {
+		const callbackUrl = `${window.location.origin}/lastfm-callback`;
+		const authUrl = `https://last.fm/api/auth?${new URLSearchParams({
+			api_key: import.meta.env.VITE_LASTFM_APIKEY,
+			cb: callbackUrl,
+		})}`;
+		const popup = window.open(authUrl, "lastfm-auth", "width=600,height=700");
+		if (!popup) return;
+		setLastfmConnecting(true);
+
+		const handler = async (e: MessageEvent) => {
+			if (e.origin !== window.location.origin) return;
+			if (!e.data || e.data.type !== "lastfm-token" || !e.data.token) return;
+			window.removeEventListener("message", handler);
+			try {
+				const session = await getSession(e.data.token as string);
+				setLastfmSession(session);
+			} catch (err) {
+				console.error("[lastfm] getSession failed:", err);
+			} finally {
+				setLastfmConnecting(false);
+			}
+		};
+		window.addEventListener("message", handler);
+		// popup が閉じられたら後片付け
+		const pollClosed = setInterval(() => {
+			if (popup.closed) {
+				clearInterval(pollClosed);
+				window.removeEventListener("message", handler);
+				setLastfmConnecting(false);
+			}
+		}, 500);
+	}, [setLastfmSession]);
 
 	const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>, action: HotkeyAction) => {
 		e.preventDefault();
@@ -55,33 +91,27 @@ export function SettingsDialog() {
 				</DialogHeader>
 
 				<div className="flex flex-col gap-5 pt-2 overflow-y-auto pr-1">
-					{/* シャッフル */}
-					<div className="flex items-center justify-between">
-						<span className="text-sm font-medium">シャッフル</span>
-						<Switch checked={shuffle} onCheckedChange={setShuffle} />
-					</div>
-
-					<Separator />
-
-					{/* リピート */}
+					{/* Last.fm 連携 */}
 					<div className="flex flex-col gap-3">
-						<span className="text-sm font-medium">リピート</span>
-						<Tabs
-							value={repeat}
-							onValueChange={(v) => setRepeat(v as RepeatMode)}
-						>
-							<TabsList className="w-full">
-								<TabsTrigger value="off" className="flex-1">
-									オフ
-								</TabsTrigger>
-								<TabsTrigger value="one" className="flex-1">
-									1曲
-								</TabsTrigger>
-								<TabsTrigger value="all" className="flex-1">
-									全曲
-								</TabsTrigger>
-							</TabsList>
-						</Tabs>
+						<span className="text-sm font-medium">Last.fm</span>
+						{lastfmSession ? (
+							<Button
+								variant="outline"
+								className="border-[#D51007] hover:bg-[#D5100730] gap-2 text-sm"
+								onClick={() => setLastfmSession(null)}
+							>
+								<LogOut className="size-4" />
+								{lastfmSession.name} で連携中
+							</Button>
+						) : (
+							<Button
+								className="bg-[#D51007aa] hover:bg-[#D51007dd] text-sm"
+								onClick={connectLastfm}
+								disabled={lastfmConnecting}
+							>
+								{lastfmConnecting ? "認証中…" : "Last.fm と連携する"}
+							</Button>
+						)}
 					</div>
 
 					<Separator />

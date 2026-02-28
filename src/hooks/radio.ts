@@ -71,19 +71,14 @@ export function useRadioPlayer() {
 
 	const tuningTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const animFreqRef = useRef<number>(0);
-	// unLoad を ref で保持して effect の deps から外す
-	// → hls.destroy() による setHls(null) が unLoad ref を変化させても多重起動しない
-	const unLoadRef = useRef(unLoad);
-	unLoadRef.current = unLoad;
 
 	// ラジオ以外のモードへ切り替わったら HLS を即停止
 	// file モードも含む（SourceBuffer が残るとファイル再生と競合するため）
-	// deps は currentSrc のみ: unLoad の参照変化で再トリガーさせない
 	useEffect(() => {
 		if (currentSrc !== "radio") {
-			unLoadRef.current();
+			unLoad();
 		}
-	}, [currentSrc]);
+	}, [currentSrc, unLoad]);
 
 	// ラジオ以外のモードに切り替わったら選局アニメーションをキャンセル
 	useEffect(() => {

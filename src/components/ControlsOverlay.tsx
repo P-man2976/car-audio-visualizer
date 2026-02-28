@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { useAtomValue } from "jotai";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, LogIn, Minus, Pause, PictureInPicture2, Play, Plus, RadioTower, Square } from "lucide-react";
+import { useAtom, useAtomValue } from "jotai";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, LogIn, Minus, Music2, Pause, PictureInPicture2, Play, Plus, RadioTower, Repeat, Repeat1, Shuffle, Square } from "lucide-react";
 import { useMemo } from "react";
-import { currentSongAtom, currentSrcAtom } from "../atoms/player";
+import { currentSongAtom, currentSrcAtom, repeatModeAtom, shuffleAtom, type RepeatMode } from "../atoms/player";
 import { currentRadioAtom, tuningFreqAtom } from "../atoms/radio";
 import { useFilePlayer } from "../hooks/file";
 import { useMediaSession } from "../hooks/mediaSession";
@@ -10,6 +10,7 @@ import { usePlayer } from "../hooks/player";
 import { usePiP } from "../hooks/pip";
 import { useRadioPlayer } from "../hooks/radio";
 import { useAppHotkeys } from "../hooks/hotkeys";
+import { useLastfmScrobble } from "../hooks/lastfm";
 import { MenuSheet } from "./MenuSheet";
 import { QueueSheet } from "./QueueSheet";
 import { ProgressSlider } from "./player/ProgressSlider";
@@ -23,11 +24,15 @@ export function ControlsOverlay() {
 	const currentSong = useAtomValue(currentSongAtom);
 	const tuningFreq = useAtomValue(tuningFreqAtom);
 
+	const [shuffle, setShuffle] = useAtom(shuffleAtom);
+	const [repeat, setRepeat] = useAtom(repeatModeAtom);
+
 	const { isPlaying, play, pause, stop, next, prev } = usePlayer();
 	const { playRadio, stopRadio, tune } = useRadioPlayer();
 	useFilePlayer();
 	const { isPiP, enterPiP, exitPiP, isSupported: isPiPSupported } = usePiP();
 	useAppHotkeys({ enterPiP, exitPiP, isPiP });
+	useLastfmScrobble();
 
 	const title = useMemo(() => {
 		switch (currentSrc) {
@@ -112,6 +117,8 @@ export function ControlsOverlay() {
 								<RadioTower />
 							) : currentSrc === "aux" ? (
 								<LogIn />
+							) : currentSrc === "file" ? (
+								<Music2 className="text-neutral-400" />
 							) : null}
 						</div>
 						{isPiPSupported && (
@@ -128,6 +135,17 @@ export function ControlsOverlay() {
 					<SongInfo title={title} artist={artist} album={album} />
 					{/* Control buttons */}
 					<div className="ml-auto flex shrink-0 gap-2">
+						{/* シャッフル (ファイルのみ) */}
+						{currentSrc === "file" && (
+							<Button
+								size="icon-lg"
+								variant="ghost"
+								className={`p-2 ${shuffle ? "text-primary" : ""}`}
+								onClick={() => setShuffle((v) => !v)}
+							>
+								<Shuffle />
+							</Button>
+						)}
 						{/* ファイル: 前のトラック / ラジオ: 周波数を下げる */}
 						{currentSrc === "file" && (
 							<Button size="icon-lg" variant="ghost" className="p-2" onClick={prev}>
@@ -169,6 +187,21 @@ export function ControlsOverlay() {
 						{currentSrc === "file" && (
 							<Button size="icon-lg" variant="ghost" className="p-2" onClick={stop}>
 								<Square />
+							</Button>
+						)}
+						{/* リピート (ファイルのみ) */}
+						{currentSrc === "file" && (
+							<Button
+								size="icon-lg"
+								variant="ghost"
+								className={`p-2 ${repeat !== "off" ? "text-primary" : ""}`}
+								onClick={() =>
+									setRepeat((r: RepeatMode) =>
+										r === "off" ? "one" : r === "one" ? "all" : "off",
+									)
+								}
+							>
+								{repeat === "one" ? <Repeat1 /> : <Repeat />}
 							</Button>
 						)}
 					</div>

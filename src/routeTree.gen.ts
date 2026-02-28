@@ -9,11 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root";
+import { Route as LastfmCallbackRouteImport } from "./routes/lastfm-callback";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as ApiRadikoStreamRouteImport } from "./routes/api/radiko/stream";
 import { Route as ApiRadikoAuthRouteImport } from "./routes/api/radiko/auth";
 import { Route as ApiRadikoSplatRouteImport } from "./routes/api/radiko/$";
 
+const LastfmCallbackRoute = LastfmCallbackRouteImport.update({
+  id: "/lastfm-callback",
+  path: "/lastfm-callback",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const IndexRoute = IndexRouteImport.update({
   id: "/",
   path: "/",
@@ -37,12 +43,14 @@ const ApiRadikoSplatRoute = ApiRadikoSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
+  "/lastfm-callback": typeof LastfmCallbackRoute;
   "/api/radiko/$": typeof ApiRadikoSplatRoute;
   "/api/radiko/auth": typeof ApiRadikoAuthRoute;
   "/api/radiko/stream": typeof ApiRadikoStreamRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
+  "/lastfm-callback": typeof LastfmCallbackRoute;
   "/api/radiko/$": typeof ApiRadikoSplatRoute;
   "/api/radiko/auth": typeof ApiRadikoAuthRoute;
   "/api/radiko/stream": typeof ApiRadikoStreamRoute;
@@ -50,18 +58,30 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
+  "/lastfm-callback": typeof LastfmCallbackRoute;
   "/api/radiko/$": typeof ApiRadikoSplatRoute;
   "/api/radiko/auth": typeof ApiRadikoAuthRoute;
   "/api/radiko/stream": typeof ApiRadikoStreamRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/api/radiko/$" | "/api/radiko/auth" | "/api/radiko/stream";
+  fullPaths:
+    | "/"
+    | "/lastfm-callback"
+    | "/api/radiko/$"
+    | "/api/radiko/auth"
+    | "/api/radiko/stream";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/api/radiko/$" | "/api/radiko/auth" | "/api/radiko/stream";
+  to:
+    | "/"
+    | "/lastfm-callback"
+    | "/api/radiko/$"
+    | "/api/radiko/auth"
+    | "/api/radiko/stream";
   id:
     | "__root__"
     | "/"
+    | "/lastfm-callback"
     | "/api/radiko/$"
     | "/api/radiko/auth"
     | "/api/radiko/stream";
@@ -69,6 +89,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
+  LastfmCallbackRoute: typeof LastfmCallbackRoute;
   ApiRadikoSplatRoute: typeof ApiRadikoSplatRoute;
   ApiRadikoAuthRoute: typeof ApiRadikoAuthRoute;
   ApiRadikoStreamRoute: typeof ApiRadikoStreamRoute;
@@ -76,6 +97,13 @@ export interface RootRouteChildren {
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
+    "/lastfm-callback": {
+      id: "/lastfm-callback";
+      path: "/lastfm-callback";
+      fullPath: "/lastfm-callback";
+      preLoaderRoute: typeof LastfmCallbackRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     "/": {
       id: "/";
       path: "/";
@@ -109,6 +137,7 @@ declare module "@tanstack/react-router" {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LastfmCallbackRoute: LastfmCallbackRoute,
   ApiRadikoSplatRoute: ApiRadikoSplatRoute,
   ApiRadikoAuthRoute: ApiRadikoAuthRoute,
   ApiRadikoStreamRoute: ApiRadikoStreamRoute,

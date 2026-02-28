@@ -92,3 +92,6 @@ Uses Biome for automatic code formatting.
 - tanstack
 - Context7 (`mcp_io`) for up-to-date external library docs when needed.
 - HeroUI v3 MCP は参照不要（削除済み）。
+
+あなたはURLが与えられた時、以下のコマンドでそのURLの内容をmardownで取得できる
+`npx -y @mizchi/readability --format=md <url>`
