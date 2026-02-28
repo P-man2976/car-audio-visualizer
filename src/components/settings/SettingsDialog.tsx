@@ -10,7 +10,6 @@ import { useAtom } from "jotai";
 import { LogOut } from "lucide-react";
 import { type KeyboardEvent, useCallback, useState } from "react";
 import { lastfmSessionAtom } from "../../atoms/lastfm";
-import { getSession } from "../../lib/lastfm";
 import {
 	type HotkeyAction,
 	HOTKEY_ACTION_LABELS,
@@ -30,33 +29,37 @@ export function SettingsDialog() {
 	const [lastfmSession, setLastfmSession] = useAtom(lastfmSessionAtom);
 	const [lastfmConnecting, setLastfmConnecting] = useState(false);
 
-	// Last.fm OAuth: popup からの postMessage を受信してセッションを取得する
-	const connectLastfm = useCallback(async () => {
+	// Last.fm OAuth: ポップアップ or 同一タブリダイレクトで認証する
+	const connectLastfm = useCallback(() => {
 		const callbackUrl = `${window.location.origin}/lastfm-callback`;
-		const authUrl = `https://last.fm/api/auth?${new URLSearchParams({
+		const authUrl = `https://www.last.fm/api/auth/?${new URLSearchParams({
 			api_key: import.meta.env.VITE_LASTFM_APIKEY,
 			cb: callbackUrl,
 		})}`;
+
+		// ポップアップを試みる（ブロックされた場合は null）
 		const popup = window.open(authUrl, "lastfm-auth", "width=600,height=700");
-		if (!popup) return;
+		if (!popup) {
+			// ポップアップがブロックされた → 同一タブでリダイレクト
+			window.location.href = authUrl;
+			return;
+		}
 		setLastfmConnecting(true);
 
-		const handler = async (e: MessageEvent) => {
+		let pollClosed: ReturnType<typeof setInterval>;
+
+		const handler = (e: MessageEvent) => {
 			if (e.origin !== window.location.origin) return;
-			if (!e.data || e.data.type !== "lastfm-token" || !e.data.token) return;
+			if (!e.data || e.data.type !== "lastfm-session" || !e.data.session) return;
 			window.removeEventListener("message", handler);
-			try {
-				const session = await getSession(e.data.token as string);
-				setLastfmSession(session);
-			} catch (err) {
-				console.error("[lastfm] getSession failed:", err);
-			} finally {
-				setLastfmConnecting(false);
-			}
+			clearInterval(pollClosed);
+			setLastfmSession(e.data.session as LastfmSession);
+			setLastfmConnecting(false);
 		};
 		window.addEventListener("message", handler);
+
 		// popup が閉じられたら後片付け
-		const pollClosed = setInterval(() => {
+		pollClosed = setInterval(() => {
 			if (popup.closed) {
 				clearInterval(pollClosed);
 				window.removeEventListener("message", handler);
