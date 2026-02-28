@@ -27,7 +27,7 @@ export function ControlsOverlay() {
 	const [shuffle, setShuffle] = useAtom(shuffleAtom);
 	const [repeat, setRepeat] = useAtom(repeatModeAtom);
 
-	const { isPlaying, play, pause, stop, next, prev } = usePlayer();
+	const { isPlaying, play, pause, next, prev } = usePlayer();
 	const { playRadio, stopRadio, tune } = useRadioPlayer();
 	useFilePlayer();
 	const { isPiP, enterPiP, exitPiP, isSupported: isPiPSupported } = usePiP();
@@ -140,7 +140,7 @@ export function ControlsOverlay() {
 							<Button
 								size="icon-lg"
 								variant="ghost"
-								className={`p-2 ${shuffle ? "text-primary" : ""}`}
+								className={`p-2 transition-opacity ${shuffle ? "" : "opacity-30"}`}
 								onClick={() => setShuffle((v) => !v)}
 							>
 								<Shuffle />
@@ -183,18 +183,12 @@ export function ControlsOverlay() {
 								<Plus />
 							</Button>
 						)}
-						{/* ファイルのみ停止ボタンを表示 */}
-						{currentSrc === "file" && (
-							<Button size="icon-lg" variant="ghost" className="p-2" onClick={stop}>
-								<Square />
-							</Button>
-						)}
 						{/* リピート (ファイルのみ) */}
 						{currentSrc === "file" && (
 							<Button
 								size="icon-lg"
 								variant="ghost"
-								className={`p-2 ${repeat !== "off" ? "text-primary" : ""}`}
+								className={`p-2 transition-opacity ${repeat !== "off" ? "" : "opacity-30"}`}
 								onClick={() =>
 									setRepeat((r: RepeatMode) =>
 										r === "off" ? "one" : r === "one" ? "all" : "off",
