@@ -15,6 +15,7 @@ import { QueueSheet } from "./QueueSheet";
 import { ProgressSlider } from "./player/ProgressSlider";
 import { SongInfo } from "./player/SongInfo";
 import { SourceSheet } from "./SourceSheet";
+import { SettingsDialog } from "./settings/SettingsDialog";
 
 export function ControlsOverlay() {
 	const currentSrc = useAtomValue(currentSrcAtom);
@@ -65,7 +66,9 @@ export function ControlsOverlay() {
 	useMediaSession({ title, artist, album, artwork: coverSrc ?? currentRadio?.logo });
 
 	return (
-		<div className="absolute inset-0 flex w-full flex-col gap-2">
+		<>
+			<SettingsDialog />
+			<div className="absolute inset-0 flex w-full flex-col gap-2">
 			{/* Header */}
 			<div className="group relative flex flex-col justify-center">
 				<div className="absolute inset-0 bg-linear-to-b from-gray-600/50 to-transparent opacity-50 transition-all duration-500 group-hover:opacity-100" />
@@ -172,5 +175,6 @@ export function ControlsOverlay() {
 				</div>
 			</div>
 		</div>
+		</>
 	);
 }

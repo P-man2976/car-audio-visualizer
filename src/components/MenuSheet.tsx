@@ -1,14 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { Settings, Volume2 } from "lucide-react";
 import { type ReactNode } from "react";
+import { settingsOpenAtom } from "../atoms/hotkeys";
 import { volumeAtom } from "../atoms/player";
-import { SettingsDialog } from "./settings/SettingsDialog";
 
 export function MenuSheet({ children }: { children: ReactNode }) {
 	const [volume, setVolume] = useAtom(volumeAtom);
+	const setSettingsOpen = useSetAtom(settingsOpenAtom);
 
 	return (
 		<Sheet>
@@ -26,11 +27,14 @@ export function MenuSheet({ children }: { children: ReactNode }) {
 							}}
 						/>
 						<Volume2 className="size-5 text-muted-foreground" />
-						<SettingsDialog>
-							<Button size="icon" variant="ghost">
-								<Settings />
-							</Button>
-						</SettingsDialog>
+						<Button
+							size="icon"
+							variant="ghost"
+							onClick={() => setSettingsOpen(true)}
+							aria-label="設定"
+						>
+							<Settings />
+						</Button>
 					</div>
 				</div>
 			</SheetContent>

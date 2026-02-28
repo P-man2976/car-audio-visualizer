@@ -1,7 +1,7 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useHotkeys } from "react-hotkeys-hook";
 import { audioElementAtom } from "../atoms/audio";
-import { hotkeyBindingsAtom } from "../atoms/hotkeys";
+import { hotkeyBindingsAtom, settingsOpenAtom } from "../atoms/hotkeys";
 import { currentSrcAtom, isPlayingAtom, muteAtom, volumeAtom } from "../atoms/player";
 import { getDisplayMediaConstraints } from "../lib/aux-media";
 import { useMediaStream } from "./mediastream";
@@ -29,9 +29,21 @@ export function useAppHotkeys(opts: AppHotkeysOptions = {}) {
 	const [, setVolume] = useAtom(volumeAtom);
 	const [mute, setMute] = useAtom(muteAtom);
 	const setCurrentSrc = useSetAtom(currentSrcAtom);
+	const [settingsOpen, setSettingsOpen] = useAtom(settingsOpenAtom);
 	const { play, pause, stop, next, prev } = usePlayer();
 	const { playRadio, stopRadio, tune } = useRadioPlayer();
 	const { connect, disconnect } = useMediaStream();
+
+	/** 設定ダイアログが開いている間は再生操作系を無効化 */
+	const enabled = !settingsOpen;
+
+	// ─── 設定を開く（/ キー） ─────────────────────────────────────
+	useHotkeys(
+		bindings.openSettings,
+		() => setSettingsOpen(true),
+		{ preventDefault: true },
+		[bindings.openSettings, setSettingsOpen],
+	);
 
 	// ─── 再生 / 一時停止（設定キー + K） ──────────────────────────
 	useHotkeys(
@@ -43,8 +55,8 @@ export function useAppHotkeys(opts: AppHotkeysOptions = {}) {
 				isPlaying ? pause() : void play();
 			}
 		},
-		{ preventDefault: true },
-		[bindings.playPause, currentSrc, isPlaying, playRadio, stopRadio, play, pause],
+		{ preventDefault: true, enabled },
+		[bindings.playPause, currentSrc, isPlaying, playRadio, stopRadio, play, pause, enabled],
 	);
 
 	// ─── 停止 ──────────────────────────────────────────────────────
@@ -54,8 +66,8 @@ export function useAppHotkeys(opts: AppHotkeysOptions = {}) {
 			if (currentSrc === "radio") stopRadio();
 			else stop();
 		},
-		{ preventDefault: true },
-		[bindings.stop, currentSrc, stopRadio, stop],
+		{ preventDefault: true, enabled },
+		[bindings.stop, currentSrc, stopRadio, stop, enabled],
 	);
 
 	// ─── 前のトラック / 周波数↓ ────────────────────────────────────
@@ -65,8 +77,8 @@ export function useAppHotkeys(opts: AppHotkeysOptions = {}) {
 			if (currentSrc === "radio") tune(-1);
 			else if (currentSrc === "file") prev();
 		},
-		{ preventDefault: true },
-		[bindings.prevOrTuneDown, currentSrc, tune, prev],
+		{ preventDefault: true, enabled },
+		[bindings.prevOrTuneDown, currentSrc, tune, prev, enabled],
 	);
 
 	// ─── 次のトラック / 周波数↑ ────────────────────────────────────
@@ -76,56 +88,56 @@ export function useAppHotkeys(opts: AppHotkeysOptions = {}) {
 			if (currentSrc === "radio") tune(1);
 			else if (currentSrc === "file") next();
 		},
-		{ preventDefault: true },
-		[bindings.nextOrTuneUp, currentSrc, tune, next],
+		{ preventDefault: true, enabled },
+		[bindings.nextOrTuneUp, currentSrc, tune, next, enabled],
 	);
 
-	// ─── 音量 +5（↑） ─────────────────────────────────────────────
+	// ─── 音量 +5 ──────────────────────────────────────────────────
 	useHotkeys(
-		"arrowup",
+		bindings.volumeUp,
 		() => {
 			setVolume((v) => Math.min(100, v + 5));
-			if (mute) setMute(false); // ミュート中は自動解除
+			if (mute) setMute(false);
 		},
-		{ preventDefault: true },
-		[mute, setVolume, setMute],
+		{ preventDefault: true, enabled },
+		[bindings.volumeUp, mute, setVolume, setMute, enabled],
 	);
 
-	// ─── 音量 -5（↓） ─────────────────────────────────────────────
+	// ─── 音量 -5 ──────────────────────────────────────────────────
 	useHotkeys(
-		"arrowdown",
+		bindings.volumeDown,
 		() => {
 			setVolume((v) => Math.max(0, v - 5));
 		},
-		{ preventDefault: true },
-		[setVolume],
+		{ preventDefault: true, enabled },
+		[bindings.volumeDown, setVolume, enabled],
 	);
 
-	// ─── ミュート切り替え（M） ─────────────────────────────────────
+	// ─── ミュート切り替え ─────────────────────────────────────────
 	useHotkeys(
-		"m",
+		bindings.mute,
 		() => {
 			setMute((prev) => !prev);
 		},
-		{ preventDefault: true },
-		[setMute],
+		{ preventDefault: true, enabled },
+		[bindings.mute, setMute, enabled],
 	);
 
-	// ─── 10秒戻し（J）— ファイルのみ ──────────────────────────────
+	// ─── 10秒戻し — ファイルのみ ───────────────────────────────────
 	useHotkeys(
-		"j",
+		bindings.seekBack,
 		() => {
 			if (currentSrc === "file") {
 				audioElement.currentTime = Math.max(0, audioElement.currentTime - 10);
 			}
 		},
-		{ preventDefault: true },
-		[audioElement, currentSrc],
+		{ preventDefault: true, enabled },
+		[bindings.seekBack, audioElement, currentSrc, enabled],
 	);
 
-	// ─── 10秒送り（L）— ファイルのみ ──────────────────────────────
+	// ─── 10秒送り — ファイルのみ ───────────────────────────────────
 	useHotkeys(
-		"l",
+		bindings.seekForward,
 		() => {
 			if (currentSrc === "file") {
 				audioElement.currentTime = Math.min(
@@ -134,24 +146,24 @@ export function useAppHotkeys(opts: AppHotkeysOptions = {}) {
 				);
 			}
 		},
-		{ preventDefault: true },
-		[audioElement, currentSrc],
+		{ preventDefault: true, enabled },
+		[bindings.seekForward, audioElement, currentSrc, enabled],
 	);
 
-	// ─── PiP 切り替え（I） ────────────────────────────────────────
+	// ─── PiP 切り替え ────────────────────────────────────────────
 	useHotkeys(
-		"i",
+		bindings.togglePiP,
 		() => {
 			if (isPiP) exitPiP?.();
 			else void enterPiP?.();
 		},
-		{ preventDefault: true },
-		[isPiP, enterPiP, exitPiP],
+		{ preventDefault: true, enabled },
+		[bindings.togglePiP, isPiP, enterPiP, exitPiP, enabled],
 	);
 
-	// ─── フルスクリーン切り替え（F） ──────────────────────────────
+	// ─── フルスクリーン切り替え ────────────────────────────────────
 	useHotkeys(
-		"f",
+		bindings.toggleFullscreen,
 		() => {
 			if (!document.fullscreenElement) {
 				document.documentElement.requestFullscreen().catch(console.error);
@@ -159,55 +171,55 @@ export function useAppHotkeys(opts: AppHotkeysOptions = {}) {
 				document.exitFullscreen().catch(console.error);
 			}
 		},
-		{ preventDefault: true },
-		[],
+		{ preventDefault: true, enabled },
+		[bindings.toggleFullscreen, enabled],
 	);
 
-	// ─── ファイルモード（E） ───────────────────────────────────────
+	// ─── ファイルモード ───────────────────────────────────────────
 	useHotkeys(
-		"e",
+		bindings.modeFile,
 		() => {
 			if (currentSrc === "aux") disconnect();
 			setCurrentSrc("file");
 		},
-		{ preventDefault: true },
-		[currentSrc, disconnect, setCurrentSrc],
+		{ preventDefault: true, enabled },
+		[bindings.modeFile, currentSrc, disconnect, setCurrentSrc, enabled],
 	);
 
-	// ─── ラジオモード（R） ────────────────────────────────────────
+	// ─── ラジオモード ─────────────────────────────────────────────
 	useHotkeys(
-		"r",
+		bindings.modeRadio,
 		() => {
 			if (currentSrc === "aux") disconnect();
 			setCurrentSrc("radio");
 		},
-		{ preventDefault: true },
-		[currentSrc, disconnect, setCurrentSrc],
+		{ preventDefault: true, enabled },
+		[bindings.modeRadio, currentSrc, disconnect, setCurrentSrc, enabled],
 	);
 
-	// ─── 画面共有モード（T） ───────────────────────────────────────
+	// ─── 画面共有モード ───────────────────────────────────────────
 	useHotkeys(
-		"t",
+		bindings.modeScreen,
 		() => {
 			navigator.mediaDevices
 				.getDisplayMedia(getDisplayMediaConstraints())
 				.then((stream) => connect(stream))
 				.catch(console.error);
 		},
-		{ preventDefault: true },
-		[connect],
+		{ preventDefault: true, enabled },
+		[bindings.modeScreen, connect, enabled],
 	);
 
-	// ─── 外部入力 / マイク（Y） ────────────────────────────────────
+	// ─── 外部入力 / マイクモード ───────────────────────────────────
 	useHotkeys(
-		"y",
+		bindings.modeAux,
 		() => {
 			navigator.mediaDevices
 				.getUserMedia({ audio: true, video: false })
 				.then((stream) => connect(stream))
 				.catch(console.error);
 		},
-		{ preventDefault: true },
-		[connect],
+		{ preventDefault: true, enabled },
+		[bindings.modeAux, connect, enabled],
 	);
 }
