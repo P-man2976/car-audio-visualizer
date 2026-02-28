@@ -1,14 +1,25 @@
 import { cn } from "@/lib/utils";
 import { useRef } from "react";
 
-export function SongInfo({ title, artist, album }: { title?: string; artist?: string; album?: string }) {
+export function SongInfo({
+	title,
+	artist,
+	album,
+}: {
+	title?: string;
+	artist?: string;
+	album?: string;
+}) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const titleRef = useRef<HTMLHeadingElement>(null);
 	const albumRef = useRef<HTMLSpanElement>(null);
 	const artistRef = useRef<HTMLSpanElement>(null);
 
 	return (
-		<div ref={containerRef} className="flex w-full grow-0 flex-col gap-1 overflow-hidden">
+		<div
+			ref={containerRef}
+			className="flex w-full grow-0 flex-col gap-1 overflow-hidden"
+		>
 			<h2
 				ref={titleRef}
 				className={cn("w-fit whitespace-nowrap text-xl", {

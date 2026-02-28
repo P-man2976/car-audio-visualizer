@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { getDisplayMediaConstraints, getInputDeviceLabel, getUserMediaConstraints } from "./aux-media";
+import {
+	getDisplayMediaConstraints,
+	getInputDeviceLabel,
+	getUserMediaConstraints,
+} from "./aux-media";
 
 describe("aux media helpers", () => {
 	it("creates display media constraints with audio tuning", () => {

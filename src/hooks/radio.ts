@@ -1,12 +1,15 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { audioElementAtom } from "../atoms/audio";
-import { currentSrcAtom, isPlayingAtom, queueAtom } from "../atoms/player";
-import { currentRadioAtom, customFrequencyAreaAtom, tuningFreqAtom } from "../atoms/radio";
+import { currentSrcAtom, queueAtom } from "@/atoms/player";
+import {
+	currentRadioAtom,
+	customFrequencyAreaAtom,
+	tuningFreqAtom,
+} from "@/atoms/radio";
 import { useHLS } from "./hls";
-import { useRadikoM3u8Url, useRadikoStationList } from "../services/radiko";
-import { useRadioFrequencies } from "../services/radio";
-import type { Radio } from "../types/radio";
+import { useRadikoM3u8Url, useRadikoStationList } from "@/services/radiko";
+import { useRadioFrequencies } from "@/services/radio";
+import type { Radio } from "@/types/radio";
 
 /** FM バンド周波数範囲 (MHz) — 76〜99 MHz (ワイドFM含む日本の FM バンド全域) */
 const FM_MIN = 76.0;
@@ -57,10 +60,8 @@ export function useSelectRadio() {
  * tuningFreqAtom への書き込みを担う。
  */
 export function useRadioPlayer() {
-	const audioElement = useAtomValue(audioElementAtom);
 	const currentSrc = useAtomValue(currentSrcAtom);
 	const currentRadio = useAtomValue(currentRadioAtom);
-	const setIsPlaying = useSetAtom(isPlayingAtom);
 	const setTuningFreq = useSetAtom(tuningFreqAtom);
 	const customFreqList = useAtomValue(customFrequencyAreaAtom);
 	const { load, unLoad } = useHLS();
@@ -72,17 +73,11 @@ export function useRadioPlayer() {
 	const tuningTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const animFreqRef = useRef<number>(0);
 
-	// ラジオ以外のモードへ切り替わったら HLS を即停止
+	// ラジオ以外のモードへ切り替わったら HLS を即停止して選局アニメーションをキャンセル
 	// file モードも含む（SourceBuffer が残るとファイル再生と競合するため）
 	useEffect(() => {
 		if (currentSrc !== "radio") {
 			unLoad();
-		}
-	}, [currentSrc, unLoad]);
-
-	// ラジオ以外のモードに切り替わったら選局アニメーションをキャンセル
-	useEffect(() => {
-		if (currentSrc !== "radio") {
 			if (tuningTimerRef.current) {
 				clearInterval(tuningTimerRef.current);
 				tuningTimerRef.current = null;
@@ -90,7 +85,7 @@ export function useRadioPlayer() {
 			animFreqRef.current = 0;
 			setTuningFreq(null);
 		}
-	}, [currentSrc, setTuningFreq]);
+	}, [currentSrc, unLoad, setTuningFreq]);
 
 	// アンマウント時のクリーンアップ
 	useEffect(() => {
@@ -199,9 +194,7 @@ export function useRadioPlayer() {
 	/** HLS をアンロードして停止 */
 	const stopRadio = useCallback(() => {
 		unLoad();
-		audioElement.pause();
-		setIsPlaying(false);
-	}, [unLoad, audioElement, setIsPlaying]);
+	}, [unLoad]);
 
 	/**
 	 * 選局アニメーション (+1 = 周波数↑, -1 = 周波数↓)
@@ -233,7 +226,9 @@ export function useRadioPlayer() {
 				target = stations.find((s) => s.freq > baseFreq + step * 0.4);
 				if (!target) target = stations[0]; // バンド最上部で折り返し
 			} else {
-				target = [...stations].reverse().find((s) => s.freq < baseFreq - step * 0.4);
+				target = [...stations]
+					.reverse()
+					.find((s) => s.freq < baseFreq - step * 0.4);
 				if (!target) target = stations[stations.length - 1]; // バンド最下部で折り返し
 			}
 			if (!target) return;
@@ -271,7 +266,7 @@ export function useRadioPlayer() {
 					tuningTimerRef.current = null;
 					animFreqRef.current = 0;
 					setTuningFreq(null);
-						selectRadio(targetStation);
+					selectRadio(targetStation);
 				} else {
 					// バンド端での折り返しを考慮した現在周波数を算出
 					let curr = baseFreq + direction * distanceTraveled;
@@ -286,7 +281,14 @@ export function useRadioPlayer() {
 				}
 			}, 100);
 		},
-		[currentRadio, currentSrc, tunableStations, unLoad, selectRadio, setTuningFreq],
+		[
+			currentRadio,
+			currentSrc,
+			tunableStations,
+			unLoad,
+			selectRadio,
+			setTuningFreq,
+		],
 	);
 
 	return { playRadio, stopRadio, tune };

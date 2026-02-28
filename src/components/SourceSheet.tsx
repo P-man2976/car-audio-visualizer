@@ -4,12 +4,12 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAtom } from "jotai";
 import { type ReactNode } from "react";
-import { mediaStreamAtom } from "../atoms/audio";
-import { currentSrcAtom } from "../atoms/player";
-import { radioStationSizeAtom } from "../atoms/radio";
-import { useMediaStream } from "../hooks/mediastream";
-import { useRadikoStationList } from "../services/radiko";
-import { useRadiruStationList } from "../services/radiru";
+import { mediaStreamAtom } from "@/atoms/audio";
+import { currentSrcAtom } from "@/atoms/player";
+import { radioStationSizeAtom } from "@/atoms/radio";
+import { useMediaStream } from "@/hooks/mediastream";
+import { useRadikoStationList } from "@/services/radiko";
+import { useRadiruStationList } from "@/services/radiru";
 import { DisconnectInput } from "./source/DisconnectInput";
 import { ExternalInput } from "./source/ExternalInput";
 import { RadioStation } from "./source/RadioStation";
@@ -50,15 +50,15 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 					<TabsContent className="py-4" value="file">
 						<div className="flex w-full flex-col gap-3">
 							<FilePicker />
-						{"showDirectoryPicker" in window && (
-							<ExplorerDialog>
-								<Button className="w-full">
-									組み込みのエクスプローラーから読み込み
-								</Button>
-							</ExplorerDialog>
-						)}
-					</div>
-				</TabsContent>
+							{"showDirectoryPicker" in window && (
+								<ExplorerDialog>
+									<Button className="w-full">
+										組み込みのエクスプローラーから読み込み
+									</Button>
+								</ExplorerDialog>
+							)}
+						</div>
+					</TabsContent>
 
 					<TabsContent value="radio">
 						<div className="flex flex-col gap-4 py-4">
@@ -66,7 +66,9 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 								<h4 className="text-lg">Radiko</h4>
 								<Button
 									size="icon"
-									onClick={() => setRadioStationSize((size) => (size === "lg" ? "sm" : "lg"))}
+									onClick={() =>
+										setRadioStationSize((size) => (size === "lg" ? "sm" : "lg"))
+									}
 								>
 									{radioStationSize === "lg" ? <LayoutGrid /> : <LayoutList />}
 								</Button>
@@ -76,7 +78,7 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 									"grid gap-4",
 									radioStationSize === "lg"
 										? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
-										: "grid-cols-[repeat(auto-fit,minmax(100px,1fr))]"
+										: "grid-cols-[repeat(auto-fit,minmax(100px,1fr))]",
 								)}
 							>
 								{radikoStationList?.map((station) => (
@@ -110,4 +112,3 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 		</Sheet>
 	);
 }
-

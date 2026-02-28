@@ -30,7 +30,9 @@ async function fileToSong(file: File): Promise<Song> {
 		duration,
 		artwork: picture?.[0]
 			? URL.createObjectURL(
-					new Blob([new Uint8Array(picture[0].data)], { type: picture[0].format }),
+					new Blob([new Uint8Array(picture[0].data)], {
+						type: picture[0].format,
+					}),
 				)
 			: undefined,
 	};

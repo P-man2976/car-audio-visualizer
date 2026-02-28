@@ -8,4 +8,3 @@ export const lastfmSessionAtom = atomWithStorage<LastfmSession | null>(
 	LASTFM_SESSION_STORAGE_KEY,
 	null,
 );
-

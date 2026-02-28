@@ -28,8 +28,12 @@ export function buildDisplayString(
 
 	if (source === "file") {
 		const track = (song?.track?.no?.toString() ?? "--").padStart(2, "0");
-		const min = Math.floor(progress / 60).toString().padStart(1, "0");
-		const sec = Math.floor(progress % 60).toString().padStart(2, "0");
+		const min = Math.floor(progress / 60)
+			.toString()
+			.padStart(1, "0");
+		const sec = Math.floor(progress % 60)
+			.toString()
+			.padStart(2, "0");
 		return `CD-${track}${`${min}:${sec}`.padStart(7, " ")}`;
 	}
 

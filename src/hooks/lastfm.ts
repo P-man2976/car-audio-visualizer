@@ -1,8 +1,8 @@
 import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useRef } from "react";
-import { currentSrcAtom, currentSongAtom, isPlayingAtom } from "../atoms/player";
-import { lastfmSessionAtom } from "../atoms/lastfm";
-import { updateNowPlaying, scrobble } from "../lib/lastfm";
+import { currentSrcAtom, currentSongAtom, isPlayingAtom } from "@/atoms/player";
+import { lastfmSessionAtom } from "@/atoms/lastfm";
+import { updateNowPlaying, scrobble } from "@/lib/lastfm";
 
 /**
  * Last.fm スクロブリングを担うフック。
@@ -52,7 +52,10 @@ export function useLastfmScrobble() {
 
 		// スクロブルタイマーを設定（30秒 or 曲の 50%、最大 4 分）
 		const scrobbleAfterMs = (() => {
-			const half = currentSong.duration != null ? (currentSong.duration / 2) * 1000 : Infinity;
+			const half =
+				currentSong.duration != null
+					? (currentSong.duration / 2) * 1000
+					: Infinity;
 			const max = 4 * 60 * 1000;
 			const min = 30 * 1000;
 			return Math.max(min, Math.min(half, max));

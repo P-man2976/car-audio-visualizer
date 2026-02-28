@@ -1,9 +1,9 @@
 import Hls from "hls.js";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback } from "react";
-import { audioElementAtom, audioMotionAnalyzerAtom } from "../atoms/audio";
-import { hlsAtom } from "../atoms/hls";
-import { isPlayingAtom } from "../atoms/player";
+import { audioElementAtom, audioMotionAnalyzerAtom } from "@/atoms/audio";
+import { hlsAtom } from "@/atoms/hls";
+import { isPlayingAtom } from "@/atoms/player";
 
 export function useHLS() {
 	const [hls, setHls] = useAtom(hlsAtom);

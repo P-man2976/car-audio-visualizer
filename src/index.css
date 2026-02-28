@@ -132,17 +132,17 @@
 }
 
 @layer base {
-  * {
-    @apply border-border select-none;
-    scrollbar-width: thin;
-    scrollbar-color: #ffffff40 transparent;
-    font-smooth: never;
-  }
-  html,
-  body {
-    @apply bg-transparent text-white overflow-hidden;
-  }
-  #root {
-    @apply bg-[#060109] h-dvh relative;
-  }
+	* {
+		@apply border-border select-none;
+		scrollbar-width: thin;
+		scrollbar-color: #ffffff40 transparent;
+		font-smooth: never;
+	}
+	html,
+	body {
+		@apply bg-transparent text-white overflow-hidden;
+	}
+	#root {
+		@apply bg-[#060109] h-dvh relative;
+	}
 }

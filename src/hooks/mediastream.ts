@@ -1,6 +1,6 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { audioMotionAnalyzerAtom, mediaStreamAtom } from "../atoms/audio";
-import { currentSrcAtom, isPlayingAtom } from "../atoms/player";
+import { audioMotionAnalyzerAtom, mediaStreamAtom } from "@/atoms/audio";
+import { currentSrcAtom, isPlayingAtom } from "@/atoms/player";
 
 /**
  * AUX 接続時に追加した gainNode の参照。

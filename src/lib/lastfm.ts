@@ -29,7 +29,8 @@ export async function getSession(token: string): Promise<LastfmSession> {
 	const res = await fetch(`${API_URL}?${query}`);
 	if (!res.ok) throw new Error(`Last.fm auth.getSession failed: ${res.status}`);
 	const data = await res.json();
-	if (data.error) throw new Error(`Last.fm error ${data.error}: ${data.message}`);
+	if (data.error)
+		throw new Error(`Last.fm error ${data.error}: ${data.message}`);
 	return data.session as LastfmSession;
 }
 
@@ -62,7 +63,8 @@ export async function updateNowPlaying(
 	body.append("api_sig", api_sig);
 	body.append("format", "json");
 	const res = await fetch(API_URL, { method: "POST", body });
-	if (!res.ok) throw new Error(`Last.fm updateNowPlaying failed: ${res.status}`);
+	if (!res.ok)
+		throw new Error(`Last.fm updateNowPlaying failed: ${res.status}`);
 }
 
 export interface ScrobbleParams {

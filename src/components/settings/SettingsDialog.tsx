@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAtom } from "jotai";
 import { LogOut } from "lucide-react";
 import { type KeyboardEvent, useCallback, useState } from "react";
-import { lastfmSessionAtom } from "../../atoms/lastfm";
+import { lastfmSessionAtom } from "@/atoms/lastfm";
 import {
 	type HotkeyAction,
 	HOTKEY_ACTION_LABELS,
@@ -20,7 +20,7 @@ import {
 	hotkeyBindingsAtom,
 	normalizeKey,
 	settingsOpenAtom,
-} from "../../atoms/hotkeys";
+} from "@/atoms/hotkeys";
 
 export function SettingsDialog() {
 	const [open, setOpen] = useAtom(settingsOpenAtom);
@@ -50,7 +50,8 @@ export function SettingsDialog() {
 
 		const handler = (e: MessageEvent) => {
 			if (e.origin !== window.location.origin) return;
-			if (!e.data || e.data.type !== "lastfm-session" || !e.data.session) return;
+			if (!e.data || e.data.type !== "lastfm-session" || !e.data.session)
+				return;
 			window.removeEventListener("message", handler);
 			clearInterval(pollClosed);
 			setLastfmSession(e.data.session as LastfmSession);
@@ -68,7 +69,10 @@ export function SettingsDialog() {
 		}, 500);
 	}, [setLastfmSession]);
 
-	const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>, action: HotkeyAction) => {
+	const handleKeyDown = (
+		e: KeyboardEvent<HTMLButtonElement>,
+		action: HotkeyAction,
+	) => {
 		e.preventDefault();
 		e.stopPropagation();
 		if (e.key === "Escape") {
@@ -122,7 +126,9 @@ export function SettingsDialog() {
 					{/* キーボードショートカット */}
 					<div className="flex flex-col gap-4">
 						<div className="flex items-center justify-between">
-							<span className="text-sm font-medium">キーボードショートカット</span>
+							<span className="text-sm font-medium">
+								キーボードショートカット
+							</span>
 							<button
 								type="button"
 								className="text-xs text-neutral-400 hover:text-neutral-200 transition-colors"
@@ -142,7 +148,10 @@ export function SettingsDialog() {
 									{section.label}
 								</span>
 								{section.actions.map((action) => (
-									<div key={action} className="flex items-center justify-between py-0.5">
+									<div
+										key={action}
+										className="flex items-center justify-between py-0.5"
+									>
 										<span className="text-sm text-neutral-300">
 											{HOTKEY_ACTION_LABELS[action]}
 										</span>
@@ -150,9 +159,10 @@ export function SettingsDialog() {
 											type="button"
 											className={`
 												min-w-20 rounded px-2 py-1 text-center text-xs font-mono transition-colors border
-												${capturing === action
-													? "border-blue-400 bg-blue-500/20 text-blue-300 animate-pulse"
-													: "border-neutral-600 bg-neutral-800 text-neutral-200 hover:border-neutral-400"
+												${
+													capturing === action
+														? "border-blue-400 bg-blue-500/20 text-blue-300 animate-pulse"
+														: "border-neutral-600 bg-neutral-800 text-neutral-200 hover:border-neutral-400"
 												}
 											`}
 											onClick={() => setCapturing(action)}
@@ -177,4 +187,3 @@ export function SettingsDialog() {
 		</Dialog>
 	);
 }
-

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useMediaStream } from "../../hooks/mediastream";
-import { getInputDeviceLabel, getUserMediaConstraints } from "../../lib/aux-media";
+import { useMediaStream } from "@/hooks/mediastream";
+import { getInputDeviceLabel, getUserMediaConstraints } from "@/lib/aux-media";
 
 export function ExternalInput() {
 	const { connect } = useMediaStream();

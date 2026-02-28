@@ -43,13 +43,17 @@ export const Route = createFileRoute("/api/radiko/auth")({
 
 				if (!authToken) {
 					return new Response(
-						JSON.stringify({ error: "No X-Radiko-AuthToken in auth1 response" }),
+						JSON.stringify({
+							error: "No X-Radiko-AuthToken in auth1 response",
+						}),
 						{ status: 502, headers: { "Content-Type": "application/json" } },
 					);
 				}
 
 				// partialKey を Worker 上で計算
-				const partialKey = btoa(AUTH_KEY.slice(keyOffset, keyOffset + keyLength));
+				const partialKey = btoa(
+					AUTH_KEY.slice(keyOffset, keyOffset + keyLength),
+				);
 
 				// --- auth2 ---
 				const resAuth2 = await fetch(`${RADIKO_BASE}/v2/api/auth2`, {
@@ -71,18 +75,15 @@ export const Route = createFileRoute("/api/radiko/auth")({
 				// auth2 のレスポンスボディは破棄（areaId は request.cf から取得済み）
 				await resAuth2.text();
 
-				return new Response(
-					JSON.stringify({ authToken, areaId }),
-					{
-						status: 200,
-						headers: {
-							"Content-Type": "application/json",
-							"Access-Control-Allow-Origin": "*",
-							// 8分キャッシュ（Radiko トークンの有効期限に合わせる）
-							"Cache-Control": "private, max-age=480",
-						},
+				return new Response(JSON.stringify({ authToken, areaId }), {
+					status: 200,
+					headers: {
+						"Content-Type": "application/json",
+						"Access-Control-Allow-Origin": "*",
+						// 8分キャッシュ（Radiko トークンの有効期限に合わせる）
+						"Cache-Control": "private, max-age=480",
 					},
-				);
+				});
 			},
 		},
 	},

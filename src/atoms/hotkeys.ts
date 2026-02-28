@@ -77,10 +77,20 @@ export const HOTKEY_ACTION_LABELS: Record<HotkeyAction, string> = {
 };
 
 /** グループ分けして設定UIで表示するためのセクション定義 */
-export const HOTKEY_ACTION_SECTIONS: { label: string; actions: HotkeyAction[] }[] = [
+export const HOTKEY_ACTION_SECTIONS: {
+	label: string;
+	actions: HotkeyAction[];
+}[] = [
 	{
 		label: "再生操作",
-		actions: ["playPause", "stop", "seekBack", "seekForward", "prevOrTuneDown", "nextOrTuneUp"],
+		actions: [
+			"playPause",
+			"stop",
+			"seekBack",
+			"seekForward",
+			"prevOrTuneDown",
+			"nextOrTuneUp",
+		],
 	},
 	{
 		label: "音量",

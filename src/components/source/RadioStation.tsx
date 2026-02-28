@@ -11,11 +11,15 @@ import {
 } from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
 import { useAtom, useAtomValue } from "jotai";
-import { currentRadioAtom, customFrequencyAreaAtom, radioStationSizeAtom } from "../../atoms/radio";
-import { currentSrcAtom } from "../../atoms/player";
-import { useSelectRadio } from "../../hooks/radio";
-import { useRadioFrequencies } from "../../services/radio";
-import type { RadikoStation, RadioType } from "../../types/radio";
+import {
+	currentRadioAtom,
+	customFrequencyAreaAtom,
+	radioStationSizeAtom,
+} from "@/atoms/radio";
+import { currentSrcAtom } from "@/atoms/player";
+import { useSelectRadio } from "@/hooks/radio";
+import { useRadioFrequencies } from "@/services/radio";
+import type { RadikoStation, RadioType } from "@/types/radio";
 
 export function RadioStation({ name, id, logo }: RadikoStation) {
 	const [currentRadio, setCurrentRadio] = useAtom(currentRadioAtom);
@@ -37,7 +41,10 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 				: station.frequencies_fm.find((area) => area.primary)?.frequency
 			: undefined);
 
-	const isSelected = currentSrc === "radio" && currentRadio?.source === "radiko" && currentRadio.id === id;
+	const isSelected =
+		currentSrc === "radio" &&
+		currentRadio?.source === "radiko" &&
+		currentRadio.id === id;
 
 	return (
 		<ContextMenu>
@@ -46,10 +53,17 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 					variant="ghost"
 					className={cn(
 						"flex justify-start h-full gap-2 p-2 rounded-lg cursor-pointer hover:bg-gray-500/50 transition-all group",
-						isSelected && "bg-gray-500/30 border"
+						isSelected && "bg-gray-500/30 border",
 					)}
 					onClick={() => {
-						selectRadio({ type, source: "radiko", id, name, logo: logo?.[0], frequency });
+						selectRadio({
+							type,
+							source: "radiko",
+							id,
+							name,
+							logo: logo?.[0],
+							frequency,
+						});
 					}}
 				>
 					<div
@@ -58,7 +72,7 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 							size === "lg" && "w-24",
 							isSelected
 								? "bg-gray-300"
-								: "bg-gray-500/50 group-hover:bg-gray-400/50"
+								: "bg-gray-500/50 group-hover:bg-gray-400/50",
 						)}
 					>
 						{logo?.[0] ? (
@@ -71,7 +85,8 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 						<div className="flex flex-col items-start">
 							{frequency != null && (
 								<span className="text-gray-300 text-sm">
-									{frequency}{type === "AM" ? "kHz" : "MHz"}
+									{frequency}
+									{type === "AM" ? "kHz" : "MHz"}
 								</span>
 							)}
 							<span className="text-lg">{name}</span>
@@ -93,11 +108,13 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 												...stations.filter((s) => s.id !== id),
 												{ id, type: newType, freq: Number(freq) },
 											]
-										: [...stations, { id, type: newType, freq: Number(freq) }]
+										: [...stations, { id, type: newType, freq: Number(freq) }],
 								);
 								if (isSelected) {
 									setCurrentRadio((prev) =>
-										prev ? { ...prev, type: newType, frequency: Number(freq) } : prev
+										prev
+											? { ...prev, type: newType, frequency: Number(freq) }
+											: prev,
 									);
 								}
 							}}

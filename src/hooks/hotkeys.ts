@@ -1,9 +1,14 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useHotkeys } from "react-hotkeys-hook";
-import { audioElementAtom } from "../atoms/audio";
-import { hotkeyBindingsAtom, settingsOpenAtom } from "../atoms/hotkeys";
-import { currentSrcAtom, isPlayingAtom, muteAtom, volumeAtom } from "../atoms/player";
-import { getDisplayMediaConstraints } from "../lib/aux-media";
+import { audioElementAtom } from "@/atoms/audio";
+import { hotkeyBindingsAtom, settingsOpenAtom } from "@/atoms/hotkeys";
+import {
+	currentSrcAtom,
+	isPlayingAtom,
+	muteAtom,
+	volumeAtom,
+} from "@/atoms/player";
+import { getDisplayMediaConstraints } from "@/lib/aux-media";
 import { useMediaStream } from "./mediastream";
 import { usePlayer } from "./player";
 import { useRadioPlayer } from "./radio";
@@ -56,7 +61,16 @@ export function useAppHotkeys(opts: AppHotkeysOptions = {}) {
 			}
 		},
 		{ preventDefault: true, enabled },
-		[bindings.playPause, currentSrc, isPlaying, playRadio, stopRadio, play, pause, enabled],
+		[
+			bindings.playPause,
+			currentSrc,
+			isPlaying,
+			playRadio,
+			stopRadio,
+			play,
+			pause,
+			enabled,
+		],
 	);
 
 	// ─── 停止 ──────────────────────────────────────────────────────

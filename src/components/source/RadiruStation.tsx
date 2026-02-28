@@ -1,9 +1,12 @@
 import { cn } from "@/lib/utils";
 import { useAtomValue } from "jotai";
-import { currentRadioAtom } from "../../atoms/radio";
-import { currentSrcAtom } from "../../atoms/player";
-import { useSelectRadio } from "../../hooks/radio";
-import type { RadiruStation as RadiruStationType, RadioType } from "../../types/radio";
+import { currentRadioAtom } from "@/atoms/radio";
+import { currentSrcAtom } from "@/atoms/player";
+import { useSelectRadio } from "@/hooks/radio";
+import type {
+	RadiruStation as RadiruStationType,
+	RadioType,
+} from "@/types/radio";
 
 type RadiruChannel = {
 	areajp: string;
@@ -13,7 +16,12 @@ type RadiruChannel = {
 	url: string;
 };
 
-export function RadiruStation({ areajp, fmhls, r1hls, r2hls }: RadiruStationType) {
+export function RadiruStation({
+	areajp,
+	fmhls,
+	r1hls,
+	r2hls,
+}: RadiruStationType) {
 	const channels: RadiruChannel[] = [
 		{ areajp, type: "AM", label: "第一", name: "ラジオ第一", url: r1hls },
 		{ areajp, type: "AM", label: "第二", name: "ラジオ第二", url: r2hls },
@@ -23,7 +31,10 @@ export function RadiruStation({ areajp, fmhls, r1hls, r2hls }: RadiruStationType
 	return (
 		<div className="grid grid-cols-3 gap-2">
 			{channels.map((channel) => (
-				<RadiruChannelCard key={`${channel.name}-${channel.url}`} {...channel} />
+				<RadiruChannelCard
+					key={`${channel.name}-${channel.url}`}
+					{...channel}
+				/>
 			))}
 		</div>
 	);
@@ -33,7 +44,10 @@ function RadiruChannelCard({ areajp, type, label, name, url }: RadiruChannel) {
 	const currentRadio = useAtomValue(currentRadioAtom);
 	const currentSrc = useAtomValue(currentSrcAtom);
 	const selectRadio = useSelectRadio();
-	const isSelected = currentSrc === "radio" && currentRadio?.source === "radiru" && currentRadio.url === url;
+	const isSelected =
+		currentSrc === "radio" &&
+		currentRadio?.source === "radiru" &&
+		currentRadio.url === url;
 
 	return (
 		<button

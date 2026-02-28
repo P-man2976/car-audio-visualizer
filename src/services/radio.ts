@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { FrequencyList } from "../types/radio";
+import type { FrequencyList } from "@/types/radio";
 
 export function useRadioFrequencies() {
 	return useQuery({

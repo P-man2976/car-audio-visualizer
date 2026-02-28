@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useSetAtom } from "jotai";
-import { currentSrcAtom } from "../../atoms/player";
-import { useMediaStream } from "../../hooks/mediastream";
+import { currentSrcAtom } from "@/atoms/player";
+import { useMediaStream } from "@/hooks/mediastream";
 
 export function DisconnectInput() {
 	const { disconnect } = useMediaStream();

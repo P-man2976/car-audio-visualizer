@@ -8,7 +8,7 @@ import { defineConfig } from "vite";
 // https://vite.dev/config/
 export default defineConfig({
 	plugins: [
-    tsConfigPaths(),
+		tsConfigPaths(),
 		cloudflare({ viteEnvironment: { name: "ssr" } }),
 		tanstackStart(),
 		react({

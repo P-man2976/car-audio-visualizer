@@ -44,12 +44,16 @@ export const Route = createFileRoute("/api/radiko/stream")({
 
 				if (!authToken) {
 					return new Response(
-						JSON.stringify({ error: "No X-Radiko-AuthToken in auth1 response" }),
+						JSON.stringify({
+							error: "No X-Radiko-AuthToken in auth1 response",
+						}),
 						{ status: 502, headers: { "Content-Type": "application/json" } },
 					);
 				}
 
-				const partialKey = btoa(AUTH_KEY.slice(keyOffset, keyOffset + keyLength));
+				const partialKey = btoa(
+					AUTH_KEY.slice(keyOffset, keyOffset + keyLength),
+				);
 
 				// --- auth2 ---
 				const resAuth2 = await fetch(`${RADIKO_BASE}/v2/api/auth2`, {
@@ -82,7 +86,10 @@ export const Route = createFileRoute("/api/radiko/stream")({
 
 				if (!resPlaylist.ok) {
 					return new Response(
-						JSON.stringify({ error: "Playlist fetch failed", status: resPlaylist.status }),
+						JSON.stringify({
+							error: "Playlist fetch failed",
+							status: resPlaylist.status,
+						}),
 						{ status: 502, headers: { "Content-Type": "application/json" } },
 					);
 				}
@@ -102,16 +109,13 @@ export const Route = createFileRoute("/api/radiko/stream")({
 					);
 				}
 
-				return new Response(
-					JSON.stringify({ streamUri }),
-					{
-						status: 200,
-						headers: {
-							"Content-Type": "application/json",
-							"Access-Control-Allow-Origin": "*",
-						},
+				return new Response(JSON.stringify({ streamUri }), {
+					status: 200,
+					headers: {
+						"Content-Type": "application/json",
+						"Access-Control-Allow-Origin": "*",
 					},
-				);
+				});
 			},
 		},
 	},

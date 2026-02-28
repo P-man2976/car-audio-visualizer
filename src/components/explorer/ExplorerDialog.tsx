@@ -60,7 +60,9 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 	const fallbackInputRef = useRef<HTMLInputElement>(null);
 
 	const handleSelectRoot = async () => {
-		const handle = await showDirectoryPicker({ mode: "read" }).catch(() => null);
+		const handle = await showDirectoryPicker({ mode: "read" }).catch(
+			() => null,
+		);
 		if (!handle) return;
 		// Reset navigation to new root
 		push(handle);
@@ -73,9 +75,7 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 		const results: FileSystemFileHandle[] = [];
 		for (const handle of files) {
 			if (handle.kind === "directory") {
-				const sub = await collectFromDir(
-					handle as FileSystemDirectoryHandle,
-				);
+				const sub = await collectFromDir(handle as FileSystemDirectoryHandle);
 				results.push(...sub);
 			} else {
 				results.push(handle as FileSystemFileHandle);

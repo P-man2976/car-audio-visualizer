@@ -1,14 +1,20 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+	Sheet,
+	SheetContent,
+	SheetHeader,
+	SheetTitle,
+	SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Reorder, useDragControls } from "framer-motion";
 import { useAtom, useAtomValue } from "jotai";
 import { GripVertical, RadioTower } from "lucide-react";
 import { type ReactNode, useRef } from "react";
-import { currentSrcAtom, queueAtom, songQueueAtom } from "../atoms/player";
-import { useSelectRadio } from "../hooks/radio";
-import type { Radio } from "../types/radio";
-import type { Song } from "../types/player";
-import { usePlayer } from "../hooks/player";
+import { currentSrcAtom, queueAtom, songQueueAtom } from "@/atoms/player";
+import { useSelectRadio } from "@/hooks/radio";
+import type { Radio } from "@/types/radio";
+import type { Song } from "@/types/player";
+import { usePlayer } from "@/hooks/player";
 
 export function QueueSheet({ children }: { children: ReactNode }) {
 	const currentSrc = useAtomValue(currentSrcAtom);
@@ -17,7 +23,10 @@ export function QueueSheet({ children }: { children: ReactNode }) {
 	return (
 		<Sheet>
 			<SheetTrigger asChild>{children}</SheetTrigger>
-			<SheetContent side="right" className="max-w-sm sm:min-w-96 overflow-y-auto px-4">
+			<SheetContent
+				side="right"
+				className="max-w-sm sm:min-w-96 overflow-y-auto px-4"
+			>
 				<SheetHeader>
 					<SheetTitle className="text-xl pl-2">
 						{isFile ? "再生待ち" : "最近再生した局"}
@@ -35,7 +44,9 @@ function SongQueueList() {
 	const [songQueue, setSongQueue] = useAtom(songQueueAtom);
 
 	if (!songQueue.length) {
-		return <p className="text-sm text-muted-foreground pl-2 mt-4">キューは空です</p>;
+		return (
+			<p className="text-sm text-muted-foreground pl-2 mt-4">キューは空です</p>
+		);
 	}
 
 	return (
@@ -76,7 +87,11 @@ function QueueSongCard({ song }: { song: Song }) {
 				onPointerDown={(e) => controls.start(e)}
 			/>
 			{artwork ? (
-				<img src={artwork} alt={title ?? filename} className="h-10 w-10 rounded-sm object-cover shrink-0" />
+				<img
+					src={artwork}
+					alt={title ?? filename}
+					className="h-10 w-10 rounded-sm object-cover shrink-0"
+				/>
 			) : (
 				<div className="h-10 w-10 rounded-sm bg-neutral-700/60 shrink-0" />
 			)}
@@ -89,7 +104,8 @@ function QueueSongCard({ song }: { song: Song }) {
 					ref={titleRef}
 					className={cn("text-sm whitespace-nowrap w-fit", {
 						"animate-scroll":
-							(titleRef.current?.clientWidth ?? 0) > (containerRef.current?.clientWidth ?? 0),
+							(titleRef.current?.clientWidth ?? 0) >
+							(containerRef.current?.clientWidth ?? 0),
 					})}
 					style={{ animationDuration: `${(title ?? filename).length}s` }}
 				>
@@ -100,7 +116,8 @@ function QueueSongCard({ song }: { song: Song }) {
 						ref={albumRef}
 						className={cn("text-xs text-gray-400 whitespace-nowrap w-fit", {
 							"animate-scroll":
-								(albumRef.current?.clientWidth ?? 0) > (containerRef.current?.clientWidth ?? 0),
+								(albumRef.current?.clientWidth ?? 0) >
+								(containerRef.current?.clientWidth ?? 0),
 						})}
 						style={{ animationDuration: `${album.length}s` }}
 					>
@@ -118,14 +135,20 @@ function RadioQueueList() {
 	const radioQueue = useAtomValue(queueAtom);
 
 	if (!radioQueue.length) {
-		return <p className="text-sm text-muted-foreground pl-2 mt-4">キューは空です</p>;
+		return (
+			<p className="text-sm text-muted-foreground pl-2 mt-4">キューは空です</p>
+		);
 	}
 
 	return (
 		<div className="flex flex-col gap-2 mt-4">
 			{radioQueue.map((station, index) => (
 				<RadioQueueCard
-					key={station.source === "radiko" ? `${station.id}-${index}` : `${station.url}-${index}`}
+					key={
+						station.source === "radiko"
+							? `${station.id}-${index}`
+							: `${station.url}-${index}`
+					}
 					station={station}
 				/>
 			))}
@@ -155,7 +178,11 @@ function RadioQueueCard({ station }: { station: Radio }) {
 			}}
 		>
 			{logo ? (
-				<img src={logo} alt={name} className="h-10 w-10 rounded-sm object-cover shrink-0 ml-2" />
+				<img
+					src={logo}
+					alt={name}
+					className="h-10 w-10 rounded-sm object-cover shrink-0 ml-2"
+				/>
 			) : (
 				<div className="h-10 w-10 rounded-sm bg-neutral-700/60 shrink-0 grid place-content-center ml-2">
 					<RadioTower size={20} className="text-gray-400" />

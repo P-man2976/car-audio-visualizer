@@ -1,7 +1,7 @@
 import { useAtomValue } from "jotai";
 import { useEffect } from "react";
-import { audioElementAtom } from "../atoms/audio";
-import { currentSrcAtom, isPlayingAtom, progressAtom } from "../atoms/player";
+import { audioElementAtom } from "@/atoms/audio";
+import { currentSrcAtom, isPlayingAtom, progressAtom } from "@/atoms/player";
 import { usePlayer } from "./player";
 import { useRadioPlayer } from "./radio";
 
@@ -32,7 +32,10 @@ export function useMediaSession({
 	// ファイル再生時のみ position state を更新
 	useEffect(() => {
 		if (currentSrc !== "file") return;
-		if (!Number.isNaN(audioElement.duration) && audioElement.duration !== Infinity) {
+		if (
+			!Number.isNaN(audioElement.duration) &&
+			audioElement.duration !== Infinity
+		) {
 			navigator.mediaSession.setPositionState({
 				duration: audioElement.duration,
 				playbackRate: 1,

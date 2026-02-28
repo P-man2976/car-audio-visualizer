@@ -29,7 +29,11 @@ export function FileEntries() {
 			if (!currentDir) return [];
 			const entries: EntryInfo[] = [];
 			for await (const [name, handle] of currentDir.entries()) {
-				entries.push({ name, handle, isDirectory: handle.kind === "directory" });
+				entries.push({
+					name,
+					handle,
+					isDirectory: handle.kind === "directory",
+				});
 			}
 			return entries.sort((a, b) => {
 				if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1;
@@ -48,7 +52,9 @@ export function FileEntries() {
 
 	return (
 		<div className="flex flex-col overflow-y-auto">
-			{data?.map((entry) => <Entry key={entry.name} {...entry} />)}
+			{data?.map((entry) => (
+				<Entry key={entry.name} {...entry} />
+			))}
 		</div>
 	);
 }
@@ -65,7 +71,8 @@ function Entry({ name, handle, isDirectory }: EntryInfo) {
 	);
 
 	const isSelected = useMemo(
-		() => selected.some((h) => h.name === handle.name && h.kind === handle.kind),
+		() =>
+			selected.some((h) => h.name === handle.name && h.kind === handle.kind),
 		[selected, handle],
 	);
 
@@ -102,7 +109,7 @@ function Entry({ name, handle, isDirectory }: EntryInfo) {
 			<Checkbox
 				disabled={isDisabled}
 				checked={isSelected}
-			onClick={(e: React.MouseEvent) => {
+				onClick={(e: React.MouseEvent) => {
 					e.stopPropagation();
 					toggleSelected();
 				}}

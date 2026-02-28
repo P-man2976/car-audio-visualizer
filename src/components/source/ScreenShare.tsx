@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { useMediaStream } from "../../hooks/mediastream";
-import { getDisplayMediaConstraints } from "../../lib/aux-media";
+import { useMediaStream } from "@/hooks/mediastream";
+import { getDisplayMediaConstraints } from "@/lib/aux-media";
 
 export function ScreenShare() {
 	const { connect } = useMediaStream();
@@ -9,7 +9,9 @@ export function ScreenShare() {
 		<Button
 			className="w-full"
 			onClick={async () => {
-				const stream = await navigator.mediaDevices.getDisplayMedia(getDisplayMediaConstraints());
+				const stream = await navigator.mediaDevices.getDisplayMedia(
+					getDisplayMediaConstraints(),
+				);
 				connect(stream);
 			}}
 		>

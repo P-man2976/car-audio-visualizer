@@ -57,8 +57,7 @@ function LastfmCallbackPage() {
 	);
 }
 
-export const Route = createFileRoute("/lastfm-callback")({  
+export const Route = createFileRoute("/lastfm-callback")({
 	ssr: false,
 	component: LastfmCallbackPage,
 });
-

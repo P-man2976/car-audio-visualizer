@@ -11,7 +11,9 @@ export function getDisplayMediaConstraints(): DisplayMediaStreamOptions {
 	};
 }
 
-export function getUserMediaConstraints(deviceId: string): MediaStreamConstraints {
+export function getUserMediaConstraints(
+	deviceId: string,
+): MediaStreamConstraints {
 	return {
 		audio: {
 			deviceId: { exact: deviceId },
@@ -23,6 +25,9 @@ export function getUserMediaConstraints(deviceId: string): MediaStreamConstraint
 	};
 }
 
-export function getInputDeviceLabel(device: MediaDeviceInfo, index: number): string {
+export function getInputDeviceLabel(
+	device: MediaDeviceInfo,
+	index: number,
+): string {
 	return device.label || `Audio Input ${index + 1}`;
 }

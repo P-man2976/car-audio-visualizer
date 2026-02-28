@@ -58,7 +58,9 @@ export const usePlayer = () => {
 			[nextSong, ...newQueue] = songQueue;
 		}
 
-		const newHistory = currentSong ? [...songHistory, currentSong] : [...songHistory];
+		const newHistory = currentSong
+			? [...songHistory, currentSong]
+			: [...songHistory];
 
 		if (!nextSong) {
 			// repeat all: 履歴全曲をキューに戻して再開
@@ -79,7 +81,17 @@ export const usePlayer = () => {
 		setSongHistory(newHistory);
 		setCurrentSong(nextSong);
 		setSongQueue(newQueue);
-	}, [currentSong, songQueue, songHistory, shuffle, repeat, setSongHistory, setCurrentSong, setSongQueue, stop]);
+	}, [
+		currentSong,
+		songQueue,
+		songHistory,
+		shuffle,
+		repeat,
+		setSongHistory,
+		setCurrentSong,
+		setSongQueue,
+		stop,
+	]);
 
 	const prev = useCallback(() => {
 		const lastSong = songHistory.at(-1);

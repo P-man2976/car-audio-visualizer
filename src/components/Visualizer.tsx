@@ -5,8 +5,8 @@ import { atom, getDefaultStore, useAtomValue } from "jotai";
 import { Fragment, useEffect, useMemo, useRef } from "react";
 import type { MeshStandardMaterial } from "three";
 import * as THREE from "three";
-import { audioMotionAnalyzerAtom } from "../atoms/audio";
-import { isPlayingAtom } from "../atoms/player";
+import { audioMotionAnalyzerAtom } from "@/atoms/audio";
+import { isPlayingAtom } from "@/atoms/player";
 
 const spectrogramAtom = atom<AnalyzerBarData[] | null>(null);
 const store = getDefaultStore();
@@ -35,7 +35,10 @@ export function Visualizer() {
 	}, [isPlaying, invalidate]);
 
 	useFrame(({ invalidate: inv }) => {
-		store.set(spectrogramAtom, audioMotionAnalyzer.getBars() as AnalyzerBarData[]);
+		store.set(
+			spectrogramAtom,
+			audioMotionAnalyzer.getBars() as AnalyzerBarData[],
+		);
 		// demand モードで再生中は次フレームを自己スケジュール → 60fps 連続描画
 		if (isPlaying) inv();
 	});
@@ -44,7 +47,10 @@ export function Visualizer() {
 		<mesh
 			ref={meshRef}
 			position={[
-				-(((CELL_WIDTH + ROW_CELL_GAP) * ROW_CELL_COUNT - ROW_CELL_GAP + 80) / 2),
+				-(
+					((CELL_WIDTH + ROW_CELL_GAP) * ROW_CELL_COUNT - ROW_CELL_GAP + 80) /
+					2
+				),
 				-(((CELL_HEIGHT + COL_CELL_GAP) * COL_CELL_COUNT - COL_CELL_GAP) / 2),
 				0,
 			]}
@@ -64,13 +70,16 @@ export function Visualizer() {
 						<Line
 							points={[
 								[
-									(CELL_WIDTH + ROW_CELL_GAP) * rowIndex - ROW_CELL_GAP / 2 +
+									(CELL_WIDTH + ROW_CELL_GAP) * rowIndex -
+										ROW_CELL_GAP / 2 +
 										(rowIndex % 2 === 0 ? 0.3 : 2),
 									-2,
 									0,
 								],
 								[
-									(CELL_WIDTH + ROW_CELL_GAP) * rowIndex - ROW_CELL_GAP / 2 + CELL_WIDTH -
+									(CELL_WIDTH + ROW_CELL_GAP) * rowIndex -
+										ROW_CELL_GAP / 2 +
+										CELL_WIDTH -
 										(rowIndex % 2 === 0 ? 2 : 0.3),
 									-2,
 									0,
@@ -83,7 +92,11 @@ export function Visualizer() {
 							color="#10b981"
 							fontSize={2.4}
 							font="https://cdn.jsdelivr.net/fontsource/fonts/montserrat@latest/latin-600-normal.woff"
-							position={[(CELL_WIDTH + ROW_CELL_GAP) * rowIndex - ROW_CELL_GAP, -2, 0]}
+							position={[
+								(CELL_WIDTH + ROW_CELL_GAP) * rowIndex - ROW_CELL_GAP,
+								-2,
+								0,
+							]}
 						>
 							{FREQ_ARRAY[(rowIndex - 1) / 2] ?? ""}
 						</Text>
@@ -94,7 +107,13 @@ export function Visualizer() {
 	);
 }
 
-function VisualizerCell({ rowIndex, colIndex }: { rowIndex: number; colIndex: number }) {
+function VisualizerCell({
+	rowIndex,
+	colIndex,
+}: {
+	rowIndex: number;
+	colIndex: number;
+}) {
 	const color = useMemo(() => new THREE.Color(), []);
 	const meshMaterialRef = useRef<MeshStandardMaterial>(null);
 
@@ -107,7 +126,9 @@ function VisualizerCell({ rowIndex, colIndex }: { rowIndex: number; colIndex: nu
 		const value = freqLevel?.value?.[0] ?? 0;
 		const peak = freqLevel?.peak?.[0] ?? 0;
 
-		meshMaterialRef.current.color = color.set(value * 32 > colIndex ? "#a5f3fc" : "#3b0764");
+		meshMaterialRef.current.color = color.set(
+			value * 32 > colIndex ? "#a5f3fc" : "#3b0764",
+		);
 
 		if (
 			(colIndex < peak * 32 && peak * 32 < colIndex + 1) ||

@@ -3,7 +3,11 @@ import type { ReactNode } from "react";
 
 export function Container({ children }: { children: ReactNode }) {
 	return (
-		<Canvas id='visualizer' frameloop="demand" camera={{ fov: 120, position: [0, 0, 50] }}>
+		<Canvas
+			id="visualizer"
+			frameloop="demand"
+			camera={{ fov: 120, position: [0, 0, 50] }}
+		>
 			<ambientLight color={0xffffff} intensity={Math.PI / 2} />
 			{children}
 		</Canvas>

@@ -1,6 +1,6 @@
 import { Plane, Text } from "@react-three/drei";
 import { useAtomValue } from "jotai";
-import { displayStringAtom } from "../atoms/display";
+import { displayStringAtom } from "@/atoms/display";
 
 const DOT_MATRIX_COL_COUNT = 7;
 const DOT_MATRIX_ROW_COUNT = 5;
@@ -30,7 +30,9 @@ export function DotMatrixArray() {
 				<mesh
 					key={`dot-matrix-${index}`}
 					position={[
-						index * DOT_MATRIX_ROW_COUNT * (DOT_MATRIX_DOT_GAP + DOT_MATRIX_DOT_SIZE) +
+						index *
+							DOT_MATRIX_ROW_COUNT *
+							(DOT_MATRIX_DOT_GAP + DOT_MATRIX_DOT_SIZE) +
 							DOT_MATRIX_ARRAY_GAP * index,
 						0,
 						0,
@@ -48,12 +50,16 @@ function DotMatrix({ char }: { char: string }) {
 		<mesh position={[0, 0, 0]}>
 			<Text
 				characters="CD 1234567890-:"
-				position={[-DOT_MATRIX_DOT_SIZE + 0.36, -DOT_MATRIX_DOT_SIZE * 2 - DOT_MATRIX_DOT_GAP, 0]}
+				position={[
+					-DOT_MATRIX_DOT_SIZE + 0.36,
+					-DOT_MATRIX_DOT_SIZE * 2 - DOT_MATRIX_DOT_GAP,
+					0,
+				]}
 				anchorX="left"
 				anchorY="bottom"
 				fontSize={16}
 				color="#67e8f9"
-        font="/LCD5x7_Regular.otf"
+				font="/LCD5x7_Regular.otf"
 			>
 				{char}
 			</Text>

@@ -1,7 +1,14 @@
 import { useAtomValue } from "jotai";
 import { useEffect, useRef } from "react";
-import { audioElementAtom } from "../atoms/audio";
-import { currentSongAtom, currentSrcAtom, isPlayingAtom, muteAtom, repeatModeAtom, volumeAtom } from "../atoms/player";
+import { audioElementAtom } from "@/atoms/audio";
+import {
+	currentSongAtom,
+	currentSrcAtom,
+	isPlayingAtom,
+	muteAtom,
+	repeatModeAtom,
+	volumeAtom,
+} from "@/atoms/player";
 import { usePlayer } from "./player";
 
 /**

@@ -27,7 +27,9 @@ export function usePiP() {
 	/** PiP を開始する */
 	const enterPiP = useCallback(async () => {
 		if (!window.documentPictureInPicture) {
-			console.warn("Document Picture-in-Picture API is not supported in this browser.");
+			console.warn(
+				"Document Picture-in-Picture API is not supported in this browser.",
+			);
 			return;
 		}
 
@@ -45,7 +47,10 @@ export function usePiP() {
 			"margin:0;padding:0;background:#000;overflow:hidden;width:100vw;height:100vh;";
 
 		// canvas の元スタイルを保存してフルサイズに書き換え
-		savedStyleRef.current = { width: canvas.style.width, height: canvas.style.height };
+		savedStyleRef.current = {
+			width: canvas.style.width,
+			height: canvas.style.height,
+		};
 		canvas.style.width = "100%";
 		canvas.style.height = "100%";
 
@@ -83,7 +88,8 @@ export function usePiP() {
 		pipWindowRef.current?.close();
 	}, []);
 
-	const isSupported = typeof window !== "undefined" && !!window.documentPictureInPicture;
+	const isSupported =
+		typeof window !== "undefined" && !!window.documentPictureInPicture;
 
 	return { isPiP, enterPiP, exitPiP, isSupported };
 }
