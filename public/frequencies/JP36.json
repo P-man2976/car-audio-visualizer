@@ -1,0 +1,235 @@
+{
+  "$schema": "../schema.json",
+  "JRT": {
+    "area": [
+      "JP36"
+    ],
+    "type": "AM",
+    "name": "ＪＲＴ四国放送",
+    "frequencies_am": [
+      {
+        "area": [
+          "徳島",
+          "池田",
+          "牟岐",
+          "日和佐"
+        ],
+        "frequency": 1269,
+        "primary": true
+      }
+    ],
+    "frequencies_fm": [
+      {
+        "area": [
+          "徳島"
+        ],
+        "frequency": 93,
+        "primary": true
+      },
+      {
+        "area": [
+          "池田"
+        ],
+        "frequency": 93,
+        "primary": false
+      },
+      {
+        "area": [
+          "阿南"
+        ],
+        "frequency": 93.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "日和佐"
+        ],
+        "frequency": 93,
+        "primary": false
+      }
+    ]
+  },
+  "FM807": {
+    "area": [
+      "JP36"
+    ],
+    "type": "FM",
+    "name": "FM徳島",
+    "frequencies_fm": [
+      {
+        "area": [
+          "大阪"
+        ],
+        "frequency": 80.2,
+        "primary": true
+      },
+      {
+        "area": [
+          "中能勢"
+        ],
+        "frequency": 78.3,
+        "primary": false
+      }
+    ]
+  },
+  "JOZK": {
+    "area": [
+      "JP36"
+    ],
+    "type": "AM",
+    "name": "NHKラジオ第1（松山）",
+    "frequencies_am": [
+      {
+        "area": [
+          "徳島"
+        ],
+        "frequency": 945,
+        "primary": true
+      },
+      {
+        "area": [
+          "池田"
+        ],
+        "frequency": 1161,
+        "primary": false
+      },
+      {
+        "area": [
+          "牟岐"
+        ],
+        "frequency": 1584,
+        "primary": false
+      },
+      {
+        "area": [
+          "山城"
+        ],
+        "frequency": 1503,
+        "primary": false
+      }
+    ],
+    "frequencies_fm": [
+      {
+        "area": [
+          "日和佐"
+        ],
+        "frequency": 94.6,
+        "primary": true
+      }
+    ]
+  },
+  "JOAK-FM": {
+    "area": [
+      "JP36"
+    ],
+    "type": "FM",
+    "name": "NHK-FM（東京）",
+    "frequencies_fm": [
+      {
+        "area": [
+          "徳島"
+        ],
+        "frequency": 83.4,
+        "primary": true
+      },
+      {
+        "area": [
+          "上那賀"
+        ],
+        "frequency": 83,
+        "primary": false
+      },
+      {
+        "area": [
+          "池田"
+        ],
+        "frequency": 85,
+        "primary": false
+      },
+      {
+        "area": [
+          "日和佐"
+        ],
+        "frequency": 85.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "美馬"
+        ],
+        "frequency": 85.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "阿南"
+        ],
+        "frequency": 81.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "阿波勝浦"
+        ],
+        "frequency": 85.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "神山"
+        ],
+        "frequency": 84.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "鷲敷"
+        ],
+        "frequency": 82,
+        "primary": false
+      },
+      {
+        "area": [
+          "阿波"
+        ],
+        "frequency": 84.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "宍喰"
+        ],
+        "frequency": 89.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "上勝"
+        ],
+        "frequency": 82.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "東祖谷山"
+        ],
+        "frequency": 84.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "一宇東"
+        ],
+        "frequency": 83.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "一宇"
+        ],
+        "frequency": 82.5,
+        "primary": false
+      }
+    ]
+  }
+}

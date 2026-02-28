@@ -1,0 +1,285 @@
+{
+  "$schema": "../schema.json",
+  "RSK": {
+    "area": [
+      "JP33"
+    ],
+    "type": "AM",
+    "name": "ＲＳＫラジオ",
+    "frequencies_am": [
+      {
+        "area": [
+          "岡山",
+          "津山",
+          "高梁",
+          "落合",
+          "備前",
+          "新見",
+          "笠岡"
+        ],
+        "frequency": 1494,
+        "primary": true
+      }
+    ]
+  },
+  "FM-OKAYAMA": {
+    "area": [
+      "JP33"
+    ],
+    "type": "FM",
+    "name": "ＦＭ岡山",
+    "frequencies_fm": [
+      {
+        "area": [
+          "岡山"
+        ],
+        "frequency": 76.8,
+        "primary": true
+      },
+      {
+        "area": [
+          "津山"
+        ],
+        "frequency": 80.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "笠岡"
+        ],
+        "frequency": 80.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "高梁"
+        ],
+        "frequency": 81.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "新見"
+        ],
+        "frequency": 80.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "井原"
+        ],
+        "frequency": 84.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "備前"
+        ],
+        "frequency": 83.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "久世"
+        ],
+        "frequency": 82.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "児島"
+        ],
+        "frequency": 84.1,
+        "primary": false
+      }
+    ]
+  },
+  "JOFK": {
+    "area": [
+      "JP33"
+    ],
+    "type": "AM",
+    "name": "NHKラジオ第1（広島）",
+    "frequencies_am": [
+      {
+        "area": [
+          "岡山"
+        ],
+        "frequency": 603,
+        "primary": true
+      },
+      {
+        "area": [
+          "津山"
+        ],
+        "frequency": 927,
+        "primary": false
+      },
+      {
+        "area": [
+          "新見"
+        ],
+        "frequency": 1341,
+        "primary": false
+      },
+      {
+        "area": [
+          "久世"
+        ],
+        "frequency": 1323,
+        "primary": false
+      },
+      {
+        "area": [
+          "北房"
+        ],
+        "frequency": 1584,
+        "primary": false
+      }
+    ],
+    "frequencies_fm": [
+      {
+        "area": [
+          "高梁"
+        ],
+        "frequency": 89.6,
+        "primary": true
+      }
+    ]
+  },
+  "JOAK-FM": {
+    "area": [
+      "JP33"
+    ],
+    "type": "FM",
+    "name": "NHK-FM（東京）",
+    "frequencies_fm": [
+      {
+        "area": [
+          "岡山"
+        ],
+        "frequency": 88.7,
+        "primary": true
+      },
+      {
+        "area": [
+          "津山"
+        ],
+        "frequency": 85.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "新見"
+        ],
+        "frequency": 86,
+        "primary": false
+      },
+      {
+        "area": [
+          "高梁"
+        ],
+        "frequency": 87.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "久世"
+        ],
+        "frequency": 83.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "笠岡"
+        ],
+        "frequency": 83.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "井原"
+        ],
+        "frequency": 82.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "和気"
+        ],
+        "frequency": 82,
+        "primary": false
+      },
+      {
+        "area": [
+          "児島"
+        ],
+        "frequency": 85.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "北房"
+        ],
+        "frequency": 84.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "柵原"
+        ],
+        "frequency": 84.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "備前"
+        ],
+        "frequency": 82.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "哲西"
+        ],
+        "frequency": 84.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "三石"
+        ],
+        "frequency": 84.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "有漢"
+        ],
+        "frequency": 82.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "大原"
+        ],
+        "frequency": 84.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "日生"
+        ],
+        "frequency": 83.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "美作加茂"
+        ],
+        "frequency": 86.3,
+        "primary": false
+      }
+    ]
+  }
+}

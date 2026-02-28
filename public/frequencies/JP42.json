@@ -1,0 +1,320 @@
+{
+  "$schema": "../schema.json",
+  "NBC": {
+    "area": [
+      "JP42"
+    ],
+    "type": "AM",
+    "name": "NBCラジオ",
+    "frequencies_am": [
+      {
+        "area": [
+          "長崎",
+          "諫早",
+          "島原"
+        ],
+        "frequency": 1233,
+        "primary": true
+      },
+      {
+        "area": [
+          "平戸"
+        ],
+        "frequency": 1062,
+        "primary": false
+      },
+      {
+        "area": [
+          "佐世保"
+        ],
+        "frequency": 1098,
+        "primary": false
+      },
+      {
+        "area": [
+          "伊万里"
+        ],
+        "frequency": 1116,
+        "primary": false
+      },
+      {
+        "area": [
+          "福江"
+        ],
+        "frequency": 1431,
+        "primary": false
+      },
+      {
+        "area": [
+          "佐賀",
+          "唐津",
+          "有田"
+        ],
+        "frequency": 1458,
+        "primary": false
+      }
+    ],
+    "frequencies_fm": [
+      {
+        "area": [
+          "長崎"
+        ],
+        "frequency": 92.6,
+        "primary": true
+      },
+      {
+        "area": [
+          "佐世保"
+        ],
+        "frequency": 90.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "諫早"
+        ],
+        "frequency": 91.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "佐賀"
+        ],
+        "frequency": 93.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "鳥栖"
+        ],
+        "frequency": 92.1,
+        "primary": false
+      }
+    ]
+  },
+  "FMNAGASAKI": {
+    "area": [
+      "JP42"
+    ],
+    "type": "FM",
+    "name": "FM長崎",
+    "frequencies_fm": [
+      {
+        "area": [
+          "長崎"
+        ],
+        "frequency": 79.5,
+        "primary": true
+      },
+      {
+        "area": [
+          "諫早"
+        ],
+        "frequency": 78.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "南有馬"
+        ],
+        "frequency": 77.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "島原"
+        ],
+        "frequency": 89.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "佐世保"
+        ],
+        "frequency": 80.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "平戸"
+        ],
+        "frequency": 79.2,
+        "primary": false
+      }
+    ]
+  },
+  "JOLK": {
+    "area": [
+      "JP42"
+    ],
+    "type": "AM",
+    "name": "NHKラジオ第1（福岡）",
+    "frequencies_am": [
+      {
+        "area": [
+          "長崎"
+        ],
+        "frequency": 684,
+        "primary": true
+      },
+      {
+        "area": [
+          "佐世保"
+        ],
+        "frequency": 981,
+        "primary": false
+      },
+      {
+        "area": [
+          "島原"
+        ],
+        "frequency": 1584,
+        "primary": false
+      },
+      {
+        "area": [
+          "福江"
+        ],
+        "frequency": 945,
+        "primary": false
+      },
+      {
+        "area": [
+          "平戸"
+        ],
+        "frequency": 1341,
+        "primary": false
+      },
+      {
+        "area": [
+          "諌早"
+        ],
+        "frequency": 927,
+        "primary": false
+      }
+    ],
+    "frequencies_fm": [
+      {
+        "area": [
+          "瀬戸板浦"
+        ],
+        "frequency": 85,
+        "primary": true
+      },
+      {
+        "area": [
+          "大瀬戸雪浦"
+        ],
+        "frequency": 76.9,
+        "primary": false
+      }
+    ]
+  },
+  "JOAK-FM": {
+    "area": [
+      "JP42"
+    ],
+    "type": "FM",
+    "name": "NHK-FM（東京）",
+    "frequencies_fm": [
+      {
+        "area": [
+          "長崎"
+        ],
+        "frequency": 84.5,
+        "primary": true
+      },
+      {
+        "area": [
+          "福江"
+        ],
+        "frequency": 83.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "有川"
+        ],
+        "frequency": 82.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "諫早"
+        ],
+        "frequency": 83,
+        "primary": false
+      },
+      {
+        "area": [
+          "大瀬戸"
+        ],
+        "frequency": 82.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "東長崎"
+        ],
+        "frequency": 83.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "南有馬"
+        ],
+        "frequency": 81.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "島原"
+        ],
+        "frequency": 82.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "佐世保"
+        ],
+        "frequency": 86,
+        "primary": false
+      },
+      {
+        "area": [
+          "松浦"
+        ],
+        "frequency": 84.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "平戸"
+        ],
+        "frequency": 83.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "宇久"
+        ],
+        "frequency": 88,
+        "primary": false
+      },
+      {
+        "area": [
+          "厳原"
+        ],
+        "frequency": 82.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "郷ノ浦"
+        ],
+        "frequency": 83.3,
+        "primary": false
+      }
+    ]
+  }
+}

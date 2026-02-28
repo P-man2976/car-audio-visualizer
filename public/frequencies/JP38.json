@@ -1,0 +1,391 @@
+{
+  "$schema": "../schema.json",
+  "RNB": {
+    "area": [
+      "JP38"
+    ],
+    "type": "AM",
+    "name": "RNB南海放送",
+    "frequencies_am": [
+      {
+        "area": [
+          "松山",
+          "八幡浜",
+          "新居浜",
+          "宇和島",
+          "大洲",
+          "御荘"
+        ],
+        "frequency": 1116,
+        "primary": true
+      }
+    ],
+    "frequencies_fm": [
+      {
+        "area": [
+          "松山"
+        ],
+        "frequency": 91.7,
+        "primary": true
+      },
+      {
+        "area": [
+          "新居浜"
+        ],
+        "frequency": 91.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "宇和島"
+        ],
+        "frequency": 91.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "川之江"
+        ],
+        "frequency": 91.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "八幡浜"
+        ],
+        "frequency": 91.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "大洲"
+        ],
+        "frequency": 91.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "今治"
+        ],
+        "frequency": 91.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "久万"
+        ],
+        "frequency": 91.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "御荘"
+        ],
+        "frequency": 91.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "野村"
+        ],
+        "frequency": 91.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "壺神"
+        ],
+        "frequency": 91.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "大三島"
+        ],
+        "frequency": 91.2,
+        "primary": false
+      }
+    ]
+  },
+  "JOEU-FM": {
+    "area": [
+      "JP38"
+    ],
+    "type": "FM",
+    "name": "FM愛媛",
+    "frequencies_fm": [
+      {
+        "area": [
+          "松山"
+        ],
+        "frequency": 79.7,
+        "primary": true
+      },
+      {
+        "area": [
+          "新居浜"
+        ],
+        "frequency": 89.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "八幡浜"
+        ],
+        "frequency": 77.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "宇和島"
+        ],
+        "frequency": 82.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "川之江"
+        ],
+        "frequency": 80,
+        "primary": false
+      },
+      {
+        "area": [
+          "大洲"
+        ],
+        "frequency": 78.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "今治"
+        ],
+        "frequency": 80.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "城川"
+        ],
+        "frequency": 80.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "愛南"
+        ],
+        "frequency": 78.8,
+        "primary": false
+      }
+    ]
+  },
+  "JOZK": {
+    "area": [
+      "JP38"
+    ],
+    "type": "AM",
+    "name": "NHKラジオ第1（松山）",
+    "frequencies_am": [
+      {
+        "area": [
+          "松山"
+        ],
+        "frequency": 963,
+        "primary": true
+      },
+      {
+        "area": [
+          "宇和島"
+        ],
+        "frequency": 846,
+        "primary": false
+      },
+      {
+        "area": [
+          "新居浜"
+        ],
+        "frequency": 531,
+        "primary": false
+      },
+      {
+        "area": [
+          "今治"
+        ],
+        "frequency": 792,
+        "primary": false
+      },
+      {
+        "area": [
+          "八幡浜"
+        ],
+        "frequency": 1368,
+        "primary": false
+      },
+      {
+        "area": [
+          "城辺"
+        ],
+        "frequency": 1341,
+        "primary": false
+      },
+      {
+        "area": [
+          "宇和"
+        ],
+        "frequency": 1584,
+        "primary": false
+      },
+      {
+        "area": [
+          "大洲"
+        ],
+        "frequency": 792,
+        "primary": false
+      },
+      {
+        "area": [
+          "野村"
+        ],
+        "frequency": 1323,
+        "primary": false
+      }
+    ],
+    "frequencies_fm": [
+      {
+        "area": [
+          "宇和島"
+        ],
+        "frequency": 93.6,
+        "primary": true
+      },
+      {
+        "area": [
+          "新居浜"
+        ],
+        "frequency": 92.6,
+        "primary": false
+      }
+    ]
+  },
+  "JOAK-FM": {
+    "area": [
+      "JP38"
+    ],
+    "type": "FM",
+    "name": "NHK-FM（東京）",
+    "frequencies_fm": [
+      {
+        "area": [
+          "松山"
+        ],
+        "frequency": 87.7,
+        "primary": true
+      },
+      {
+        "area": [
+          "新居浜"
+        ],
+        "frequency": 87,
+        "primary": false
+      },
+      {
+        "area": [
+          "八幡浜"
+        ],
+        "frequency": 86.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "宇和島"
+        ],
+        "frequency": 84.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "大洲"
+        ],
+        "frequency": 85.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "南宇和"
+        ],
+        "frequency": 83.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "久万"
+        ],
+        "frequency": 86.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "野村"
+        ],
+        "frequency": 85.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "川之江"
+        ],
+        "frequency": 84.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "菊間"
+        ],
+        "frequency": 82.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "城辺"
+        ],
+        "frequency": 85.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "中山"
+        ],
+        "frequency": 85.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "小田"
+        ],
+        "frequency": 88.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "大三島"
+        ],
+        "frequency": 83.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "美川"
+        ],
+        "frequency": 85.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "城川"
+        ],
+        "frequency": 83.6,
+        "primary": false
+      }
+    ]
+  }
+}

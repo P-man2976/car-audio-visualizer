@@ -1,0 +1,352 @@
+{
+  "$schema": "../schema.json",
+  "BSS": {
+    "area": [
+      "JP32"
+    ],
+    "type": "AM",
+    "name": "BSSラジオ",
+    "frequencies_am": [
+      {
+        "area": [
+          "米子"
+        ],
+        "frequency": 900,
+        "primary": true
+      },
+      {
+        "area": [
+          "鳥取",
+          "出雲",
+          "益田"
+        ],
+        "frequency": 1431,
+        "primary": false
+      },
+      {
+        "area": [
+          "大田"
+        ],
+        "frequency": 1485,
+        "primary": false
+      },
+      {
+        "area": [
+          "倉吉",
+          "浜田"
+        ],
+        "frequency": 1557,
+        "primary": false
+      }
+    ]
+  },
+  "FM-SANIN": {
+    "area": [
+      "JP32"
+    ],
+    "type": "FM",
+    "name": "エフエム山陰",
+    "frequencies_fm": [
+      {
+        "area": [
+          "松江"
+        ],
+        "frequency": 77.4,
+        "primary": true
+      },
+      {
+        "area": [
+          "智頭"
+        ],
+        "frequency": 83.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "鳥取"
+        ],
+        "frequency": 78.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "隠岐"
+        ],
+        "frequency": 82.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "浜田"
+        ],
+        "frequency": 86.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "邑智"
+        ],
+        "frequency": 80.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "大田"
+        ],
+        "frequency": 82.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "石見大和"
+        ],
+        "frequency": 86.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "用瀬"
+        ],
+        "frequency": 77.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "羽須美"
+        ],
+        "frequency": 87.3,
+        "primary": false
+      }
+    ]
+  },
+  "JOFK": {
+    "area": [
+      "JP32"
+    ],
+    "type": "AM",
+    "name": "NHKラジオ第1（広島）",
+    "frequencies_am": [
+      {
+        "area": [
+          "松江"
+        ],
+        "frequency": 1296,
+        "primary": true
+      },
+      {
+        "area": [
+          "石見"
+        ],
+        "frequency": 846,
+        "primary": false
+      },
+      {
+        "area": [
+          "川本"
+        ],
+        "frequency": 1368,
+        "primary": false
+      },
+      {
+        "area": [
+          "益田"
+        ],
+        "frequency": 1341,
+        "primary": false
+      },
+      {
+        "area": [
+          "津和野"
+        ],
+        "frequency": 999,
+        "primary": false
+      },
+      {
+        "area": [
+          "匹見"
+        ],
+        "frequency": 1584,
+        "primary": false
+      },
+      {
+        "area": [
+          "浜田"
+        ],
+        "frequency": 1026,
+        "primary": false
+      },
+      {
+        "area": [
+          "江津"
+        ],
+        "frequency": 1323,
+        "primary": false
+      },
+      {
+        "area": [
+          "六日市"
+        ],
+        "frequency": 1323,
+        "primary": false
+      }
+    ],
+    "frequencies_fm": [
+      {
+        "area": [
+          "来島"
+        ],
+        "frequency": 89.2,
+        "primary": true
+      },
+      {
+        "area": [
+          "頓原"
+        ],
+        "frequency": 88,
+        "primary": false
+      },
+      {
+        "area": [
+          "浜田"
+        ],
+        "frequency": 81.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "隠岐"
+        ],
+        "frequency": 79.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "赤名"
+        ],
+        "frequency": 87.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "日原"
+        ],
+        "frequency": 80.3,
+        "primary": false
+      }
+    ]
+  },
+  "JOAK-FM": {
+    "area": [
+      "JP32"
+    ],
+    "type": "FM",
+    "name": "NHK-FM（東京）",
+    "frequencies_fm": [
+      {
+        "area": [
+          "松江"
+        ],
+        "frequency": 84.5,
+        "primary": true
+      },
+      {
+        "area": [
+          "浜田"
+        ],
+        "frequency": 85.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "大田"
+        ],
+        "frequency": 85.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "石見"
+        ],
+        "frequency": 85.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "邑智萩原山"
+        ],
+        "frequency": 78.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "津和野"
+        ],
+        "frequency": 89.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "横田"
+        ],
+        "frequency": 83.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "木次"
+        ],
+        "frequency": 85.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "邑智"
+        ],
+        "frequency": 85,
+        "primary": false
+      },
+      {
+        "area": [
+          "大東"
+        ],
+        "frequency": 85.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "西ノ島"
+        ],
+        "frequency": 80.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "西郷"
+        ],
+        "frequency": 81.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "日原"
+        ],
+        "frequency": 84.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "石見大和"
+        ],
+        "frequency": 87.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "羽須美"
+        ],
+        "frequency": 83.9,
+        "primary": false
+      }
+    ]
+  }
+}

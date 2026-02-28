@@ -1,0 +1,210 @@
+{
+  "$schema": "../schema.json",
+  "FBC": {
+    "area": [
+      "JP18"
+    ],
+    "type": "AM",
+    "name": "FBCラジオ",
+    "frequencies_am": [
+      {
+        "area": [
+          "福井"
+        ],
+        "frequency": 864,
+        "primary": true
+      },
+      {
+        "area": [
+          "敦賀",
+          "小浜"
+        ],
+        "frequency": 1557,
+        "primary": false
+      }
+    ]
+  },
+  "FMFUKUI": {
+    "area": [
+      "JP18"
+    ],
+    "type": "FM",
+    "name": "FM福井",
+    "frequencies_fm": [
+      {
+        "area": [
+          "福井"
+        ],
+        "frequency": 76.1,
+        "primary": true
+      },
+      {
+        "area": [
+          "美浜"
+        ],
+        "frequency": 80.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "高浜"
+        ],
+        "frequency": 82,
+        "primary": false
+      },
+      {
+        "area": [
+          "小浜"
+        ],
+        "frequency": 82.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "大野"
+        ],
+        "frequency": 84.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "三国"
+        ],
+        "frequency": 86.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "敦賀"
+        ],
+        "frequency": 86.4,
+        "primary": false
+      }
+    ]
+  },
+  "JOCK": {
+    "area": [
+      "JP18"
+    ],
+    "type": "AM",
+    "name": "NHKラジオ第1（名古屋）",
+    "frequencies_am": [
+      {
+        "area": [
+          "福井"
+        ],
+        "frequency": 927,
+        "primary": true
+      },
+      {
+        "area": [
+          "敦賀"
+        ],
+        "frequency": 1026,
+        "primary": false
+      },
+      {
+        "area": [
+          "小浜"
+        ],
+        "frequency": 1161,
+        "primary": false
+      },
+      {
+        "area": [
+          "勝山"
+        ],
+        "frequency": 1584,
+        "primary": false
+      },
+      {
+        "area": [
+          "三方"
+        ],
+        "frequency": 1584,
+        "primary": false
+      }
+    ],
+    "frequencies_fm": [
+      {
+        "area": [
+          "福井川西"
+        ],
+        "frequency": 88.3,
+        "primary": true
+      },
+      {
+        "area": [
+          "福井国見"
+        ],
+        "frequency": 86.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "越廼"
+        ],
+        "frequency": 89.5,
+        "primary": false
+      }
+    ]
+  },
+  "JOAK-FM": {
+    "area": [
+      "JP18"
+    ],
+    "type": "FM",
+    "name": "NHK-FM（東京）",
+    "frequencies_fm": [
+      {
+        "area": [
+          "福井"
+        ],
+        "frequency": 83.4,
+        "primary": true
+      },
+      {
+        "area": [
+          "大野"
+        ],
+        "frequency": 86,
+        "primary": false
+      },
+      {
+        "area": [
+          "敦賀"
+        ],
+        "frequency": 84.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "小浜"
+        ],
+        "frequency": 87.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "美浜"
+        ],
+        "frequency": 85.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "高浜"
+        ],
+        "frequency": 88.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "越前"
+        ],
+        "frequency": 85.7,
+        "primary": false
+      }
+    ]
+  }
+}

@@ -1,0 +1,421 @@
+{
+  "$schema": "../schema.json",
+  "SBC": {
+    "area": [
+      "JP20"
+    ],
+    "type": "AM",
+    "name": "SBCラジオ",
+    "frequencies_am": [
+      {
+        "area": [
+          "長野",
+          "飯田",
+          "伊那"
+        ],
+        "frequency": 1098,
+        "primary": true
+      },
+      {
+        "area": [
+          "松本"
+        ],
+        "frequency": 864,
+        "primary": false
+      },
+      {
+        "area": [
+          "上田"
+        ],
+        "frequency": 1062,
+        "primary": false
+      },
+      {
+        "area": [
+          "諏訪"
+        ],
+        "frequency": 1197,
+        "primary": false
+      },
+      {
+        "area": [
+          "佐久"
+        ],
+        "frequency": 1458,
+        "primary": false
+      },
+      {
+        "area": [
+          "軽井沢"
+        ],
+        "frequency": 1485,
+        "primary": false
+      }
+    ]
+  },
+  "FMN": {
+    "area": [
+      "JP20"
+    ],
+    "type": "FM",
+    "name": "ＦＭ長野",
+    "frequencies_fm": [
+      {
+        "area": [
+          "長野"
+        ],
+        "frequency": 79.7,
+        "primary": true
+      },
+      {
+        "area": [
+          "善光寺平"
+        ],
+        "frequency": 83.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "松本"
+        ],
+        "frequency": 86.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "岡谷諏訪"
+        ],
+        "frequency": 81.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "飯田"
+        ],
+        "frequency": 88.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "小海"
+        ],
+        "frequency": 80.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "聖"
+        ],
+        "frequency": 78.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "木曽福島"
+        ],
+        "frequency": 81.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "飯山野沢"
+        ],
+        "frequency": 81.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "大鹿"
+        ],
+        "frequency": 81.8,
+        "primary": false
+      }
+    ]
+  },
+  "JOAK": {
+    "area": [
+      "JP20"
+    ],
+    "type": "AM",
+    "name": "NHKラジオ第1（東京）",
+    "frequencies_am": [
+      {
+        "area": [
+          "長野"
+        ],
+        "frequency": 819,
+        "primary": true
+      },
+      {
+        "area": [
+          "松本"
+        ],
+        "frequency": 540,
+        "primary": false
+      },
+      {
+        "area": [
+          "飯田"
+        ],
+        "frequency": 621,
+        "primary": false
+      },
+      {
+        "area": [
+          "伊那"
+        ],
+        "frequency": 1341,
+        "primary": false
+      },
+      {
+        "area": [
+          "小諸"
+        ],
+        "frequency": 1026,
+        "primary": false
+      },
+      {
+        "area": [
+          "岡谷諏訪"
+        ],
+        "frequency": 1584,
+        "primary": false
+      },
+      {
+        "area": [
+          "木曽福島"
+        ],
+        "frequency": 981,
+        "primary": false
+      },
+      {
+        "area": [
+          "上田"
+        ],
+        "frequency": 1341,
+        "primary": false
+      },
+      {
+        "area": [
+          "駒ケ根"
+        ],
+        "frequency": 999,
+        "primary": false
+      },
+      {
+        "area": [
+          "白馬"
+        ],
+        "frequency": 1026,
+        "primary": false
+      },
+      {
+        "area": [
+          "大桑"
+        ],
+        "frequency": 1584,
+        "primary": false
+      }
+    ],
+    "frequencies_fm": [
+      {
+        "area": [
+          "南木曽"
+        ],
+        "frequency": 86.6,
+        "primary": true
+      },
+      {
+        "area": [
+          "木祖楢川"
+        ],
+        "frequency": 86,
+        "primary": false
+      }
+    ]
+  },
+  "JOAK-FM": {
+    "area": [
+      "JP20"
+    ],
+    "type": "FM",
+    "name": "NHK-FM（東京）",
+    "frequencies_fm": [
+      {
+        "area": [
+          "長野"
+        ],
+        "frequency": 84,
+        "primary": true
+      },
+      {
+        "area": [
+          "小海"
+        ],
+        "frequency": 84.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "善光寺平"
+        ],
+        "frequency": 85.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "戸倉上山田"
+        ],
+        "frequency": 89.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "牟礼"
+        ],
+        "frequency": 85.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "飯山"
+        ],
+        "frequency": 82.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "栄村"
+        ],
+        "frequency": 84.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "鬼無里"
+        ],
+        "frequency": 89.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "聖"
+        ],
+        "frequency": 83,
+        "primary": false
+      },
+      {
+        "area": [
+          "松本"
+        ],
+        "frequency": 84.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "飯田"
+        ],
+        "frequency": 77.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "岡谷諏訪"
+        ],
+        "frequency": 85.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "木曽福島"
+        ],
+        "frequency": 82.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "高遠"
+        ],
+        "frequency": 85,
+        "primary": false
+      },
+      {
+        "area": [
+          "倉本"
+        ],
+        "frequency": 85.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "信濃阿南"
+        ],
+        "frequency": 82.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "辰野"
+        ],
+        "frequency": 85.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "木祖楢川"
+        ],
+        "frequency": 83.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "南木曽"
+        ],
+        "frequency": 82,
+        "primary": false
+      },
+      {
+        "area": [
+          "天龍平岡"
+        ],
+        "frequency": 85.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "遠山"
+        ],
+        "frequency": 85.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "白馬"
+        ],
+        "frequency": 83.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "小谷"
+        ],
+        "frequency": 84.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "大鹿"
+        ],
+        "frequency": 85,
+        "primary": false
+      },
+      {
+        "area": [
+          "奈川"
+        ],
+        "frequency": 85.4,
+        "primary": false
+      }
+    ]
+  }
+}

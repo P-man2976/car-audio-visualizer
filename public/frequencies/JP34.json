@@ -1,0 +1,409 @@
+{
+  "$schema": "../schema.json",
+  "RCC": {
+    "area": [
+      "JP34"
+    ],
+    "type": "AM",
+    "name": "RCCラジオ",
+    "frequencies_am": [
+      {
+        "area": [
+          "広島"
+        ],
+        "frequency": 1350,
+        "primary": true
+      },
+      {
+        "area": [
+          "三次",
+          "庄原",
+          "東城"
+        ],
+        "frequency": 1458,
+        "primary": false
+      },
+      {
+        "area": [
+          "福山",
+          "三原",
+          "府中"
+        ],
+        "frequency": 1530,
+        "primary": false
+      }
+    ]
+  },
+  "HFM": {
+    "area": [
+      "JP34"
+    ],
+    "type": "FM",
+    "name": "広島FM",
+    "frequencies_fm": [
+      {
+        "area": [
+          "広島"
+        ],
+        "frequency": 78.2,
+        "primary": true
+      },
+      {
+        "area": [
+          "呉"
+        ],
+        "frequency": 81.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "大崎"
+        ],
+        "frequency": 76.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "尾道"
+        ],
+        "frequency": 77.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "福山"
+        ],
+        "frequency": 82.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "府中"
+        ],
+        "frequency": 85.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "西条"
+        ],
+        "frequency": 77.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "佐東"
+        ],
+        "frequency": 82.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "可部"
+        ],
+        "frequency": 80.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "千代田"
+        ],
+        "frequency": 86.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "三次"
+        ],
+        "frequency": 83.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "世羅甲山"
+        ],
+        "frequency": 81.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "五日市"
+        ],
+        "frequency": 81.3,
+        "primary": false
+      }
+    ]
+  },
+  "JOFK": {
+    "area": [
+      "JP34"
+    ],
+    "type": "AM",
+    "name": "NHKラジオ第1（広島）",
+    "frequencies_am": [
+      {
+        "area": [
+          "広島"
+        ],
+        "frequency": 1071,
+        "primary": true
+      },
+      {
+        "area": [
+          "福山"
+        ],
+        "frequency": 999,
+        "primary": false
+      },
+      {
+        "area": [
+          "庄原"
+        ],
+        "frequency": 1161,
+        "primary": false
+      },
+      {
+        "area": [
+          "三次"
+        ],
+        "frequency": 1584,
+        "primary": false
+      },
+      {
+        "area": [
+          "東城"
+        ],
+        "frequency": 792,
+        "primary": false
+      },
+      {
+        "area": [
+          "呉"
+        ],
+        "frequency": 1026,
+        "primary": false
+      },
+      {
+        "area": [
+          "福山木之庄"
+        ],
+        "frequency": 1161,
+        "primary": false
+      },
+      {
+        "area": [
+          "府中"
+        ],
+        "frequency": 1026,
+        "primary": false
+      },
+      {
+        "area": [
+          "世羅"
+        ],
+        "frequency": 1224,
+        "primary": false
+      }
+    ],
+    "frequencies_fm": [
+      {
+        "area": [
+          "尾道"
+        ],
+        "frequency": 93.6,
+        "primary": true
+      },
+      {
+        "area": [
+          "大崎"
+        ],
+        "frequency": 90.9,
+        "primary": false
+      }
+    ]
+  },
+  "JOAK-FM": {
+    "area": [
+      "JP34"
+    ],
+    "type": "FM",
+    "name": "NHK-FM（東京）",
+    "frequencies_fm": [
+      {
+        "area": [
+          "広島"
+        ],
+        "frequency": 88.3,
+        "primary": true
+      },
+      {
+        "area": [
+          "三次"
+        ],
+        "frequency": 84.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "大崎"
+        ],
+        "frequency": 84.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "西条"
+        ],
+        "frequency": 83.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "呉"
+        ],
+        "frequency": 83.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "安芸千代田"
+        ],
+        "frequency": 83,
+        "primary": false
+      },
+      {
+        "area": [
+          "黒瀬"
+        ],
+        "frequency": 82.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "吉田"
+        ],
+        "frequency": 85.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "東城"
+        ],
+        "frequency": 83.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "南加計"
+        ],
+        "frequency": 82,
+        "primary": false
+      },
+      {
+        "area": [
+          "大朝"
+        ],
+        "frequency": 83.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "安芸佐伯"
+        ],
+        "frequency": 88.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "豊栄"
+        ],
+        "frequency": 81.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "西城"
+        ],
+        "frequency": 85.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "佐東"
+        ],
+        "frequency": 84.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "可部"
+        ],
+        "frequency": 83.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "五日市"
+        ],
+        "frequency": 80.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "尾道"
+        ],
+        "frequency": 84.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "府中"
+        ],
+        "frequency": 84.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "福山南"
+        ],
+        "frequency": 85.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "三原"
+        ],
+        "frequency": 83.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "因島"
+        ],
+        "frequency": 83.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "世羅甲山"
+        ],
+        "frequency": 82.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "甲奴"
+        ],
+        "frequency": 83.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "油木"
+        ],
+        "frequency": 82.6,
+        "primary": false
+      }
+    ]
+  }
+}

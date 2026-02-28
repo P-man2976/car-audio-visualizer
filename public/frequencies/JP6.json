@@ -1,0 +1,193 @@
+{
+  "$schema": "../schema.json",
+  "YBC": {
+    "area": [
+      "JP6"
+    ],
+    "type": "AM",
+    "name": "YBC山形放送",
+    "frequencies_am": [
+      {
+        "area": [
+          "山形",
+          "鶴岡",
+          "米沢",
+          "新庄",
+          "酒田",
+          "小国"
+        ],
+        "frequency": 918,
+        "primary": true
+      }
+    ],
+    "frequencies_fm": [
+      {
+        "area": [
+          "山形"
+        ],
+        "frequency": 92.4,
+        "primary": true
+      }
+    ]
+  },
+  "RFM": {
+    "area": [
+      "JP6"
+    ],
+    "type": "FM",
+    "name": "Rhythm Station　エフエム山形",
+    "frequencies_fm": [
+      {
+        "area": [
+          "山形"
+        ],
+        "frequency": 80.4,
+        "primary": true
+      },
+      {
+        "area": [
+          "新庄"
+        ],
+        "frequency": 78.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "米沢"
+        ],
+        "frequency": 77.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "鶴岡"
+        ],
+        "frequency": 76.9,
+        "primary": false
+      }
+    ]
+  },
+  "JOHK": {
+    "area": [
+      "JP6"
+    ],
+    "type": "AM",
+    "name": "NHKラジオ第1（仙台）",
+    "frequencies_am": [
+      {
+        "area": [
+          "山形"
+        ],
+        "frequency": 540,
+        "primary": true
+      },
+      {
+        "area": [
+          "鶴岡"
+        ],
+        "frequency": 1368,
+        "primary": false
+      },
+      {
+        "area": [
+          "米沢"
+        ],
+        "frequency": 1026,
+        "primary": false
+      },
+      {
+        "area": [
+          "新庄"
+        ],
+        "frequency": 1341,
+        "primary": false
+      },
+      {
+        "area": [
+          "温海"
+        ],
+        "frequency": 1584,
+        "primary": false
+      },
+      {
+        "area": [
+          "小国"
+        ],
+        "frequency": 1584,
+        "primary": false
+      }
+    ]
+  },
+  "JOAK-FM": {
+    "area": [
+      "JP6"
+    ],
+    "type": "FM",
+    "name": "NHK-FM（東京）",
+    "frequencies_fm": [
+      {
+        "area": [
+          "山形"
+        ],
+        "frequency": 82.1,
+        "primary": true
+      },
+      {
+        "area": [
+          "長井"
+        ],
+        "frequency": 84.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "新庄"
+        ],
+        "frequency": 88.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "小国"
+        ],
+        "frequency": 89.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "白鷹"
+        ],
+        "frequency": 84,
+        "primary": false
+      },
+      {
+        "area": [
+          "朝日"
+        ],
+        "frequency": 83.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "米沢"
+        ],
+        "frequency": 84.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "鶴岡"
+        ],
+        "frequency": 86,
+        "primary": false
+      },
+      {
+        "area": [
+          "温海"
+        ],
+        "frequency": 84.8,
+        "primary": false
+      }
+    ]
+  }
+}

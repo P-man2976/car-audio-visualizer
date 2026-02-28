@@ -1,0 +1,165 @@
+{
+  "$schema": "../schema.json",
+  "TBC": {
+    "area": [
+      "JP4"
+    ],
+    "type": "AM",
+    "name": "TBCラジオ",
+    "frequencies_am": [
+      {
+        "area": [
+          "仙台"
+        ],
+        "frequency": 1260,
+        "primary": true
+      },
+      {
+        "area": [
+          "気仙沼"
+        ],
+        "frequency": 801,
+        "primary": false
+      },
+      {
+        "area": [
+          "志津川"
+        ],
+        "frequency": 1215,
+        "primary": false
+      },
+      {
+        "area": [
+          "鳴子"
+        ],
+        "frequency": 1557,
+        "primary": false
+      }
+    ]
+  },
+  "DATEFM": {
+    "area": [
+      "JP4"
+    ],
+    "type": "FM",
+    "name": "Date fm エフエム仙台",
+    "frequencies_fm": [
+      {
+        "area": [
+          "仙台"
+        ],
+        "frequency": 77.1,
+        "primary": true
+      },
+      {
+        "area": [
+          "気仙沼"
+        ],
+        "frequency": 81.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "志津川"
+        ],
+        "frequency": 84.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "鳴子"
+        ],
+        "frequency": 84.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "白石"
+        ],
+        "frequency": 81.4,
+        "primary": false
+      }
+    ]
+  },
+  "JOHK": {
+    "area": [
+      "JP4"
+    ],
+    "type": "AM",
+    "name": "NHKラジオ第1（仙台）",
+    "frequencies_am": [
+      {
+        "area": [
+          "仙台"
+        ],
+        "frequency": 891,
+        "primary": true
+      },
+      {
+        "area": [
+          "気仙沼"
+        ],
+        "frequency": 1161,
+        "primary": false
+      },
+      {
+        "area": [
+          "鳴子"
+        ],
+        "frequency": 1161,
+        "primary": false
+      },
+      {
+        "area": [
+          "志津川"
+        ],
+        "frequency": 981,
+        "primary": false
+      }
+    ]
+  },
+  "JOAK-FM": {
+    "area": [
+      "JP4"
+    ],
+    "type": "FM",
+    "name": "NHK-FM（東京）",
+    "frequencies_fm": [
+      {
+        "area": [
+          "仙台"
+        ],
+        "frequency": 82.5,
+        "primary": true
+      },
+      {
+        "area": [
+          "鳴子"
+        ],
+        "frequency": 85.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "気仙沼"
+        ],
+        "frequency": 84.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "白石"
+        ],
+        "frequency": 84.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "志津川"
+        ],
+        "frequency": 85.2,
+        "primary": false
+      }
+    ]
+  }
+}

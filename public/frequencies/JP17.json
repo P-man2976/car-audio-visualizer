@@ -1,0 +1,197 @@
+{
+  "$schema": "../schema.json",
+  "MRO": {
+    "area": [
+      "JP17"
+    ],
+    "type": "AM",
+    "name": "MROラジオ",
+    "frequencies_am": [
+      {
+        "area": [
+          "金沢",
+          "七尾",
+          "輪島"
+        ],
+        "frequency": 1107,
+        "primary": true
+      },
+      {
+        "area": [
+          "山中"
+        ],
+        "frequency": 1485,
+        "primary": false
+      }
+    ]
+  },
+  "HELLOFIVE": {
+    "area": [
+      "JP17"
+    ],
+    "type": "FM",
+    "name": "エフエム石川",
+    "frequencies_fm": [
+      {
+        "area": [
+          "金沢"
+        ],
+        "frequency": 80.5,
+        "primary": true
+      },
+      {
+        "area": [
+          "七尾"
+        ],
+        "frequency": 78.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "珠洲"
+        ],
+        "frequency": 81.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "羽咋"
+        ],
+        "frequency": 85.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "輪島"
+        ],
+        "frequency": 89.9,
+        "primary": false
+      }
+    ]
+  },
+  "JOCK": {
+    "area": [
+      "JP17"
+    ],
+    "type": "AM",
+    "name": "NHKラジオ第1（名古屋）",
+    "frequencies_am": [
+      {
+        "area": [
+          "金沢"
+        ],
+        "frequency": 1224,
+        "primary": true
+      },
+      {
+        "area": [
+          "七尾"
+        ],
+        "frequency": 540,
+        "primary": false
+      },
+      {
+        "area": [
+          "輪島"
+        ],
+        "frequency": 1584,
+        "primary": false
+      },
+      {
+        "area": [
+          "山中"
+        ],
+        "frequency": 1026,
+        "primary": false
+      }
+    ],
+    "frequencies_fm": [
+      {
+        "area": [
+          "輪島門前"
+        ],
+        "frequency": 79.5,
+        "primary": true
+      },
+      {
+        "area": [
+          "能登柳田"
+        ],
+        "frequency": 87.7,
+        "primary": false
+      }
+    ]
+  },
+  "JOAK-FM": {
+    "area": [
+      "JP17"
+    ],
+    "type": "FM",
+    "name": "NHK-FM（東京）",
+    "frequencies_fm": [
+      {
+        "area": [
+          "金沢"
+        ],
+        "frequency": 82.2,
+        "primary": true
+      },
+      {
+        "area": [
+          "七尾"
+        ],
+        "frequency": 84.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "輪島"
+        ],
+        "frequency": 83.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "珠洲"
+        ],
+        "frequency": 83.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "富来"
+        ],
+        "frequency": 85.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "羽咋"
+        ],
+        "frequency": 83,
+        "primary": false
+      },
+      {
+        "area": [
+          "東門前"
+        ],
+        "frequency": 84.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "輪島町野"
+        ],
+        "frequency": 83.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "山中"
+        ],
+        "frequency": 84.2,
+        "primary": false
+      }
+    ]
+  }
+}

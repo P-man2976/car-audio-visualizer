@@ -1,0 +1,287 @@
+{
+  "$schema": "../schema.json",
+  "BSN": {
+    "area": [
+      "JP15"
+    ],
+    "type": "AM",
+    "name": "ＢＳＮラジオ",
+    "frequencies_am": [
+      {
+        "area": [
+          "新潟"
+        ],
+        "frequency": 1116,
+        "primary": true
+      },
+      {
+        "area": [
+          "小出"
+        ],
+        "frequency": 1026,
+        "primary": false
+      },
+      {
+        "area": [
+          "長岡",
+          "柏崎",
+          "十日町"
+        ],
+        "frequency": 1062,
+        "primary": false
+      },
+      {
+        "area": [
+          "塩沢"
+        ],
+        "frequency": 1485,
+        "primary": false
+      },
+      {
+        "area": [
+          "上越",
+          "糸魚川"
+        ],
+        "frequency": 1530,
+        "primary": false
+      }
+    ]
+  },
+  "FMNIIGATA": {
+    "area": [
+      "JP15"
+    ],
+    "type": "FM",
+    "name": "FM NIIGATA",
+    "frequencies_fm": [
+      {
+        "area": [
+          "新潟"
+        ],
+        "frequency": 77.5,
+        "primary": true
+      },
+      {
+        "area": [
+          "高田"
+        ],
+        "frequency": 84.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "大和"
+        ],
+        "frequency": 86.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "安塚"
+        ],
+        "frequency": 80.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "糸魚川"
+        ],
+        "frequency": 79.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "越後湯沢"
+        ],
+        "frequency": 81.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "津川"
+        ],
+        "frequency": 80.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "津南"
+        ],
+        "frequency": 80.2,
+        "primary": false
+      }
+    ]
+  },
+  "JOAK": {
+    "area": [
+      "JP15"
+    ],
+    "type": "AM",
+    "name": "NHKラジオ第1（東京）",
+    "frequencies_am": [
+      {
+        "area": [
+          "新潟"
+        ],
+        "frequency": 837,
+        "primary": true
+      },
+      {
+        "area": [
+          "高田"
+        ],
+        "frequency": 792,
+        "primary": false
+      },
+      {
+        "area": [
+          "津南"
+        ],
+        "frequency": 1161,
+        "primary": false
+      },
+      {
+        "area": [
+          "糸魚川"
+        ],
+        "frequency": 999,
+        "primary": false
+      },
+      {
+        "area": [
+          "六日町"
+        ],
+        "frequency": 1323,
+        "primary": false
+      },
+      {
+        "area": [
+          "柏崎"
+        ],
+        "frequency": 981,
+        "primary": false
+      },
+      {
+        "area": [
+          "十日町"
+        ],
+        "frequency": 1341,
+        "primary": false
+      },
+      {
+        "area": [
+          "小出"
+        ],
+        "frequency": 1368,
+        "primary": false
+      }
+    ]
+  },
+  "JOAK-FM": {
+    "area": [
+      "JP15"
+    ],
+    "type": "FM",
+    "name": "NHK-FM（東京）",
+    "frequencies_fm": [
+      {
+        "area": [
+          "新潟"
+        ],
+        "frequency": 82.3,
+        "primary": true
+      },
+      {
+        "area": [
+          "高田"
+        ],
+        "frequency": 86,
+        "primary": false
+      },
+      {
+        "area": [
+          "大和"
+        ],
+        "frequency": 83.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "津南"
+        ],
+        "frequency": 87,
+        "primary": false
+      },
+      {
+        "area": [
+          "相川"
+        ],
+        "frequency": 87.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "糸魚川"
+        ],
+        "frequency": 85.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "津川"
+        ],
+        "frequency": 85.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "越後湯沢"
+        ],
+        "frequency": 85.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "両津"
+        ],
+        "frequency": 86.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "高千"
+        ],
+        "frequency": 86.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "松代"
+        ],
+        "frequency": 84.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "府屋"
+        ],
+        "frequency": 85.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "能生"
+        ],
+        "frequency": 85.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "安塚"
+        ],
+        "frequency": 85.2,
+        "primary": false
+      }
+    ]
+  }
+}

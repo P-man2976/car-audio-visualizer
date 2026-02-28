@@ -1,0 +1,282 @@
+{
+  "$schema": "../schema.json",
+  "SBS": {
+    "area": [
+      "JP22"
+    ],
+    "type": "AM",
+    "name": "SBSラジオ",
+    "frequencies_am": [
+      {
+        "area": [
+          "静岡",
+          "浜松",
+          "御殿場",
+          "三島",
+          "掛川",
+          "天竜",
+          "春野",
+          "龍山",
+          "佐久間",
+          "水窪"
+        ],
+        "frequency": 1404,
+        "primary": true
+      },
+      {
+        "area": [
+          "熱海",
+          "富士宮"
+        ],
+        "frequency": 1557,
+        "primary": false
+      }
+    ]
+  },
+  "K-MIX": {
+    "area": [
+      "JP22"
+    ],
+    "type": "FM",
+    "name": "K-MIX",
+    "frequencies_fm": [
+      {
+        "area": [
+          "静岡"
+        ],
+        "frequency": 79.2,
+        "primary": true
+      },
+      {
+        "area": [
+          "浜松"
+        ],
+        "frequency": 78.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "伊豆長岡"
+        ],
+        "frequency": 86.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "熱海"
+        ],
+        "frequency": 83,
+        "primary": false
+      },
+      {
+        "area": [
+          "島田"
+        ],
+        "frequency": 85.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "掛川"
+        ],
+        "frequency": 80.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "御殿場"
+        ],
+        "frequency": 81.6,
+        "primary": false
+      },
+      {
+        "area": [
+          "富士"
+        ],
+        "frequency": 85.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "下田"
+        ],
+        "frequency": 80.5,
+        "primary": false
+      },
+      {
+        "area": [
+          "東伊豆"
+        ],
+        "frequency": 78.6,
+        "primary": false
+      }
+    ]
+  },
+  "JOCK": {
+    "area": [
+      "JP22"
+    ],
+    "type": "AM",
+    "name": "NHKラジオ第1（名古屋）",
+    "frequencies_am": [
+      {
+        "area": [
+          "静岡"
+        ],
+        "frequency": 882,
+        "primary": true
+      },
+      {
+        "area": [
+          "浜松"
+        ],
+        "frequency": 576,
+        "primary": false
+      },
+      {
+        "area": [
+          "熱海"
+        ],
+        "frequency": 1161,
+        "primary": false
+      },
+      {
+        "area": [
+          "御殿場"
+        ],
+        "frequency": 1026,
+        "primary": false
+      },
+      {
+        "area": [
+          "水窪"
+        ],
+        "frequency": 1584,
+        "primary": false
+      }
+    ],
+    "frequencies_fm": [
+      {
+        "area": [
+          "富士宮"
+        ],
+        "frequency": 88.2,
+        "primary": true
+      }
+    ]
+  },
+  "JOAK-FM": {
+    "area": [
+      "JP22"
+    ],
+    "type": "FM",
+    "name": "NHK-FM（東京）",
+    "frequencies_fm": [
+      {
+        "area": [
+          "静岡"
+        ],
+        "frequency": 88.8,
+        "primary": true
+      },
+      {
+        "area": [
+          "島田"
+        ],
+        "frequency": 83,
+        "primary": false
+      },
+      {
+        "area": [
+          "下田"
+        ],
+        "frequency": 84.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "芝川"
+        ],
+        "frequency": 84.9,
+        "primary": false
+      },
+      {
+        "area": [
+          "熱海"
+        ],
+        "frequency": 84.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "伊豆長岡"
+        ],
+        "frequency": 85.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "東伊豆"
+        ],
+        "frequency": 83.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "御殿場"
+        ],
+        "frequency": 83.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "河津"
+        ],
+        "frequency": 82.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "浜松"
+        ],
+        "frequency": 82.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "佐久間"
+        ],
+        "frequency": 84.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "中川根"
+        ],
+        "frequency": 83.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "水窪"
+        ],
+        "frequency": 84.1,
+        "primary": false
+      },
+      {
+        "area": [
+          "東佐久間"
+        ],
+        "frequency": 83.8,
+        "primary": false
+      },
+      {
+        "area": [
+          "春野"
+        ],
+        "frequency": 84.5,
+        "primary": false
+      }
+    ]
+  }
+}

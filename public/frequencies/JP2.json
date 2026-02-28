@@ -1,0 +1,225 @@
+{
+  "$schema": "../schema.json",
+  "RAB": {
+    "area": [
+      "JP2"
+    ],
+    "type": "AM",
+    "name": "ＲＡＢ青森放送",
+    "frequencies_am": [
+      {
+        "area": [
+          "青森"
+        ],
+        "frequency": 1233,
+        "primary": true
+      },
+      {
+        "area": [
+          "野辺地"
+        ],
+        "frequency": 1062,
+        "primary": false
+      },
+      {
+        "area": [
+          "弘前"
+        ],
+        "frequency": 1215,
+        "primary": false
+      },
+      {
+        "area": [
+          "八戸",
+          "深浦",
+          "十和田"
+        ],
+        "frequency": 1485,
+        "primary": false
+      }
+    ],
+    "frequencies_fm": [
+      {
+        "area": [
+          "青森"
+        ],
+        "frequency": 91.7,
+        "primary": true
+      },
+      {
+        "area": [
+          "八戸"
+        ],
+        "frequency": 92.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "野辺地陸奥湾"
+        ],
+        "frequency": 93.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "大間下北"
+        ],
+        "frequency": 78.8,
+        "primary": false
+      }
+    ]
+  },
+  "AFB": {
+    "area": [
+      "JP2"
+    ],
+    "type": "FM",
+    "name": "エフエム青森",
+    "frequencies_fm": [
+      {
+        "area": [
+          "八戸"
+        ],
+        "frequency": 78.4,
+        "primary": true
+      },
+      {
+        "area": [
+          "深浦"
+        ],
+        "frequency": 78.2,
+        "primary": false
+      },
+      {
+        "area": [
+          "青森"
+        ],
+        "frequency": 80,
+        "primary": false
+      },
+      {
+        "area": [
+          "むつ"
+        ],
+        "frequency": 81.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "上北"
+        ],
+        "frequency": 84.3,
+        "primary": false
+      }
+    ]
+  },
+  "JOHK": {
+    "area": [
+      "JP2"
+    ],
+    "type": "AM",
+    "name": "NHKラジオ第1（仙台）",
+    "frequencies_am": [
+      {
+        "area": [
+          "青森"
+        ],
+        "frequency": 963,
+        "primary": true
+      },
+      {
+        "area": [
+          "弘前"
+        ],
+        "frequency": 846,
+        "primary": false
+      },
+      {
+        "area": [
+          "八戸"
+        ],
+        "frequency": 999,
+        "primary": false
+      },
+      {
+        "area": [
+          "深浦"
+        ],
+        "frequency": 1584,
+        "primary": false
+      },
+      {
+        "area": [
+          "十和田"
+        ],
+        "frequency": 1161,
+        "primary": false
+      },
+      {
+        "area": [
+          "田子"
+        ],
+        "frequency": 1026,
+        "primary": false
+      },
+      {
+        "area": [
+          "野辺地"
+        ],
+        "frequency": 846,
+        "primary": false
+      }
+    ]
+  },
+  "JOAK-FM": {
+    "area": [
+      "JP2"
+    ],
+    "type": "FM",
+    "name": "NHK-FM（東京）",
+    "frequencies_fm": [
+      {
+        "area": [
+          "青森"
+        ],
+        "frequency": 86,
+        "primary": true
+      },
+      {
+        "area": [
+          "むつ"
+        ],
+        "frequency": 82.7,
+        "primary": false
+      },
+      {
+        "area": [
+          "上北烏帽子"
+        ],
+        "frequency": 83.4,
+        "primary": false
+      },
+      {
+        "area": [
+          "深浦"
+        ],
+        "frequency": 84.3,
+        "primary": false
+      },
+      {
+        "area": [
+          "南鰺ケ沢"
+        ],
+        "frequency": 85,
+        "primary": false
+      },
+      {
+        "area": [
+          "八戸"
+        ],
+        "frequency": 81.8,
+        "primary": false
+      }
+    ]
+  }
+}
