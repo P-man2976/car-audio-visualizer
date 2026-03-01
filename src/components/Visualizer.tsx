@@ -18,7 +18,7 @@ export function VisualizerSwitch() {
 			<>
 				<VisualizerKenwood />
 				<VisualizerKenwoodSub />
-				<DotMatrixArray y={-55} />
+				<DotMatrixArray y={-43} />
 			</>
 		);
 	}
