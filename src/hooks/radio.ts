@@ -9,7 +9,7 @@ import {
 import { useHLS } from "./hls";
 import { useRadikoM3u8Url, useRadikoStationList } from "@/services/radiko";
 import { useRadioFrequencies } from "@/services/radio";
-import type { Radio } from "@/types/radio";
+import type { Radio, RadioType } from "@/types/radio";
 
 /** FM バンド周波数範囲 (MHz) — 76〜99 MHz (ワイドFM含む日本の FM バンド全域) */
 const FM_MIN = 76.0;
@@ -17,6 +17,127 @@ const FM_MAX = 99.0;
 /** AM バンド周波数範囲 (kHz) — 531〜1602 kHz (9kHz ステップ) */
 const AM_MIN = 531;
 const AM_MAX = 1602;
+
+type TunableEntry = {
+	id: string;
+	name: string;
+	type: "AM" | "FM";
+	freq: number;
+	logo: string | undefined;
+};
+
+/**
+ * 周波数でソートされた選局可能な局一覧を返すフック。
+ * useRadioPlayer と useBandToggle/チャンネルショートカットで共用する。
+ */
+export function useTunableStations(): TunableEntry[] {
+	const customFreqList = useAtomValue(customFrequencyAreaAtom);
+	const { data: frequencies } = useRadioFrequencies();
+	const { data: radikoStationList } = useRadikoStationList();
+
+	return useMemo(() => {
+		if (!frequencies || !radikoStationList) return [];
+
+		const entries: TunableEntry[] = [];
+
+		for (const station of radikoStationList) {
+			const freqData = frequencies[station.id];
+			if (!freqData) continue;
+
+			const customFreq = customFreqList.find((s) => s.id === station.id);
+
+			// ─── カスタム設定あり: その周波数 1 件のみ ───
+			if (customFreq) {
+				entries.push({
+					id: station.id,
+					name: station.name,
+					type: customFreq.type,
+					freq: customFreq.freq,
+					logo: station.logo?.[0],
+				});
+				continue;
+			}
+
+			// ─── カスタム設定なし ───
+			const hasAM = freqData.type === "AM";
+
+			if (hasAM) {
+				const amArea =
+					freqData.frequencies_am!.find((a) => a.primary) ??
+					freqData.frequencies_am![0];
+				entries.push({
+					id: station.id,
+					name: station.name,
+					type: "AM",
+					freq: amArea.frequency,
+					logo: station.logo?.[0],
+				});
+
+				const primaryFmArea = freqData.frequencies_fm?.find((a) => a.primary);
+				if (primaryFmArea) {
+					entries.push({
+						id: station.id,
+						name: station.name,
+						type: "FM",
+						freq: primaryFmArea.frequency,
+						logo: station.logo?.[0],
+					});
+				}
+			} else {
+				const fmArea =
+					freqData.frequencies_fm!.find((a) => a.primary) ??
+					freqData.frequencies_fm![0];
+				entries.push({
+					id: station.id,
+					name: station.name,
+					type: "FM",
+					freq: fmArea.frequency,
+					logo: station.logo?.[0],
+				});
+			}
+		}
+
+		return entries.sort((a, b) => {
+			if (a.type !== b.type) return a.type === "FM" ? -1 : 1;
+			return a.freq - b.freq;
+		});
+	}, [frequencies, radikoStationList, customFreqList]);
+}
+
+/**
+ * FM/AM バンド切り替えフック。
+ * キュー内の最新局を探してバンドを切り替える。なければ最初のチューナブル局へ。
+ */
+export function useBandToggle() {
+	const currentRadio = useAtomValue(currentRadioAtom);
+	const queue = useAtomValue(queueAtom);
+	const tunableStations = useTunableStations();
+	const selectRadio = useSelectRadio();
+
+	return useCallback(() => {
+		if (!currentRadio) return;
+		const targetBand: RadioType = currentRadio.type === "FM" ? "AM" : "FM";
+
+		// キュー内の最新局を探す
+		const lastOfBand = queue.find((r) => r.type === targetBand);
+		if (lastOfBand) {
+			selectRadio(lastOfBand);
+			return;
+		}
+		// なければ最初のチューナブル局へ
+		const first = tunableStations.find((s) => s.type === targetBand);
+		if (first) {
+			selectRadio({
+				type: first.type,
+				source: "radiko",
+				id: first.id,
+				name: first.name,
+				logo: first.logo,
+				frequency: first.freq,
+			});
+		}
+	}, [currentRadio, queue, tunableStations, selectRadio]);
+}
 
 /**
  * 局を選択してそのまま HLS ロードまで一気に行うフック。
@@ -63,11 +184,9 @@ export function useRadioPlayer() {
 	const currentSrc = useAtomValue(currentSrcAtom);
 	const currentRadio = useAtomValue(currentRadioAtom);
 	const setTuningFreq = useSetAtom(tuningFreqAtom);
-	const customFreqList = useAtomValue(customFrequencyAreaAtom);
 	const { load, unLoad } = useHLS();
 	const { mutate } = useRadikoM3u8Url();
-	const { data: frequencies } = useRadioFrequencies();
-	const { data: radikoStationList } = useRadikoStationList();
+	const tunableStations = useTunableStations();
 	const selectRadio = useSelectRadio();
 
 	const tuningTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -93,92 +212,6 @@ export function useRadioPlayer() {
 			if (tuningTimerRef.current) clearInterval(tuningTimerRef.current);
 		};
 	}, []);
-
-	/**
-	 * 周波数でソートされた選局可能な局一覧。
-	 *
-	 * - customFrequencyAreaAtom に設定がある局: その 1 エントリのみ追加
-	 * - AM+FM 併設局（設定なし）: AM primary + FM primary（primary:true がなければ FM は追加しない）
-	 * - FM 専用局（設定なし）: FM primary（なければ index 0 の周波数）
-	 */
-	const tunableStations = useMemo(() => {
-		if (!frequencies || !radikoStationList) return [];
-
-		type Entry = {
-			id: string;
-			name: string;
-			type: "AM" | "FM";
-			freq: number;
-			logo: string | undefined;
-		};
-
-		const entries: Entry[] = [];
-
-		for (const station of radikoStationList) {
-			const freqData = frequencies[station.id];
-			if (!freqData) continue;
-
-			const customFreq = customFreqList.find((s) => s.id === station.id);
-
-			// ─── カスタム設定あり: その周波数 1 件のみ ───
-			if (customFreq) {
-				entries.push({
-					id: station.id,
-					name: station.name,
-					type: customFreq.type,
-					freq: customFreq.freq,
-					logo: station.logo?.[0],
-				});
-				continue;
-			}
-
-			// ─── カスタム設定なし ───
-			const hasAM = freqData.type === "AM";
-
-			if (hasAM) {
-				// AM エントリ（primary があれば優先、なければ index 0）
-				const amArea =
-					freqData.frequencies_am!.find((a) => a.primary) ??
-					freqData.frequencies_am![0];
-				entries.push({
-					id: station.id,
-					name: station.name,
-					type: "AM",
-					freq: amArea.frequency,
-					logo: station.logo?.[0],
-				});
-
-				// AM+FM 併設局: primary:true の FM 周波数がある場合のみ FM エントリを追加
-				const primaryFmArea = freqData.frequencies_fm?.find((a) => a.primary);
-				if (primaryFmArea) {
-					entries.push({
-						id: station.id,
-						name: station.name,
-						type: "FM",
-						freq: primaryFmArea.frequency,
-						logo: station.logo?.[0],
-					});
-				}
-			} else {
-				// FM 専用局（primary があれば優先、なければ index 0）
-				const fmArea =
-					freqData.frequencies_fm!.find((a) => a.primary) ??
-					freqData.frequencies_fm![0];
-				entries.push({
-					id: station.id,
-					name: station.name,
-					type: "FM",
-					freq: fmArea.frequency,
-					logo: station.logo?.[0],
-				});
-			}
-		}
-
-		return entries.sort((a, b) => {
-			if (a.type !== b.type) return a.type === "FM" ? -1 : 1;
-			return a.freq - b.freq;
-		});
-	}, [frequencies, radikoStationList, customFreqList]);
 
 	/** 停止中に現在局を再ロードして再生 */
 	const playRadio = useCallback(() => {

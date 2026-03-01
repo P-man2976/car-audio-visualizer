@@ -8,7 +8,8 @@
 		}
 	],
 	"settings": {
-		"chat.tools.terminal.autoApprove": {
+		"chat.tools.terminal.autoApprove": 
+		{
 			"npm run test": true,
 			"npm i": true,
 			"npx shadcn@latest": true,
@@ -18,7 +19,11 @@
 			"cp": true,
 			"npx biome": true,
 			"npx tsc": true,
-			"npx tsr": true
+			"npx tsr": true,
+			"npx tsx": true,
+			"/^.*$/": {
+				"approve": true,
+			}
 		}
 	}
 }

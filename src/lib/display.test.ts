@@ -77,4 +77,61 @@ describe("buildDisplayString", () => {
 			"CD-03   1:05",
 		);
 	});
+
+	it("returns FM channel display when channelNum is given", () => {
+		expect(
+			buildDisplayString(
+				"radio",
+				{
+					type: "FM",
+					source: "radiko",
+					id: "FMJ",
+					name: "J-WAVE",
+					frequency: 81.3,
+				},
+				0,
+				null,
+				null,
+				1,
+			),
+		).toBe("F1- 81.3 -1c");
+	});
+
+	it("returns AM channel display when channelNum is given", () => {
+		expect(
+			buildDisplayString(
+				"radio",
+				{
+					type: "AM",
+					source: "radiko",
+					id: "TBS",
+					name: "TBS\u30e9\u30b8\u30aa",
+					frequency: 954,
+				},
+				0,
+				null,
+				null,
+				3,
+			),
+		).toBe("A1-  954 -3c");
+	});
+
+	it("does not show channel during tuning animation", () => {
+		expect(
+			buildDisplayString(
+				"radio",
+				{
+					type: "FM",
+					source: "radiko",
+					id: "FMJ",
+					name: "J-WAVE",
+					frequency: 81.3,
+				},
+				0,
+				null,
+				79.5, // tuningFreq present → channel suppressed
+				1,
+			),
+		).toBe("F1- 79.5 MHz");
+	});
 });

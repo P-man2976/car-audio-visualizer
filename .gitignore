@@ -25,4 +25,5 @@ dist-ssr
 # heroui-agents-md
 .heroui-docs/
 
-.env.wrangler/
+.env
+.wrangler/

@@ -32,9 +32,10 @@ import { useFilePlayer } from "@/hooks/file";
 import { useMediaSession } from "@/hooks/mediaSession";
 import { usePlayer } from "@/hooks/player";
 import { usePiP } from "@/hooks/pip";
-import { useRadioPlayer } from "@/hooks/radio";
+import { useBandToggle, useRadioPlayer } from "@/hooks/radio";
 import { useAppHotkeys } from "@/hooks/hotkeys";
 import { useLastfmScrobble } from "@/hooks/lastfm";
+import { useRestoreState } from "@/hooks/restore";
 import { MenuSheet } from "./MenuSheet";
 import { QueueSheet } from "./QueueSheet";
 import { ProgressSlider } from "./player/ProgressSlider";
@@ -53,10 +54,12 @@ export function ControlsOverlay() {
 
 	const { isPlaying, play, pause, next, prev } = usePlayer();
 	const { playRadio, stopRadio, tune } = useRadioPlayer();
+	const toggleBand = useBandToggle();
 	useFilePlayer();
 	const { isPiP, enterPiP, exitPiP, isSupported: isPiPSupported } = usePiP();
 	useAppHotkeys({ enterPiP, exitPiP, isPiP });
 	useLastfmScrobble();
+	useRestoreState();
 
 	const title = useMemo(() => {
 		switch (currentSrc) {
@@ -178,6 +181,18 @@ export function ControlsOverlay() {
 								</Button>
 							)}
 							{/* ファイル: 前のトラック / ラジオ: 周波数を下げる */}
+							{/* ラジオ: FM/AM バンド切り替え */}
+							{currentSrc === "radio" && (
+								<Button
+									size="icon-lg"
+									variant="ghost"
+									className="p-2 w-12 font-mono text-xs font-bold tracking-wider"
+									onClick={toggleBand}
+									aria-label="FM/AM バンド切り替え"
+								>
+									{currentRadio?.type ?? "FM"}
+								</Button>
+							)}
 							{currentSrc === "file" && (
 								<Button
 									size="icon-lg"

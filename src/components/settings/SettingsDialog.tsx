@@ -21,6 +21,7 @@ import {
 	normalizeKey,
 	settingsOpenAtom,
 } from "@/atoms/hotkeys";
+import { visualizerStyleAtom, type VisualizerStyle } from "@/atoms/visualizer";
 
 export function SettingsDialog() {
 	const [open, setOpen] = useAtom(settingsOpenAtom);
@@ -28,6 +29,7 @@ export function SettingsDialog() {
 	const [capturing, setCapturing] = useState<HotkeyAction | null>(null);
 	const [lastfmSession, setLastfmSession] = useAtom(lastfmSessionAtom);
 	const [lastfmConnecting, setLastfmConnecting] = useState(false);
+	const [visualizerStyle, setVisualizerStyle] = useAtom(visualizerStyleAtom);
 
 	// Last.fm OAuth: ポップアップ or 同一タブリダイレクトで認証する
 	const connectLastfm = useCallback(() => {
@@ -98,6 +100,32 @@ export function SettingsDialog() {
 				</DialogHeader>
 
 				<div className="flex flex-col gap-5 pt-2 overflow-y-auto pr-1">
+					{/* ビジュアライザースタイル */}
+					<div className="flex flex-col gap-3">
+						<span className="text-sm font-medium">ビジュアライザー</span>
+						<div className="flex gap-2">
+							{([
+								{ value: "standard", label: "スタンダード" },
+								{ value: "kenwood", label: "Kenwood" },
+							] as { value: VisualizerStyle; label: string }[]).map(({ value, label }) => (
+								<button
+									key={value}
+									type="button"
+									className={`flex-1 rounded px-3 py-1.5 text-sm border transition-colors ${
+										visualizerStyle === value
+											? "border-neutral-400 bg-neutral-500/40 text-neutral-100"
+											: "border-neutral-700 bg-neutral-900 text-neutral-400 hover:border-neutral-500 hover:text-neutral-300"
+									}`}
+									onClick={() => setVisualizerStyle(value)}
+								>
+									{label}
+								</button>
+							))}
+						</div>
+					</div>
+
+					<Separator />
+
 					{/* Last.fm 連携 */}
 					<div className="flex flex-col gap-3">
 						<span className="text-sm font-medium">Last.fm</span>

@@ -1,10 +1,19 @@
 import { atom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
 import type { Song } from "@/types/player";
 import type { Radio } from "../types/radio";
 
 export type Source = "off" | "radio" | "aux" | "file";
 
-export const currentSrcAtom = atom<Source>("off");
+// aux モードは再起動時に権限が必要なため "off" に戻す
+const _currentSrcAtom = atomWithStorage<Source>("cav-current-src-v2", "off");
+export const currentSrcAtom = atom(
+	(get) => {
+		const src = get(_currentSrcAtom);
+		return src === "aux" ? "off" : src;
+	},
+	(_get, set, value: Source) => set(_currentSrcAtom, value),
+);
 export const isPlayingAtom = atom(false);
 export const progressAtom = atom(0);
 export const volumeAtom = atom(70);

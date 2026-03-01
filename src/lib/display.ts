@@ -8,6 +8,7 @@ export function buildDisplayString(
 	progress: number,
 	song?: Song | null,
 	tuningFreq?: number | null,
+	channelNum?: number | null,
 ): string {
 	if (source === "off") {
 		return "ALL OFF".padEnd(12, " ");
@@ -16,8 +17,16 @@ export function buildDisplayString(
 	if (source === "radio") {
 		const type = radio?.type ?? "FM";
 		const freq = tuningFreq ?? radio?.frequency;
+		// チャンネル表示: チューニングアニメーション中は非表示
+		const ch = tuningFreq == null ? (channelNum ?? null) : null;
 		if (type === "AM") {
+			if (ch != null) {
+				return `A1- ${freq?.toString().padStart(4, " ") ?? "----"} -${ch}c`;
+			}
 			return `A1- ${freq?.toString().padStart(4, " ") ?? "----"} kHz`;
+		}
+		if (ch != null) {
+			return `F1- ${freq?.toFixed(1) ?? "--.-"} -${ch}c`;
 		}
 		return `F1- ${freq?.toFixed(1) ?? "--.-"} MHz`;
 	}
