@@ -11,22 +11,22 @@ import { spectrogramAtom, store } from "./spectrogramStore";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 /** Number of actual frequency bands from the analyzer. */
-const FREQ_COUNT = 9;
+const FREQ_COUNT = 11;
 
-const CELL_HEIGHT = 0.8;
-const COL_CELL_COUNT = 40;
-const COL_CELL_GAP = 0.6;
-const ANALYZER_ANGLE_DEGREE = 24;
+const CELL_HEIGHT = 0.6;
+const COL_CELL_COUNT = 26;
+const COL_CELL_GAP = 0.8;
+const ANALYZER_ANGLE_DEGREE = 20;
 
 /** Each main bar is drawn as two thin sub-columns side by side. */
-const SUB_COL_WIDTH = 4;
+const SUB_COL_WIDTH = 3.6;
 /** Gap between the two sub-columns within one main bar. */
 const SUB_COL_GAP = 0.5;
 /** Total visual width of one main bar (2 sub-cols + internal gap). */
 const MAIN_BAR_WIDTH = SUB_COL_WIDTH * 2 + SUB_COL_GAP; // 5.5
 
 /** Width of the narrow inverted side bar flanking each main bar. */
-const SIDE_BAR_WIDTH = 1;
+const SIDE_BAR_WIDTH = 0.6;
 /** Gap between the main bar edge and its side bar. */
 const SIDE_GAP = 0.5;
 
@@ -34,7 +34,7 @@ const SIDE_GAP = 0.5;
 const SIDE_UNIT = SIDE_BAR_WIDTH + SIDE_GAP; // 2.0
 
 /** Gap between adjacent frequency bands (outside the side bars). */
-const BAND_GAP = 3.0;
+const BAND_GAP = 2.0;
 
 /**
  * Horizontal stride per frequency band:
@@ -59,7 +59,13 @@ const sideRightCX = (fi: number) =>
 const bandCenterCX = (fi: number) =>
 	BAND_STRIDE * fi + SIDE_UNIT + MAIN_BAR_WIDTH / 2;
 
-const FREQ_ARRAY = ["60", "120", "250", "500", "1k", "2k", "4k", "8k", "16k"];
+/**
+ * 1/3-octave ANSI band indices that correspond to the DPX-5021M's 11 EQ bands.
+ * With mode:6 + ansiBands:true + minFreq:20, getBars() returns ~31 bands
+ * starting at 20 Hz. Index mapping: 20,25,31.5,40,50,63,80,100,125,...
+ */
+const BAND_INDICES = [5, 8, 11, 14, 17, 20, 23, 25, 26, 28, 29] as const;
+const FREQ_ARRAY = ["63", "125", "250", "500", "1k", "2k", "4k", "6.3k", "8k", "12.5k", "16k"];
 
 // ─── Y-position helper ────────────────────────────────────────────────────────
 const cellY = (colIndex: number) =>
@@ -84,7 +90,7 @@ function MainCell({
 
 	useFrame(() => {
 		if (!leftRef.current || !rightRef.current) return;
-		const freqLevel = store.get(spectrogramAtom)?.[freqIndex];
+		const freqLevel = store.get(spectrogramAtom)?.[BAND_INDICES[freqIndex]];
 		const value = freqLevel?.value?.[0] ?? 0;
 		const peak = freqLevel?.peak?.[0] ?? 0;
 
@@ -145,7 +151,7 @@ function SideCell({
 
 	useFrame(() => {
 		if (!meshMaterialRef.current) return;
-		const freqLevel = store.get(spectrogramAtom)?.[freqIndex];
+		const freqLevel = store.get(spectrogramAtom)?.[BAND_INDICES[freqIndex]];
 		const value = freqLevel?.value?.[0] ?? 0;
 		meshMaterialRef.current.color = color.set(
 			value * COL_CELL_COUNT <= colIndex ? "#0e7490" : "#050012",
