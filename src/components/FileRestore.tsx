@@ -39,19 +39,25 @@ async function buildSongFromFile(stub: SongStub, file: File): Promise<Song> {
 	return { ...stub, url, artwork };
 }
 
-/** Find a file by name inside a directory (recursive). */
+/** Find a file by name AND fingerprint inside a directory (recursive). */
 async function findFileInDir(
 	dir: FileSystemDirectoryHandle,
-	name: string,
+	stub: SongStub,
 ): Promise<FileSystemFileHandle | null> {
 	for await (const [entryName, handle] of dir.entries()) {
-		if (handle.kind === "file" && entryName === name) {
-			return handle as FileSystemFileHandle;
+		if (handle.kind === "file" && entryName === stub.filename) {
+			const file = await (handle as FileSystemFileHandle).getFile();
+			if (
+				file.size === stub.fileSize &&
+				file.lastModified === stub.fileLastModified
+			) {
+				return handle as FileSystemFileHandle;
+			}
 		}
 		if (handle.kind === "directory") {
 			const found = await findFileInDir(
 				handle as FileSystemDirectoryHandle,
-				name,
+				stub,
 			);
 			if (found) return found;
 		}
@@ -65,7 +71,7 @@ async function rehydrateFromDir(
 ): Promise<Song[]> {
 	const results = await Promise.all(
 		stubs.map(async (stub) => {
-			const h = await findFileInDir(dir, stub.filename);
+			const h = await findFileInDir(dir, stub);
 			if (!h) return null;
 			return buildSongFromFile(stub, await h.getFile());
 		}),
@@ -77,12 +83,22 @@ async function rehydrateFromFileHandles(
 	stubs: SongStub[],
 	handles: FileSystemFileHandle[],
 ): Promise<Song[]> {
-	const byName = new Map(handles.map((h) => [h.name, h]));
 	const results = await Promise.all(
 		stubs.map(async (stub) => {
-			const h = byName.get(stub.filename);
-			if (!h) return null;
-			return buildSongFromFile(stub, await h.getFile());
+			const file = await (async () => {
+				for (const h of handles) {
+					if (h.name !== stub.filename) continue;
+					const f = await h.getFile();
+					if (
+						f.size === stub.fileSize &&
+						f.lastModified === stub.fileLastModified
+					)
+						return f;
+				}
+				return null;
+			})();
+			if (!file) return null;
+			return buildSongFromFile(stub, file);
 		}),
 	);
 	return results.filter((s): s is Song => s !== null);

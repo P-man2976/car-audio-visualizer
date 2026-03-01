@@ -28,6 +28,8 @@ async function fileToSong(file: File): Promise<Song> {
 	return {
 		id: crypto.randomUUID(),
 		filename: file.name,
+		fileSize: file.size,
+		fileLastModified: file.lastModified,
 		url,
 		title,
 		track: { no: track.no ?? undefined, of: track.of ?? undefined },
@@ -91,7 +93,9 @@ export function FilePicker() {
 			const files = await Promise.all(handles.map((h) => h.getFile()));
 			await loadSongs(files);
 			// Persist handles in IDB so they can be restored after reload
-			await saveSessionHandle({ type: "files", handles }).catch(() => undefined);
+			await saveSessionHandle({ type: "files", handles }).catch(
+				() => undefined,
+			);
 		} else {
 			// フォールバック: 隠し input[type=file] を使用
 			inputRef.current?.click();

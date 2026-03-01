@@ -1,61 +1,32 @@
 /**
  * IndexedDB wrapper for persisting FileSystem Access API handles.
  *
+ * Uses idb-keyval for a minimal, promise-based API.
  * FileSystemHandle instances are structured-cloneable and can be stored in
  * IndexedDB (unlike localStorage, which only accepts strings).  Storing a
  * handle does NOT preserve the user-granted permission — permission must be
  * re-requested via handle.requestPermission() after a page reload.
  */
 
+import { createStore, del, get, set } from "idb-keyval";
+
 export type PersistedFSHandle =
 	| { type: "directory"; handle: FileSystemDirectoryHandle }
 	| { type: "files"; handles: FileSystemFileHandle[] };
 
-const DB_NAME = "cav-file-session";
-const STORE_NAME = "handles";
+const store = createStore("cav-file-session", "handles");
 const KEY = "session";
 
-function openDb(): Promise<IDBDatabase> {
-	return new Promise((resolve, reject) => {
-		const req = indexedDB.open(DB_NAME, 1);
-		req.onupgradeneeded = () => {
-			req.result.createObjectStore(STORE_NAME);
-		};
-		req.onsuccess = () => resolve(req.result);
-		req.onerror = () => reject(req.error);
-	});
-}
-
-export async function saveSessionHandle(
-	data: PersistedFSHandle,
-): Promise<void> {
-	const db = await openDb();
-	return new Promise((resolve, reject) => {
-		const tx = db.transaction(STORE_NAME, "readwrite");
-		tx.objectStore(STORE_NAME).put(data, KEY);
-		tx.oncomplete = () => resolve();
-		tx.onerror = () => reject(tx.error);
-	});
+export function saveSessionHandle(data: PersistedFSHandle): Promise<void> {
+	return set(KEY, data, store);
 }
 
 export async function loadSessionHandle(): Promise<PersistedFSHandle | null> {
-	const db = await openDb();
-	return new Promise((resolve, reject) => {
-		const tx = db.transaction(STORE_NAME, "readonly");
-		const req = tx.objectStore(STORE_NAME).get(KEY);
-		req.onsuccess = () => resolve((req.result as PersistedFSHandle) ?? null);
-		req.onerror = () => reject(req.error);
-	});
+	return (await get<PersistedFSHandle>(KEY, store)) ?? null;
 }
 
-export async function clearSessionHandle(): Promise<void> {
-	const db = await openDb();
-	return new Promise((resolve, reject) => {
-		const tx = db.transaction(STORE_NAME, "readwrite");
-		tx.objectStore(STORE_NAME).delete(KEY);
-		tx.oncomplete = () => resolve();
-		tx.onerror = () => reject(tx.error);
-	});
+export function clearSessionHandle(): Promise<void> {
+	return del(KEY, store);
 }
 
 /** Request read permission for all handles in a stored session.

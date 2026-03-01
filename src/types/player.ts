@@ -1,6 +1,10 @@
 export interface Song {
 	id: string;
 	filename: string;
+	/** `File.size` — used to disambiguate files with identical names in different directories */
+	fileSize: number;
+	/** `File.lastModified` (epoch ms) — combined with fileSize forms a stable fingerprint */
+	fileLastModified: number;
 	url: string;
 	artwork?: string;
 	duration?: number;

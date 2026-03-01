@@ -40,6 +40,8 @@ async function fileToSong(
 	return {
 		id: crypto.randomUUID(),
 		filename: file.name,
+		fileSize: file.size,
+		fileLastModified: file.lastModified,
 		url,
 		title,
 		track: { no: track.no ?? undefined, of: track.of ?? undefined },
