@@ -23,6 +23,7 @@ import { LuFolderOpen, LuLoader } from "react-icons/lu";
 import type { SelectedFile } from "@/types/explorer";
 import type { Song } from "@/types/player";
 import { songToStub } from "@/types/player";
+import { saveSessionHandle } from "@/lib/fileSessionDb";
 
 const hasFSAPI = "showDirectoryPicker" in window;
 
@@ -164,6 +165,15 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 				});
 			}
 			setCurrentSrc("file");
+
+			// Persist the root directory handle in IDB for post-reload restoration
+			const rootHandle = stack[0];
+			if (rootHandle) {
+				await saveSessionHandle({
+					type: "directory",
+					handle: rootHandle,
+				}).catch(() => undefined);
+			}
 
 			setSelected([]);
 		},

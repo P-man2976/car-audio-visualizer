@@ -17,7 +17,6 @@ import { RadiruStation } from "./source/RadiruStation";
 import { ScreenShare } from "./source/ScreenShare";
 import { ExplorerDialog } from "./explorer/ExplorerDialog";
 import { FilePicker } from "./FilePicker";
-import { FileRestore } from "./FileRestore";
 import { LayoutGrid, LayoutList } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +49,6 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 
 					<TabsContent className="py-4" value="file">
 						<div className="flex w-full flex-col gap-3">
-							<FileRestore />
 							<FilePicker />
 							{"showDirectoryPicker" in window && (
 								<ExplorerDialog>

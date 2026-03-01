@@ -42,6 +42,7 @@ import { ProgressSlider } from "./player/ProgressSlider";
 import { SongInfo } from "./player/SongInfo";
 import { SourceSheet } from "./SourceSheet";
 import { SettingsDialog } from "./settings/SettingsDialog";
+import { FileRestore } from "./FileRestore";
 
 export function ControlsOverlay() {
 	const currentSrc = useAtomValue(currentSrcAtom);
@@ -108,6 +109,7 @@ export function ControlsOverlay() {
 
 	return (
 		<>
+			<FileRestore />
 			<SettingsDialog />
 			<div className="absolute inset-0 flex w-full flex-col gap-2">
 				{/* Header */}

@@ -14,6 +14,7 @@ import { displayStringAtom } from "@/atoms/display";
 import { StepBack } from "lucide-react";
 import type { Song } from "@/types/player";
 import { songToStub } from "@/types/player";
+import { saveSessionHandle } from "@/lib/fileSessionDb";
 
 /** showOpenFilePicker が使えるかどうか */
 const hasFSA = "showOpenFilePicker" in window;
@@ -89,6 +90,8 @@ export function FilePicker() {
 			if (!handles?.length) return;
 			const files = await Promise.all(handles.map((h) => h.getFile()));
 			await loadSongs(files);
+			// Persist handles in IDB so they can be restored after reload
+			await saveSessionHandle({ type: "files", handles }).catch(() => undefined);
 		} else {
 			// フォールバック: 隠し input[type=file] を使用
 			inputRef.current?.click();

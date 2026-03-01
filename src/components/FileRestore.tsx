@@ -1,6 +1,6 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { parseBlob } from "music-metadata";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
 	currentSongAtom,
 	currentSrcAtom,
@@ -12,12 +12,34 @@ import {
 	songQueueAtom,
 } from "@/atoms/player";
 import type { Song, SongStub } from "@/types/player";
-import { Button } from "@/components/ui/button";
-import { FolderOpen, Loader, X } from "lucide-react";
+import { Loader } from "lucide-react";
+import {
+	clearSessionHandle,
+	loadSessionHandle,
+	requestPermissionForSession,
+	type PersistedFSHandle,
+} from "@/lib/fileSessionDb";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Rehydration helpers ──────────────────────────────────────────────────────
 
-/** Recursively search `dir` for a file with the given name; returns the first match. */
+async function buildSongFromFile(stub: SongStub, file: File): Promise<Song> {
+	const url = URL.createObjectURL(file);
+	let artwork: string | undefined;
+	try {
+		const { common } = await parseBlob(file);
+		if (common.picture?.[0]) {
+			const pic = common.picture[0];
+			artwork = URL.createObjectURL(
+				new Blob([new Uint8Array(pic.data)], { type: pic.format }),
+			);
+		}
+	} catch {
+		// non-fatal
+	}
+	return { ...stub, url, artwork };
+}
+
+/** Find a file by name inside a directory (recursive). */
 async function findFileInDir(
 	dir: FileSystemDirectoryHandle,
 	name: string,
@@ -37,45 +59,60 @@ async function findFileInDir(
 	return null;
 }
 
-/** Reconstruct a full Song from a stub + a file (new blob URLs). */
-async function rehydrateSong(
-	stub: SongStub,
+async function rehydrateFromDir(
+	stubs: SongStub[],
 	dir: FileSystemDirectoryHandle,
-): Promise<Song | null> {
-	const fileHandle = await findFileInDir(dir, stub.filename);
-	if (!fileHandle) return null;
+): Promise<Song[]> {
+	const results = await Promise.all(
+		stubs.map(async (stub) => {
+			const h = await findFileInDir(dir, stub.filename);
+			if (!h) return null;
+			return buildSongFromFile(stub, await h.getFile());
+		}),
+	);
+	return results.filter((s): s is Song => s !== null);
+}
 
-	const file = await fileHandle.getFile();
-	const url = URL.createObjectURL(file);
-
-	let artwork: string | undefined;
-	try {
-		const { common } = await parseBlob(file);
-		if (common.picture?.[0]) {
-			const pic = common.picture[0];
-			artwork = URL.createObjectURL(
-				new Blob([new Uint8Array(pic.data)], { type: pic.format }),
-			);
-		}
-	} catch {
-		// artwork extraction failures are non-fatal
-	}
-
-	return { ...stub, url, artwork };
+async function rehydrateFromFileHandles(
+	stubs: SongStub[],
+	handles: FileSystemFileHandle[],
+): Promise<Song[]> {
+	const byName = new Map(handles.map((h) => [h.name, h]));
+	const results = await Promise.all(
+		stubs.map(async (stub) => {
+			const h = byName.get(stub.filename);
+			if (!h) return null;
+			return buildSongFromFile(stub, await h.getFile());
+		}),
+	);
+	return results.filter((s): s is Song => s !== null);
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+type RestoreState =
+	| { status: "idle" }
+	| { status: "restoring" }
+	| { status: "needs-permission"; stored: PersistedFSHandle }
+	| { status: "done" };
+
 /**
- * Shows a "前回のファイルを復元" banner when there is a persisted file session.
- * The user picks the same directory via showDirectoryPicker; files are matched
- * by filename and restored into the runtime atoms.
+ * Automatically restores a file playback session after page reload.
+ *
+ * On mount it:
+ *   1. Checks for persisted song stubs (via hasPersistedFileSessionAtom)
+ *   2. Loads the FileSystem handle(s) stored in IndexedDB
+ *   3. Calls requestPermission() — Chrome shows a non-blocking permission bar
+ *   4. If granted, rehydrates Songs (new blob URLs) and pushes to runtime atoms
+ *
+ * Place this component outside any Sheet/Dialog so it mounts at app load.
  */
 export function FileRestore() {
 	const hasSession = useAtomValue(hasPersistedFileSessionAtom);
 	const persistedCurrent = useAtomValue(persistedCurrentSongAtom);
 	const persistedQueue = useAtomValue(persistedSongQueueAtom);
 	const persistedHistory = useAtomValue(persistedSongHistoryAtom);
+
 	const setCurrentSong = useSetAtom(currentSongAtom);
 	const setQueue = useSetAtom(songQueueAtom);
 	const setHistory = useSetAtom(songHistoryAtom);
@@ -83,108 +120,125 @@ export function FileRestore() {
 	const clearPersistedCurrent = useSetAtom(persistedCurrentSongAtom);
 	const clearPersistedQueue = useSetAtom(persistedSongQueueAtom);
 	const clearPersistedHistory = useSetAtom(persistedSongHistoryAtom);
-	const [isRestoring, setIsRestoring] = useState(false);
-	const [error, setError] = useState<string | null>(null);
 
-	if (!hasSession) return null;
+	const [state, setState] = useState<RestoreState>({ status: "idle" });
+	const didRun = useRef(false);
 
 	const clearAll = () => {
 		clearPersistedCurrent(null);
 		clearPersistedQueue([]);
 		clearPersistedHistory([]);
+		clearSessionHandle().catch(() => undefined);
 	};
 
-	const handleRestore = async () => {
-		setError(null);
-		const dirHandle = await showDirectoryPicker({ mode: "read" }).catch(
-			() => null,
-		);
-		if (!dirHandle) return; // user cancelled
+	const doRestore = async (stored: PersistedFSHandle) => {
+		setState({ status: "restoring" });
 
-		setIsRestoring(true);
+		const allStubs: SongStub[] = [
+			...(persistedCurrent ? [persistedCurrent] : []),
+			...persistedQueue,
+			...persistedHistory,
+		];
+
+		let restored: Song[];
 		try {
-			// Rehydrate current, queue, history in parallel
-			const [restoredCurrent, restoredQueue, restoredHistory] =
-				await Promise.all([
-					persistedCurrent ? rehydrateSong(persistedCurrent, dirHandle) : null,
-					Promise.all(
-						persistedQueue.map((s) => rehydrateSong(s, dirHandle)),
-					).then((results) => results.filter((s): s is Song => s !== null)),
-					Promise.all(
-						persistedHistory.map((s) => rehydrateSong(s, dirHandle)),
-					).then((results) => results.filter((s): s is Song => s !== null)),
-				]);
+			restored =
+				stored.type === "directory"
+					? await rehydrateFromDir(allStubs, stored.handle)
+					: await rehydrateFromFileHandles(allStubs, stored.handles);
+		} catch {
+			clearAll();
+			setState({ status: "done" });
+			return;
+		}
 
-			if (!restoredCurrent && restoredQueue.length === 0) {
-				setError(
-					"選択したフォルダに前回のファイルが見つかりませんでした。\nサブフォルダも含めて検索しましたが一致するファイルがありません。",
-				);
+		const byFilename = new Map(restored.map((s) => [s.filename, s]));
+
+		const restoredCurrent = persistedCurrent
+			? (byFilename.get(persistedCurrent.filename) ?? null)
+			: null;
+		const restoredQueue = persistedQueue
+			.map((s) => byFilename.get(s.filename))
+			.filter((s): s is Song => s !== undefined);
+		const restoredHistory = persistedHistory
+			.map((s) => byFilename.get(s.filename))
+			.filter((s): s is Song => s !== undefined);
+
+		if (!restoredCurrent && restoredQueue.length === 0) {
+			clearAll();
+			setState({ status: "done" });
+			return;
+		}
+
+		if (restoredCurrent) {
+			setCurrentSong(restoredCurrent);
+			setQueue(restoredQueue);
+			setHistory(restoredHistory);
+		} else {
+			const [first, ...rest] = restoredQueue;
+			setCurrentSong(first);
+			setQueue(rest);
+			setHistory(restoredHistory);
+		}
+		setCurrentSrc("file");
+		clearAll();
+		setState({ status: "done" });
+	};
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: mount-only effect, doRestore excluded intentionally
+	useEffect(() => {
+		if (didRun.current || !hasSession) return;
+		didRun.current = true;
+
+		(async () => {
+			const stored = await loadSessionHandle().catch(() => null);
+			if (!stored) return;
+
+			const granted = await requestPermissionForSession(stored).catch(
+				() => false,
+			);
+			if (!granted) {
+				setState({ status: "needs-permission", stored });
 				return;
 			}
+			await doRestore(stored);
+		})();
+	}, [hasSession]);
 
-			if (restoredCurrent) {
-				setCurrentSong(restoredCurrent);
-				setQueue(restoredQueue);
-				setHistory(restoredHistory);
-			} else {
-				// Current song was not found; promote first queue item
-				const [first, ...rest] = restoredQueue;
-				setCurrentSong(first);
-				setQueue(rest);
-				setHistory(restoredHistory);
-			}
-
-			setCurrentSrc("file");
-			clearAll();
-		} finally {
-			setIsRestoring(false);
-		}
-	};
-
-	const title = persistedCurrent?.title ?? persistedCurrent?.filename;
-	const totalCount =
-		(persistedCurrent ? 1 : 0) +
-		persistedQueue.length +
-		persistedHistory.length;
-
-	return (
-		<div className="flex flex-col gap-2 rounded-md border border-neutral-700 bg-neutral-900/60 p-3">
-			<p className="text-sm text-neutral-300">
-				前回のファイル再生セッションが見つかりました
-				{title && (
-					<>
-						{" "}
-						（<span className="font-medium text-white">{title}</span>
-						{totalCount > 1 && ` ほか ${totalCount - 1} 曲`}）
-					</>
-				)}
-			</p>
-			{error && (
-				<p className="text-xs text-red-400 whitespace-pre-wrap">{error}</p>
-			)}
-			<div className="flex gap-2">
-				<Button
-					className="flex-1 gap-2"
-					onClick={handleRestore}
-					disabled={isRestoring}
-				>
-					{isRestoring ? (
-						<Loader className="h-4 w-4 animate-spin" />
-					) : (
-						<FolderOpen className="h-4 w-4" />
-					)}
-					{isRestoring ? "復元中..." : "前回のファイルを復元"}
-				</Button>
-				<Button
-					variant="ghost"
-					size="icon"
-					onClick={clearAll}
-					disabled={isRestoring}
-					title="スキップ（セッションを破棄）"
-				>
-					<X className="h-4 w-4" />
-				</Button>
+	if (state.status === "restoring") {
+		return (
+			<div className="fixed bottom-20 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full bg-neutral-900/80 px-4 py-2 text-sm text-neutral-300 shadow-lg backdrop-blur-sm">
+				<Loader className="h-4 w-4 animate-spin" />
+				前回のファイルを復元中...
 			</div>
-		</div>
-	);
+		);
+	}
+
+	if (state.status === "needs-permission") {
+		const { stored } = state;
+		return (
+			<div className="fixed bottom-20 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-full bg-neutral-900/80 px-4 py-2 text-sm text-neutral-300 shadow-lg backdrop-blur-sm">
+				<span>前回のファイルへのアクセスを許可してください</span>
+				<button
+					type="button"
+					className="rounded-full bg-neutral-700 px-3 py-1 text-xs font-medium text-white hover:bg-neutral-600"
+					onClick={() => doRestore(stored)}
+				>
+					許可する
+				</button>
+				<button
+					type="button"
+					className="rounded-full px-2 py-1 text-xs text-neutral-500 hover:text-neutral-300"
+					onClick={() => {
+						clearAll();
+						setState({ status: "done" });
+					}}
+				>
+					×
+				</button>
+			</div>
+		);
+	}
+
+	return null;
 }
