@@ -31,6 +31,7 @@
 		"hls.js": "^1.6.15",
 		"idb-keyval": "^6.2.2",
 		"jotai": "^2.18.0",
+		"jotai-devtools": "^0.13.0",
 		"lucide-react": "^0.575.0",
 		"m3u8-parser": "^7.2.0",
 		"md5": "^2.3.0",

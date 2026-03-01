@@ -9,8 +9,10 @@ import {
 	createRootRoute,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { DevTools as JotaiDevTools } from "jotai-devtools";
 import type { ReactNode } from "react";
 import indexCss from "../index.css?url";
+import "jotai-devtools/styles.css";
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -54,6 +56,7 @@ function RootComponent() {
 	return (
 		<QueryClientProvider client={queryClient}>
 			<Outlet />
+			<JotaiDevTools position="bottom-left" />
 			<ReactQueryDevtools
 				initialIsOpen={false}
 				buttonPosition="bottom-right"
