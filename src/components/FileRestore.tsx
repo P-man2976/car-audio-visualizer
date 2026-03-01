@@ -79,6 +79,11 @@ async function rehydrateFromEntries(
  */
 export function FileRestore() {
 	const hasSession = useAtomValue(hasPersistedFileSessionAtom);
+	// リロード前の再生モードが "file" だった時のみ復元を実行する。
+	// currentSrcAtom はページロード直後は localStorage の永続値を返すため、
+	// セッション復元の要否をここで判断できる。
+	const currentSrc = useAtomValue(currentSrcAtom);
+	const shouldRestore = hasSession && currentSrc === "file";
 	const persistedCurrent = useAtomValue(persistedCurrentSongAtom);
 	const persistedQueue = useAtomValue(persistedSongQueueAtom);
 	const persistedHistory = useAtomValue(persistedSongHistoryAtom);
@@ -114,7 +119,7 @@ export function FileRestore() {
 			);
 			return { stored, granted };
 		},
-		enabled: hasSession,
+		enabled: shouldRestore,
 		staleTime: Number.POSITIVE_INFINITY,
 		gcTime: 0,
 		retry: false,
