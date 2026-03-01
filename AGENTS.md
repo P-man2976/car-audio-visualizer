@@ -43,12 +43,11 @@ npm run test                     # 全テストがパスすること
 - shadcn ドキュメントには MCP (`mcp_shadcn`) を使用する。
 
 ## 3D Visualizer (React Three Fiber) ルール
-- `Canvas` は `frameloop="demand"` なので、**マウント時に必ず `invalidate()` を呼ぶこと**。  
-  呼ばないと最初のフレームが一切描画されない（`useFrame` も動かない）。
-- ビジュアライザーの推奨実装は **ShaderMaterial + 単一 Plane**。  
-  `InstancedMesh` は描画されるまでの初期化タイミングが複雑なため使用しない。
+- `Canvas` は `frameloop="always"` を使うこと。`demand` は `invalidate()` の管理が複雑になり得策でない。
+- ビジュアライザーの推奨実装は **ShaderMaterial + 単一 Plane**。
   - `useFrame` 内で `mat.uniforms.uValues.value` を更新し `mat.uniformsNeedUpdate = true` を設定するだけでよい。
   - `uniforms` オブジェクトは `useMemo` で 1 回だけ生成すること。
+  - `frameloop="always"` では `useFrame` が毎フレーム自動実行されるため `invalidate()` は不要。
 - ビジュアライザーの周波数バンドは `audioMotionAnalyzer.getBars()` で取得し、  
   `BAND_INDICES` で目的の帯域を選択する。`mode: 6`（ANSI 1/3 オクターブ）時は約 30 本返る。
 - `<Line>` / `<Text>` などの drei コンポーネントは `<mesh>` の子に置かない。コンテナには `<group>` を使うこと。

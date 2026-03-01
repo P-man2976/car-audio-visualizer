@@ -110,10 +110,12 @@ Uses Biome for automatic code formatting.
 
 ### 3D Visualizer (React Three Fiber) ルール
 
-- `Canvas` は `frameloop="demand"` なので、`useEffect` 内でジオメトリ/マトリクスを更新した後は必ず `invalidate()` を呼ぶこと。呼ばないと初回描画が行われない。
-- `InstancedMesh` を使う場合、`instanceColor` バッファは `setColorAt()` を初めて呼ぶまで `null`。`vertexColors` マテリアルは `instanceColor` が `null` だと動かないので、`useEffect` でマトリクス初期化と同時に全インスタンスの初期色を `setColorAt()` で設定すること。
-- `<Line>` / `<Text>` などの drei コンポーネントは `<mesh>` の子に置かない（R3F が material/geometry として解釈してエラーになる）。コンテナには `<group>` を使うこと。
-- ビジュアライザーの周波数バンドは `audioMotionAnalyzer.getBars()` で取得し、`BAND_INDICES` で目的の帯域を選択する。`mode: 6`（ANSI 1/3 オクターブ）時は約 30 本返る。
+- `Canvas` は `frameloop="always"` を使うこと。`demand` は `invalidate()` の管理が複雑になり得策でない。
+- ビジュアライザーの推奨実装は **ShaderMaterial + 単一 Plane**。
+  `InstancedMesh` は使用しない。
+  - `useFrame` 内で `mat.uniforms.uValues.value` を更新し `mat.uniformsNeedUpdate = true` を設定するだけでよい。
+  - `uniforms` オブジェクトは `useMemo` で 1 回だけ生成すること。
+  - `frameloop="always"` では `useFrame` が毎フレーム自動実行されるため `invalidate()` は不要。
 
 あなたはURLが与えられた時、以下のコマンドでそのURLの内容をmardownで取得できる
 `npx -y @mizchi/readability --format=md <url>`
