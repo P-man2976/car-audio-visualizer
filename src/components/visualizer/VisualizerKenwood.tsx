@@ -1,4 +1,4 @@
-import { Line, Plane, Text } from "@react-three/drei";
+import { Plane } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import type { AnalyzerBarData } from "audiomotion-analyzer";
 import { useAtomValue } from "jotai";

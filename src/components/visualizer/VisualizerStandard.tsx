@@ -1,4 +1,4 @@
-import { Line, Plane, Text } from "@react-three/drei";
+import { Line, Plane } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import type { AnalyzerBarData } from "audiomotion-analyzer";
 import { useAtomValue } from "jotai";
@@ -73,18 +73,14 @@ export function VisualizerStandard() {
 							lineWidth={4}
 							color="#67e8f9"
 						/>
-						<Text
-							color="#10b981"
-							fontSize={2.4}
-							font="https://cdn.jsdelivr.net/fontsource/fonts/montserrat@latest/latin-600-normal.woff"
+						<FrequencyLabel
+							label={FREQ_ARRAY[(rowIndex - 1) / 2] ?? ""}
 							position={[
 								(CELL_WIDTH + ROW_CELL_GAP) * rowIndex - ROW_CELL_GAP,
 								-2,
 								0,
 							]}
-						>
-							{FREQ_ARRAY[(rowIndex - 1) / 2] ?? ""}
-						</Text>
+						/>
 					</group>
 				</group>
 			))}
@@ -134,6 +130,51 @@ function VisualizerCell({
 			args={[CELL_WIDTH, CELL_HEIGHT]}
 		>
 			<meshStandardMaterial ref={matRef} />
+		</Plane>
+	);
+}
+
+/**
+ * 周波数ラベルを Canvas 2D テクスチャ（sprite）で描画する。
+ *
+ * @react-three/drei の <Text> は troika-three-text を使用しており、
+ * フォントアトラス生成のたびに新しい WebGL コンテキストを作成する。
+ * 18 個同時にマウントすると 30+ コンテキストが生成され、
+ * ブラウザの上限（~16）を超えて Context Lost が発生する。
+ *
+ * Canvas 2D テクスチャにすることで追加の WebGL コンテキストを消費せず、
+ * CDN フォントのネットワークリクエストも不要になる。
+ */
+function FrequencyLabel({
+	label,
+	position,
+}: {
+	label: string;
+	position: [number, number, number];
+}) {
+	const texture = useMemo(() => {
+		if (!label) return null;
+		const canvas = document.createElement("canvas");
+		canvas.width = 128;
+		canvas.height = 48;
+		const ctx = canvas.getContext("2d");
+		if (!ctx) return null;
+		ctx.fillStyle = "#10b981";
+		ctx.font = "bold 32px system-ui, sans-serif";
+		ctx.textAlign = "left";
+		ctx.textBaseline = "middle";
+		ctx.fillText(label, 4, 24);
+		const tex = new THREE.CanvasTexture(canvas);
+		tex.needsUpdate = true;
+		return tex;
+	}, [label]);
+
+	if (!texture) return null;
+
+	// plane のサイズ: fontSize=2.4 に合わせて幅 8 高さ 3
+	return (
+		<Plane position={position} args={[8, 3]}>
+			<meshBasicMaterial map={texture} transparent alphaTest={0.05} />
 		</Plane>
 	);
 }
