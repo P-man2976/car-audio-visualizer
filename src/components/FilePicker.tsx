@@ -2,10 +2,19 @@ import { parseBlob } from "music-metadata";
 import { Button } from "./ui/button";
 import { useAtom, useSetAtom } from "jotai";
 import { useRef } from "react";
-import { currentSongAtom, currentSrcAtom, songQueueAtom } from "@/atoms/player";
+import {
+	currentSongAtom,
+	currentSrcAtom,
+	persistedCurrentSongAtom,
+	persistedSongHistoryAtom,
+	persistedSongQueueAtom,
+	songQueueAtom,
+} from "@/atoms/player";
 import { displayStringAtom } from "@/atoms/display";
 import { StepBack } from "lucide-react";
 import type { Song } from "@/types/player";
+import { songToStub } from "@/types/player";
+import { mergeSessionEntries } from "@/lib/fileSessionDb";
 
 /** showOpenFilePicker が使えるかどうか */
 const hasFSA = "showOpenFilePicker" in window;
@@ -43,18 +52,28 @@ export function FilePicker() {
 	const setQueue = useSetAtom(songQueueAtom);
 	const setDisplayString = useSetAtom(displayStringAtom);
 	const setCurrentSrc = useSetAtom(currentSrcAtom);
+	const setPersistedCurrent = useSetAtom(persistedCurrentSongAtom);
+	const setPersistedQueue = useSetAtom(persistedSongQueueAtom);
+	const setPersistedHistory = useSetAtom(persistedSongHistoryAtom);
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	const loadSongs = async (files: File[]) => {
-		if (!files.length) return;
+	const loadSongs = async (songs: Song[]) => {
+		if (!songs.length) return;
 		setDisplayString("CD-01   LOAD");
-		const songs = await Promise.all(files.map(fileToSong));
 		if (currentSong) {
-			setQueue((prev) => [...prev, ...songs]);
+			setQueue((prev) => {
+				const next = [...prev, ...songs];
+				setPersistedQueue(next.map(songToStub));
+				return next;
+			});
 		} else {
 			const [current, ...queue] = songs;
 			setCurrentSong(current);
 			setQueue(queue);
+			// Persist stubs for cross-reload restoration
+			setPersistedCurrent(songToStub(current));
+			setPersistedQueue(queue.map(songToStub));
+			setPersistedHistory([]);
 		}
 		setCurrentSrc("file");
 	};
@@ -68,8 +87,14 @@ export function FilePicker() {
 				types: [{ description: "Audio", accept: { "audio/*": [] } }],
 			}).catch(() => null);
 			if (!handles?.length) return;
-			const files = await Promise.all(handles.map((h) => h.getFile()));
-			await loadSongs(files);
+			const songs = await Promise.all(
+				handles.map((h) => h.getFile().then(fileToSong)),
+			);
+			await loadSongs(songs);
+			// Persist handles keyed by songId (isSameEntry() used internally for dedup)
+			await mergeSessionEntries(
+				handles.map((h, i) => ({ songId: songs[i].id, handle: h })),
+			).catch(() => undefined);
 		} else {
 			// フォールバック: 隠し input[type=file] を使用
 			inputRef.current?.click();

@@ -10,11 +10,11 @@ const DOT_MATRIX_DOT_GAP = 0.3;
 const DOT_MATRIX_ARRAY_COUNT = 12;
 const DOT_MATRIX_ARRAY_GAP = 2;
 
-export function DotMatrixArray() {
+export function DotMatrixArray({ y = 40 }: { y?: number }) {
 	const displayString = useAtomValue(displayStringAtom);
 
 	return (
-		<mesh
+		<group
 			position={[
 				-(
 					(DOT_MATRIX_DOT_SIZE * DOT_MATRIX_ROW_COUNT +
@@ -22,12 +22,12 @@ export function DotMatrixArray() {
 						DOT_MATRIX_ARRAY_COUNT +
 					DOT_MATRIX_ARRAY_GAP * (DOT_MATRIX_ARRAY_COUNT - 1)
 				) / 2,
-				40,
+				y,
 				0,
 			]}
 		>
 			{Array.from({ length: DOT_MATRIX_ARRAY_COUNT }).map((_, index) => (
-				<mesh
+				<group
 					key={`dot-matrix-${index}`}
 					position={[
 						index *
@@ -39,15 +39,15 @@ export function DotMatrixArray() {
 					]}
 				>
 					<DotMatrix char={displayString[index] ?? " "} />
-				</mesh>
+				</group>
 			))}
-		</mesh>
+		</group>
 	);
 }
 
 function DotMatrix({ char }: { char: string }) {
 	return (
-		<mesh position={[0, 0, 0]}>
+		<group position={[0, 0, 0]}>
 			<Text
 				characters="CD 1234567890-:"
 				position={[
@@ -77,6 +77,6 @@ function DotMatrix({ char }: { char: string }) {
 					/>
 				)),
 			)}
-		</mesh>
+		</group>
 	);
 }

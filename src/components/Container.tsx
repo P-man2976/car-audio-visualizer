@@ -5,7 +5,7 @@ export function Container({ children }: { children: ReactNode }) {
 	return (
 		<Canvas
 			id="visualizer"
-			frameloop="demand"
+			frameloop="always"
 			camera={{ fov: 120, position: [0, 0, 50] }}
 		>
 			<ambientLight color={0xffffff} intensity={Math.PI / 2} />

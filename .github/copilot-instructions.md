@@ -4,6 +4,21 @@
 
 This is a React 19 + TypeScript + Vite app set up as a car audio visualizer, with React Compiler enabled. UI components use **shadcn/ui** (migrated from HeroUI v3) with styles matching the `2din-spectrogram` project. Tailwind CSS v4 is used for utility-first styling.
 
+## 作業終了後のチェックリスト（必須）
+
+作業が完了したら、コミット前に必ず以下をこの順番で実行すること：
+
+```bash
+npx biome format --write src/   # フォーマット適用
+npm run lint                     # lint チェック（エラーがないこと）
+npm run build                    # 型エラー・ビルドエラーがないこと
+npm run test                     # 全テストがパスすること
+```
+
+`npm run format` は check only（書き込みなし）なので、整形は必ず `npx biome format --write` を使うこと。
+
+---
+
 ## Build, Test, and Lint
 
 ### Development Server
@@ -92,6 +107,16 @@ Uses Biome for automatic code formatting.
 - tanstack
 - Context7 (`mcp_io`) for up-to-date external library docs when needed.
 - HeroUI v3 MCP は参照不要（削除済み）。
+
+### 3D Visualizer (React Three Fiber) ルール
+
+- `Canvas` は `frameloop="always"` を使うこと。`demand` は `invalidate()` の管理が複雑になり得策でない。
+- ビジュアライザーの実装は **`<Plane>` per-cell + `useFrame`** パターン（2din-spectrogram と同方式）。
+  `InstancedMesh` と `ShaderMaterial` は使わない（どちらも問題が発生した）。
+  - ルートコンポーネントの `useFrame` で `store.set(spectrogramAtom, getBars())` を呼ぶ。
+  - セルコンポーネントは `store.get(spectrogramAtom)` で値を読み `matRef.current.color.set(...)` で更新する。
+  - `useMemo(() => new THREE.Color(), [])` でカラーオブジェクトをキャッシュする。
+  - `frameloop="always"` では `useFrame` が毎フレーム自動実行されるため `invalidate()` は不要。
 
 あなたはURLが与えられた時、以下のコマンドでそのURLの内容をmardownで取得できる
 `npx -y @mizchi/readability --format=md <url>`

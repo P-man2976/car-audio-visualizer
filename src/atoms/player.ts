@@ -1,6 +1,6 @@
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import type { Song } from "@/types/player";
+import type { Song, SongStub } from "@/types/player";
 import type { Radio } from "../types/radio";
 
 export type Source = "off" | "radio" | "aux" | "file";
@@ -32,3 +32,27 @@ export const queueAtom = atom<Radio[]>([]);
 export const currentSongAtom = atom<Song | null>(null);
 export const songQueueAtom = atom<Song[]>([]);
 export const songHistoryAtom = atom<Song[]>([]);
+
+// ─── Persisted file-session stubs ─────────────────────────────────────────────
+// These survive page reloads and are used to restore the file queue after the
+// user re-grants directory access via showDirectoryPicker.
+// They are intentionally separate from the runtime atoms so that blob URLs in
+// the runtime atoms are never accidentally serialised.
+export const persistedCurrentSongAtom = atomWithStorage<SongStub | null>(
+	"cav-file-current-v1",
+	null,
+);
+export const persistedSongQueueAtom = atomWithStorage<SongStub[]>(
+	"cav-file-queue-v1",
+	[],
+);
+export const persistedSongHistoryAtom = atomWithStorage<SongStub[]>(
+	"cav-file-history-v1",
+	[],
+);
+/** True when there is a persisted file session that can be restored. */
+export const hasPersistedFileSessionAtom = atom(
+	(get) =>
+		get(persistedCurrentSongAtom) !== null ||
+		get(persistedSongQueueAtom).length > 0,
+);
