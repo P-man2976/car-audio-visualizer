@@ -14,7 +14,7 @@ import { displayStringAtom } from "@/atoms/display";
 import { StepBack } from "lucide-react";
 import type { Song } from "@/types/player";
 import { songToStub } from "@/types/player";
-import { saveSessionHandle } from "@/lib/fileSessionDb";
+import { mergeSessionEntries } from "@/lib/fileSessionDb";
 
 /** showOpenFilePicker が使えるかどうか */
 const hasFSA = "showOpenFilePicker" in window;
@@ -28,8 +28,6 @@ async function fileToSong(file: File): Promise<Song> {
 	return {
 		id: crypto.randomUUID(),
 		filename: file.name,
-		fileSize: file.size,
-		fileLastModified: file.lastModified,
 		url,
 		title,
 		track: { no: track.no ?? undefined, of: track.of ?? undefined },
@@ -59,10 +57,9 @@ export function FilePicker() {
 	const setPersistedHistory = useSetAtom(persistedSongHistoryAtom);
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	const loadSongs = async (files: File[]) => {
-		if (!files.length) return;
+	const loadSongs = async (songs: Song[]) => {
+		if (!songs.length) return;
 		setDisplayString("CD-01   LOAD");
-		const songs = await Promise.all(files.map(fileToSong));
 		if (currentSong) {
 			setQueue((prev) => {
 				const next = [...prev, ...songs];
@@ -90,12 +87,14 @@ export function FilePicker() {
 				types: [{ description: "Audio", accept: { "audio/*": [] } }],
 			}).catch(() => null);
 			if (!handles?.length) return;
-			const files = await Promise.all(handles.map((h) => h.getFile()));
-			await loadSongs(files);
-			// Persist handles in IDB so they can be restored after reload
-			await saveSessionHandle({ type: "files", handles }).catch(
-				() => undefined,
+			const songs = await Promise.all(
+				handles.map((h) => h.getFile().then(fileToSong)),
 			);
+			await loadSongs(songs);
+			// Persist handles keyed by songId (isSameEntry() used internally for dedup)
+			await mergeSessionEntries(
+				handles.map((h, i) => ({ songId: songs[i].id, handle: h })),
+			).catch(() => undefined);
 		} else {
 			// フォールバック: 隠し input[type=file] を使用
 			inputRef.current?.click();

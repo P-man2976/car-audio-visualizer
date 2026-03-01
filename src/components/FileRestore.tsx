@@ -39,66 +39,22 @@ async function buildSongFromFile(stub: SongStub, file: File): Promise<Song> {
 	return { ...stub, url, artwork };
 }
 
-/** Find a file by name AND fingerprint inside a directory (recursive). */
-async function findFileInDir(
-	dir: FileSystemDirectoryHandle,
-	stub: SongStub,
-): Promise<FileSystemFileHandle | null> {
-	for await (const [entryName, handle] of dir.entries()) {
-		if (handle.kind === "file" && entryName === stub.filename) {
-			const file = await (handle as FileSystemFileHandle).getFile();
-			if (
-				file.size === stub.fileSize &&
-				file.lastModified === stub.fileLastModified
-			) {
-				return handle as FileSystemFileHandle;
-			}
-		}
-		if (handle.kind === "directory") {
-			const found = await findFileInDir(
-				handle as FileSystemDirectoryHandle,
-				stub,
-			);
-			if (found) return found;
-		}
-	}
-	return null;
-}
-
-async function rehydrateFromDir(
+/**
+ * Rehydrate songs from stored FileSystemFileHandle entries.
+ * Each entry is keyed by songId, so no directory walking or filename matching
+ * is needed — the handle already points to the exact file.
+ * isSameEntry() deduplication is handled at save time (mergeSessionEntries).
+ */
+async function rehydrateFromEntries(
 	stubs: SongStub[],
-	dir: FileSystemDirectoryHandle,
+	stored: PersistedFSHandle,
 ): Promise<Song[]> {
+	const handleMap = new Map(stored.entries.map((e) => [e.songId, e.handle]));
 	const results = await Promise.all(
 		stubs.map(async (stub) => {
-			const h = await findFileInDir(dir, stub);
-			if (!h) return null;
-			return buildSongFromFile(stub, await h.getFile());
-		}),
-	);
-	return results.filter((s): s is Song => s !== null);
-}
-
-async function rehydrateFromFileHandles(
-	stubs: SongStub[],
-	handles: FileSystemFileHandle[],
-): Promise<Song[]> {
-	const results = await Promise.all(
-		stubs.map(async (stub) => {
-			const file = await (async () => {
-				for (const h of handles) {
-					if (h.name !== stub.filename) continue;
-					const f = await h.getFile();
-					if (
-						f.size === stub.fileSize &&
-						f.lastModified === stub.fileLastModified
-					)
-						return f;
-				}
-				return null;
-			})();
-			if (!file) return null;
-			return buildSongFromFile(stub, file);
+			const handle = handleMap.get(stub.id);
+			if (!handle) return null;
+			return buildSongFromFile(stub, await handle.getFile());
 		}),
 	);
 	return results.filter((s): s is Song => s !== null);
@@ -158,26 +114,23 @@ export function FileRestore() {
 
 		let restored: Song[];
 		try {
-			restored =
-				stored.type === "directory"
-					? await rehydrateFromDir(allStubs, stored.handle)
-					: await rehydrateFromFileHandles(allStubs, stored.handles);
+			restored = await rehydrateFromEntries(allStubs, stored);
 		} catch {
 			clearAll();
 			setState({ status: "done" });
 			return;
 		}
 
-		const byFilename = new Map(restored.map((s) => [s.filename, s]));
+		const byId = new Map(restored.map((s) => [s.id, s]));
 
 		const restoredCurrent = persistedCurrent
-			? (byFilename.get(persistedCurrent.filename) ?? null)
+			? (byId.get(persistedCurrent.id) ?? null)
 			: null;
 		const restoredQueue = persistedQueue
-			.map((s) => byFilename.get(s.filename))
+			.map((s) => byId.get(s.id))
 			.filter((s): s is Song => s !== undefined);
 		const restoredHistory = persistedHistory
-			.map((s) => byFilename.get(s.filename))
+			.map((s) => byId.get(s.id))
 			.filter((s): s is Song => s !== undefined);
 
 		if (!restoredCurrent && restoredQueue.length === 0) {

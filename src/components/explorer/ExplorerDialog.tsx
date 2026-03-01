@@ -23,7 +23,7 @@ import { LuFolderOpen, LuLoader } from "react-icons/lu";
 import type { SelectedFile } from "@/types/explorer";
 import type { Song } from "@/types/player";
 import { songToStub } from "@/types/player";
-import { saveSessionHandle } from "@/lib/fileSessionDb";
+import { mergeSessionEntries } from "@/lib/fileSessionDb";
 
 const hasFSAPI = "showDirectoryPicker" in window;
 
@@ -40,8 +40,6 @@ async function fileToSong(
 	return {
 		id: crypto.randomUUID(),
 		filename: file.name,
-		fileSize: file.size,
-		fileLastModified: file.lastModified,
 		url,
 		title,
 		track: { no: track.no ?? undefined, of: track.of ?? undefined },
@@ -117,6 +115,19 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 	const queueFile = (handle: FileSystemFileHandle) =>
 		handle.getFile().then((file) => fileToSong(file, audioElement));
 
+	/** collectFileHandles with handle tracking */
+	const collectHandleSongPairs = async (
+		files: SelectedFile[],
+	): Promise<{ handle: FileSystemFileHandle; song: Song | undefined }[]> => {
+		const fileHandles = await collectFileHandles(files);
+		return Promise.all(
+			fileHandles.map(async (handle) => ({
+				handle,
+				song: await queueFile(handle),
+			})),
+		);
+	};
+
 	const handleFallbackChange = async (
 		e: React.ChangeEvent<HTMLInputElement>,
 	) => {
@@ -145,12 +156,11 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 
 	const { mutate, isPending } = useMutation({
 		mutationFn: async (files: SelectedFile[]) => {
-			const handles = await collectFileHandles(files);
-			console.log(`[Explorer] Loading ${handles.length} file(s)...`);
-
-			const songs = (
-				await Promise.all(handles.map((h) => queueFile(h)))
-			).filter((s) => s !== undefined);
+			const pairs = await collectHandleSongPairs(files);
+			const songs = pairs
+				.map((p) => p.song)
+				.filter((s): s is Song => s !== undefined);
+			console.log(`[Explorer] Loading ${songs.length} file(s)...`);
 
 			if (!currentSong && songs.length > 0) {
 				const [first, ...rest] = songs;
@@ -168,14 +178,16 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 			}
 			setCurrentSrc("file");
 
-			// Persist the root directory handle in IDB for post-reload restoration
+			// Persist individual file handles keyed by songId.
+			// isSameEntry() is used inside mergeSessionEntries to skip duplicates.
+			const entries = pairs
+				.filter(
+					(p): p is { handle: FileSystemFileHandle; song: Song } =>
+						p.song !== undefined,
+				)
+				.map((p) => ({ songId: p.song.id, handle: p.handle }));
 			const rootHandle = stack[0];
-			if (rootHandle) {
-				await saveSessionHandle({
-					type: "directory",
-					handle: rootHandle,
-				}).catch(() => undefined);
-			}
+			await mergeSessionEntries(entries, rootHandle).catch(() => undefined);
 
 			setSelected([]);
 		},
