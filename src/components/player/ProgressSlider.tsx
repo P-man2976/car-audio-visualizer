@@ -7,7 +7,11 @@ import {
 	currentSrcAtom,
 	progressAtom,
 } from "../../atoms/player";
-import { currentRadioAtom, radioChannelsByAreaAtom, tuningFreqAtom } from "../../atoms/radio";
+import {
+	currentRadioAtom,
+	radioChannelsByAreaAtom,
+	tuningFreqAtom,
+} from "../../atoms/radio";
 import { displayStringAtom } from "../../atoms/display";
 import { buildDisplayString } from "../../lib/display";
 import { useRadikoArea } from "../../services/radiko";

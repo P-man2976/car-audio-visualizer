@@ -104,10 +104,12 @@ export function SettingsDialog() {
 					<div className="flex flex-col gap-3">
 						<span className="text-sm font-medium">ビジュアライザー</span>
 						<div className="flex gap-2">
-							{([
-								{ value: "standard", label: "スタンダード" },
-								{ value: "dpx5021m", label: "DPX-5021M" },
-							] as { value: VisualizerStyle; label: string }[]).map(({ value, label }) => (
+							{(
+								[
+									{ value: "standard", label: "スタンダード" },
+									{ value: "dpx5021m", label: "DPX-5021M" },
+								] as { value: VisualizerStyle; label: string }[]
+							).map(({ value, label }) => (
 								<button
 									key={value}
 									type="button"
