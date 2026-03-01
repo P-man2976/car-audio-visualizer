@@ -15,15 +15,15 @@ const COL_CELL_COUNT = 26;
 const COL_CELL_GAP = 0.8;
 const ANALYZER_ANGLE_DEGREE = 16;
 
-const SUB_COL_WIDTH = 3.4;
+const SUB_COL_WIDTH = 3;
 const SUB_COL_GAP = 0.5;
 // MAIN_BAR_WIDTH is derived from SUB_COL_WIDTH so they stay in sync:
 //   left bar + gap + right bar  (e.g. 3.4 + 0.5 + 3.4 = 7.3)
 const MAIN_BAR_WIDTH = SUB_COL_WIDTH * 2 + SUB_COL_GAP;
-const SIDE_BAR_WIDTH = 0.6;
+const SIDE_BAR_WIDTH = 0.4;
 const SIDE_GAP = 0.5;
 const SIDE_UNIT = SIDE_BAR_WIDTH + SIDE_GAP; // 1.1
-const BAND_GAP = 2.0;
+const BAND_GAP = 1.6;
 const BAND_STRIDE =
 	SIDE_UNIT + MAIN_BAR_WIDTH + SIDE_GAP + SIDE_BAR_WIDTH + BAND_GAP;
 const TOTAL_WIDTH = BAND_STRIDE * FREQ_COUNT;
@@ -56,8 +56,8 @@ export function VisualizerKenwood() {
 
 	const totalHeight =
 		(CELL_HEIGHT + COL_CELL_GAP) * COL_CELL_COUNT - COL_CELL_GAP;
-	const SCALE = 1.6;
-	const OFFSET_Y = 30;
+	const SCALE = 1.8;
+	const OFFSET_Y = 24;
 
 	return (
 		<group
@@ -98,10 +98,10 @@ function KenwoodMainCell({ fi, ci }: { fi: number; ci: number }) {
 
 		const isPeak =
 			(ci < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci + 1) ||
-			(ci - 2 < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci - 1);
+			(ci - 1 < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci);
 
 		const c = color.set(
-			isPeak ? "#ffffff" : value * COL_CELL_COUNT > ci ? "#a5f3fc" : "#3b0764",
+			isPeak ? "#ffffff" : value * COL_CELL_COUNT > ci ? "#6dceff" : "#3b0764",
 		);
 		leftRef.current.color.copy(c);
 		rightRef.current.color.copy(c);
@@ -140,7 +140,7 @@ function KenwoodSideCell({ fi, ci }: { fi: number; ci: number }) {
 		const value = freqLevel?.value?.[0] ?? 0;
 
 		// inverted: below signal level = dark, above = cyan
-		const c = color.set(value * COL_CELL_COUNT > ci ? "#3b0764" : "#0e7490");
+		const c = color.set(value * COL_CELL_COUNT > ci ? "#3b0764" : "#91daff");
 		leftRef.current.color.copy(c);
 		rightRef.current.color.copy(c);
 	});

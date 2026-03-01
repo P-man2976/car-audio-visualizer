@@ -15,13 +15,13 @@ const COL_CELL_GAP = 0.6; // main = 0.8
 const ANALYZER_ANGLE_DEGREE = 24;
 
 // Sub bar geometry (pair per band, no side-tick bars)
-const SUB_COL_WIDTH = 2.8; // main = 3.6
+const SUB_COL_WIDTH = 2.2; // main = 3.6
 const SUB_COL_GAP = 0.4; // gap between left+right bars within band
 
 // MAIN_BAR_WIDTH is derived from SUB_COL_WIDTH so they stay in sync:
 //   left bar + gap + right bar  (mirrors VisualizerKenwood: 3.6 + 0.5 + 3.6 = 7.7)
 const MAIN_BAR_WIDTH = SUB_COL_WIDTH * 2 + SUB_COL_GAP;
-const BAND_GAP = 1;
+const BAND_GAP = 1.4;
 const BAND_STRIDE = MAIN_BAR_WIDTH + BAND_GAP; // 11.9
 
 // Group span — 7 bands centred on the same world X=0 as the main
@@ -30,21 +30,23 @@ const TOTAL_WIDTH = BAND_STRIDE * FREQ_COUNT; // 83.3
 // ANSI 1/3-oct indices for the central 7 of 11 bands (~125 Hz … 6 kHz)
 const BAND_INDICES = [4, 7, 10, 13, 16, 19, 22, 24, 27, 28] as const;
 
-const SCALE = 1.6;
+const SCALE = 2;
 
 // Position sub just below the main Kenwood visualizer.
 // Main bottom world Y ≈ -27 (self-centred around 0).
 // Top of sub (ci=6) should sit ~2 world units below main bottom.
 //   topCellLocal = cellY(COL_CELL_COUNT-1) = (CELL_HEIGHT+COL_CELL_GAP)*(COL_CELL_COUNT-1) + COL_CELL_GAP
-//                = 1.0 * 6 + 0.6 = 6.6   →  world = 6.6 * 1.6 = 10.56
-//   groupY = wantedTop − topCellWorld = -29 − 10.56 = -39.56  →  use -40
-const SUB_Y_OFFSET = -20;
+//                = 1.0 * 6 + 0.6 = 6.6   →  world = 6.6 * 1.8 = 11.88
+//   groupY = wantedTop − topCellWorld = -29 − 11.88 = -40.88  →  use -40
+const SUB_Y_OFFSET = -26;
 
 // Wing bar dimensions: widest at TOP row, narrowest at BOTTOM row.
 // This fills the triangular gap between the tilted sub-spectrum and the
 // screen vertical (screen edges).
-const WING_MAX_LOCAL_WIDTH = 17; // top row (ci = COL_CELL_COUNT-1)
-const WING_MIN_LOCAL_WIDTH = 14; // bottom row (ci = 0)
+const WING_MAX_LOCAL_WIDTH = 22; // top row (ci = COL_CELL_COUNT-1)
+const WING_MIN_LOCAL_WIDTH = 18; // bottom row (ci = 0)
+// Gap (in local units) between the wing bar and the outermost spectrum bar.
+const WING_GAP = 1;
 
 // ─── Position helpers ─────────────────────────────────────────────────────────
 const subLeftCX = (fi: number) => BAND_STRIDE * fi + SUB_COL_WIDTH / 2;
@@ -98,9 +100,12 @@ function KenwoodWing({ side }: { side: "left" | "right" }) {
 				const t = ci / (COL_CELL_COUNT - 1);
 				const width = WING_MIN_LOCAL_WIDTH * (1 - t) + WING_MAX_LOCAL_WIDTH * t;
 				const y = cellY(ci);
-				// Left wing: right edge flush to x=0 (left edge of band 0)
-				// Right wing: left edge flush to x=TOTAL_WIDTH
-				const xCenter = side === "left" ? -width / 2 : TOTAL_WIDTH + width / 2;
+				// Left wing:  right edge flush to x = -WING_GAP            (left  edge of band 0 minus gap)
+				// Right wing: left  edge flush to x = TOTAL_WIDTH - BAND_GAP + WING_GAP (right edge of last band plus gap)
+				const xCenter =
+					side === "left"
+						? -WING_GAP - width / 2
+						: TOTAL_WIDTH - BAND_GAP + WING_GAP + width / 2;
 				const color = BAR_COLORS[ci] ?? "#0e7490";
 
 				return (
@@ -128,7 +133,7 @@ function SubCell({ fi, ci }: { fi: number; ci: number }) {
 		const freqLevel = bars?.[BAND_INDICES[fi]];
 		const value = freqLevel?.value?.[0] ?? 0;
 
-		const c = color.set(value * COL_CELL_COUNT > ci ? "#a5f3fc" : "#3b0764");
+		const c = color.set(value * COL_CELL_COUNT > ci ? "#6dceff" : "#3b0764");
 		leftRef.current.color.copy(c);
 		rightRef.current.color.copy(c);
 	});
