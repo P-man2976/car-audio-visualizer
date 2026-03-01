@@ -23,6 +23,7 @@ import { useMemo } from "react";
 import {
 	currentSongAtom,
 	currentSrcAtom,
+	persistedCurrentSongAtom,
 	repeatModeAtom,
 	shuffleAtom,
 	type RepeatMode,
@@ -48,6 +49,10 @@ export function ControlsOverlay() {
 	const currentSrc = useAtomValue(currentSrcAtom);
 	const currentRadio = useAtomValue(currentRadioAtom);
 	const currentSong = useAtomValue(currentSongAtom);
+	const persistedSong = useAtomValue(persistedCurrentSongAtom);
+	// 復元完了前は persistedSong（localStorage）をフォールバックにしてテキストメタデータを即時表示する。
+	// blob URL (url / artwork) は持たないため、テキスト情報のみ先行して使用する。
+	const displaySong = currentSong ?? persistedSong;
 	const tuningFreq = useAtomValue(tuningFreqAtom);
 
 	const [shuffle, setShuffle] = useAtom(shuffleAtom);
@@ -65,7 +70,7 @@ export function ControlsOverlay() {
 	const title = useMemo(() => {
 		switch (currentSrc) {
 			case "file":
-				return currentSong?.title ?? currentSong?.filename ?? "タイトル不明";
+				return displaySong?.title ?? displaySong?.filename ?? "タイトル不明";
 			case "radio":
 				return currentRadio?.name ?? "局未選択";
 			case "aux":
@@ -73,7 +78,7 @@ export function ControlsOverlay() {
 			case "off":
 				return "再生停止中";
 		}
-	}, [currentSrc, currentSong, currentRadio]);
+	}, [currentSrc, displaySong, currentRadio]);
 
 	const artist = useMemo(() => {
 		if (currentSrc === "radio") {
@@ -85,20 +90,21 @@ export function ControlsOverlay() {
 				? `${displayFreq}kHz`
 				: `${displayFreq.toFixed(1)}MHz`;
 		}
-		if (currentSrc === "file") return currentSong?.artists?.join(", ");
+		if (currentSrc === "file") return displaySong?.artists?.join(", ");
 		return undefined;
-	}, [currentSrc, currentSong, currentRadio, tuningFreq]);
+	}, [currentSrc, displaySong, currentRadio, tuningFreq]);
 
 	const album = useMemo(() => {
-		if (currentSrc === "file") return currentSong?.album;
+		if (currentSrc === "file") return displaySong?.album;
 		if (currentSrc === "radio") {
 			return currentRadio?.source === "radiko"
 				? "Radiko"
 				: "NHKラジオ らじる★らじる";
 		}
 		return undefined;
-	}, [currentSrc, currentSong, currentRadio]);
+	}, [currentSrc, displaySong, currentRadio]);
 
+	// artwork は blob URL のため復元完了（currentSong が存在）後のみ表示する
 	const coverSrc = currentSrc === "file" ? currentSong?.artwork : undefined;
 	useMediaSession({
 		title,
