@@ -5,14 +5,26 @@ import type { Radio } from "../types/radio";
 
 export type Source = "off" | "radio" | "aux" | "file";
 
-// aux モードは再起動時に権限が必要なため "off" に戻す
-const _currentSrcAtom = atomWithStorage<Source>("cav-current-src-v2", "off");
+// "radio" / "file" / "off" のみ localStorage に永続化する。
+// "aux" は再起動時に権限が失われるためストレージには保存しない。
+const _persistedSrcAtom = atomWithStorage<Exclude<Source, "aux">>(
+	"cav-current-src-v2",
+	"off",
+);
+// ランタイム限定の aux フラグ。リロードで false にリセットされる。
+const _auxActiveAtom = atom(false);
+
 export const currentSrcAtom = atom(
-	(get) => {
-		const src = get(_currentSrcAtom);
-		return src === "aux" ? "off" : src;
+	(get): Source => (get(_auxActiveAtom) ? "aux" : get(_persistedSrcAtom)),
+	(_get, set, value: Source) => {
+		if (value === "aux") {
+			set(_auxActiveAtom, true);
+			// ストレージへは書かない（リロード後は "off" から始める）
+		} else {
+			set(_auxActiveAtom, false);
+			set(_persistedSrcAtom, value);
+		}
 	},
-	(_get, set, value: Source) => set(_currentSrcAtom, value),
 );
 export const isPlayingAtom = atom(false);
 export const progressAtom = atom(0);
