@@ -33,6 +33,8 @@ export function useHLS() {
 			}
 
 			// HLS 非対応ブラウザ（Safari のネイティブ HLS）
+			// Safari では AudioContext が "interrupted" になることがある。
+			// resume() は interrupted / suspended どちらからも機能する（確認済）。
 			audioElement.src = source;
 			void audioMotionAnalyzer.audioCtx
 				.resume()
@@ -41,7 +43,11 @@ export function useHLS() {
 					audioMotionAnalyzer.start();
 					setIsPlaying(true);
 				})
-				.catch(() => undefined);
+				.catch((err: unknown) => {
+					// Safari で autoplay policy や interruption により再生が拒否された場合
+					// ここに来る。サイレントに握り潰さずコンソールに出力する。
+					console.warn("[hls] Safari native HLS play failed:", err);
+				});
 		},
 		// hls は deps に含めない：常に新規インスタンスを生成するため
 		[audioElement, audioMotionAnalyzer, setIsPlaying, setHls],

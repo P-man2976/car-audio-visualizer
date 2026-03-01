@@ -39,11 +39,10 @@ export function VisualizerStandard() {
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 
 	useFrame(() => {
-		// AudioMotionAnalyzer._bars は start() が呼ばれて初めて初期化される。
-		// start() 前に getBars() を呼ぶと Array.from(undefined) で TypeError が発生する。
-		// Chrome は rAF 内のエラーをサイレントに無視するが、
-		// Safari は rAF エラーでアニメーションループを停止させるため
-		// visuzalizer が完全に動かなくなる。isOn で起動済みかを確認してからコールする。
+		// Safari/WebKit: audioMotionAnalyzer が start() される前（isOn=false）は
+		// _draw() が走らず bar.value が更新されないため、空 bars のまま store を
+		// 更新しても意味がない。isOn チェックでオーバーヘッドを削減しつつ、
+		// WebKit の rAF ループが uncaught error で停止するリスクも排除する。
 		if (!audioMotionAnalyzer.isOn) return;
 		store.set(
 			spectrogramAtom,
