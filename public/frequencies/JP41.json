@@ -1,270 +1,194 @@
 {
-  "$schema": "../schema.json",
-  "FMS": {
-    "area": [
-      "JP41"
-    ],
-    "type": "FM",
-    "name": "エフエム佐賀",
-    "frequencies_fm": [
-      {
-        "area": [
-          "佐賀"
-        ],
-        "frequency": 77.9,
-        "primary": true
-      },
-      {
-        "area": [
-          "有田"
-        ],
-        "frequency": 79.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "鳥栖"
-        ],
-        "frequency": 79.7,
-        "primary": false
-      }
-    ]
-  },
-  "NBC": {
-    "area": [
-      "JP41"
-    ],
-    "type": "AM",
-    "name": "NBCラジオ",
-    "frequencies_am": [
-      {
-        "area": [
-          "長崎",
-          "諫早",
-          "島原"
-        ],
-        "frequency": 1233,
-        "primary": true
-      },
-      {
-        "area": [
-          "平戸"
-        ],
-        "frequency": 1062,
-        "primary": false
-      },
-      {
-        "area": [
-          "佐世保"
-        ],
-        "frequency": 1098,
-        "primary": false
-      },
-      {
-        "area": [
-          "伊万里"
-        ],
-        "frequency": 1116,
-        "primary": false
-      },
-      {
-        "area": [
-          "福江"
-        ],
-        "frequency": 1431,
-        "primary": false
-      },
-      {
-        "area": [
-          "佐賀",
-          "唐津",
-          "有田"
-        ],
-        "frequency": 1458,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "長崎"
-        ],
-        "frequency": 92.6,
-        "primary": true
-      },
-      {
-        "area": [
-          "佐世保"
-        ],
-        "frequency": 90.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "諫早"
-        ],
-        "frequency": 91.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "佐賀"
-        ],
-        "frequency": 93.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "鳥栖"
-        ],
-        "frequency": 92.1,
-        "primary": false
-      }
-    ]
-  },
-  "RKB": {
-    "area": [
-      "JP41"
-    ],
-    "type": "AM",
-    "name": "RKBラジオ",
-    "frequencies_am": [
-      {
-        "area": [
-          "福岡"
-        ],
-        "frequency": 1278,
-        "primary": true
-      },
-      {
-        "area": [
-          "大牟田",
-          "行橋"
-        ],
-        "frequency": 1062,
-        "primary": false
-      },
-      {
-        "area": [
-          "北九州"
-        ],
-        "frequency": 1197,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "福岡"
-        ],
-        "frequency": 91,
-        "primary": true
-      },
-      {
-        "area": [
-          "北九州"
-        ],
-        "frequency": 91.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "糸島"
-        ],
-        "frequency": 94.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "行橋"
-        ],
-        "frequency": 94.8,
-        "primary": false
-      }
-    ]
-  },
-  "KBC": {
-    "area": [
-      "JP41"
-    ],
-    "type": "AM",
-    "name": "KBCラジオ",
-    "frequencies_am": [
-      {
-        "area": [
-          "福岡"
-        ],
-        "frequency": 1413,
-        "primary": true
-      },
-      {
-        "area": [
-          "北九州"
-        ],
-        "frequency": 720,
-        "primary": false
-      },
-      {
-        "area": [
-          "大牟田",
-          "行橋"
-        ],
-        "frequency": 1485,
-        "primary": false
-      }
-    ]
-  },
-  "JOLK": {
-    "area": [
-      "JP41"
-    ],
-    "type": "AM",
-    "name": "NHKラジオ第1（福岡）",
-    "frequencies_am": [
-      {
-        "area": [
-          "佐賀"
-        ],
-        "frequency": 963,
-        "primary": true
-      },
-      {
-        "area": [
-          "唐津"
-        ],
-        "frequency": 1584,
-        "primary": false
-      },
-      {
-        "area": [
-          "伊万里"
-        ],
-        "frequency": 531,
-        "primary": false
-      }
-    ]
-  },
-  "JOAK-FM": {
-    "area": [
-      "JP41"
-    ],
-    "type": "FM",
-    "name": "NHK-FM（東京）",
-    "frequencies_fm": [
-      {
-        "area": [
-          "佐賀"
-        ],
-        "frequency": 81.6,
-        "primary": true
-      },
-      {
-        "area": [
-          "肥前有田"
-        ],
-        "frequency": 88.9,
-        "primary": false
-      }
-    ]
-  }
+	"$schema": "../schema.json",
+	"FMS": {
+		"area": ["JP41"],
+		"type": "FM",
+		"name": "エフエム佐賀",
+		"frequencies_fm": [
+			{
+				"area": ["佐賀"],
+				"frequency": 77.9,
+				"primary": true
+			},
+			{
+				"area": ["有田"],
+				"frequency": 79.9,
+				"primary": false
+			},
+			{
+				"area": ["鳥栖"],
+				"frequency": 79.7,
+				"primary": false
+			}
+		]
+	},
+	"NBC": {
+		"area": ["JP41"],
+		"type": "AM",
+		"name": "NBCラジオ",
+		"frequencies_am": [
+			{
+				"area": ["長崎", "諫早", "島原"],
+				"frequency": 1233,
+				"primary": true
+			},
+			{
+				"area": ["平戸"],
+				"frequency": 1062,
+				"primary": false
+			},
+			{
+				"area": ["佐世保"],
+				"frequency": 1098,
+				"primary": false
+			},
+			{
+				"area": ["伊万里"],
+				"frequency": 1116,
+				"primary": false
+			},
+			{
+				"area": ["福江"],
+				"frequency": 1431,
+				"primary": false
+			},
+			{
+				"area": ["佐賀", "唐津", "有田"],
+				"frequency": 1458,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["長崎"],
+				"frequency": 92.6,
+				"primary": true
+			},
+			{
+				"area": ["佐世保"],
+				"frequency": 90.6,
+				"primary": false
+			},
+			{
+				"area": ["諫早"],
+				"frequency": 91.8,
+				"primary": false
+			},
+			{
+				"area": ["佐賀"],
+				"frequency": 93.5,
+				"primary": false
+			},
+			{
+				"area": ["鳥栖"],
+				"frequency": 92.1,
+				"primary": false
+			}
+		]
+	},
+	"RKB": {
+		"area": ["JP41"],
+		"type": "AM",
+		"name": "RKBラジオ",
+		"frequencies_am": [
+			{
+				"area": ["福岡"],
+				"frequency": 1278,
+				"primary": true
+			},
+			{
+				"area": ["大牟田", "行橋"],
+				"frequency": 1062,
+				"primary": false
+			},
+			{
+				"area": ["北九州"],
+				"frequency": 1197,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["福岡"],
+				"frequency": 91,
+				"primary": true
+			},
+			{
+				"area": ["北九州"],
+				"frequency": 91.5,
+				"primary": false
+			},
+			{
+				"area": ["糸島"],
+				"frequency": 94.6,
+				"primary": false
+			},
+			{
+				"area": ["行橋"],
+				"frequency": 94.8,
+				"primary": false
+			}
+		]
+	},
+	"KBC": {
+		"area": ["JP41"],
+		"type": "AM",
+		"name": "KBCラジオ",
+		"frequencies_am": [
+			{
+				"area": ["福岡"],
+				"frequency": 1413,
+				"primary": true
+			},
+			{
+				"area": ["北九州"],
+				"frequency": 720,
+				"primary": false
+			},
+			{
+				"area": ["大牟田", "行橋"],
+				"frequency": 1485,
+				"primary": false
+			}
+		]
+	},
+	"JOLK": {
+		"area": ["JP41"],
+		"type": "AM",
+		"name": "NHKラジオ第1（福岡）",
+		"frequencies_am": [
+			{
+				"area": ["佐賀"],
+				"frequency": 963,
+				"primary": true
+			},
+			{
+				"area": ["唐津"],
+				"frequency": 1584,
+				"primary": false
+			},
+			{
+				"area": ["伊万里"],
+				"frequency": 531,
+				"primary": false
+			}
+		]
+	},
+	"JOAK-FM": {
+		"area": ["JP41"],
+		"type": "FM",
+		"name": "NHK-FM（東京）",
+		"frequencies_fm": [
+			{
+				"area": ["佐賀"],
+				"frequency": 81.6,
+				"primary": true
+			},
+			{
+				"area": ["肥前有田"],
+				"frequency": 88.9,
+				"primary": false
+			}
+		]
+	}
 }

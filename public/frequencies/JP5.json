@@ -1,311 +1,225 @@
 {
-  "$schema": "../schema.json",
-  "ABS": {
-    "area": [
-      "JP5"
-    ],
-    "type": "AM",
-    "name": "ABSラジオ",
-    "frequencies_am": [
-      {
-        "area": [
-          "秋田"
-        ],
-        "frequency": 936,
-        "primary": true
-      },
-      {
-        "area": [
-          "鹿角",
-          "東成瀬"
-        ],
-        "frequency": 801,
-        "primary": false
-      },
-      {
-        "area": [
-          "浅舞"
-        ],
-        "frequency": 1485,
-        "primary": false
-      },
-      {
-        "area": [
-          "大館",
-          "本荘"
-        ],
-        "frequency": 1557,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "秋田"
-        ],
-        "frequency": 90.1,
-        "primary": true
-      }
-    ]
-  },
-  "AFM": {
-    "area": [
-      "JP5"
-    ],
-    "type": "FM",
-    "name": "エフエム秋田",
-    "frequencies_fm": [
-      {
-        "area": [
-          "秋田"
-        ],
-        "frequency": 82.8,
-        "primary": true
-      },
-      {
-        "area": [
-          "大館"
-        ],
-        "frequency": 89.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "湯沢"
-        ],
-        "frequency": 78,
-        "primary": false
-      },
-      {
-        "area": [
-          "角館"
-        ],
-        "frequency": 78.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "花輪"
-        ],
-        "frequency": 77.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "能代"
-        ],
-        "frequency": 89.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "本荘"
-        ],
-        "frequency": 77.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "羽後"
-        ],
-        "frequency": 89,
-        "primary": false
-      },
-      {
-        "area": [
-          "東成瀬"
-        ],
-        "frequency": 89.4,
-        "primary": false
-      }
-    ]
-  },
-  "JOHK": {
-    "area": [
-      "JP5"
-    ],
-    "type": "AM",
-    "name": "NHKラジオ第1（仙台）",
-    "frequencies_am": [
-      {
-        "area": [
-          "秋田"
-        ],
-        "frequency": 1503,
-        "primary": true
-      },
-      {
-        "area": [
-          "大館"
-        ],
-        "frequency": 1161,
-        "primary": false
-      },
-      {
-        "area": [
-          "横手"
-        ],
-        "frequency": 1341,
-        "primary": false
-      },
-      {
-        "area": [
-          "花輪"
-        ],
-        "frequency": 1341,
-        "primary": false
-      },
-      {
-        "area": [
-          "湯沢"
-        ],
-        "frequency": 1584,
-        "primary": false
-      },
-      {
-        "area": [
-          "小坂"
-        ],
-        "frequency": 1584,
-        "primary": false
-      },
-      {
-        "area": [
-          "本荘"
-        ],
-        "frequency": 1026,
-        "primary": false
-      },
-      {
-        "area": [
-          "二ツ井"
-        ],
-        "frequency": 1026,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "東成瀬椿川"
-        ],
-        "frequency": 87.7,
-        "primary": true
-      },
-      {
-        "area": [
-          "東成瀬"
-        ],
-        "frequency": 81.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "皆瀬"
-        ],
-        "frequency": 84.2,
-        "primary": false
-      }
-    ]
-  },
-  "JOAK-FM": {
-    "area": [
-      "JP5"
-    ],
-    "type": "FM",
-    "name": "NHK-FM（東京）",
-    "frequencies_fm": [
-      {
-        "area": [
-          "秋田"
-        ],
-        "frequency": 86.7,
-        "primary": true
-      },
-      {
-        "area": [
-          "大館"
-        ],
-        "frequency": 88.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "湯沢"
-        ],
-        "frequency": 84.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "花輪"
-        ],
-        "frequency": 83.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "田沢湖"
-        ],
-        "frequency": 89.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "角館"
-        ],
-        "frequency": 85.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "二ツ井"
-        ],
-        "frequency": 82.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "能代"
-        ],
-        "frequency": 83.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "花矢"
-        ],
-        "frequency": 85.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "阿仁"
-        ],
-        "frequency": 84.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "矢島"
-        ],
-        "frequency": 85.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "東由利"
-        ],
-        "frequency": 85.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "本荘"
-        ],
-        "frequency": 83.9,
-        "primary": false
-      }
-    ]
-  }
+	"$schema": "../schema.json",
+	"ABS": {
+		"area": ["JP5"],
+		"type": "AM",
+		"name": "ABSラジオ",
+		"frequencies_am": [
+			{
+				"area": ["秋田"],
+				"frequency": 936,
+				"primary": true
+			},
+			{
+				"area": ["鹿角", "東成瀬"],
+				"frequency": 801,
+				"primary": false
+			},
+			{
+				"area": ["浅舞"],
+				"frequency": 1485,
+				"primary": false
+			},
+			{
+				"area": ["大館", "本荘"],
+				"frequency": 1557,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["秋田"],
+				"frequency": 90.1,
+				"primary": true
+			}
+		]
+	},
+	"AFM": {
+		"area": ["JP5"],
+		"type": "FM",
+		"name": "エフエム秋田",
+		"frequencies_fm": [
+			{
+				"area": ["秋田"],
+				"frequency": 82.8,
+				"primary": true
+			},
+			{
+				"area": ["大館"],
+				"frequency": 89.2,
+				"primary": false
+			},
+			{
+				"area": ["湯沢"],
+				"frequency": 78,
+				"primary": false
+			},
+			{
+				"area": ["角館"],
+				"frequency": 78.9,
+				"primary": false
+			},
+			{
+				"area": ["花輪"],
+				"frequency": 77.1,
+				"primary": false
+			},
+			{
+				"area": ["能代"],
+				"frequency": 89.7,
+				"primary": false
+			},
+			{
+				"area": ["本荘"],
+				"frequency": 77.7,
+				"primary": false
+			},
+			{
+				"area": ["羽後"],
+				"frequency": 89,
+				"primary": false
+			},
+			{
+				"area": ["東成瀬"],
+				"frequency": 89.4,
+				"primary": false
+			}
+		]
+	},
+	"JOHK": {
+		"area": ["JP5"],
+		"type": "AM",
+		"name": "NHKラジオ第1（仙台）",
+		"frequencies_am": [
+			{
+				"area": ["秋田"],
+				"frequency": 1503,
+				"primary": true
+			},
+			{
+				"area": ["大館"],
+				"frequency": 1161,
+				"primary": false
+			},
+			{
+				"area": ["横手"],
+				"frequency": 1341,
+				"primary": false
+			},
+			{
+				"area": ["花輪"],
+				"frequency": 1341,
+				"primary": false
+			},
+			{
+				"area": ["湯沢"],
+				"frequency": 1584,
+				"primary": false
+			},
+			{
+				"area": ["小坂"],
+				"frequency": 1584,
+				"primary": false
+			},
+			{
+				"area": ["本荘"],
+				"frequency": 1026,
+				"primary": false
+			},
+			{
+				"area": ["二ツ井"],
+				"frequency": 1026,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["東成瀬椿川"],
+				"frequency": 87.7,
+				"primary": true
+			},
+			{
+				"area": ["東成瀬"],
+				"frequency": 81.5,
+				"primary": false
+			},
+			{
+				"area": ["皆瀬"],
+				"frequency": 84.2,
+				"primary": false
+			}
+		]
+	},
+	"JOAK-FM": {
+		"area": ["JP5"],
+		"type": "FM",
+		"name": "NHK-FM（東京）",
+		"frequencies_fm": [
+			{
+				"area": ["秋田"],
+				"frequency": 86.7,
+				"primary": true
+			},
+			{
+				"area": ["大館"],
+				"frequency": 88.3,
+				"primary": false
+			},
+			{
+				"area": ["湯沢"],
+				"frequency": 84.9,
+				"primary": false
+			},
+			{
+				"area": ["花輪"],
+				"frequency": 83.8,
+				"primary": false
+			},
+			{
+				"area": ["田沢湖"],
+				"frequency": 89.9,
+				"primary": false
+			},
+			{
+				"area": ["角館"],
+				"frequency": 85.8,
+				"primary": false
+			},
+			{
+				"area": ["二ツ井"],
+				"frequency": 82.5,
+				"primary": false
+			},
+			{
+				"area": ["能代"],
+				"frequency": 83.6,
+				"primary": false
+			},
+			{
+				"area": ["花矢"],
+				"frequency": 85.7,
+				"primary": false
+			},
+			{
+				"area": ["阿仁"],
+				"frequency": 84.5,
+				"primary": false
+			},
+			{
+				"area": ["矢島"],
+				"frequency": 85.2,
+				"primary": false
+			},
+			{
+				"area": ["東由利"],
+				"frequency": 85.3,
+				"primary": false
+			},
+			{
+				"area": ["本荘"],
+				"frequency": 83.9,
+				"primary": false
+			}
+		]
+	}
 }

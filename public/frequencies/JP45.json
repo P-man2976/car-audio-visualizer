@@ -1,217 +1,155 @@
 {
-  "$schema": "../schema.json",
-  "MRT": {
-    "area": [
-      "JP45"
-    ],
-    "type": "AM",
-    "name": "宮崎放送",
-    "frequencies_am": [
-      {
-        "area": [
-          "宮崎",
-          "延岡",
-          "高千穂",
-          "小林",
-          "日南",
-          "都城",
-          "串間"
-        ],
-        "frequency": 936,
-        "primary": true
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "宮崎"
-        ],
-        "frequency": 90.4,
-        "primary": true
-      },
-      {
-        "area": [
-          "延岡"
-        ],
-        "frequency": 94.7,
-        "primary": false
-      }
-    ]
-  },
-  "JOYFM": {
-    "area": [
-      "JP45"
-    ],
-    "type": "FM",
-    "name": "エフエム宮崎",
-    "frequencies_fm": [
-      {
-        "area": [
-          "串間"
-        ],
-        "frequency": 80.7,
-        "primary": true
-      },
-      {
-        "area": [
-          "宮崎"
-        ],
-        "frequency": 83.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "高千穂"
-        ],
-        "frequency": 84.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "延岡"
-        ],
-        "frequency": 89.5,
-        "primary": false
-      }
-    ]
-  },
-  "JOLK": {
-    "area": [
-      "JP45"
-    ],
-    "type": "AM",
-    "name": "NHKラジオ第1（福岡）",
-    "frequencies_am": [
-      {
-        "area": [
-          "宮崎"
-        ],
-        "frequency": 540,
-        "primary": true
-      },
-      {
-        "area": [
-          "延岡"
-        ],
-        "frequency": 621,
-        "primary": false
-      },
-      {
-        "area": [
-          "都城"
-        ],
-        "frequency": 1161,
-        "primary": false
-      },
-      {
-        "area": [
-          "小林"
-        ],
-        "frequency": 1026,
-        "primary": false
-      },
-      {
-        "area": [
-          "日南"
-        ],
-        "frequency": 1341,
-        "primary": false
-      },
-      {
-        "area": [
-          "高千穂"
-        ],
-        "frequency": 1584,
-        "primary": false
-      },
-      {
-        "area": [
-          "串間"
-        ],
-        "frequency": 1026,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "延岡"
-        ],
-        "frequency": 93,
-        "primary": true
-      },
-      {
-        "area": [
-          "五ヶ瀬"
-        ],
-        "frequency": 78.2,
-        "primary": false
-      }
-    ]
-  },
-  "JOAK-FM": {
-    "area": [
-      "JP45"
-    ],
-    "type": "FM",
-    "name": "NHK-FM（東京）",
-    "frequencies_fm": [
-      {
-        "area": [
-          "宮崎"
-        ],
-        "frequency": 86.2,
-        "primary": true
-      },
-      {
-        "area": [
-          "延岡"
-        ],
-        "frequency": 87,
-        "primary": false
-      },
-      {
-        "area": [
-          "高千穂"
-        ],
-        "frequency": 88.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "串間"
-        ],
-        "frequency": 85.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "東郷"
-        ],
-        "frequency": 84,
-        "primary": false
-      },
-      {
-        "area": [
-          "日向西郷"
-        ],
-        "frequency": 85.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "入郷"
-        ],
-        "frequency": 85.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "椎葉"
-        ],
-        "frequency": 88.2,
-        "primary": false
-      }
-    ]
-  }
+	"$schema": "../schema.json",
+	"MRT": {
+		"area": ["JP45"],
+		"type": "AM",
+		"name": "宮崎放送",
+		"frequencies_am": [
+			{
+				"area": ["宮崎", "延岡", "高千穂", "小林", "日南", "都城", "串間"],
+				"frequency": 936,
+				"primary": true
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["宮崎"],
+				"frequency": 90.4,
+				"primary": true
+			},
+			{
+				"area": ["延岡"],
+				"frequency": 94.7,
+				"primary": false
+			}
+		]
+	},
+	"JOYFM": {
+		"area": ["JP45"],
+		"type": "FM",
+		"name": "エフエム宮崎",
+		"frequencies_fm": [
+			{
+				"area": ["串間"],
+				"frequency": 80.7,
+				"primary": true
+			},
+			{
+				"area": ["宮崎"],
+				"frequency": 83.2,
+				"primary": false
+			},
+			{
+				"area": ["高千穂"],
+				"frequency": 84.9,
+				"primary": false
+			},
+			{
+				"area": ["延岡"],
+				"frequency": 89.5,
+				"primary": false
+			}
+		]
+	},
+	"JOLK": {
+		"area": ["JP45"],
+		"type": "AM",
+		"name": "NHKラジオ第1（福岡）",
+		"frequencies_am": [
+			{
+				"area": ["宮崎"],
+				"frequency": 540,
+				"primary": true
+			},
+			{
+				"area": ["延岡"],
+				"frequency": 621,
+				"primary": false
+			},
+			{
+				"area": ["都城"],
+				"frequency": 1161,
+				"primary": false
+			},
+			{
+				"area": ["小林"],
+				"frequency": 1026,
+				"primary": false
+			},
+			{
+				"area": ["日南"],
+				"frequency": 1341,
+				"primary": false
+			},
+			{
+				"area": ["高千穂"],
+				"frequency": 1584,
+				"primary": false
+			},
+			{
+				"area": ["串間"],
+				"frequency": 1026,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["延岡"],
+				"frequency": 93,
+				"primary": true
+			},
+			{
+				"area": ["五ヶ瀬"],
+				"frequency": 78.2,
+				"primary": false
+			}
+		]
+	},
+	"JOAK-FM": {
+		"area": ["JP45"],
+		"type": "FM",
+		"name": "NHK-FM（東京）",
+		"frequencies_fm": [
+			{
+				"area": ["宮崎"],
+				"frequency": 86.2,
+				"primary": true
+			},
+			{
+				"area": ["延岡"],
+				"frequency": 87,
+				"primary": false
+			},
+			{
+				"area": ["高千穂"],
+				"frequency": 88.1,
+				"primary": false
+			},
+			{
+				"area": ["串間"],
+				"frequency": 85.2,
+				"primary": false
+			},
+			{
+				"area": ["東郷"],
+				"frequency": 84,
+				"primary": false
+			},
+			{
+				"area": ["日向西郷"],
+				"frequency": 85.8,
+				"primary": false
+			},
+			{
+				"area": ["入郷"],
+				"frequency": 85.2,
+				"primary": false
+			},
+			{
+				"area": ["椎葉"],
+				"frequency": 88.2,
+				"primary": false
+			}
+		]
+	}
 }

@@ -1,349 +1,253 @@
 {
-  "$schema": "../schema.json",
-  "RFC": {
-    "area": [
-      "JP7"
-    ],
-    "type": "AM",
-    "name": "RFCラジオ福島",
-    "frequencies_am": [
-      {
-        "area": [
-          "福島"
-        ],
-        "frequency": 1458,
-        "primary": true
-      },
-      {
-        "area": [
-          "原町"
-        ],
-        "frequency": 801,
-        "primary": false
-      },
-      {
-        "area": [
-          "郡山"
-        ],
-        "frequency": 1098,
-        "primary": false
-      },
-      {
-        "area": [
-          "会津若松"
-        ],
-        "frequency": 1395,
-        "primary": false
-      },
-      {
-        "area": [
-          "いわき"
-        ],
-        "frequency": 1431,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "福島"
-        ],
-        "frequency": 90.8,
-        "primary": true
-      },
-      {
-        "area": [
-          "東金山"
-        ],
-        "frequency": 77.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "西金山"
-        ],
-        "frequency": 79.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "金山"
-        ],
-        "frequency": 79.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "いわき"
-        ],
-        "frequency": 90.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "原町"
-        ],
-        "frequency": 90.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "郡山"
-        ],
-        "frequency": 90.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "若松"
-        ],
-        "frequency": 90.8,
-        "primary": false
-      }
-    ]
-  },
-  "FMF": {
-    "area": [
-      "JP7"
-    ],
-    "type": "FM",
-    "name": "ふくしまFM",
-    "frequencies_fm": [
-      {
-        "area": [
-          "福島"
-        ],
-        "frequency": 81.8,
-        "primary": true
-      },
-      {
-        "area": [
-          "会津若松"
-        ],
-        "frequency": 82.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "いわき"
-        ],
-        "frequency": 78.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "白河"
-        ],
-        "frequency": 79.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "原町"
-        ],
-        "frequency": 78.6,
-        "primary": false
-      }
-    ]
-  },
-  "JOHK": {
-    "area": [
-      "JP7"
-    ],
-    "type": "AM",
-    "name": "NHKラジオ第1（仙台）",
-    "frequencies_am": [
-      {
-        "area": [
-          "福島"
-        ],
-        "frequency": 1323,
-        "primary": true
-      },
-      {
-        "area": [
-          "郡山"
-        ],
-        "frequency": 846,
-        "primary": false
-      },
-      {
-        "area": [
-          "いわき"
-        ],
-        "frequency": 1341,
-        "primary": false
-      },
-      {
-        "area": [
-          "会津若松"
-        ],
-        "frequency": 1161,
-        "primary": false
-      },
-      {
-        "area": [
-          "原町"
-        ],
-        "frequency": 1026,
-        "primary": false
-      },
-      {
-        "area": [
-          "只見"
-        ],
-        "frequency": 1584,
-        "primary": false
-      },
-      {
-        "area": [
-          "田島"
-        ],
-        "frequency": 1341,
-        "primary": false
-      },
-      {
-        "area": [
-          "西会津"
-        ],
-        "frequency": 1368,
-        "primary": false
-      },
-      {
-        "area": [
-          "双葉"
-        ],
-        "frequency": 1161,
-        "primary": false
-      }
-    ]
-  },
-  "JOAK-FM": {
-    "area": [
-      "JP7"
-    ],
-    "type": "FM",
-    "name": "NHK-FM（東京）",
-    "frequencies_fm": [
-      {
-        "area": [
-          "福島"
-        ],
-        "frequency": 85.3,
-        "primary": true
-      },
-      {
-        "area": [
-          "原町"
-        ],
-        "frequency": 83.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "月館"
-        ],
-        "frequency": 84.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "会津若松"
-        ],
-        "frequency": 85.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "田島"
-        ],
-        "frequency": 85,
-        "primary": false
-      },
-      {
-        "area": [
-          "白河"
-        ],
-        "frequency": 84.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "東只見"
-        ],
-        "frequency": 83.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "只見"
-        ],
-        "frequency": 84.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "小野"
-        ],
-        "frequency": 84,
-        "primary": false
-      },
-      {
-        "area": [
-          "東金山"
-        ],
-        "frequency": 84.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "塙"
-        ],
-        "frequency": 83.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "西金山"
-        ],
-        "frequency": 83.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "柳津三島"
-        ],
-        "frequency": 84.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "南郷"
-        ],
-        "frequency": 84.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "いわき"
-        ],
-        "frequency": 86.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "富岡"
-        ],
-        "frequency": 84.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "勿来"
-        ],
-        "frequency": 83.6,
-        "primary": false
-      }
-    ]
-  }
+	"$schema": "../schema.json",
+	"RFC": {
+		"area": ["JP7"],
+		"type": "AM",
+		"name": "RFCラジオ福島",
+		"frequencies_am": [
+			{
+				"area": ["福島"],
+				"frequency": 1458,
+				"primary": true
+			},
+			{
+				"area": ["原町"],
+				"frequency": 801,
+				"primary": false
+			},
+			{
+				"area": ["郡山"],
+				"frequency": 1098,
+				"primary": false
+			},
+			{
+				"area": ["会津若松"],
+				"frequency": 1395,
+				"primary": false
+			},
+			{
+				"area": ["いわき"],
+				"frequency": 1431,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["福島"],
+				"frequency": 90.8,
+				"primary": true
+			},
+			{
+				"area": ["東金山"],
+				"frequency": 77.8,
+				"primary": false
+			},
+			{
+				"area": ["西金山"],
+				"frequency": 79.3,
+				"primary": false
+			},
+			{
+				"area": ["金山"],
+				"frequency": 79.3,
+				"primary": false
+			},
+			{
+				"area": ["いわき"],
+				"frequency": 90.2,
+				"primary": false
+			},
+			{
+				"area": ["原町"],
+				"frequency": 90.2,
+				"primary": false
+			},
+			{
+				"area": ["郡山"],
+				"frequency": 90.8,
+				"primary": false
+			},
+			{
+				"area": ["若松"],
+				"frequency": 90.8,
+				"primary": false
+			}
+		]
+	},
+	"FMF": {
+		"area": ["JP7"],
+		"type": "FM",
+		"name": "ふくしまFM",
+		"frequencies_fm": [
+			{
+				"area": ["福島"],
+				"frequency": 81.8,
+				"primary": true
+			},
+			{
+				"area": ["会津若松"],
+				"frequency": 82.8,
+				"primary": false
+			},
+			{
+				"area": ["いわき"],
+				"frequency": 78.6,
+				"primary": false
+			},
+			{
+				"area": ["白河"],
+				"frequency": 79.8,
+				"primary": false
+			},
+			{
+				"area": ["原町"],
+				"frequency": 78.6,
+				"primary": false
+			}
+		]
+	},
+	"JOHK": {
+		"area": ["JP7"],
+		"type": "AM",
+		"name": "NHKラジオ第1（仙台）",
+		"frequencies_am": [
+			{
+				"area": ["福島"],
+				"frequency": 1323,
+				"primary": true
+			},
+			{
+				"area": ["郡山"],
+				"frequency": 846,
+				"primary": false
+			},
+			{
+				"area": ["いわき"],
+				"frequency": 1341,
+				"primary": false
+			},
+			{
+				"area": ["会津若松"],
+				"frequency": 1161,
+				"primary": false
+			},
+			{
+				"area": ["原町"],
+				"frequency": 1026,
+				"primary": false
+			},
+			{
+				"area": ["只見"],
+				"frequency": 1584,
+				"primary": false
+			},
+			{
+				"area": ["田島"],
+				"frequency": 1341,
+				"primary": false
+			},
+			{
+				"area": ["西会津"],
+				"frequency": 1368,
+				"primary": false
+			},
+			{
+				"area": ["双葉"],
+				"frequency": 1161,
+				"primary": false
+			}
+		]
+	},
+	"JOAK-FM": {
+		"area": ["JP7"],
+		"type": "FM",
+		"name": "NHK-FM（東京）",
+		"frequencies_fm": [
+			{
+				"area": ["福島"],
+				"frequency": 85.3,
+				"primary": true
+			},
+			{
+				"area": ["原町"],
+				"frequency": 83.3,
+				"primary": false
+			},
+			{
+				"area": ["月館"],
+				"frequency": 84.6,
+				"primary": false
+			},
+			{
+				"area": ["会津若松"],
+				"frequency": 85.9,
+				"primary": false
+			},
+			{
+				"area": ["田島"],
+				"frequency": 85,
+				"primary": false
+			},
+			{
+				"area": ["白河"],
+				"frequency": 84.3,
+				"primary": false
+			},
+			{
+				"area": ["東只見"],
+				"frequency": 83.7,
+				"primary": false
+			},
+			{
+				"area": ["只見"],
+				"frequency": 84.8,
+				"primary": false
+			},
+			{
+				"area": ["小野"],
+				"frequency": 84,
+				"primary": false
+			},
+			{
+				"area": ["東金山"],
+				"frequency": 84.1,
+				"primary": false
+			},
+			{
+				"area": ["塙"],
+				"frequency": 83.8,
+				"primary": false
+			},
+			{
+				"area": ["西金山"],
+				"frequency": 83.3,
+				"primary": false
+			},
+			{
+				"area": ["柳津三島"],
+				"frequency": 84.9,
+				"primary": false
+			},
+			{
+				"area": ["南郷"],
+				"frequency": 84.5,
+				"primary": false
+			},
+			{
+				"area": ["いわき"],
+				"frequency": 86.1,
+				"primary": false
+			},
+			{
+				"area": ["富岡"],
+				"frequency": 84.5,
+				"primary": false
+			},
+			{
+				"area": ["勿来"],
+				"frequency": 83.6,
+				"primary": false
+			}
+		]
+	}
 }

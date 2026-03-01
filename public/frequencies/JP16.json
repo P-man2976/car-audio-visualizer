@@ -1,88 +1,66 @@
 {
-  "$schema": "../schema.json",
-  "KNB": {
-    "area": [
-      "JP16"
-    ],
-    "type": "AM",
-    "name": "ＫＮＢラジオ",
-    "frequencies_am": [
-      {
-        "area": [
-          "富山"
-        ],
-        "frequency": 738,
-        "primary": true
-      }
-    ]
-  },
-  "FMTOYAMA": {
-    "area": [
-      "JP16"
-    ],
-    "type": "FM",
-    "name": "ＦＭとやま",
-    "frequencies_fm": [
-      {
-        "area": [
-          "富山"
-        ],
-        "frequency": 82.7,
-        "primary": true
-      },
-      {
-        "area": [
-          "福光"
-        ],
-        "frequency": 84.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "宇奈月"
-        ],
-        "frequency": 85.8,
-        "primary": false
-      }
-    ]
-  },
-  "JOCK": {
-    "area": [
-      "JP16"
-    ],
-    "type": "AM",
-    "name": "NHKラジオ第1（名古屋）",
-    "frequencies_am": [
-      {
-        "area": [
-          "富山"
-        ],
-        "frequency": 648,
-        "primary": true
-      }
-    ]
-  },
-  "JOAK-FM": {
-    "area": [
-      "JP16"
-    ],
-    "type": "FM",
-    "name": "NHK-FM（東京）",
-    "frequencies_fm": [
-      {
-        "area": [
-          "富山"
-        ],
-        "frequency": 81.5,
-        "primary": true
-      },
-      {
-        "area": [
-          "宇奈月"
-        ],
-        "frequency": 84.9,
-        "primary": false
-      }
-    ]
-  }
+	"$schema": "../schema.json",
+	"KNB": {
+		"area": ["JP16"],
+		"type": "AM",
+		"name": "ＫＮＢラジオ",
+		"frequencies_am": [
+			{
+				"area": ["富山"],
+				"frequency": 738,
+				"primary": true
+			}
+		]
+	},
+	"FMTOYAMA": {
+		"area": ["JP16"],
+		"type": "FM",
+		"name": "ＦＭとやま",
+		"frequencies_fm": [
+			{
+				"area": ["富山"],
+				"frequency": 82.7,
+				"primary": true
+			},
+			{
+				"area": ["福光"],
+				"frequency": 84.6,
+				"primary": false
+			},
+			{
+				"area": ["宇奈月"],
+				"frequency": 85.8,
+				"primary": false
+			}
+		]
+	},
+	"JOCK": {
+		"area": ["JP16"],
+		"type": "AM",
+		"name": "NHKラジオ第1（名古屋）",
+		"frequencies_am": [
+			{
+				"area": ["富山"],
+				"frequency": 648,
+				"primary": true
+			}
+		]
+	},
+	"JOAK-FM": {
+		"area": ["JP16"],
+		"type": "FM",
+		"name": "NHK-FM（東京）",
+		"frequencies_fm": [
+			{
+				"area": ["富山"],
+				"frequency": 81.5,
+				"primary": true
+			},
+			{
+				"area": ["宇奈月"],
+				"frequency": 84.9,
+				"primary": false
+			}
+		]
+	}
 }

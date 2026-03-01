@@ -16,6 +16,7 @@ export function useRestoreState() {
 	const { mutate } = useRadikoM3u8Url();
 	const restoredRef = useRef(false);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: マウント時のみ1回実行（restoredRef で再実行防止済み）
 	useEffect(() => {
 		if (restoredRef.current) return;
 		restoredRef.current = true;
@@ -25,9 +26,11 @@ export function useRestoreState() {
 				mutate(currentRadio.id, { onSuccess: (m3u8) => load(m3u8) });
 			} else if (currentRadio.source === "radiru") {
 				// radiru は url プロパティ保持
-				load((currentRadio as Extract<typeof currentRadio, { source: "radiru" }>).url);
+				load(
+					(currentRadio as Extract<typeof currentRadio, { source: "radiru" }>)
+						.url,
+				);
 			}
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []); // マウント時のみ実行
 }

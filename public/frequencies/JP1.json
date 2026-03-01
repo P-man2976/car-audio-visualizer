@@ -1,909 +1,644 @@
 {
-  "$schema": "../schema.json",
-  "HBC": {
-    "area": [
-      "JP1"
-    ],
-    "type": "AM",
-    "name": "ＨＢＣラジオ",
-    "frequencies_am": [
-      {
-        "area": [
-          "札幌"
-        ],
-        "frequency": 1287,
-        "primary": true
-      },
-      {
-        "area": [
-          "苫小牧",
-          "北見",
-          "遠軽",
-          "根室"
-        ],
-        "frequency": 801,
-        "primary": false
-      },
-      {
-        "area": [
-          "旭川",
-          "遠別",
-          "室蘭"
-        ],
-        "frequency": 864,
-        "primary": false
-      },
-      {
-        "area": [
-          "函館"
-        ],
-        "frequency": 900,
-        "primary": false
-      },
-      {
-        "area": [
-          "北桧山"
-        ],
-        "frequency": 1098,
-        "primary": false
-      },
-      {
-        "area": [
-          "江差",
-          "帯広"
-        ],
-        "frequency": 1269,
-        "primary": false
-      },
-      {
-        "area": [
-          "稚内"
-        ],
-        "frequency": 1368,
-        "primary": false
-      },
-      {
-        "area": [
-          "釧路"
-        ],
-        "frequency": 1404,
-        "primary": false
-      },
-      {
-        "area": [
-          "網走"
-        ],
-        "frequency": 1449,
-        "primary": false
-      },
-      {
-        "area": [
-          "名寄"
-        ],
-        "frequency": 1494,
-        "primary": false
-      },
-      {
-        "area": [
-          "留萌"
-        ],
-        "frequency": 1557,
-        "primary": false
-      }
-    ]
-  },
-  "STV": {
-    "area": [
-      "JP1"
-    ],
-    "type": "AM",
-    "name": "ＳＴＶラジオ",
-    "frequencies_am": [
-      {
-        "area": [
-          "札幌",
-          "室蘭",
-          "苫小牧"
-        ],
-        "frequency": 1440,
-        "primary": true
-      },
-      {
-        "area": [
-          "函館"
-        ],
-        "frequency": 639,
-        "primary": false
-      },
-      {
-        "area": [
-          "江差",
-          "北檜山",
-          "釧路"
-        ],
-        "frequency": 882,
-        "primary": false
-      },
-      {
-        "area": [
-          "網走",
-          "遠軽"
-        ],
-        "frequency": 909,
-        "primary": false
-      },
-      {
-        "area": [
-          "根室"
-        ],
-        "frequency": 1062,
-        "primary": false
-      },
-      {
-        "area": [
-          "帯広"
-        ],
-        "frequency": 1071,
-        "primary": false
-      },
-      {
-        "area": [
-          "旭川",
-          "名寄",
-          "留萌",
-          "遠別",
-          "稚内"
-        ],
-        "frequency": 1197,
-        "primary": false
-      },
-      {
-        "area": [
-          "北見"
-        ],
-        "frequency": 1485,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "手稲"
-        ],
-        "frequency": 90.4,
-        "primary": true
-      }
-    ]
-  },
-  "AIR-G": {
-    "area": [
-      "JP1"
-    ],
-    "type": "FM",
-    "name": "AIR-G'（FM北海道）",
-    "frequencies_fm": [
-      {
-        "area": [
-          "札幌"
-        ],
-        "frequency": 80.4,
-        "primary": true
-      },
-      {
-        "area": [
-          "札幌大通"
-        ],
-        "frequency": 79.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "旭川"
-        ],
-        "frequency": 76.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "小樽"
-        ],
-        "frequency": 81.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "函館"
-        ],
-        "frequency": 88.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "帯広"
-        ],
-        "frequency": 78.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "釧路"
-        ],
-        "frequency": 86.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "網走"
-        ],
-        "frequency": 83.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "北見"
-        ],
-        "frequency": 87.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "室蘭"
-        ],
-        "frequency": 89.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "洞爺"
-        ],
-        "frequency": 86.5,
-        "primary": false
-      }
-    ]
-  },
-  "NORTHWAVE": {
-    "area": [
-      "JP1"
-    ],
-    "type": "FM",
-    "name": "FM NORTH WAVE",
-    "frequencies_fm": [
-      {
-        "area": [
-          "札幌"
-        ],
-        "frequency": 82.5,
-        "primary": true
-      },
-      {
-        "area": [
-          "札幌大通"
-        ],
-        "frequency": 77.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "旭川"
-        ],
-        "frequency": 79.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "函館"
-        ],
-        "frequency": 79.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "小樽"
-        ],
-        "frequency": 79.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "帯広"
-        ],
-        "frequency": 82.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "釧路"
-        ],
-        "frequency": 80.7,
-        "primary": false
-      }
-    ]
-  },
-  "JOIK": {
-    "area": [
-      "JP1"
-    ],
-    "type": "AM",
-    "name": "NHKラジオ第1（札幌）",
-    "frequencies_am": [
-      {
-        "area": [
-          "札幌"
-        ],
-        "frequency": 567,
-        "primary": true
-      },
-      {
-        "area": [
-          "函館"
-        ],
-        "frequency": 675,
-        "primary": false
-      },
-      {
-        "area": [
-          "江差"
-        ],
-        "frequency": 792,
-        "primary": false
-      },
-      {
-        "area": [
-          "今金"
-        ],
-        "frequency": 1161,
-        "primary": false
-      },
-      {
-        "area": [
-          "松前"
-        ],
-        "frequency": 1161,
-        "primary": false
-      },
-      {
-        "area": [
-          "旭川"
-        ],
-        "frequency": 621,
-        "primary": false
-      },
-      {
-        "area": [
-          "留萌"
-        ],
-        "frequency": 1161,
-        "primary": false
-      },
-      {
-        "area": [
-          "稚内"
-        ],
-        "frequency": 927,
-        "primary": false
-      },
-      {
-        "area": [
-          "名寄"
-        ],
-        "frequency": 837,
-        "primary": false
-      },
-      {
-        "area": [
-          "中頓別"
-        ],
-        "frequency": 1026,
-        "primary": false
-      },
-      {
-        "area": [
-          "遠別"
-        ],
-        "frequency": 792,
-        "primary": false
-      },
-      {
-        "area": [
-          "帯広"
-        ],
-        "frequency": 603,
-        "primary": false
-      },
-      {
-        "area": [
-          "広尾"
-        ],
-        "frequency": 1584,
-        "primary": false
-      },
-      {
-        "area": [
-          "釧路"
-        ],
-        "frequency": 585,
-        "primary": false
-      },
-      {
-        "area": [
-          "根室"
-        ],
-        "frequency": 1584,
-        "primary": false
-      },
-      {
-        "area": [
-          "中標津"
-        ],
-        "frequency": 1341,
-        "primary": false
-      },
-      {
-        "area": [
-          "北見"
-        ],
-        "frequency": 1188,
-        "primary": false
-      },
-      {
-        "area": [
-          "新北見"
-        ],
-        "frequency": 1584,
-        "primary": false
-      },
-      {
-        "area": [
-          "遠軽"
-        ],
-        "frequency": 1026,
-        "primary": false
-      },
-      {
-        "area": [
-          "室蘭"
-        ],
-        "frequency": 945,
-        "primary": false
-      },
-      {
-        "area": [
-          "浦河"
-        ],
-        "frequency": 1341,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "広尾"
-        ],
-        "frequency": 90.1,
-        "primary": true
-      },
-      {
-        "area": [
-          "屈斜路"
-        ],
-        "frequency": 81.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "川湯"
-        ],
-        "frequency": 84.1,
-        "primary": false
-      }
-    ]
-  },
-  "JOAK-FM": {
-    "area": [
-      "JP1"
-    ],
-    "type": "FM",
-    "name": "NHK-FM（東京）",
-    "frequencies_fm": [
-      {
-        "area": [
-          "札幌"
-        ],
-        "frequency": 85.2,
-        "primary": true
-      },
-      {
-        "area": [
-          "札幌大通"
-        ],
-        "frequency": 81.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "小樽"
-        ],
-        "frequency": 84.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "岩内"
-        ],
-        "frequency": 84.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "黒松内"
-        ],
-        "frequency": 84.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "南羊蹄"
-        ],
-        "frequency": 83.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "島牧"
-        ],
-        "frequency": 85.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "芦別"
-        ],
-        "frequency": 83.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "歌志内"
-        ],
-        "frequency": 84.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "夕張"
-        ],
-        "frequency": 83.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "夕張清水沢"
-        ],
-        "frequency": 85.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "ニセコ"
-        ],
-        "frequency": 78.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "函館"
-        ],
-        "frequency": 87,
-        "primary": false
-      },
-      {
-        "area": [
-          "江差"
-        ],
-        "frequency": 89.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "北檜山"
-        ],
-        "frequency": 86,
-        "primary": false
-      },
-      {
-        "area": [
-          "渡島福島"
-        ],
-        "frequency": 84.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "奥尻大成"
-        ],
-        "frequency": 84.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "松前"
-        ],
-        "frequency": 85.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "札前"
-        ],
-        "frequency": 84.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "日浦"
-        ],
-        "frequency": 83.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "旭川"
-        ],
-        "frequency": 85.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "名寄"
-        ],
-        "frequency": 88.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "知駒"
-        ],
-        "frequency": 89.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "留萌"
-        ],
-        "frequency": 84.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "稚内"
-        ],
-        "frequency": 84.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "枝幸"
-        ],
-        "frequency": 89.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "富良野"
-        ],
-        "frequency": 84.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "羽幌"
-        ],
-        "frequency": 83.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "礼文"
-        ],
-        "frequency": 89.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "上川"
-        ],
-        "frequency": 84.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "幾寅"
-        ],
-        "frequency": 84.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "深川"
-        ],
-        "frequency": 84,
-        "primary": false
-      },
-      {
-        "area": [
-          "帯広"
-        ],
-        "frequency": 87.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "足寄"
-        ],
-        "frequency": 89.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "広尾"
-        ],
-        "frequency": 83.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "新得"
-        ],
-        "frequency": 83.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "陸別"
-        ],
-        "frequency": 84.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "本別"
-        ],
-        "frequency": 83.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "釧路"
-        ],
-        "frequency": 88.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "中標津"
-        ],
-        "frequency": 89.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "根室"
-        ],
-        "frequency": 85.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "羅臼"
-        ],
-        "frequency": 88.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "弟子屈"
-        ],
-        "frequency": 89.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "厚岸"
-        ],
-        "frequency": 85.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "北見"
-        ],
-        "frequency": 86,
-        "primary": false
-      },
-      {
-        "area": [
-          "新北見"
-        ],
-        "frequency": 84.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "紋別"
-        ],
-        "frequency": 85.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "滝上"
-        ],
-        "frequency": 83.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "遠軽"
-        ],
-        "frequency": 83.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "丸瀬布"
-        ],
-        "frequency": 84.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "室蘭"
-        ],
-        "frequency": 88,
-        "primary": false
-      },
-      {
-        "area": [
-          "浦河"
-        ],
-        "frequency": 86.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "静内"
-        ],
-        "frequency": 84,
-        "primary": false
-      },
-      {
-        "area": [
-          "洞爺"
-        ],
-        "frequency": 81.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "登別"
-        ],
-        "frequency": 84.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "日高"
-        ],
-        "frequency": 84.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "振内"
-        ],
-        "frequency": 84.8,
-        "primary": false
-      }
-    ]
-  }
+	"$schema": "../schema.json",
+	"HBC": {
+		"area": ["JP1"],
+		"type": "AM",
+		"name": "ＨＢＣラジオ",
+		"frequencies_am": [
+			{
+				"area": ["札幌"],
+				"frequency": 1287,
+				"primary": true
+			},
+			{
+				"area": ["苫小牧", "北見", "遠軽", "根室"],
+				"frequency": 801,
+				"primary": false
+			},
+			{
+				"area": ["旭川", "遠別", "室蘭"],
+				"frequency": 864,
+				"primary": false
+			},
+			{
+				"area": ["函館"],
+				"frequency": 900,
+				"primary": false
+			},
+			{
+				"area": ["北桧山"],
+				"frequency": 1098,
+				"primary": false
+			},
+			{
+				"area": ["江差", "帯広"],
+				"frequency": 1269,
+				"primary": false
+			},
+			{
+				"area": ["稚内"],
+				"frequency": 1368,
+				"primary": false
+			},
+			{
+				"area": ["釧路"],
+				"frequency": 1404,
+				"primary": false
+			},
+			{
+				"area": ["網走"],
+				"frequency": 1449,
+				"primary": false
+			},
+			{
+				"area": ["名寄"],
+				"frequency": 1494,
+				"primary": false
+			},
+			{
+				"area": ["留萌"],
+				"frequency": 1557,
+				"primary": false
+			}
+		]
+	},
+	"STV": {
+		"area": ["JP1"],
+		"type": "AM",
+		"name": "ＳＴＶラジオ",
+		"frequencies_am": [
+			{
+				"area": ["札幌", "室蘭", "苫小牧"],
+				"frequency": 1440,
+				"primary": true
+			},
+			{
+				"area": ["函館"],
+				"frequency": 639,
+				"primary": false
+			},
+			{
+				"area": ["江差", "北檜山", "釧路"],
+				"frequency": 882,
+				"primary": false
+			},
+			{
+				"area": ["網走", "遠軽"],
+				"frequency": 909,
+				"primary": false
+			},
+			{
+				"area": ["根室"],
+				"frequency": 1062,
+				"primary": false
+			},
+			{
+				"area": ["帯広"],
+				"frequency": 1071,
+				"primary": false
+			},
+			{
+				"area": ["旭川", "名寄", "留萌", "遠別", "稚内"],
+				"frequency": 1197,
+				"primary": false
+			},
+			{
+				"area": ["北見"],
+				"frequency": 1485,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["手稲"],
+				"frequency": 90.4,
+				"primary": true
+			}
+		]
+	},
+	"AIR-G": {
+		"area": ["JP1"],
+		"type": "FM",
+		"name": "AIR-G'（FM北海道）",
+		"frequencies_fm": [
+			{
+				"area": ["札幌"],
+				"frequency": 80.4,
+				"primary": true
+			},
+			{
+				"area": ["札幌大通"],
+				"frequency": 79.2,
+				"primary": false
+			},
+			{
+				"area": ["旭川"],
+				"frequency": 76.4,
+				"primary": false
+			},
+			{
+				"area": ["小樽"],
+				"frequency": 81.9,
+				"primary": false
+			},
+			{
+				"area": ["函館"],
+				"frequency": 88.8,
+				"primary": false
+			},
+			{
+				"area": ["帯広"],
+				"frequency": 78.5,
+				"primary": false
+			},
+			{
+				"area": ["釧路"],
+				"frequency": 86.4,
+				"primary": false
+			},
+			{
+				"area": ["網走"],
+				"frequency": 83.1,
+				"primary": false
+			},
+			{
+				"area": ["北見"],
+				"frequency": 87.8,
+				"primary": false
+			},
+			{
+				"area": ["室蘭"],
+				"frequency": 89.4,
+				"primary": false
+			},
+			{
+				"area": ["洞爺"],
+				"frequency": 86.5,
+				"primary": false
+			}
+		]
+	},
+	"NORTHWAVE": {
+		"area": ["JP1"],
+		"type": "FM",
+		"name": "FM NORTH WAVE",
+		"frequencies_fm": [
+			{
+				"area": ["札幌"],
+				"frequency": 82.5,
+				"primary": true
+			},
+			{
+				"area": ["札幌大通"],
+				"frequency": 77.2,
+				"primary": false
+			},
+			{
+				"area": ["旭川"],
+				"frequency": 79.8,
+				"primary": false
+			},
+			{
+				"area": ["函館"],
+				"frequency": 79.4,
+				"primary": false
+			},
+			{
+				"area": ["小樽"],
+				"frequency": 79.5,
+				"primary": false
+			},
+			{
+				"area": ["帯広"],
+				"frequency": 82.1,
+				"primary": false
+			},
+			{
+				"area": ["釧路"],
+				"frequency": 80.7,
+				"primary": false
+			}
+		]
+	},
+	"JOIK": {
+		"area": ["JP1"],
+		"type": "AM",
+		"name": "NHKラジオ第1（札幌）",
+		"frequencies_am": [
+			{
+				"area": ["札幌"],
+				"frequency": 567,
+				"primary": true
+			},
+			{
+				"area": ["函館"],
+				"frequency": 675,
+				"primary": false
+			},
+			{
+				"area": ["江差"],
+				"frequency": 792,
+				"primary": false
+			},
+			{
+				"area": ["今金"],
+				"frequency": 1161,
+				"primary": false
+			},
+			{
+				"area": ["松前"],
+				"frequency": 1161,
+				"primary": false
+			},
+			{
+				"area": ["旭川"],
+				"frequency": 621,
+				"primary": false
+			},
+			{
+				"area": ["留萌"],
+				"frequency": 1161,
+				"primary": false
+			},
+			{
+				"area": ["稚内"],
+				"frequency": 927,
+				"primary": false
+			},
+			{
+				"area": ["名寄"],
+				"frequency": 837,
+				"primary": false
+			},
+			{
+				"area": ["中頓別"],
+				"frequency": 1026,
+				"primary": false
+			},
+			{
+				"area": ["遠別"],
+				"frequency": 792,
+				"primary": false
+			},
+			{
+				"area": ["帯広"],
+				"frequency": 603,
+				"primary": false
+			},
+			{
+				"area": ["広尾"],
+				"frequency": 1584,
+				"primary": false
+			},
+			{
+				"area": ["釧路"],
+				"frequency": 585,
+				"primary": false
+			},
+			{
+				"area": ["根室"],
+				"frequency": 1584,
+				"primary": false
+			},
+			{
+				"area": ["中標津"],
+				"frequency": 1341,
+				"primary": false
+			},
+			{
+				"area": ["北見"],
+				"frequency": 1188,
+				"primary": false
+			},
+			{
+				"area": ["新北見"],
+				"frequency": 1584,
+				"primary": false
+			},
+			{
+				"area": ["遠軽"],
+				"frequency": 1026,
+				"primary": false
+			},
+			{
+				"area": ["室蘭"],
+				"frequency": 945,
+				"primary": false
+			},
+			{
+				"area": ["浦河"],
+				"frequency": 1341,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["広尾"],
+				"frequency": 90.1,
+				"primary": true
+			},
+			{
+				"area": ["屈斜路"],
+				"frequency": 81.6,
+				"primary": false
+			},
+			{
+				"area": ["川湯"],
+				"frequency": 84.1,
+				"primary": false
+			}
+		]
+	},
+	"JOAK-FM": {
+		"area": ["JP1"],
+		"type": "FM",
+		"name": "NHK-FM（東京）",
+		"frequencies_fm": [
+			{
+				"area": ["札幌"],
+				"frequency": 85.2,
+				"primary": true
+			},
+			{
+				"area": ["札幌大通"],
+				"frequency": 81.6,
+				"primary": false
+			},
+			{
+				"area": ["小樽"],
+				"frequency": 84.5,
+				"primary": false
+			},
+			{
+				"area": ["岩内"],
+				"frequency": 84.2,
+				"primary": false
+			},
+			{
+				"area": ["黒松内"],
+				"frequency": 84.6,
+				"primary": false
+			},
+			{
+				"area": ["南羊蹄"],
+				"frequency": 83.1,
+				"primary": false
+			},
+			{
+				"area": ["島牧"],
+				"frequency": 85.7,
+				"primary": false
+			},
+			{
+				"area": ["芦別"],
+				"frequency": 83.8,
+				"primary": false
+			},
+			{
+				"area": ["歌志内"],
+				"frequency": 84.3,
+				"primary": false
+			},
+			{
+				"area": ["夕張"],
+				"frequency": 83.9,
+				"primary": false
+			},
+			{
+				"area": ["夕張清水沢"],
+				"frequency": 85.9,
+				"primary": false
+			},
+			{
+				"area": ["ニセコ"],
+				"frequency": 78.9,
+				"primary": false
+			},
+			{
+				"area": ["函館"],
+				"frequency": 87,
+				"primary": false
+			},
+			{
+				"area": ["江差"],
+				"frequency": 89.7,
+				"primary": false
+			},
+			{
+				"area": ["北檜山"],
+				"frequency": 86,
+				"primary": false
+			},
+			{
+				"area": ["渡島福島"],
+				"frequency": 84.2,
+				"primary": false
+			},
+			{
+				"area": ["奥尻大成"],
+				"frequency": 84.3,
+				"primary": false
+			},
+			{
+				"area": ["松前"],
+				"frequency": 85.7,
+				"primary": false
+			},
+			{
+				"area": ["札前"],
+				"frequency": 84.7,
+				"primary": false
+			},
+			{
+				"area": ["日浦"],
+				"frequency": 83.6,
+				"primary": false
+			},
+			{
+				"area": ["旭川"],
+				"frequency": 85.8,
+				"primary": false
+			},
+			{
+				"area": ["名寄"],
+				"frequency": 88.2,
+				"primary": false
+			},
+			{
+				"area": ["知駒"],
+				"frequency": 89.1,
+				"primary": false
+			},
+			{
+				"area": ["留萌"],
+				"frequency": 84.8,
+				"primary": false
+			},
+			{
+				"area": ["稚内"],
+				"frequency": 84.5,
+				"primary": false
+			},
+			{
+				"area": ["枝幸"],
+				"frequency": 89.9,
+				"primary": false
+			},
+			{
+				"area": ["富良野"],
+				"frequency": 84.2,
+				"primary": false
+			},
+			{
+				"area": ["羽幌"],
+				"frequency": 83.8,
+				"primary": false
+			},
+			{
+				"area": ["礼文"],
+				"frequency": 89.7,
+				"primary": false
+			},
+			{
+				"area": ["上川"],
+				"frequency": 84.5,
+				"primary": false
+			},
+			{
+				"area": ["幾寅"],
+				"frequency": 84.7,
+				"primary": false
+			},
+			{
+				"area": ["深川"],
+				"frequency": 84,
+				"primary": false
+			},
+			{
+				"area": ["帯広"],
+				"frequency": 87.5,
+				"primary": false
+			},
+			{
+				"area": ["足寄"],
+				"frequency": 89.7,
+				"primary": false
+			},
+			{
+				"area": ["広尾"],
+				"frequency": 83.8,
+				"primary": false
+			},
+			{
+				"area": ["新得"],
+				"frequency": 83.5,
+				"primary": false
+			},
+			{
+				"area": ["陸別"],
+				"frequency": 84.4,
+				"primary": false
+			},
+			{
+				"area": ["本別"],
+				"frequency": 83.9,
+				"primary": false
+			},
+			{
+				"area": ["釧路"],
+				"frequency": 88.5,
+				"primary": false
+			},
+			{
+				"area": ["中標津"],
+				"frequency": 89.9,
+				"primary": false
+			},
+			{
+				"area": ["根室"],
+				"frequency": 85.6,
+				"primary": false
+			},
+			{
+				"area": ["羅臼"],
+				"frequency": 88.8,
+				"primary": false
+			},
+			{
+				"area": ["弟子屈"],
+				"frequency": 89.5,
+				"primary": false
+			},
+			{
+				"area": ["厚岸"],
+				"frequency": 85.5,
+				"primary": false
+			},
+			{
+				"area": ["北見"],
+				"frequency": 86,
+				"primary": false
+			},
+			{
+				"area": ["新北見"],
+				"frequency": 84.5,
+				"primary": false
+			},
+			{
+				"area": ["紋別"],
+				"frequency": 85.1,
+				"primary": false
+			},
+			{
+				"area": ["滝上"],
+				"frequency": 83.6,
+				"primary": false
+			},
+			{
+				"area": ["遠軽"],
+				"frequency": 83.8,
+				"primary": false
+			},
+			{
+				"area": ["丸瀬布"],
+				"frequency": 84.5,
+				"primary": false
+			},
+			{
+				"area": ["室蘭"],
+				"frequency": 88,
+				"primary": false
+			},
+			{
+				"area": ["浦河"],
+				"frequency": 86.1,
+				"primary": false
+			},
+			{
+				"area": ["静内"],
+				"frequency": 84,
+				"primary": false
+			},
+			{
+				"area": ["洞爺"],
+				"frequency": 81.6,
+				"primary": false
+			},
+			{
+				"area": ["登別"],
+				"frequency": 84.9,
+				"primary": false
+			},
+			{
+				"area": ["日高"],
+				"frequency": 84.1,
+				"primary": false
+			},
+			{
+				"area": ["振内"],
+				"frequency": 84.8,
+				"primary": false
+			}
+		]
+	}
 }

@@ -1,244 +1,182 @@
 {
-  "$schema": "../schema.json",
-  "RKK": {
-    "area": [
-      "JP43"
-    ],
-    "type": "AM",
-    "name": "RKKラジオ",
-    "frequencies_am": [
-      {
-        "area": [
-          "熊本",
-          "人吉",
-          "御所浦",
-          "荒尾",
-          "阿蘇",
-          "南阿蘇",
-          "蘇陽南",
-          "蘇陽北",
-          "小国",
-          "河浦"
-        ],
-        "frequency": 1197,
-        "primary": true
-      }
-    ]
-  },
-  "FMK": {
-    "area": [
-      "JP43"
-    ],
-    "type": "FM",
-    "name": "FMKエフエム熊本",
-    "frequencies_fm": [
-      {
-        "area": [
-          "熊本"
-        ],
-        "frequency": 77.4,
-        "primary": true
-      },
-      {
-        "area": [
-          "阿蘇"
-        ],
-        "frequency": 81.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "南阿蘇"
-        ],
-        "frequency": 76.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "小国"
-        ],
-        "frequency": 80.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "人吉"
-        ],
-        "frequency": 82,
-        "primary": false
-      },
-      {
-        "area": [
-          "五木"
-        ],
-        "frequency": 81.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "御所浦"
-        ],
-        "frequency": 78.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "牛深"
-        ],
-        "frequency": 76.9,
-        "primary": false
-      }
-    ]
-  },
-  "JOLK": {
-    "area": [
-      "JP43"
-    ],
-    "type": "AM",
-    "name": "NHKラジオ第1（福岡）",
-    "frequencies_am": [
-      {
-        "area": [
-          "熊本"
-        ],
-        "frequency": 756,
-        "primary": true
-      },
-      {
-        "area": [
-          "人吉"
-        ],
-        "frequency": 846,
-        "primary": false
-      },
-      {
-        "area": [
-          "水俣"
-        ],
-        "frequency": 1341,
-        "primary": false
-      },
-      {
-        "area": [
-          "阿蘇"
-        ],
-        "frequency": 1503,
-        "primary": false
-      },
-      {
-        "area": [
-          "南阿蘇"
-        ],
-        "frequency": 1026,
-        "primary": false
-      }
-    ]
-  },
-  "JOAK-FM": {
-    "area": [
-      "JP43"
-    ],
-    "type": "FM",
-    "name": "NHK-FM（東京）",
-    "frequencies_fm": [
-      {
-        "area": [
-          "熊本"
-        ],
-        "frequency": 85.4,
-        "primary": true
-      },
-      {
-        "area": [
-          "人吉"
-        ],
-        "frequency": 82.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "水俣"
-        ],
-        "frequency": 82.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "阿蘇"
-        ],
-        "frequency": 86.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "肥後小国"
-        ],
-        "frequency": 83.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "南阿蘇"
-        ],
-        "frequency": 83.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "矢部"
-        ],
-        "frequency": 89.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "牛深"
-        ],
-        "frequency": 83.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "河浦"
-        ],
-        "frequency": 84.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "坂本"
-        ],
-        "frequency": 83.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "天草"
-        ],
-        "frequency": 82.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "芦北"
-        ],
-        "frequency": 81.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "五木"
-        ],
-        "frequency": 84,
-        "primary": false
-      },
-      {
-        "area": [
-          "蘇陽"
-        ],
-        "frequency": 86.8,
-        "primary": false
-      }
-    ]
-  }
+	"$schema": "../schema.json",
+	"RKK": {
+		"area": ["JP43"],
+		"type": "AM",
+		"name": "RKKラジオ",
+		"frequencies_am": [
+			{
+				"area": [
+					"熊本",
+					"人吉",
+					"御所浦",
+					"荒尾",
+					"阿蘇",
+					"南阿蘇",
+					"蘇陽南",
+					"蘇陽北",
+					"小国",
+					"河浦"
+				],
+				"frequency": 1197,
+				"primary": true
+			}
+		]
+	},
+	"FMK": {
+		"area": ["JP43"],
+		"type": "FM",
+		"name": "FMKエフエム熊本",
+		"frequencies_fm": [
+			{
+				"area": ["熊本"],
+				"frequency": 77.4,
+				"primary": true
+			},
+			{
+				"area": ["阿蘇"],
+				"frequency": 81.3,
+				"primary": false
+			},
+			{
+				"area": ["南阿蘇"],
+				"frequency": 76.8,
+				"primary": false
+			},
+			{
+				"area": ["小国"],
+				"frequency": 80.4,
+				"primary": false
+			},
+			{
+				"area": ["人吉"],
+				"frequency": 82,
+				"primary": false
+			},
+			{
+				"area": ["五木"],
+				"frequency": 81.3,
+				"primary": false
+			},
+			{
+				"area": ["御所浦"],
+				"frequency": 78.4,
+				"primary": false
+			},
+			{
+				"area": ["牛深"],
+				"frequency": 76.9,
+				"primary": false
+			}
+		]
+	},
+	"JOLK": {
+		"area": ["JP43"],
+		"type": "AM",
+		"name": "NHKラジオ第1（福岡）",
+		"frequencies_am": [
+			{
+				"area": ["熊本"],
+				"frequency": 756,
+				"primary": true
+			},
+			{
+				"area": ["人吉"],
+				"frequency": 846,
+				"primary": false
+			},
+			{
+				"area": ["水俣"],
+				"frequency": 1341,
+				"primary": false
+			},
+			{
+				"area": ["阿蘇"],
+				"frequency": 1503,
+				"primary": false
+			},
+			{
+				"area": ["南阿蘇"],
+				"frequency": 1026,
+				"primary": false
+			}
+		]
+	},
+	"JOAK-FM": {
+		"area": ["JP43"],
+		"type": "FM",
+		"name": "NHK-FM（東京）",
+		"frequencies_fm": [
+			{
+				"area": ["熊本"],
+				"frequency": 85.4,
+				"primary": true
+			},
+			{
+				"area": ["人吉"],
+				"frequency": 82.8,
+				"primary": false
+			},
+			{
+				"area": ["水俣"],
+				"frequency": 82.5,
+				"primary": false
+			},
+			{
+				"area": ["阿蘇"],
+				"frequency": 86.3,
+				"primary": false
+			},
+			{
+				"area": ["肥後小国"],
+				"frequency": 83.9,
+				"primary": false
+			},
+			{
+				"area": ["南阿蘇"],
+				"frequency": 83.8,
+				"primary": false
+			},
+			{
+				"area": ["矢部"],
+				"frequency": 89.8,
+				"primary": false
+			},
+			{
+				"area": ["牛深"],
+				"frequency": 83.3,
+				"primary": false
+			},
+			{
+				"area": ["河浦"],
+				"frequency": 84.2,
+				"primary": false
+			},
+			{
+				"area": ["坂本"],
+				"frequency": 83.1,
+				"primary": false
+			},
+			{
+				"area": ["天草"],
+				"frequency": 82.9,
+				"primary": false
+			},
+			{
+				"area": ["芦北"],
+				"frequency": 81.5,
+				"primary": false
+			},
+			{
+				"area": ["五木"],
+				"frequency": 84,
+				"primary": false
+			},
+			{
+				"area": ["蘇陽"],
+				"frequency": 86.8,
+				"primary": false
+			}
+		]
+	}
 }

@@ -1,391 +1,287 @@
 {
-  "802": {
-    "area": [
-      "JP25"
-    ],
-    "type": "FM",
-    "name": "FM802",
-    "frequencies_fm": [
-      {
-        "area": [
-          "大阪"
-        ],
-        "frequency": 80.2,
-        "primary": true
-      },
-      {
-        "area": [
-          "中能勢"
-        ],
-        "frequency": 78.3,
-        "primary": false
-      }
-    ]
-  },
-  "$schema": "../schema.json",
-  "ABC": {
-    "area": [
-      "JP25"
-    ],
-    "type": "AM",
-    "name": "ABCラジオ",
-    "frequencies_am": [
-      {
-        "area": [
-          "大阪",
-          "京都"
-        ],
-        "frequency": 1008,
-        "primary": true
-      }
-    ]
-  },
-  "MBS": {
-    "area": [
-      "JP25"
-    ],
-    "type": "AM",
-    "name": "MBSラジオ",
-    "frequencies_am": [
-      {
-        "area": [
-          "大阪",
-          "京都"
-        ],
-        "frequency": 1179,
-        "primary": true
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "大阪"
-        ],
-        "frequency": 90.6,
-        "primary": true
-      }
-    ]
-  },
-  "OBC": {
-    "area": [
-      "JP25"
-    ],
-    "type": "AM",
-    "name": "OBCラジオ大阪",
-    "frequencies_am": [
-      {
-        "area": [
-          "大阪",
-          "京都"
-        ],
-        "frequency": 1314,
-        "primary": true
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "大阪"
-        ],
-        "frequency": 91.9,
-        "primary": true
-      }
-    ]
-  },
-  "CCL": {
-    "area": [
-      "JP25"
-    ],
-    "type": "FM",
-    "name": "FM COCOLO",
-    "frequencies_fm": [
-      {
-        "area": [
-          "大阪"
-        ],
-        "frequency": 76.5,
-        "primary": true
-      }
-    ]
-  },
-  "FMO": {
-    "area": [
-      "JP25"
-    ],
-    "type": "FM",
-    "name": "FM大阪",
-    "frequencies_fm": [
-      {
-        "area": [
-          "大阪"
-        ],
-        "frequency": 85.1,
-        "primary": true
-      },
-      {
-        "area": [
-          "中能勢"
-        ],
-        "frequency": 77.4,
-        "primary": false
-      }
-    ]
-  },
-  "KBS": {
-    "area": [
-      "JP25"
-    ],
-    "type": "AM",
-    "name": "KBS京都ラジオ",
-    "frequencies_am": [
-      {
-        "area": [
-          "京都"
-        ],
-        "frequency": 1143,
-        "primary": true
-      },
-      {
-        "area": [
-          "舞鶴",
-          "滋賀"
-        ],
-        "frequency": 1215,
-        "primary": false
-      },
-      {
-        "area": [
-          "福知山"
-        ],
-        "frequency": 1485,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "京都"
-        ],
-        "frequency": 94.9,
-        "primary": true
-      }
-    ]
-  },
-  "KISSFMKOBE": {
-    "area": [
-      "JP25"
-    ],
-    "type": "FM",
-    "name": "Kiss FM KOBE",
-    "frequencies_fm": [
-      {
-        "area": [
-          "神戸"
-        ],
-        "frequency": 89.9,
-        "primary": true
-      },
-      {
-        "area": [
-          "姫路"
-        ],
-        "frequency": 77.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "北阪神"
-        ],
-        "frequency": 87.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "淡路三原"
-        ],
-        "frequency": 79.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "氷上"
-        ],
-        "frequency": 78.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "城崎"
-        ],
-        "frequency": 87.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "香住"
-        ],
-        "frequency": 78.4,
-        "primary": false
-      }
-    ]
-  },
-  "E-RADIO": {
-    "area": [
-      "JP25"
-    ],
-    "type": "FM",
-    "name": "e-radio FM滋賀",
-    "frequencies_fm": [
-      {
-        "area": [
-          "大津"
-        ],
-        "frequency": 77,
-        "primary": true
-      },
-      {
-        "area": [
-          "長浜"
-        ],
-        "frequency": 82.2,
-        "primary": false
-      }
-    ]
-  },
-  "CRK": {
-    "area": [
-      "JP25"
-    ],
-    "type": "AM",
-    "name": "ラジオ関西",
-    "frequencies_am": [
-      {
-        "area": [
-          "神戸"
-        ],
-        "frequency": 558,
-        "primary": true
-      },
-      {
-        "area": [
-          "豊岡"
-        ],
-        "frequency": 1395,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "神戸"
-        ],
-        "frequency": 91.1,
-        "primary": true
-      },
-      {
-        "area": [
-          "姫路"
-        ],
-        "frequency": 91.1,
-        "primary": false
-      }
-    ]
-  },
-  "ALPHA-STATION": {
-    "area": [
-      "JP25"
-    ],
-    "type": "FM",
-    "name": "α-STATION FM KYOTO",
-    "frequencies_fm": [
-      {
-        "area": [
-          "京都"
-        ],
-        "frequency": 89.4,
-        "primary": true
-      },
-      {
-        "area": [
-          "福知山"
-        ],
-        "frequency": 81.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "宮津"
-        ],
-        "frequency": 79.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "舞鶴"
-        ],
-        "frequency": 87.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "峰山"
-        ],
-        "frequency": 85.4,
-        "primary": false
-      }
-    ]
-  },
-  "JOBK": {
-    "area": [
-      "JP25"
-    ],
-    "type": "AM",
-    "name": "NHKラジオ第1（大阪）",
-    "frequencies_am": [
-      {
-        "area": [
-          "大阪"
-        ],
-        "frequency": 666,
-        "primary": true
-      },
-      {
-        "area": [
-          "彦根"
-        ],
-        "frequency": 945,
-        "primary": false
-      }
-    ]
-  },
-  "JOAK-FM": {
-    "area": [
-      "JP25"
-    ],
-    "type": "FM",
-    "name": "NHK-FM（東京）",
-    "frequencies_fm": [
-      {
-        "area": [
-          "大津"
-        ],
-        "frequency": 84,
-        "primary": true
-      },
-      {
-        "area": [
-          "山東"
-        ],
-        "frequency": 83.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "信楽"
-        ],
-        "frequency": 88.9,
-        "primary": false
-      }
-    ]
-  }
+	"802": {
+		"area": ["JP25"],
+		"type": "FM",
+		"name": "FM802",
+		"frequencies_fm": [
+			{
+				"area": ["大阪"],
+				"frequency": 80.2,
+				"primary": true
+			},
+			{
+				"area": ["中能勢"],
+				"frequency": 78.3,
+				"primary": false
+			}
+		]
+	},
+	"$schema": "../schema.json",
+	"ABC": {
+		"area": ["JP25"],
+		"type": "AM",
+		"name": "ABCラジオ",
+		"frequencies_am": [
+			{
+				"area": ["大阪", "京都"],
+				"frequency": 1008,
+				"primary": true
+			}
+		]
+	},
+	"MBS": {
+		"area": ["JP25"],
+		"type": "AM",
+		"name": "MBSラジオ",
+		"frequencies_am": [
+			{
+				"area": ["大阪", "京都"],
+				"frequency": 1179,
+				"primary": true
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["大阪"],
+				"frequency": 90.6,
+				"primary": true
+			}
+		]
+	},
+	"OBC": {
+		"area": ["JP25"],
+		"type": "AM",
+		"name": "OBCラジオ大阪",
+		"frequencies_am": [
+			{
+				"area": ["大阪", "京都"],
+				"frequency": 1314,
+				"primary": true
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["大阪"],
+				"frequency": 91.9,
+				"primary": true
+			}
+		]
+	},
+	"CCL": {
+		"area": ["JP25"],
+		"type": "FM",
+		"name": "FM COCOLO",
+		"frequencies_fm": [
+			{
+				"area": ["大阪"],
+				"frequency": 76.5,
+				"primary": true
+			}
+		]
+	},
+	"FMO": {
+		"area": ["JP25"],
+		"type": "FM",
+		"name": "FM大阪",
+		"frequencies_fm": [
+			{
+				"area": ["大阪"],
+				"frequency": 85.1,
+				"primary": true
+			},
+			{
+				"area": ["中能勢"],
+				"frequency": 77.4,
+				"primary": false
+			}
+		]
+	},
+	"KBS": {
+		"area": ["JP25"],
+		"type": "AM",
+		"name": "KBS京都ラジオ",
+		"frequencies_am": [
+			{
+				"area": ["京都"],
+				"frequency": 1143,
+				"primary": true
+			},
+			{
+				"area": ["舞鶴", "滋賀"],
+				"frequency": 1215,
+				"primary": false
+			},
+			{
+				"area": ["福知山"],
+				"frequency": 1485,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["京都"],
+				"frequency": 94.9,
+				"primary": true
+			}
+		]
+	},
+	"KISSFMKOBE": {
+		"area": ["JP25"],
+		"type": "FM",
+		"name": "Kiss FM KOBE",
+		"frequencies_fm": [
+			{
+				"area": ["神戸"],
+				"frequency": 89.9,
+				"primary": true
+			},
+			{
+				"area": ["姫路"],
+				"frequency": 77.6,
+				"primary": false
+			},
+			{
+				"area": ["北阪神"],
+				"frequency": 87.1,
+				"primary": false
+			},
+			{
+				"area": ["淡路三原"],
+				"frequency": 79.9,
+				"primary": false
+			},
+			{
+				"area": ["氷上"],
+				"frequency": 78.3,
+				"primary": false
+			},
+			{
+				"area": ["城崎"],
+				"frequency": 87.9,
+				"primary": false
+			},
+			{
+				"area": ["香住"],
+				"frequency": 78.4,
+				"primary": false
+			}
+		]
+	},
+	"E-RADIO": {
+		"area": ["JP25"],
+		"type": "FM",
+		"name": "e-radio FM滋賀",
+		"frequencies_fm": [
+			{
+				"area": ["大津"],
+				"frequency": 77,
+				"primary": true
+			},
+			{
+				"area": ["長浜"],
+				"frequency": 82.2,
+				"primary": false
+			}
+		]
+	},
+	"CRK": {
+		"area": ["JP25"],
+		"type": "AM",
+		"name": "ラジオ関西",
+		"frequencies_am": [
+			{
+				"area": ["神戸"],
+				"frequency": 558,
+				"primary": true
+			},
+			{
+				"area": ["豊岡"],
+				"frequency": 1395,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["神戸"],
+				"frequency": 91.1,
+				"primary": true
+			},
+			{
+				"area": ["姫路"],
+				"frequency": 91.1,
+				"primary": false
+			}
+		]
+	},
+	"ALPHA-STATION": {
+		"area": ["JP25"],
+		"type": "FM",
+		"name": "α-STATION FM KYOTO",
+		"frequencies_fm": [
+			{
+				"area": ["京都"],
+				"frequency": 89.4,
+				"primary": true
+			},
+			{
+				"area": ["福知山"],
+				"frequency": 81.3,
+				"primary": false
+			},
+			{
+				"area": ["宮津"],
+				"frequency": 79.8,
+				"primary": false
+			},
+			{
+				"area": ["舞鶴"],
+				"frequency": 87.2,
+				"primary": false
+			},
+			{
+				"area": ["峰山"],
+				"frequency": 85.4,
+				"primary": false
+			}
+		]
+	},
+	"JOBK": {
+		"area": ["JP25"],
+		"type": "AM",
+		"name": "NHKラジオ第1（大阪）",
+		"frequencies_am": [
+			{
+				"area": ["大阪"],
+				"frequency": 666,
+				"primary": true
+			},
+			{
+				"area": ["彦根"],
+				"frequency": 945,
+				"primary": false
+			}
+		]
+	},
+	"JOAK-FM": {
+		"area": ["JP25"],
+		"type": "FM",
+		"name": "NHK-FM（東京）",
+		"frequencies_fm": [
+			{
+				"area": ["大津"],
+				"frequency": 84,
+				"primary": true
+			},
+			{
+				"area": ["山東"],
+				"frequency": 83.1,
+				"primary": false
+			},
+			{
+				"area": ["信楽"],
+				"frequency": 88.9,
+				"primary": false
+			}
+		]
+	}
 }

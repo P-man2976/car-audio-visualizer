@@ -1,390 +1,289 @@
 {
-  "$schema": "../schema.json",
-  "TBS": {
-    "area": [
-      "JP11"
-    ],
-    "type": "AM",
-    "name": "TBSラジオ",
-    "frequencies_am": [
-      {
-        "area": [
-          "東京"
-        ],
-        "frequency": 954,
-        "primary": true
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "墨田"
-        ],
-        "frequency": 90.5,
-        "primary": true
-      }
-    ]
-  },
-  "QRR": {
-    "area": [
-      "JP11"
-    ],
-    "type": "AM",
-    "name": "文化放送",
-    "frequencies_am": [
-      {
-        "area": [
-          "東京"
-        ],
-        "frequency": 1134,
-        "primary": true
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "墨田"
-        ],
-        "frequency": 91.6,
-        "primary": true
-      }
-    ]
-  },
-  "LFR": {
-    "area": [
-      "JP11"
-    ],
-    "type": "AM",
-    "name": "ニッポン放送",
-    "frequencies_am": [
-      {
-        "area": [
-          "東京"
-        ],
-        "frequency": 1242,
-        "primary": true
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "墨田"
-        ],
-        "frequency": 93,
-        "primary": true
-      }
-    ]
-  },
-  "INT": {
-    "area": [
-      "JP11"
-    ],
-    "type": "FM",
-    "name": "interfm",
-    "frequencies_fm": [
-      {
-        "area": [
-          "東京"
-        ],
-        "frequency": 89.7,
-        "primary": true
-      },
-      {
-        "area": [
-          "横浜"
-        ],
-        "frequency": 76.5,
-        "primary": false
-      }
-    ]
-  },
-  "FMT": {
-    "area": [
-      "JP11"
-    ],
-    "type": "FM",
-    "name": "TOKYO FM",
-    "frequencies_fm": [
-      {
-        "area": [
-          "東京"
-        ],
-        "frequency": 80,
-        "primary": true
-      },
-      {
-        "area": [
-          "檜原"
-        ],
-        "frequency": 86.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "青梅"
-        ],
-        "frequency": 83.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "八王子"
-        ],
-        "frequency": 80.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "新島"
-        ],
-        "frequency": 76.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "八丈"
-        ],
-        "frequency": 84.3,
-        "primary": false
-      }
-    ]
-  },
-  "FMJ": {
-    "area": [
-      "JP11"
-    ],
-    "type": "FM",
-    "name": "J-WAVE",
-    "frequencies_fm": [
-      {
-        "area": [
-          "東京"
-        ],
-        "frequency": 81.3,
-        "primary": true
-      },
-      {
-        "area": [
-          "港"
-        ],
-        "frequency": 88.3,
-        "primary": false
-      }
-    ]
-  },
-  "JORF": {
-    "area": [
-      "JP11"
-    ],
-    "type": "AM",
-    "name": "ラジオ日本",
-    "frequencies_am": [
-      {
-        "area": [
-          "横浜"
-        ],
-        "frequency": 1422,
-        "primary": true
-      },
-      {
-        "area": [
-          "小田原"
-        ],
-        "frequency": 1485,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "横浜"
-        ],
-        "frequency": 92.4,
-        "primary": true
-      }
-    ]
-  },
-  "BAYFM78": {
-    "area": [
-      "JP11"
-    ],
-    "type": "FM",
-    "name": "BAYFM78",
-    "frequencies_fm": [
-      {
-        "area": [
-          "千葉"
-        ],
-        "frequency": 78,
-        "primary": true
-      },
-      {
-        "area": [
-          "銚子"
-        ],
-        "frequency": 79.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "勝浦"
-        ],
-        "frequency": 87.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "館山"
-        ],
-        "frequency": 77.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "白浜"
-        ],
-        "frequency": 79.7,
-        "primary": false
-      }
-    ]
-  },
-  "NACK5": {
-    "area": [
-      "JP11"
-    ],
-    "type": "FM",
-    "name": "NACK5",
-    "frequencies_fm": [
-      {
-        "area": [
-          "さいたま"
-        ],
-        "frequency": 79.5,
-        "primary": true
-      },
-      {
-        "area": [
-          "秩父"
-        ],
-        "frequency": 77.5,
-        "primary": false
-      }
-    ]
-  },
-  "YFM": {
-    "area": [
-      "JP11"
-    ],
-    "type": "FM",
-    "name": "ＦＭヨコハマ",
-    "frequencies_fm": [
-      {
-        "area": [
-          "横浜"
-        ],
-        "frequency": 84.7,
-        "primary": true
-      },
-      {
-        "area": [
-          "小田原"
-        ],
-        "frequency": 80.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "磯子"
-        ],
-        "frequency": 87,
-        "primary": false
-      }
-    ]
-  },
-  "IBS": {
-    "area": [
-      "JP11"
-    ],
-    "type": "AM",
-    "name": "LuckyFM 茨城放送",
-    "frequencies_am": [
-      {
-        "area": [
-          "水戸"
-        ],
-        "frequency": 1197,
-        "primary": true
-      },
-      {
-        "area": [
-          "土浦",
-          "県西"
-        ],
-        "frequency": 1458,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "加波山"
-        ],
-        "frequency": 94.6,
-        "primary": true
-      },
-      {
-        "area": [
-          "高鈴山"
-        ],
-        "frequency": 88.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "宝篋山"
-        ],
-        "frequency": 88.1,
-        "primary": false
-      }
-    ]
-  },
-  "JOAK": {
-    "area": [
-      "JP11"
-    ],
-    "type": "AM",
-    "name": "NHKラジオ第1（東京）",
-    "frequencies_am": [
-      {
-        "area": [
-          "東京"
-        ],
-        "frequency": 594,
-        "primary": true
-      }
-    ]
-  },
-  "JOAK-FM": {
-    "area": [
-      "JP11"
-    ],
-    "type": "FM",
-    "name": "NHK-FM（東京）",
-    "frequencies_fm": [
-      {
-        "area": [
-          "さいたま"
-        ],
-        "frequency": 85.1,
-        "primary": true
-      },
-      {
-        "area": [
-          "秩父"
-        ],
-        "frequency": 83.5,
-        "primary": false
-      }
-    ]
-  }
+	"$schema": "../schema.json",
+	"TBS": {
+		"area": ["JP11"],
+		"type": "AM",
+		"name": "TBSラジオ",
+		"frequencies_am": [
+			{
+				"area": ["東京"],
+				"frequency": 954,
+				"primary": true
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["墨田"],
+				"frequency": 90.5,
+				"primary": true
+			}
+		]
+	},
+	"QRR": {
+		"area": ["JP11"],
+		"type": "AM",
+		"name": "文化放送",
+		"frequencies_am": [
+			{
+				"area": ["東京"],
+				"frequency": 1134,
+				"primary": true
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["墨田"],
+				"frequency": 91.6,
+				"primary": true
+			}
+		]
+	},
+	"LFR": {
+		"area": ["JP11"],
+		"type": "AM",
+		"name": "ニッポン放送",
+		"frequencies_am": [
+			{
+				"area": ["東京"],
+				"frequency": 1242,
+				"primary": true
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["墨田"],
+				"frequency": 93,
+				"primary": true
+			}
+		]
+	},
+	"INT": {
+		"area": ["JP11"],
+		"type": "FM",
+		"name": "interfm",
+		"frequencies_fm": [
+			{
+				"area": ["東京"],
+				"frequency": 89.7,
+				"primary": true
+			},
+			{
+				"area": ["横浜"],
+				"frequency": 76.5,
+				"primary": false
+			}
+		]
+	},
+	"FMT": {
+		"area": ["JP11"],
+		"type": "FM",
+		"name": "TOKYO FM",
+		"frequencies_fm": [
+			{
+				"area": ["東京"],
+				"frequency": 80,
+				"primary": true
+			},
+			{
+				"area": ["檜原"],
+				"frequency": 86.6,
+				"primary": false
+			},
+			{
+				"area": ["青梅"],
+				"frequency": 83.6,
+				"primary": false
+			},
+			{
+				"area": ["八王子"],
+				"frequency": 80.5,
+				"primary": false
+			},
+			{
+				"area": ["新島"],
+				"frequency": 76.7,
+				"primary": false
+			},
+			{
+				"area": ["八丈"],
+				"frequency": 84.3,
+				"primary": false
+			}
+		]
+	},
+	"FMJ": {
+		"area": ["JP11"],
+		"type": "FM",
+		"name": "J-WAVE",
+		"frequencies_fm": [
+			{
+				"area": ["東京"],
+				"frequency": 81.3,
+				"primary": true
+			},
+			{
+				"area": ["港"],
+				"frequency": 88.3,
+				"primary": false
+			}
+		]
+	},
+	"JORF": {
+		"area": ["JP11"],
+		"type": "AM",
+		"name": "ラジオ日本",
+		"frequencies_am": [
+			{
+				"area": ["横浜"],
+				"frequency": 1422,
+				"primary": true
+			},
+			{
+				"area": ["小田原"],
+				"frequency": 1485,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["横浜"],
+				"frequency": 92.4,
+				"primary": true
+			}
+		]
+	},
+	"BAYFM78": {
+		"area": ["JP11"],
+		"type": "FM",
+		"name": "BAYFM78",
+		"frequencies_fm": [
+			{
+				"area": ["千葉"],
+				"frequency": 78,
+				"primary": true
+			},
+			{
+				"area": ["銚子"],
+				"frequency": 79.3,
+				"primary": false
+			},
+			{
+				"area": ["勝浦"],
+				"frequency": 87.4,
+				"primary": false
+			},
+			{
+				"area": ["館山"],
+				"frequency": 77.7,
+				"primary": false
+			},
+			{
+				"area": ["白浜"],
+				"frequency": 79.7,
+				"primary": false
+			}
+		]
+	},
+	"NACK5": {
+		"area": ["JP11"],
+		"type": "FM",
+		"name": "NACK5",
+		"frequencies_fm": [
+			{
+				"area": ["さいたま"],
+				"frequency": 79.5,
+				"primary": true
+			},
+			{
+				"area": ["秩父"],
+				"frequency": 77.5,
+				"primary": false
+			}
+		]
+	},
+	"YFM": {
+		"area": ["JP11"],
+		"type": "FM",
+		"name": "ＦＭヨコハマ",
+		"frequencies_fm": [
+			{
+				"area": ["横浜"],
+				"frequency": 84.7,
+				"primary": true
+			},
+			{
+				"area": ["小田原"],
+				"frequency": 80.4,
+				"primary": false
+			},
+			{
+				"area": ["磯子"],
+				"frequency": 87,
+				"primary": false
+			}
+		]
+	},
+	"IBS": {
+		"area": ["JP11"],
+		"type": "AM",
+		"name": "LuckyFM 茨城放送",
+		"frequencies_am": [
+			{
+				"area": ["水戸"],
+				"frequency": 1197,
+				"primary": true
+			},
+			{
+				"area": ["土浦", "県西"],
+				"frequency": 1458,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["加波山"],
+				"frequency": 94.6,
+				"primary": true
+			},
+			{
+				"area": ["高鈴山"],
+				"frequency": 88.1,
+				"primary": false
+			},
+			{
+				"area": ["宝篋山"],
+				"frequency": 88.1,
+				"primary": false
+			}
+		]
+	},
+	"JOAK": {
+		"area": ["JP11"],
+		"type": "AM",
+		"name": "NHKラジオ第1（東京）",
+		"frequencies_am": [
+			{
+				"area": ["東京"],
+				"frequency": 594,
+				"primary": true
+			}
+		]
+	},
+	"JOAK-FM": {
+		"area": ["JP11"],
+		"type": "FM",
+		"name": "NHK-FM（東京）",
+		"frequencies_fm": [
+			{
+				"area": ["さいたま"],
+				"frequency": 85.1,
+				"primary": true
+			},
+			{
+				"area": ["秩父"],
+				"frequency": 83.5,
+				"primary": false
+			}
+		]
+	}
 }

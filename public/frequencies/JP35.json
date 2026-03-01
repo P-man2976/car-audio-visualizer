@@ -1,387 +1,278 @@
 {
-  "$schema": "../schema.json",
-  "KRY": {
-    "area": [
-      "JP35"
-    ],
-    "type": "AM",
-    "name": "ＫＲＹ山口放送",
-    "frequencies_am": [
-      {
-        "area": [
-          "周南",
-          "山口",
-          "須佐田万川"
-        ],
-        "frequency": 765,
-        "primary": true
-      },
-      {
-        "area": [
-          "下関",
-          "岩国"
-        ],
-        "frequency": 918,
-        "primary": false
-      },
-      {
-        "area": [
-          "萩"
-        ],
-        "frequency": 1485,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "山口"
-        ],
-        "frequency": 92.3,
-        "primary": true
-      },
-      {
-        "area": [
-          "美祢"
-        ],
-        "frequency": 86.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "長門"
-        ],
-        "frequency": 86.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "萩"
-        ],
-        "frequency": 86.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "豊浦"
-        ],
-        "frequency": 86.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "須佐田万川"
-        ],
-        "frequency": 86.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "柳井"
-        ],
-        "frequency": 92.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "岩国"
-        ],
-        "frequency": 92.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "下関"
-        ],
-        "frequency": 92.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "阿東"
-        ],
-        "frequency": 92.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "宇部"
-        ],
-        "frequency": 92.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "山口鴻ノ峯"
-        ],
-        "frequency": 92.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "周防大島"
-        ],
-        "frequency": 92.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "豊田"
-        ],
-        "frequency": 86.4,
-        "primary": false
-      }
-    ]
-  },
-  "FMY": {
-    "area": [
-      "JP35"
-    ],
-    "type": "FM",
-    "name": "エフエム山口",
-    "frequencies_fm": [
-      {
-        "area": [
-          "山口"
-        ],
-        "frequency": 79.2,
-        "primary": true
-      },
-      {
-        "area": [
-          "下関"
-        ],
-        "frequency": 77.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "宇部"
-        ],
-        "frequency": 88.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "山口鴻ノ峯"
-        ],
-        "frequency": 82.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "岩国"
-        ],
-        "frequency": 82.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "柳井"
-        ],
-        "frequency": 77.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "萩"
-        ],
-        "frequency": 78.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "長門"
-        ],
-        "frequency": 89.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "美祢"
-        ],
-        "frequency": 81.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "豊浦"
-        ],
-        "frequency": 78.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "周防大島"
-        ],
-        "frequency": 84.5,
-        "primary": false
-      }
-    ]
-  },
-  "JOFK": {
-    "area": [
-      "JP35"
-    ],
-    "type": "AM",
-    "name": "NHKラジオ第1（広島）",
-    "frequencies_am": [
-      {
-        "area": [
-          "山口"
-        ],
-        "frequency": 675,
-        "primary": true
-      },
-      {
-        "area": [
-          "萩"
-        ],
-        "frequency": 963,
-        "primary": false
-      },
-      {
-        "area": [
-          "下関"
-        ],
-        "frequency": 1026,
-        "primary": false
-      },
-      {
-        "area": [
-          "須佐"
-        ],
-        "frequency": 1368,
-        "primary": false
-      },
-      {
-        "area": [
-          "岩国"
-        ],
-        "frequency": 585,
-        "primary": false
-      }
-    ]
-  },
-  "JOAK-FM": {
-    "area": [
-      "JP35"
-    ],
-    "type": "FM",
-    "name": "NHK-FM（東京）",
-    "frequencies_fm": [
-      {
-        "area": [
-          "山口"
-        ],
-        "frequency": 85.3,
-        "primary": true
-      },
-      {
-        "area": [
-          "萩"
-        ],
-        "frequency": 82.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "柳井"
-        ],
-        "frequency": 84,
-        "primary": false
-      },
-      {
-        "area": [
-          "美祢"
-        ],
-        "frequency": 84.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "長門"
-        ],
-        "frequency": 83.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "岩国"
-        ],
-        "frequency": 85,
-        "primary": false
-      },
-      {
-        "area": [
-          "阿東"
-        ],
-        "frequency": 84.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "東和"
-        ],
-        "frequency": 82.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "宇部"
-        ],
-        "frequency": 83.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "山口錦"
-        ],
-        "frequency": 83.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "山口鴻ノ峯"
-        ],
-        "frequency": 85.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "須佐田万川"
-        ],
-        "frequency": 82.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "下関"
-        ],
-        "frequency": 83.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "山口豊田"
-        ],
-        "frequency": 83.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "豊北"
-        ],
-        "frequency": 81.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "山口豊浦"
-        ],
-        "frequency": 81.3,
-        "primary": false
-      }
-    ]
-  }
+	"$schema": "../schema.json",
+	"KRY": {
+		"area": ["JP35"],
+		"type": "AM",
+		"name": "ＫＲＹ山口放送",
+		"frequencies_am": [
+			{
+				"area": ["周南", "山口", "須佐田万川"],
+				"frequency": 765,
+				"primary": true
+			},
+			{
+				"area": ["下関", "岩国"],
+				"frequency": 918,
+				"primary": false
+			},
+			{
+				"area": ["萩"],
+				"frequency": 1485,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["山口"],
+				"frequency": 92.3,
+				"primary": true
+			},
+			{
+				"area": ["美祢"],
+				"frequency": 86.4,
+				"primary": false
+			},
+			{
+				"area": ["長門"],
+				"frequency": 86.4,
+				"primary": false
+			},
+			{
+				"area": ["萩"],
+				"frequency": 86.4,
+				"primary": false
+			},
+			{
+				"area": ["豊浦"],
+				"frequency": 86.4,
+				"primary": false
+			},
+			{
+				"area": ["須佐田万川"],
+				"frequency": 86.4,
+				"primary": false
+			},
+			{
+				"area": ["柳井"],
+				"frequency": 92.3,
+				"primary": false
+			},
+			{
+				"area": ["岩国"],
+				"frequency": 92.3,
+				"primary": false
+			},
+			{
+				"area": ["下関"],
+				"frequency": 92.3,
+				"primary": false
+			},
+			{
+				"area": ["阿東"],
+				"frequency": 92.3,
+				"primary": false
+			},
+			{
+				"area": ["宇部"],
+				"frequency": 92.3,
+				"primary": false
+			},
+			{
+				"area": ["山口鴻ノ峯"],
+				"frequency": 92.3,
+				"primary": false
+			},
+			{
+				"area": ["周防大島"],
+				"frequency": 92.3,
+				"primary": false
+			},
+			{
+				"area": ["豊田"],
+				"frequency": 86.4,
+				"primary": false
+			}
+		]
+	},
+	"FMY": {
+		"area": ["JP35"],
+		"type": "FM",
+		"name": "エフエム山口",
+		"frequencies_fm": [
+			{
+				"area": ["山口"],
+				"frequency": 79.2,
+				"primary": true
+			},
+			{
+				"area": ["下関"],
+				"frequency": 77.7,
+				"primary": false
+			},
+			{
+				"area": ["宇部"],
+				"frequency": 88.6,
+				"primary": false
+			},
+			{
+				"area": ["山口鴻ノ峯"],
+				"frequency": 82.1,
+				"primary": false
+			},
+			{
+				"area": ["岩国"],
+				"frequency": 82.1,
+				"primary": false
+			},
+			{
+				"area": ["柳井"],
+				"frequency": 77.9,
+				"primary": false
+			},
+			{
+				"area": ["萩"],
+				"frequency": 78.6,
+				"primary": false
+			},
+			{
+				"area": ["長門"],
+				"frequency": 89.4,
+				"primary": false
+			},
+			{
+				"area": ["美祢"],
+				"frequency": 81.5,
+				"primary": false
+			},
+			{
+				"area": ["豊浦"],
+				"frequency": 78.3,
+				"primary": false
+			},
+			{
+				"area": ["周防大島"],
+				"frequency": 84.5,
+				"primary": false
+			}
+		]
+	},
+	"JOFK": {
+		"area": ["JP35"],
+		"type": "AM",
+		"name": "NHKラジオ第1（広島）",
+		"frequencies_am": [
+			{
+				"area": ["山口"],
+				"frequency": 675,
+				"primary": true
+			},
+			{
+				"area": ["萩"],
+				"frequency": 963,
+				"primary": false
+			},
+			{
+				"area": ["下関"],
+				"frequency": 1026,
+				"primary": false
+			},
+			{
+				"area": ["須佐"],
+				"frequency": 1368,
+				"primary": false
+			},
+			{
+				"area": ["岩国"],
+				"frequency": 585,
+				"primary": false
+			}
+		]
+	},
+	"JOAK-FM": {
+		"area": ["JP35"],
+		"type": "FM",
+		"name": "NHK-FM（東京）",
+		"frequencies_fm": [
+			{
+				"area": ["山口"],
+				"frequency": 85.3,
+				"primary": true
+			},
+			{
+				"area": ["萩"],
+				"frequency": 82.4,
+				"primary": false
+			},
+			{
+				"area": ["柳井"],
+				"frequency": 84,
+				"primary": false
+			},
+			{
+				"area": ["美祢"],
+				"frequency": 84.5,
+				"primary": false
+			},
+			{
+				"area": ["長門"],
+				"frequency": 83.5,
+				"primary": false
+			},
+			{
+				"area": ["岩国"],
+				"frequency": 85,
+				"primary": false
+			},
+			{
+				"area": ["阿東"],
+				"frequency": 84.2,
+				"primary": false
+			},
+			{
+				"area": ["東和"],
+				"frequency": 82.5,
+				"primary": false
+			},
+			{
+				"area": ["宇部"],
+				"frequency": 83.3,
+				"primary": false
+			},
+			{
+				"area": ["山口錦"],
+				"frequency": 83.1,
+				"primary": false
+			},
+			{
+				"area": ["山口鴻ノ峯"],
+				"frequency": 85.9,
+				"primary": false
+			},
+			{
+				"area": ["須佐田万川"],
+				"frequency": 82.9,
+				"primary": false
+			},
+			{
+				"area": ["下関"],
+				"frequency": 83.1,
+				"primary": false
+			},
+			{
+				"area": ["山口豊田"],
+				"frequency": 83.8,
+				"primary": false
+			},
+			{
+				"area": ["豊北"],
+				"frequency": 81.9,
+				"primary": false
+			},
+			{
+				"area": ["山口豊浦"],
+				"frequency": 81.3,
+				"primary": false
+			}
+		]
+	}
 }

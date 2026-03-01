@@ -1,86 +1,63 @@
 {
-  "$schema": "../schema.json",
-  "RNC": {
-    "area": [
-      "JP37"
-    ],
-    "type": "AM",
-    "name": "RNC西日本放送",
-    "frequencies_am": [
-      {
-        "area": [
-          "高松",
-          "丸亀",
-          "観音寺",
-          "白鳥"
-        ],
-        "frequency": 1449,
-        "primary": true
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "高松"
-        ],
-        "frequency": 90.3,
-        "primary": true
-      }
-    ]
-  },
-  "FMKAGAWA": {
-    "area": [
-      "JP37"
-    ],
-    "type": "FM",
-    "name": "エフエム香川",
-    "frequencies_fm": [
-      {
-        "area": [
-          "高松"
-        ],
-        "frequency": 78.6,
-        "primary": true
-      }
-    ]
-  },
-  "JOZK": {
-    "area": [
-      "JP37"
-    ],
-    "type": "AM",
-    "name": "NHKラジオ第1（松山）",
-    "frequencies_am": [
-      {
-        "area": [
-          "高松"
-        ],
-        "frequency": 1368,
-        "primary": true
-      },
-      {
-        "area": [
-          "観音寺"
-        ],
-        "frequency": 1584,
-        "primary": false
-      }
-    ]
-  },
-  "JOAK-FM": {
-    "area": [
-      "JP37"
-    ],
-    "type": "FM",
-    "name": "NHK-FM（東京）",
-    "frequencies_fm": [
-      {
-        "area": [
-          "高松"
-        ],
-        "frequency": 86,
-        "primary": true
-      }
-    ]
-  }
+	"$schema": "../schema.json",
+	"RNC": {
+		"area": ["JP37"],
+		"type": "AM",
+		"name": "RNC西日本放送",
+		"frequencies_am": [
+			{
+				"area": ["高松", "丸亀", "観音寺", "白鳥"],
+				"frequency": 1449,
+				"primary": true
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["高松"],
+				"frequency": 90.3,
+				"primary": true
+			}
+		]
+	},
+	"FMKAGAWA": {
+		"area": ["JP37"],
+		"type": "FM",
+		"name": "エフエム香川",
+		"frequencies_fm": [
+			{
+				"area": ["高松"],
+				"frequency": 78.6,
+				"primary": true
+			}
+		]
+	},
+	"JOZK": {
+		"area": ["JP37"],
+		"type": "AM",
+		"name": "NHKラジオ第1（松山）",
+		"frequencies_am": [
+			{
+				"area": ["高松"],
+				"frequency": 1368,
+				"primary": true
+			},
+			{
+				"area": ["観音寺"],
+				"frequency": 1584,
+				"primary": false
+			}
+		]
+	},
+	"JOAK-FM": {
+		"area": ["JP37"],
+		"type": "FM",
+		"name": "NHK-FM（東京）",
+		"frequencies_fm": [
+			{
+				"area": ["高松"],
+				"frequency": 86,
+				"primary": true
+			}
+		]
+	}
 }

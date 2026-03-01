@@ -140,7 +140,8 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 											key={`${band}${ch}`}
 											className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-neutral-500/60 text-neutral-200"
 										>
-											{band}{ch}
+											{band}
+											{ch}
 										</span>
 									))}
 								</div>
@@ -205,7 +206,9 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 							const isSelf = existing?.stationId === id;
 							return (
 								<ContextMenuItem key={ch} onClick={() => assignChannel(ch)}>
-									<span className={isSelf ? "text-neutral-100 font-semibold" : ""}>
+									<span
+										className={isSelf ? "text-neutral-100 font-semibold" : ""}
+									>
 										CH{ch}
 									</span>
 									{existing && !isSelf && (

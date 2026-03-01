@@ -1,308 +1,224 @@
 {
-  "$schema": "../schema.json",
-  "RKB": {
-    "area": [
-      "JP40"
-    ],
-    "type": "AM",
-    "name": "RKBラジオ",
-    "frequencies_am": [
-      {
-        "area": [
-          "福岡"
-        ],
-        "frequency": 1278,
-        "primary": true
-      },
-      {
-        "area": [
-          "大牟田",
-          "行橋"
-        ],
-        "frequency": 1062,
-        "primary": false
-      },
-      {
-        "area": [
-          "北九州"
-        ],
-        "frequency": 1197,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "福岡"
-        ],
-        "frequency": 91,
-        "primary": true
-      },
-      {
-        "area": [
-          "北九州"
-        ],
-        "frequency": 91.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "糸島"
-        ],
-        "frequency": 94.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "行橋"
-        ],
-        "frequency": 94.8,
-        "primary": false
-      }
-    ]
-  },
-  "KBC": {
-    "area": [
-      "JP40"
-    ],
-    "type": "AM",
-    "name": "KBCラジオ",
-    "frequencies_am": [
-      {
-        "area": [
-          "福岡"
-        ],
-        "frequency": 1413,
-        "primary": true
-      },
-      {
-        "area": [
-          "北九州"
-        ],
-        "frequency": 720,
-        "primary": false
-      },
-      {
-        "area": [
-          "大牟田",
-          "行橋"
-        ],
-        "frequency": 1485,
-        "primary": false
-      }
-    ]
-  },
-  "LOVEFM": {
-    "area": [
-      "JP40"
-    ],
-    "type": "FM",
-    "name": "LOVE FM",
-    "frequencies_fm": [
-      {
-        "area": [
-          "福岡"
-        ],
-        "frequency": 76.1,
-        "primary": true
-      },
-      {
-        "area": [
-          "北九州"
-        ],
-        "frequency": 82.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "福岡西"
-        ],
-        "frequency": 82.5,
-        "primary": false
-      }
-    ]
-  },
-  "CROSSFM": {
-    "area": [
-      "JP40"
-    ],
-    "type": "FM",
-    "name": "CROSS FM",
-    "frequencies_fm": [
-      {
-        "area": [
-          "福岡"
-        ],
-        "frequency": 78.7,
-        "primary": true
-      },
-      {
-        "area": [
-          "北九州"
-        ],
-        "frequency": 77,
-        "primary": false
-      },
-      {
-        "area": [
-          "久留米"
-        ],
-        "frequency": 86.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "大牟田"
-        ],
-        "frequency": 87.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "行橋"
-        ],
-        "frequency": 87.2,
-        "primary": false
-      }
-    ]
-  },
-  "FMFUKUOKA": {
-    "area": [
-      "JP40"
-    ],
-    "type": "FM",
-    "name": "FM FUKUOKA",
-    "frequencies_fm": [
-      {
-        "area": [
-          "福岡"
-        ],
-        "frequency": 80.7,
-        "primary": true
-      },
-      {
-        "area": [
-          "北九州"
-        ],
-        "frequency": 80,
-        "primary": false
-      },
-      {
-        "area": [
-          "久留米"
-        ],
-        "frequency": 82.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "行橋"
-        ],
-        "frequency": 81.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "大牟田"
-        ],
-        "frequency": 87,
-        "primary": false
-      },
-      {
-        "area": [
-          "糸島"
-        ],
-        "frequency": 81.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "宗像"
-        ],
-        "frequency": 84.1,
-        "primary": false
-      }
-    ]
-  },
-  "JOLK": {
-    "area": [
-      "JP40"
-    ],
-    "type": "AM",
-    "name": "NHKラジオ第1（福岡）",
-    "frequencies_am": [
-      {
-        "area": [
-          "福岡"
-        ],
-        "frequency": 612,
-        "primary": true
-      },
-      {
-        "area": [
-          "北九州"
-        ],
-        "frequency": 540,
-        "primary": false
-      }
-    ]
-  },
-  "JOAK-FM": {
-    "area": [
-      "JP40"
-    ],
-    "type": "FM",
-    "name": "NHK-FM（東京）",
-    "frequencies_fm": [
-      {
-        "area": [
-          "福岡"
-        ],
-        "frequency": 84.8,
-        "primary": true
-      },
-      {
-        "area": [
-          "久留米"
-        ],
-        "frequency": 83.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "大牟田"
-        ],
-        "frequency": 85.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "北九州"
-        ],
-        "frequency": 85.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "筑前山田"
-        ],
-        "frequency": 82.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "行橋"
-        ],
-        "frequency": 83.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "門司"
-        ],
-        "frequency": 82.2,
-        "primary": false
-      }
-    ]
-  }
+	"$schema": "../schema.json",
+	"RKB": {
+		"area": ["JP40"],
+		"type": "AM",
+		"name": "RKBラジオ",
+		"frequencies_am": [
+			{
+				"area": ["福岡"],
+				"frequency": 1278,
+				"primary": true
+			},
+			{
+				"area": ["大牟田", "行橋"],
+				"frequency": 1062,
+				"primary": false
+			},
+			{
+				"area": ["北九州"],
+				"frequency": 1197,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["福岡"],
+				"frequency": 91,
+				"primary": true
+			},
+			{
+				"area": ["北九州"],
+				"frequency": 91.5,
+				"primary": false
+			},
+			{
+				"area": ["糸島"],
+				"frequency": 94.6,
+				"primary": false
+			},
+			{
+				"area": ["行橋"],
+				"frequency": 94.8,
+				"primary": false
+			}
+		]
+	},
+	"KBC": {
+		"area": ["JP40"],
+		"type": "AM",
+		"name": "KBCラジオ",
+		"frequencies_am": [
+			{
+				"area": ["福岡"],
+				"frequency": 1413,
+				"primary": true
+			},
+			{
+				"area": ["北九州"],
+				"frequency": 720,
+				"primary": false
+			},
+			{
+				"area": ["大牟田", "行橋"],
+				"frequency": 1485,
+				"primary": false
+			}
+		]
+	},
+	"LOVEFM": {
+		"area": ["JP40"],
+		"type": "FM",
+		"name": "LOVE FM",
+		"frequencies_fm": [
+			{
+				"area": ["福岡"],
+				"frequency": 76.1,
+				"primary": true
+			},
+			{
+				"area": ["北九州"],
+				"frequency": 82.7,
+				"primary": false
+			},
+			{
+				"area": ["福岡西"],
+				"frequency": 82.5,
+				"primary": false
+			}
+		]
+	},
+	"CROSSFM": {
+		"area": ["JP40"],
+		"type": "FM",
+		"name": "CROSS FM",
+		"frequencies_fm": [
+			{
+				"area": ["福岡"],
+				"frequency": 78.7,
+				"primary": true
+			},
+			{
+				"area": ["北九州"],
+				"frequency": 77,
+				"primary": false
+			},
+			{
+				"area": ["久留米"],
+				"frequency": 86.5,
+				"primary": false
+			},
+			{
+				"area": ["大牟田"],
+				"frequency": 87.8,
+				"primary": false
+			},
+			{
+				"area": ["行橋"],
+				"frequency": 87.2,
+				"primary": false
+			}
+		]
+	},
+	"FMFUKUOKA": {
+		"area": ["JP40"],
+		"type": "FM",
+		"name": "FM FUKUOKA",
+		"frequencies_fm": [
+			{
+				"area": ["福岡"],
+				"frequency": 80.7,
+				"primary": true
+			},
+			{
+				"area": ["北九州"],
+				"frequency": 80,
+				"primary": false
+			},
+			{
+				"area": ["久留米"],
+				"frequency": 82.1,
+				"primary": false
+			},
+			{
+				"area": ["行橋"],
+				"frequency": 81.8,
+				"primary": false
+			},
+			{
+				"area": ["大牟田"],
+				"frequency": 87,
+				"primary": false
+			},
+			{
+				"area": ["糸島"],
+				"frequency": 81.3,
+				"primary": false
+			},
+			{
+				"area": ["宗像"],
+				"frequency": 84.1,
+				"primary": false
+			}
+		]
+	},
+	"JOLK": {
+		"area": ["JP40"],
+		"type": "AM",
+		"name": "NHKラジオ第1（福岡）",
+		"frequencies_am": [
+			{
+				"area": ["福岡"],
+				"frequency": 612,
+				"primary": true
+			},
+			{
+				"area": ["北九州"],
+				"frequency": 540,
+				"primary": false
+			}
+		]
+	},
+	"JOAK-FM": {
+		"area": ["JP40"],
+		"type": "FM",
+		"name": "NHK-FM（東京）",
+		"frequencies_fm": [
+			{
+				"area": ["福岡"],
+				"frequency": 84.8,
+				"primary": true
+			},
+			{
+				"area": ["久留米"],
+				"frequency": 83.4,
+				"primary": false
+			},
+			{
+				"area": ["大牟田"],
+				"frequency": 85.8,
+				"primary": false
+			},
+			{
+				"area": ["北九州"],
+				"frequency": 85.7,
+				"primary": false
+			},
+			{
+				"area": ["筑前山田"],
+				"frequency": 82.9,
+				"primary": false
+			},
+			{
+				"area": ["行橋"],
+				"frequency": 83.6,
+				"primary": false
+			},
+			{
+				"area": ["門司"],
+				"frequency": 82.2,
+				"primary": false
+			}
+		]
+	}
 }

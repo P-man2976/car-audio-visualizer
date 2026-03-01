@@ -1,282 +1,203 @@
 {
-  "$schema": "../schema.json",
-  "MBC": {
-    "area": [
-      "JP46"
-    ],
-    "type": "AM",
-    "name": "ＭＢＣラジオ",
-    "frequencies_am": [
-      {
-        "area": [
-          "鹿児島",
-          "阿久根",
-          "大口",
-          "川内"
-        ],
-        "frequency": 1107,
-        "primary": true
-      },
-      {
-        "area": [
-          "名瀬"
-        ],
-        "frequency": 1449,
-        "primary": false
-      }
-    ]
-  },
-  "MYUFM": {
-    "area": [
-      "JP46"
-    ],
-    "type": "FM",
-    "name": "μＦＭ",
-    "frequencies_fm": [
-      {
-        "area": [
-          "枕崎"
-        ],
-        "frequency": 76.6,
-        "primary": true
-      },
-      {
-        "area": [
-          "鹿屋"
-        ],
-        "frequency": 79,
-        "primary": false
-      },
-      {
-        "area": [
-          "鹿児島"
-        ],
-        "frequency": 79.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "阿久根"
-        ],
-        "frequency": 80.5,
-        "primary": false
-      }
-    ]
-  },
-  "JOLK": {
-    "area": [
-      "JP46"
-    ],
-    "type": "AM",
-    "name": "NHKラジオ第1（福岡）",
-    "frequencies_am": [
-      {
-        "area": [
-          "鹿児島"
-        ],
-        "frequency": 576,
-        "primary": true
-      },
-      {
-        "area": [
-          "阿久根"
-        ],
-        "frequency": 1026,
-        "primary": false
-      },
-      {
-        "area": [
-          "名瀬"
-        ],
-        "frequency": 792,
-        "primary": false
-      },
-      {
-        "area": [
-          "徳之島"
-        ],
-        "frequency": 1341,
-        "primary": false
-      },
-      {
-        "area": [
-          "瀬戸内"
-        ],
-        "frequency": 1026,
-        "primary": false
-      },
-      {
-        "area": [
-          "大口"
-        ],
-        "frequency": 1503,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "奄美宇検"
-        ],
-        "frequency": 81.3,
-        "primary": true
-      },
-      {
-        "area": [
-          "奄美住用"
-        ],
-        "frequency": 78.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "奄美大和"
-        ],
-        "frequency": 83.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "喜界"
-        ],
-        "frequency": 80.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "与論"
-        ],
-        "frequency": 77,
-        "primary": false
-      },
-      {
-        "area": [
-          "徳之島"
-        ],
-        "frequency": 79.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "川内出水"
-        ],
-        "frequency": 89.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "種子島"
-        ],
-        "frequency": 79.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "上之牧"
-        ],
-        "frequency": 82.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "栗生"
-        ],
-        "frequency": 78.5,
-        "primary": false
-      }
-    ]
-  },
-  "JOAK-FM": {
-    "area": [
-      "JP46"
-    ],
-    "type": "FM",
-    "name": "NHK-FM（東京）",
-    "frequencies_fm": [
-      {
-        "area": [
-          "鹿児島"
-        ],
-        "frequency": 85.6,
-        "primary": true
-      },
-      {
-        "area": [
-          "鹿屋"
-        ],
-        "frequency": 84.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "阿久根"
-        ],
-        "frequency": 83.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "枕崎"
-        ],
-        "frequency": 84.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "種子島"
-        ],
-        "frequency": 84.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "東市来"
-        ],
-        "frequency": 84.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "栗野"
-        ],
-        "frequency": 85.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "末吉"
-        ],
-        "frequency": 84.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "名瀬"
-        ],
-        "frequency": 82.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "瀬戸内"
-        ],
-        "frequency": 84.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "徳之島"
-        ],
-        "frequency": 81.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "知名"
-        ],
-        "frequency": 84,
-        "primary": false
-      }
-    ]
-  }
+	"$schema": "../schema.json",
+	"MBC": {
+		"area": ["JP46"],
+		"type": "AM",
+		"name": "ＭＢＣラジオ",
+		"frequencies_am": [
+			{
+				"area": ["鹿児島", "阿久根", "大口", "川内"],
+				"frequency": 1107,
+				"primary": true
+			},
+			{
+				"area": ["名瀬"],
+				"frequency": 1449,
+				"primary": false
+			}
+		]
+	},
+	"MYUFM": {
+		"area": ["JP46"],
+		"type": "FM",
+		"name": "μＦＭ",
+		"frequencies_fm": [
+			{
+				"area": ["枕崎"],
+				"frequency": 76.6,
+				"primary": true
+			},
+			{
+				"area": ["鹿屋"],
+				"frequency": 79,
+				"primary": false
+			},
+			{
+				"area": ["鹿児島"],
+				"frequency": 79.8,
+				"primary": false
+			},
+			{
+				"area": ["阿久根"],
+				"frequency": 80.5,
+				"primary": false
+			}
+		]
+	},
+	"JOLK": {
+		"area": ["JP46"],
+		"type": "AM",
+		"name": "NHKラジオ第1（福岡）",
+		"frequencies_am": [
+			{
+				"area": ["鹿児島"],
+				"frequency": 576,
+				"primary": true
+			},
+			{
+				"area": ["阿久根"],
+				"frequency": 1026,
+				"primary": false
+			},
+			{
+				"area": ["名瀬"],
+				"frequency": 792,
+				"primary": false
+			},
+			{
+				"area": ["徳之島"],
+				"frequency": 1341,
+				"primary": false
+			},
+			{
+				"area": ["瀬戸内"],
+				"frequency": 1026,
+				"primary": false
+			},
+			{
+				"area": ["大口"],
+				"frequency": 1503,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["奄美宇検"],
+				"frequency": 81.3,
+				"primary": true
+			},
+			{
+				"area": ["奄美住用"],
+				"frequency": 78.3,
+				"primary": false
+			},
+			{
+				"area": ["奄美大和"],
+				"frequency": 83.4,
+				"primary": false
+			},
+			{
+				"area": ["喜界"],
+				"frequency": 80.3,
+				"primary": false
+			},
+			{
+				"area": ["与論"],
+				"frequency": 77,
+				"primary": false
+			},
+			{
+				"area": ["徳之島"],
+				"frequency": 79.4,
+				"primary": false
+			},
+			{
+				"area": ["川内出水"],
+				"frequency": 89.9,
+				"primary": false
+			},
+			{
+				"area": ["種子島"],
+				"frequency": 79.3,
+				"primary": false
+			},
+			{
+				"area": ["上之牧"],
+				"frequency": 82.9,
+				"primary": false
+			},
+			{
+				"area": ["栗生"],
+				"frequency": 78.5,
+				"primary": false
+			}
+		]
+	},
+	"JOAK-FM": {
+		"area": ["JP46"],
+		"type": "FM",
+		"name": "NHK-FM（東京）",
+		"frequencies_fm": [
+			{
+				"area": ["鹿児島"],
+				"frequency": 85.6,
+				"primary": true
+			},
+			{
+				"area": ["鹿屋"],
+				"frequency": 84.1,
+				"primary": false
+			},
+			{
+				"area": ["阿久根"],
+				"frequency": 83.7,
+				"primary": false
+			},
+			{
+				"area": ["枕崎"],
+				"frequency": 84.7,
+				"primary": false
+			},
+			{
+				"area": ["種子島"],
+				"frequency": 84.4,
+				"primary": false
+			},
+			{
+				"area": ["東市来"],
+				"frequency": 84.3,
+				"primary": false
+			},
+			{
+				"area": ["栗野"],
+				"frequency": 85.9,
+				"primary": false
+			},
+			{
+				"area": ["末吉"],
+				"frequency": 84.9,
+				"primary": false
+			},
+			{
+				"area": ["名瀬"],
+				"frequency": 82.2,
+				"primary": false
+			},
+			{
+				"area": ["瀬戸内"],
+				"frequency": 84.5,
+				"primary": false
+			},
+			{
+				"area": ["徳之島"],
+				"frequency": 81.6,
+				"primary": false
+			},
+			{
+				"area": ["知名"],
+				"frequency": 84,
+				"primary": false
+			}
+		]
+	}
 }

@@ -1,366 +1,265 @@
 {
-  "$schema": "../schema.json",
-  "RKC": {
-    "area": [
-      "JP39"
-    ],
-    "type": "AM",
-    "name": "RKC高知放送",
-    "frequencies_am": [
-      {
-        "area": [
-          "高知"
-        ],
-        "frequency": 900,
-        "primary": true
-      },
-      {
-        "area": [
-          "中村"
-        ],
-        "frequency": 1197,
-        "primary": false
-      },
-      {
-        "area": [
-          "宿毛",
-          "土佐清水"
-        ],
-        "frequency": 1395,
-        "primary": false
-      },
-      {
-        "area": [
-          "須崎"
-        ],
-        "frequency": 1557,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "高知"
-        ],
-        "frequency": 90.8,
-        "primary": true
-      }
-    ]
-  },
-  "HI-SIX": {
-    "area": [
-      "JP39"
-    ],
-    "type": "FM",
-    "name": "エフエム高知",
-    "frequencies_fm": [
-      {
-        "area": [
-          "高知"
-        ],
-        "frequency": 81.6,
-        "primary": true
-      },
-      {
-        "area": [
-          "中村"
-        ],
-        "frequency": 78.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "窪川"
-        ],
-        "frequency": 80.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "須崎"
-        ],
-        "frequency": 82.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "宿毛"
-        ],
-        "frequency": 81.3,
-        "primary": false
-      },
-      {
-        "area": [
-          "安芸"
-        ],
-        "frequency": 79.9,
-        "primary": false
-      }
-    ]
-  },
-  "JOZK": {
-    "area": [
-      "JP39"
-    ],
-    "type": "AM",
-    "name": "NHKラジオ第1（松山）",
-    "frequencies_am": [
-      {
-        "area": [
-          "高知"
-        ],
-        "frequency": 990,
-        "primary": true
-      },
-      {
-        "area": [
-          "中村"
-        ],
-        "frequency": 999,
-        "primary": false
-      },
-      {
-        "area": [
-          "檮原"
-        ],
-        "frequency": 1161,
-        "primary": false
-      },
-      {
-        "area": [
-          "宿毛"
-        ],
-        "frequency": 1026,
-        "primary": false
-      },
-      {
-        "area": [
-          "大正"
-        ],
-        "frequency": 1368,
-        "primary": false
-      },
-      {
-        "area": [
-          "須崎"
-        ],
-        "frequency": 1323,
-        "primary": false
-      },
-      {
-        "area": [
-          "土佐清水"
-        ],
-        "frequency": 1584,
-        "primary": false
-      },
-      {
-        "area": [
-          "窪川"
-        ],
-        "frequency": 1341,
-        "primary": false
-      },
-      {
-        "area": [
-          "大豊"
-        ],
-        "frequency": 1026,
-        "primary": false
-      },
-      {
-        "area": [
-          "早明浦"
-        ],
-        "frequency": 1341,
-        "primary": false
-      }
-    ],
-    "frequencies_fm": [
-      {
-        "area": [
-          "宿毛"
-        ],
-        "frequency": 92.5,
-        "primary": true
-      },
-      {
-        "area": [
-          "仁淀"
-        ],
-        "frequency": 78.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "蟠蛇ヶ森"
-        ],
-        "frequency": 77.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "東津野"
-        ],
-        "frequency": 76.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "柏尾山"
-        ],
-        "frequency": 92.8,
-        "primary": false
-      }
-    ]
-  },
-  "JOAK-FM": {
-    "area": [
-      "JP39"
-    ],
-    "type": "FM",
-    "name": "NHK-FM（東京）",
-    "frequencies_fm": [
-      {
-        "area": [
-          "高知"
-        ],
-        "frequency": 87.5,
-        "primary": true
-      },
-      {
-        "area": [
-          "中村"
-        ],
-        "frequency": 84.4,
-        "primary": false
-      },
-      {
-        "area": [
-          "須崎"
-        ],
-        "frequency": 84.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "宿毛"
-        ],
-        "frequency": 82.5,
-        "primary": false
-      },
-      {
-        "area": [
-          "窪川"
-        ],
-        "frequency": 83.7,
-        "primary": false
-      },
-      {
-        "area": [
-          "佐川"
-        ],
-        "frequency": 84,
-        "primary": false
-      },
-      {
-        "area": [
-          "土佐町"
-        ],
-        "frequency": 82.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "安芸"
-        ],
-        "frequency": 83.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "物部"
-        ],
-        "frequency": 89.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "中土佐"
-        ],
-        "frequency": 84.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "大豊"
-        ],
-        "frequency": 85.6,
-        "primary": false
-      },
-      {
-        "area": [
-          "豊永"
-        ],
-        "frequency": 85,
-        "primary": false
-      },
-      {
-        "area": [
-          "土佐大月"
-        ],
-        "frequency": 85.9,
-        "primary": false
-      },
-      {
-        "area": [
-          "吾川村"
-        ],
-        "frequency": 84.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "室戸"
-        ],
-        "frequency": 89.1,
-        "primary": false
-      },
-      {
-        "area": [
-          "仁淀"
-        ],
-        "frequency": 85.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "十和"
-        ],
-        "frequency": 85.2,
-        "primary": false
-      },
-      {
-        "area": [
-          "室戸岬"
-        ],
-        "frequency": 86.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "東洋野根"
-        ],
-        "frequency": 87.8,
-        "primary": false
-      },
-      {
-        "area": [
-          "土佐佐賀"
-        ],
-        "frequency": 85.9,
-        "primary": false
-      }
-    ]
-  }
+	"$schema": "../schema.json",
+	"RKC": {
+		"area": ["JP39"],
+		"type": "AM",
+		"name": "RKC高知放送",
+		"frequencies_am": [
+			{
+				"area": ["高知"],
+				"frequency": 900,
+				"primary": true
+			},
+			{
+				"area": ["中村"],
+				"frequency": 1197,
+				"primary": false
+			},
+			{
+				"area": ["宿毛", "土佐清水"],
+				"frequency": 1395,
+				"primary": false
+			},
+			{
+				"area": ["須崎"],
+				"frequency": 1557,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["高知"],
+				"frequency": 90.8,
+				"primary": true
+			}
+		]
+	},
+	"HI-SIX": {
+		"area": ["JP39"],
+		"type": "FM",
+		"name": "エフエム高知",
+		"frequencies_fm": [
+			{
+				"area": ["高知"],
+				"frequency": 81.6,
+				"primary": true
+			},
+			{
+				"area": ["中村"],
+				"frequency": 78.5,
+				"primary": false
+			},
+			{
+				"area": ["窪川"],
+				"frequency": 80.6,
+				"primary": false
+			},
+			{
+				"area": ["須崎"],
+				"frequency": 82.7,
+				"primary": false
+			},
+			{
+				"area": ["宿毛"],
+				"frequency": 81.3,
+				"primary": false
+			},
+			{
+				"area": ["安芸"],
+				"frequency": 79.9,
+				"primary": false
+			}
+		]
+	},
+	"JOZK": {
+		"area": ["JP39"],
+		"type": "AM",
+		"name": "NHKラジオ第1（松山）",
+		"frequencies_am": [
+			{
+				"area": ["高知"],
+				"frequency": 990,
+				"primary": true
+			},
+			{
+				"area": ["中村"],
+				"frequency": 999,
+				"primary": false
+			},
+			{
+				"area": ["檮原"],
+				"frequency": 1161,
+				"primary": false
+			},
+			{
+				"area": ["宿毛"],
+				"frequency": 1026,
+				"primary": false
+			},
+			{
+				"area": ["大正"],
+				"frequency": 1368,
+				"primary": false
+			},
+			{
+				"area": ["須崎"],
+				"frequency": 1323,
+				"primary": false
+			},
+			{
+				"area": ["土佐清水"],
+				"frequency": 1584,
+				"primary": false
+			},
+			{
+				"area": ["窪川"],
+				"frequency": 1341,
+				"primary": false
+			},
+			{
+				"area": ["大豊"],
+				"frequency": 1026,
+				"primary": false
+			},
+			{
+				"area": ["早明浦"],
+				"frequency": 1341,
+				"primary": false
+			}
+		],
+		"frequencies_fm": [
+			{
+				"area": ["宿毛"],
+				"frequency": 92.5,
+				"primary": true
+			},
+			{
+				"area": ["仁淀"],
+				"frequency": 78.1,
+				"primary": false
+			},
+			{
+				"area": ["蟠蛇ヶ森"],
+				"frequency": 77.4,
+				"primary": false
+			},
+			{
+				"area": ["東津野"],
+				"frequency": 76.5,
+				"primary": false
+			},
+			{
+				"area": ["柏尾山"],
+				"frequency": 92.8,
+				"primary": false
+			}
+		]
+	},
+	"JOAK-FM": {
+		"area": ["JP39"],
+		"type": "FM",
+		"name": "NHK-FM（東京）",
+		"frequencies_fm": [
+			{
+				"area": ["高知"],
+				"frequency": 87.5,
+				"primary": true
+			},
+			{
+				"area": ["中村"],
+				"frequency": 84.4,
+				"primary": false
+			},
+			{
+				"area": ["須崎"],
+				"frequency": 84.9,
+				"primary": false
+			},
+			{
+				"area": ["宿毛"],
+				"frequency": 82.5,
+				"primary": false
+			},
+			{
+				"area": ["窪川"],
+				"frequency": 83.7,
+				"primary": false
+			},
+			{
+				"area": ["佐川"],
+				"frequency": 84,
+				"primary": false
+			},
+			{
+				"area": ["土佐町"],
+				"frequency": 82.9,
+				"primary": false
+			},
+			{
+				"area": ["安芸"],
+				"frequency": 83.8,
+				"primary": false
+			},
+			{
+				"area": ["物部"],
+				"frequency": 89.9,
+				"primary": false
+			},
+			{
+				"area": ["中土佐"],
+				"frequency": 84.2,
+				"primary": false
+			},
+			{
+				"area": ["大豊"],
+				"frequency": 85.6,
+				"primary": false
+			},
+			{
+				"area": ["豊永"],
+				"frequency": 85,
+				"primary": false
+			},
+			{
+				"area": ["土佐大月"],
+				"frequency": 85.9,
+				"primary": false
+			},
+			{
+				"area": ["吾川村"],
+				"frequency": 84.8,
+				"primary": false
+			},
+			{
+				"area": ["室戸"],
+				"frequency": 89.1,
+				"primary": false
+			},
+			{
+				"area": ["仁淀"],
+				"frequency": 85.8,
+				"primary": false
+			},
+			{
+				"area": ["十和"],
+				"frequency": 85.2,
+				"primary": false
+			},
+			{
+				"area": ["室戸岬"],
+				"frequency": 86.8,
+				"primary": false
+			},
+			{
+				"area": ["東洋野根"],
+				"frequency": 87.8,
+				"primary": false
+			},
+			{
+				"area": ["土佐佐賀"],
+				"frequency": 85.9,
+				"primary": false
+			}
+		]
+	}
 }

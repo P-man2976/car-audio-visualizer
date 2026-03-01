@@ -20,6 +20,7 @@ function getAnalyzer() {
 		maxFreq: 22000,
 		mode: 6,
 		ansiBands: true,
+		fftSize: 8192,
 		weightingFilter: "A",
 		peakFallSpeed: 0.005,
 	});
