@@ -21,7 +21,7 @@ const SUB_COL_GAP = 0.4; // gap between left+right bars within band
 // MAIN_BAR_WIDTH is derived from SUB_COL_WIDTH so they stay in sync:
 //   left bar + gap + right bar  (mirrors VisualizerKenwood: 3.6 + 0.5 + 3.6 = 7.7)
 const MAIN_BAR_WIDTH = SUB_COL_WIDTH * 2 + SUB_COL_GAP;
-const BAND_GAP = 0;
+const BAND_GAP = 1;
 const BAND_STRIDE = MAIN_BAR_WIDTH + BAND_GAP; // 11.9
 
 // Group span — 7 bands centred on the same world X=0 as the main
