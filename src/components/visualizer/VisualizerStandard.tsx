@@ -30,56 +30,54 @@ const CELL_COUNT = ROW_CELL_COUNT * COL_CELL_COUNT;
 
 // ─── Root component ───────────────────────────────────────────────────────────
 export function VisualizerStandard() {
-	const meshRef = useRef<THREE.Mesh>(null);
 	const cellsRef = useRef<THREE.InstancedMesh>(null);
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 	const isPlaying = useAtomValue(isPlayingAtom);
 	const { invalidate } = useThree();
 
-	// ── One-time matrix + color initialization ───────────────────────────────
-	useEffect(() => {
-		const cells = cellsRef.current;
-		if (!cells) return;
-
-		const d = new THREE.Object3D();
-		d.scale.set(CELL_WIDTH, CELL_HEIGHT, 1);
-		const dark = new THREE.Color("#3b0764");
-
-		for (let ri = 0; ri < ROW_CELL_COUNT; ri++) {
-			for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
-				const idx = ri * COL_CELL_COUNT + ci;
-				d.position.set(
-					(CELL_WIDTH + ROW_CELL_GAP) * ri + ROW_CELL_GAP,
-					(CELL_HEIGHT + COL_CELL_GAP) * ci + COL_CELL_GAP,
-					0,
-				);
-				d.updateMatrix();
-				cells.setMatrixAt(idx, d.matrix);
-				// instanceColor バッファを初期化（null のままだと vertexColors が機能しない）
-				cells.setColorAt(idx, dark);
-			}
-		}
-
-		cells.instanceMatrix.needsUpdate = true;
-		if (cells.instanceColor) cells.instanceColor.needsUpdate = true;
-		// demand モードでは明示的に invalidate しないと初回描画されない
-		invalidate();
-	}, [invalidate]);
-
-	// isPlaying が true になった瞬間に最初のフレームをキックして
-	// useFrame の自己スケジュールループを始動させる
+	// demand モードで再生開始時に最初のフレームをキックする
 	useEffect(() => {
 		if (isPlaying) invalidate();
 	}, [isPlaying, invalidate]);
 
-	// ── Per-frame color update (single callback for all 576 cells) ────────────
+	// ── Per-frame: 初回のみ matrix/color 初期化、以降は色更新 ─────────────────
+	const initializedRef = useRef(false);
 	const _c = useRef(new THREE.Color());
 
 	useFrame(({ invalidate: inv }) => {
+		const cells = cellsRef.current;
+
+		// ── 初回フレームで matrix + instanceColor を初期化 ──────────────────
+		if (!initializedRef.current && cells) {
+			const d = new THREE.Object3D();
+			d.scale.set(CELL_WIDTH, CELL_HEIGHT, 1);
+			const dark = new THREE.Color("#3b0764");
+
+			for (let ri = 0; ri < ROW_CELL_COUNT; ri++) {
+				for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
+					const idx = ri * COL_CELL_COUNT + ci;
+					d.position.set(
+						(CELL_WIDTH + ROW_CELL_GAP) * ri + ROW_CELL_GAP,
+						(CELL_HEIGHT + COL_CELL_GAP) * ci + COL_CELL_GAP,
+						0,
+					);
+					d.updateMatrix();
+					cells.setMatrixAt(idx, d.matrix);
+					cells.setColorAt(idx, dark);
+				}
+			}
+
+			cells.instanceMatrix.needsUpdate = true;
+			if (cells.instanceColor) cells.instanceColor.needsUpdate = true;
+			initializedRef.current = true;
+			// 初期化完了を描画に反映するためもう 1 フレーム要求
+			inv();
+			return;
+		}
+
 		const bars = audioMotionAnalyzer.getBars() as AnalyzerBarData[];
 		store.set(spectrogramAtom, bars);
 
-		const cells = cellsRef.current;
 		if (!cells) {
 			if (isPlaying) inv();
 			return;
@@ -115,8 +113,7 @@ export function VisualizerStandard() {
 	});
 
 	return (
-		<mesh
-			ref={meshRef}
+		<group
 			position={[
 				-(
 					((CELL_WIDTH + ROW_CELL_GAP) * ROW_CELL_COUNT - ROW_CELL_GAP + 80) /
@@ -129,7 +126,11 @@ export function VisualizerStandard() {
 			rotation-x={(Math.PI / 180) * -ANALYZER_ANGLE_DEGREE}
 		>
 			{/* All cells as a single InstancedMesh — 576 instances, 1 draw call */}
-			<instancedMesh ref={cellsRef} args={[undefined, undefined, CELL_COUNT]}>
+			<instancedMesh
+				ref={cellsRef}
+				args={[undefined, undefined, CELL_COUNT]}
+				frustumCulled={false}
+			>
 				<planeGeometry args={[1, 1]} />
 				<meshStandardMaterial vertexColors />
 			</instancedMesh>
@@ -175,6 +176,6 @@ export function VisualizerStandard() {
 					</Text>
 				</group>
 			))}
-		</mesh>
+		</group>
 	);
 }

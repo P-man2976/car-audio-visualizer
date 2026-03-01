@@ -72,71 +72,67 @@ export function VisualizerKenwood() {
 	const isPlaying = useAtomValue(isPlayingAtom);
 	const { invalidate } = useThree();
 
-	// ── One-time matrix initialization ────────────────────────────────────────
-	useEffect(() => {
-		const main = mainRef.current;
-		const side = sideRef.current;
-		if (!main || !side) return;
-
-		const d = new THREE.Object3D();
-
-		for (let fi = 0; fi < FREQ_COUNT; fi++) {
-			for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
-				const y = cellY(ci);
-				const base = (fi * COL_CELL_COUNT + ci) * 2;
-
-				// main ─ left sub-col
-				d.position.set(subLeftCX(fi), y, 0);
-				d.scale.set(SUB_COL_WIDTH, CELL_HEIGHT, 1);
-				d.updateMatrix();
-				main.setMatrixAt(base, d.matrix);
-
-				// main ─ right sub-col
-				d.position.set(subRightCX(fi), y, 0);
-				d.updateMatrix();
-				main.setMatrixAt(base + 1, d.matrix);
-
-				// side ─ left bar
-				d.position.set(sideLeftCX(fi), y, 0);
-				d.scale.set(SIDE_BAR_WIDTH, CELL_HEIGHT, 1);
-				d.updateMatrix();
-				side.setMatrixAt(base, d.matrix);
-
-				// side ─ right bar
-				d.position.set(sideRightCX(fi), y, 0);
-				d.updateMatrix();
-				side.setMatrixAt(base + 1, d.matrix);
-			}
-		}
-
-		main.instanceMatrix.needsUpdate = true;
-		side.instanceMatrix.needsUpdate = true;
-
-		// instanceColor バッファを初期化（null のままだと vertexColors が機能しない）
-		const darkMain = new THREE.Color("#080018");
-		const darkSide = new THREE.Color("#050012");
-		for (let i = 0; i < MAIN_COUNT; i++) main.setColorAt(i, darkMain);
-		for (let i = 0; i < SIDE_COUNT; i++) side.setColorAt(i, darkSide);
-		if (main.instanceColor) main.instanceColor.needsUpdate = true;
-		if (side.instanceColor) side.instanceColor.needsUpdate = true;
-
-		// demand モードでは明示的に invalidate しないと初回描画されない
-		invalidate();
-	}, [invalidate]);
-
+	// demand モードで再生開始時に最初のフレームをキックする
 	useEffect(() => {
 		if (isPlaying) invalidate();
 	}, [isPlaying, invalidate]);
 
-	// ── Per-frame color update (single callback for all cells) ────────────────
+	// ── Per-frame: 初回のみ matrix/color 初期化、以降は色更新 ─────────────────
+	const initializedRef = useRef(false);
 	const _c = useRef(new THREE.Color());
 
 	useFrame(({ invalidate: inv }) => {
+		const main = mainRef.current;
+		const side = sideRef.current;
+
+		// ── 初回フレームで matrix + instanceColor を初期化 ──────────────────
+		if (!initializedRef.current && main && side) {
+			const d = new THREE.Object3D();
+			const darkMain = new THREE.Color("#080018");
+			const darkSide = new THREE.Color("#050012");
+
+			for (let fi = 0; fi < FREQ_COUNT; fi++) {
+				for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
+					const y = cellY(ci);
+					const base = (fi * COL_CELL_COUNT + ci) * 2;
+
+					d.position.set(subLeftCX(fi), y, 0);
+					d.scale.set(SUB_COL_WIDTH, CELL_HEIGHT, 1);
+					d.updateMatrix();
+					main.setMatrixAt(base, d.matrix);
+					main.setColorAt(base, darkMain);
+
+					d.position.set(subRightCX(fi), y, 0);
+					d.updateMatrix();
+					main.setMatrixAt(base + 1, d.matrix);
+					main.setColorAt(base + 1, darkMain);
+
+					d.position.set(sideLeftCX(fi), y, 0);
+					d.scale.set(SIDE_BAR_WIDTH, CELL_HEIGHT, 1);
+					d.updateMatrix();
+					side.setMatrixAt(base, d.matrix);
+					side.setColorAt(base, darkSide);
+
+					d.position.set(sideRightCX(fi), y, 0);
+					d.updateMatrix();
+					side.setMatrixAt(base + 1, d.matrix);
+					side.setColorAt(base + 1, darkSide);
+				}
+			}
+
+			main.instanceMatrix.needsUpdate = true;
+			side.instanceMatrix.needsUpdate = true;
+			if (main.instanceColor) main.instanceColor.needsUpdate = true;
+			if (side.instanceColor) side.instanceColor.needsUpdate = true;
+			initializedRef.current = true;
+			// 初期化完了を描画に反映するためもう 1 フレーム要求
+			inv();
+			return;
+		}
+
 		const bars = audioMotionAnalyzer.getBars() as AnalyzerBarData[];
 		store.set(spectrogramAtom, bars);
 
-		const main = mainRef.current;
-		const side = sideRef.current;
 		if (!main || !side) {
 			if (isPlaying) inv();
 			return;
@@ -185,24 +181,32 @@ export function VisualizerKenwood() {
 	const SCALE = 1.6;
 
 	return (
-		<mesh
+		<group
 			position={[-TOTAL_WIDTH * (SCALE / 2), -totalHeight * (SCALE / 2), 0]}
 			scale={SCALE}
 			rotation-x={(Math.PI / 180) * -ANALYZER_ANGLE_DEGREE}
 		>
 			{/* Main bars: 2 sub-cols × FREQ_COUNT × COL_CELL_COUNT instances */}
-			<instancedMesh ref={mainRef} args={[undefined, undefined, MAIN_COUNT]}>
+			<instancedMesh
+				ref={mainRef}
+				args={[undefined, undefined, MAIN_COUNT]}
+				frustumCulled={false}
+			>
 				<planeGeometry args={[1, 1]} />
 				<meshStandardMaterial vertexColors />
 			</instancedMesh>
 
 			{/* Side bars: 2 sides × FREQ_COUNT × COL_CELL_COUNT instances */}
-			<instancedMesh ref={sideRef} args={[undefined, undefined, SIDE_COUNT]}>
+			<instancedMesh
+				ref={sideRef}
+				args={[undefined, undefined, SIDE_COUNT]}
+				frustumCulled={false}
+			>
 				<planeGeometry args={[1, 1]} />
 				<meshStandardMaterial vertexColors />
 			</instancedMesh>
 
-			{/* Frequency labels (11 meshes — no optimization needed) */}
+			{/* Frequency labels (11 groups — no optimization needed) */}
 			{Array.from({ length: FREQ_COUNT }).map((_, fi) => (
 				<group
 					key={`k-label-${fi}`}
@@ -226,6 +230,6 @@ export function VisualizerKenwood() {
 					</Text>
 				</group>
 			))}
-		</mesh>
+		</group>
 	);
 }
