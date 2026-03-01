@@ -13,13 +13,19 @@ export function useHLS() {
 
 	const load = useCallback(
 		(source: string) => {
+			// AudioContext.resume() はユーザージェスチャーの同期コールスタック上で
+			// 呼ぶ必要がある。MEDIA_ATTACHED コールバックや .then() チェーン内で
+			// 呼ぶとブラウザのジェスチャー要件を満たせないため、load() 先頭で即時呼ぶ。
+			// radiko の場合は useSelectRadio / playRadio でも呼ばれるため冗長だが、
+			// radiru（load が同期呼び出し）のカバーと防御的コーディングを兼ねる。
+			void audioMotionAnalyzer.audioCtx.resume();
+
 			if (Hls.isSupported()) {
 				const newHls = new Hls();
-				// attach 完了後に自動再生
+				// attach 完了後に自動再生（resume は load() 先頭で既に呼んでいる）
 				newHls.on(Hls.Events.MEDIA_ATTACHED, () => {
-					void audioMotionAnalyzer.audioCtx
-						.resume()
-						.then(() => audioElement.play())
+					void audioElement
+						.play()
 						.then(() => {
 							audioMotionAnalyzer.start();
 							setIsPlaying(true);
@@ -36,9 +42,8 @@ export function useHLS() {
 			// Safari では AudioContext が "interrupted" になることがある。
 			// resume() は interrupted / suspended どちらからも機能する（確認済）。
 			audioElement.src = source;
-			void audioMotionAnalyzer.audioCtx
-				.resume()
-				.then(() => audioElement.play())
+			void audioElement
+				.play()
 				.then(() => {
 					audioMotionAnalyzer.start();
 					setIsPlaying(true);

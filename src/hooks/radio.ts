@@ -1,5 +1,6 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { audioMotionAnalyzerAtom } from "@/atoms/audio";
 import { currentSrcAtom, queueAtom } from "@/atoms/player";
 import {
 	currentRadioAtom,
@@ -149,9 +150,15 @@ export function useSelectRadio() {
 	const setQueue = useSetAtom(queueAtom);
 	const { load, unLoad } = useHLS();
 	const { mutate } = useRadikoM3u8Url();
+	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 
 	return useCallback(
 		(radio: Radio) => {
+			// ユーザーインタラクション（クリック）の同期コンテキスト内で resume() を呼ぶ。
+			// radiko は mutate() の onSuccess コールバック内で load() が呼ばれるため
+			// ジェスチャーから切り離される。ここで先行して resume() することで
+			// Safari / WebKit の autoplay policy を満たす。
+			void audioMotionAnalyzer.audioCtx.resume();
 			setCurrentSrc("radio");
 			setCurrentRadio(radio);
 			unLoad();
@@ -171,7 +178,15 @@ export function useSelectRadio() {
 				return alreadyIn ? current : [radio, ...current].slice(0, 20);
 			});
 		},
-		[setCurrentSrc, setCurrentRadio, unLoad, mutate, load, setQueue],
+		[
+			setCurrentSrc,
+			setCurrentRadio,
+			unLoad,
+			mutate,
+			load,
+			setQueue,
+			audioMotionAnalyzer,
+		],
 	);
 }
 
@@ -188,6 +203,7 @@ export function useRadioPlayer() {
 	const { mutate } = useRadikoM3u8Url();
 	const tunableStations = useTunableStations();
 	const selectRadio = useSelectRadio();
+	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 
 	const tuningTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const animFreqRef = useRef<number>(0);
@@ -216,13 +232,17 @@ export function useRadioPlayer() {
 	/** 停止中に現在局を再ロードして再生 */
 	const playRadio = useCallback(() => {
 		if (!currentRadio) return;
+		// ユーザーインタラクション起点のコールバックとして resume() を同期呼び出し。
+		// radiko は mutate の onSuccess で load() が実行されるため、
+		// ここで先行して resume しないと Safari の autoplay policy に弾かれる。
+		void audioMotionAnalyzer.audioCtx.resume();
 		unLoad();
 		if (currentRadio.source === "radiko") {
 			mutate(currentRadio.id, { onSuccess: (m3u8) => load(m3u8) });
 		} else if (currentRadio.source === "radiru") {
 			load(currentRadio.url);
 		}
-	}, [currentRadio, mutate, load, unLoad]);
+	}, [currentRadio, mutate, load, unLoad, audioMotionAnalyzer]);
 
 	/** HLS をアンロードして停止 */
 	const stopRadio = useCallback(() => {
