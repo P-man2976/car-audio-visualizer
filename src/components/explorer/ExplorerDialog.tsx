@@ -11,10 +11,18 @@ import { useAddress } from "@/hooks/explorer";
 import { Button } from "../ui/button";
 import { parseBlob } from "music-metadata";
 import { audioElementAtom } from "@/atoms/audio";
-import { currentSongAtom, currentSrcAtom, songQueueAtom } from "@/atoms/player";
+import {
+	currentSongAtom,
+	currentSrcAtom,
+	persistedCurrentSongAtom,
+	persistedSongHistoryAtom,
+	persistedSongQueueAtom,
+	songQueueAtom,
+} from "@/atoms/player";
 import { LuFolderOpen, LuLoader } from "react-icons/lu";
 import type { SelectedFile } from "@/types/explorer";
 import type { Song } from "@/types/player";
+import { songToStub } from "@/types/player";
 
 const hasFSAPI = "showDirectoryPicker" in window;
 
@@ -56,6 +64,9 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 	const setQueue = useSetAtom(songQueueAtom);
 	const [currentSong, setCurrentSong] = useAtom(currentSongAtom);
 	const setCurrentSrc = useSetAtom(currentSrcAtom);
+	const setPersistedCurrent = useSetAtom(persistedCurrentSongAtom);
+	const setPersistedQueue = useSetAtom(persistedSongQueueAtom);
+	const setPersistedHistory = useSetAtom(persistedSongHistoryAtom);
 	const { stack, push } = useAddress();
 	const fallbackInputRef = useRef<HTMLInputElement>(null);
 
@@ -115,8 +126,15 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 			const [first, ...rest] = songs;
 			setCurrentSong(first);
 			setQueue((prev) => [...prev, ...rest]);
+			setPersistedCurrent(songToStub(first));
+			setPersistedQueue(rest.map(songToStub));
+			setPersistedHistory([]);
 		} else {
-			setQueue((prev) => [...prev, ...songs]);
+			setQueue((prev) => {
+				const next = [...prev, ...songs];
+				setPersistedQueue(next.map(songToStub));
+				return next;
+			});
 		}
 		setCurrentSrc("file");
 		e.target.value = "";
@@ -135,8 +153,15 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 				const [first, ...rest] = songs;
 				setCurrentSong(first);
 				setQueue((prev) => [...prev, ...rest]);
+				setPersistedCurrent(songToStub(first));
+				setPersistedQueue(rest.map(songToStub));
+				setPersistedHistory([]);
 			} else {
-				setQueue((prev) => [...prev, ...songs]);
+				setQueue((prev) => {
+					const next = [...prev, ...songs];
+					setPersistedQueue(next.map(songToStub));
+					return next;
+				});
 			}
 			setCurrentSrc("file");
 

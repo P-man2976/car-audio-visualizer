@@ -44,7 +44,7 @@ const SUB_Y_OFFSET = -26;
 // This fills the triangular gap between the tilted sub-spectrum and the
 // screen vertical (screen edges).
 const WING_MAX_LOCAL_WIDTH = 22; // top row (ci = COL_CELL_COUNT-1)
-const WING_MIN_LOCAL_WIDTH = 18; // bottom row (ci = 0)
+const WING_MIN_LOCAL_WIDTH = 17.4; // bottom row (ci = 0)
 // Gap (in local units) between the wing bar and the outermost spectrum bar.
 const WING_GAP = 1;
 

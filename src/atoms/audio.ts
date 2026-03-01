@@ -27,17 +27,6 @@ function getAnalyzer() {
 	return analyzerInstance;
 }
 
-// Destroy the analyzer on page unload so its RAF loop and AudioContext are
-// properly torn down before the browser destroys WebGL contexts.  Without this,
-// the still-running RAF can race with THREE.WebGLRenderer teardown and cause
-// "Context Lost" on the next page load.
-if (typeof window !== "undefined") {
-	window.addEventListener("beforeunload", () => {
-		analyzerInstance?.destroy();
-		analyzerInstance = null;
-	});
-}
-
 export const audioElementAtom = atom(sharedAudioElement);
 export const audioMotionAnalyzerAtom = atom(() => getAnalyzer());
 export const mediaStreamAtom = atom<MediaStream | null>(null);
