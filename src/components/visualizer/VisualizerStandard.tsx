@@ -182,7 +182,7 @@ function FrequencyLabel({
 			font,
 			size: 2.4,
 			depth: 0,
-			curveSegments: 4,
+			curveSegments: 12,
 			bevelEnabled: false,
 		});
 		// テキストをバウンディングボックス中心に居中新
@@ -195,7 +195,9 @@ function FrequencyLabel({
 	if (!geometry) return null;
 
 	return (
-		<mesh position={position} geometry={geometry}>
+		// typeface.js フォントは Y 座標が Three.js と反転しているため
+		// scale={[1, -1, 1]} で上下を反転して正立させる。
+		<mesh position={position} geometry={geometry} scale={[1, -1, 1]}>
 			<meshBasicMaterial color="#10b981" />
 		</mesh>
 	);
