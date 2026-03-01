@@ -1,11 +1,10 @@
 import { Line, Text } from "@react-three/drei";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import type { AnalyzerBarData } from "audiomotion-analyzer";
 import { useAtomValue } from "jotai";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
-import { isPlayingAtom } from "@/atoms/player";
 import { spectrogramAtom, store } from "./spectrogramStore";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -94,18 +93,6 @@ const FRAG = `
 export function VisualizerStandard() {
 	const matRef = useRef<THREE.ShaderMaterial>(null);
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
-	const isPlaying = useAtomValue(isPlayingAtom);
-	const { invalidate } = useThree();
-
-	// Render one initial frame so the dark grid appears even before playback.
-	// frameloop="demand" fires NO frames automatically — this kicks the first one.
-	useEffect(() => {
-		invalidate();
-	}, [invalidate]);
-
-	useEffect(() => {
-		if (isPlaying) invalidate();
-	}, [isPlaying, invalidate]);
 
 	// Pre-allocate uniform buffers; never re-created across renders
 	const uniforms = useMemo(
@@ -116,15 +103,12 @@ export function VisualizerStandard() {
 		[],
 	);
 
-	useFrame(({ invalidate: inv }) => {
+	useFrame(() => {
 		const bars = audioMotionAnalyzer.getBars() as AnalyzerBarData[];
 		store.set(spectrogramAtom, bars);
 
 		const mat = matRef.current;
-		if (!mat) {
-			if (isPlaying) inv();
-			return;
-		}
+		if (!mat) return;
 
 		const vals = mat.uniforms.uValues.value as Float32Array;
 		const peaks = mat.uniforms.uPeaks.value as Float32Array;
@@ -134,8 +118,6 @@ export function VisualizerStandard() {
 			peaks[i] = bar?.peak?.[0] ?? 0;
 		}
 		mat.uniformsNeedUpdate = true;
-
-		if (isPlaying) inv();
 	});
 
 	return (
