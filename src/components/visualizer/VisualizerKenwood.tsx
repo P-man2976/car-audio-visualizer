@@ -13,20 +13,20 @@ import { spectrogramAtom, store } from "./spectrogramStore";
 /** Number of actual frequency bands from the analyzer. */
 const FREQ_COUNT = 9;
 
-const CELL_HEIGHT = 1;
-const COL_CELL_COUNT = 32;
+const CELL_HEIGHT = 0.8;
+const COL_CELL_COUNT = 40;
 const COL_CELL_GAP = 0.6;
 const ANALYZER_ANGLE_DEGREE = 24;
 
 /** Each main bar is drawn as two thin sub-columns side by side. */
-const SUB_COL_WIDTH = 2.5;
+const SUB_COL_WIDTH = 4;
 /** Gap between the two sub-columns within one main bar. */
 const SUB_COL_GAP = 0.5;
 /** Total visual width of one main bar (2 sub-cols + internal gap). */
 const MAIN_BAR_WIDTH = SUB_COL_WIDTH * 2 + SUB_COL_GAP; // 5.5
 
 /** Width of the narrow inverted side bar flanking each main bar. */
-const SIDE_BAR_WIDTH = 1.5;
+const SIDE_BAR_WIDTH = 1;
 /** Gap between the main bar edge and its side bar. */
 const SIDE_GAP = 0.5;
 
@@ -34,7 +34,7 @@ const SIDE_GAP = 0.5;
 const SIDE_UNIT = SIDE_BAR_WIDTH + SIDE_GAP; // 2.0
 
 /** Gap between adjacent frequency bands (outside the side bars). */
-const BAND_GAP = 5.0;
+const BAND_GAP = 3.0;
 
 /**
  * Horizontal stride per frequency band:
@@ -183,12 +183,14 @@ export function VisualizerKenwood() {
 
 	const totalHeight =
 		(CELL_HEIGHT + COL_CELL_GAP) * COL_CELL_COUNT - COL_CELL_GAP;
+	// scale=1.6 のため、ローカル幅×(scale/2) で原点を視覚的中央に合わせる
+	const SCALE = 1.6;
 
 	return (
 		<mesh
 			ref={meshRef}
-			position={[-TOTAL_WIDTH / 2, -totalHeight / 2, 0]}
-			scale={1.6}
+			position={[-TOTAL_WIDTH * (SCALE / 2), -totalHeight * (SCALE / 2), 0]}
+			scale={SCALE}
 			rotation-x={(Math.PI / 180) * -ANALYZER_ANGLE_DEGREE}
 		>
 			{Array.from({ length: FREQ_COUNT }).map((_, freqIndex) => (

@@ -106,7 +106,7 @@ export function SettingsDialog() {
 						<div className="flex gap-2">
 							{([
 								{ value: "standard", label: "スタンダード" },
-								{ value: "kenwood", label: "Kenwood" },
+								{ value: "dpx5021m", label: "DPX-5021M" },
 							] as { value: VisualizerStyle; label: string }[]).map(({ value, label }) => (
 								<button
 									key={value}

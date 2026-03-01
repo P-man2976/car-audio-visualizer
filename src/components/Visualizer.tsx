@@ -6,5 +6,5 @@ import { VisualizerKenwood } from "./visualizer/VisualizerKenwood";
 /** Renders the active visualizer style based on visualizerStyleAtom. */
 export function VisualizerSwitch() {
 	const style = useAtomValue(visualizerStyleAtom);
-	return style === "kenwood" ? <VisualizerKenwood /> : <VisualizerStandard />;
+	return style === "dpx5021m" ? <VisualizerKenwood /> : <VisualizerStandard />;
 }
