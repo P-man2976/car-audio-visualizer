@@ -91,7 +91,8 @@ export function FileRestore() {
 	const setCurrentSong = useSetAtom(currentSongAtom);
 	const setQueue = useSetAtom(songQueueAtom);
 	const setHistory = useSetAtom(songHistoryAtom);
-	const setCurrentSrc = useSetAtom(currentSrcAtom);
+	// currentSrcAtom はリロード時に atomWithStorage によりすでに "file" が復元されているため
+	// ここで setCurrentSrc("file") を呼ぶ必要はない。
 	const clearPersistedCurrent = useSetAtom(persistedCurrentSongAtom);
 	const clearPersistedQueue = useSetAtom(persistedSongQueueAtom);
 	const clearPersistedHistory = useSetAtom(persistedSongHistoryAtom);
@@ -158,7 +159,7 @@ export function FileRestore() {
 					setQueue(rest);
 					setHistory(restoredHistory);
 				}
-				setCurrentSrc("file");
+				// currentSrcAtom はリロード時に atomWithStorage によりすでに "file" なので明示的なセットは不要
 			}
 			// persisted stubs と IDB ハンドルは残す。
 			// clearAll() を呼ぶと 2 回目以降のリロードで復元できなくなる。
