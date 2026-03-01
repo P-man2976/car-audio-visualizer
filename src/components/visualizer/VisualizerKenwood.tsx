@@ -1,9 +1,8 @@
-import { Line, Plane, Text } from "@react-three/drei";
+import { Line, Text } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import type { AnalyzerBarData } from "audiomotion-analyzer";
 import { useAtomValue } from "jotai";
-import { Fragment, useEffect, useMemo, useRef } from "react";
-import type { MeshStandardMaterial } from "three";
+import { Fragment, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
 import { isPlayingAtom } from "@/atoms/player";
@@ -71,125 +70,106 @@ const FREQ_ARRAY = ["63", "125", "250", "500", "1k", "2k", "4k", "6.3k", "8k", "
 const cellY = (colIndex: number) =>
 	(CELL_HEIGHT + COL_CELL_GAP) * colIndex + COL_CELL_GAP;
 
-// ─── MainCell ─────────────────────────────────────────────────────────────────
-/**
- * One frequency band rendered as two thin sub-columns.
- * freqIndex maps 1:1 to an actual analyzer band — no Math.trunc needed.
- * Lit cells: cyan. Dark cells: near-black. Peak: white.
- */
-function MainCell({
-	freqIndex,
-	colIndex,
-}: {
-	freqIndex: number;
-	colIndex: number;
-}) {
-	const color = useMemo(() => new THREE.Color(), []);
-	const leftRef = useRef<MeshStandardMaterial>(null);
-	const rightRef = useRef<MeshStandardMaterial>(null);
+// ─── InstancedMesh counts ─────────────────────────────────────────────────────
+// main: FREQ_COUNT × COL_CELL_COUNT × 2 sub-cols    = 572
+// side: FREQ_COUNT × COL_CELL_COUNT × 2 (left+right)= 572
+const MAIN_INST = FREQ_COUNT * COL_CELL_COUNT * 2;
+const SIDE_INST = FREQ_COUNT * COL_CELL_COUNT * 2;
 
-	useFrame(() => {
-		if (!leftRef.current || !rightRef.current) return;
-		const freqLevel = store.get(spectrogramAtom)?.[BAND_INDICES[freqIndex]];
-		const value = freqLevel?.value?.[0] ?? 0;
-		const peak = freqLevel?.peak?.[0] ?? 0;
-
-		const isPeak =
-			(colIndex < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < colIndex + 1) ||
-			(colIndex - 2 < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < colIndex - 1);
-
-		const c = color.set(
-			isPeak
-				? "#ffffff"
-				: value * COL_CELL_COUNT > colIndex
-					? "#a5f3fc"
-					: "#080018",
-		);
-
-		leftRef.current.color = c;
-		rightRef.current.color = c;
-	});
-
-	return (
-		<>
-			{/* Left sub-column */}
-			<Plane
-				position={[subLeftCX(freqIndex), cellY(colIndex), 0]}
-				args={[SUB_COL_WIDTH, CELL_HEIGHT, 1]}
-			>
-				<meshStandardMaterial ref={leftRef} />
-			</Plane>
-			{/* Right sub-column */}
-			<Plane
-				position={[subRightCX(freqIndex), cellY(colIndex), 0]}
-				args={[SUB_COL_WIDTH, CELL_HEIGHT, 1]}
-			>
-				<meshStandardMaterial ref={rightRef} />
-			</Plane>
-		</>
-	);
-}
-
-// ─── SideCell ─────────────────────────────────────────────────────────────────
-/**
- * Narrow bar placed immediately outside the main bar.
- * Inverted: lit (teal) where the main bar is UN-lit, dark where it IS lit.
- */
-function SideCell({
-	freqIndex,
-	colIndex,
-	side,
-}: {
-	freqIndex: number;
-	colIndex: number;
-	side: "left" | "right";
-}) {
-	const color = useMemo(() => new THREE.Color(), []);
-	const meshMaterialRef = useRef<MeshStandardMaterial>(null);
-
-	const cx = side === "left" ? sideLeftCX(freqIndex) : sideRightCX(freqIndex);
-
-	useFrame(() => {
-		if (!meshMaterialRef.current) return;
-		const freqLevel = store.get(spectrogramAtom)?.[BAND_INDICES[freqIndex]];
-		const value = freqLevel?.value?.[0] ?? 0;
-		meshMaterialRef.current.color = color.set(
-			value * COL_CELL_COUNT <= colIndex ? "#0e7490" : "#050012",
-		);
-	});
-
-	return (
-		<Plane
-			position={[cx, cellY(colIndex), 0]}
-			args={[SIDE_BAR_WIDTH, CELL_HEIGHT, 1]}
-		>
-			<meshStandardMaterial ref={meshMaterialRef} />
-		</Plane>
-	);
-}
+// Reusable scratch objects (never re-allocated during render)
+const _mat = new THREE.Matrix4();
+const _pos = new THREE.Vector3();
+const _quat = new THREE.Quaternion(); // identity
+const _scl = new THREE.Vector3(1, 1, 1);
+const _cMain = new THREE.Color();
+const _cSide = new THREE.Color();
 
 // ─── Root component ───────────────────────────────────────────────────────────
 export function VisualizerKenwood() {
+	const mainRef = useRef<THREE.InstancedMesh>(null);
+	const sideRef = useRef<THREE.InstancedMesh>(null);
 	const meshRef = useRef<THREE.Mesh>(null);
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 	const isPlaying = useAtomValue(isPlayingAtom);
 	const { invalidate } = useThree();
 
+	// ── Initialize instance transforms once ──────────────────────────────────
 	useEffect(() => {
+		const main = mainRef.current;
+		const side = sideRef.current;
+		if (!main || !side) return;
+
+		for (let fi = 0; fi < FREQ_COUNT; fi++) {
+			for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
+				const y = cellY(ci);
+				const base = fi * COL_CELL_COUNT * 2 + ci * 2;
+
+				// Main: left sub-col
+				_pos.set(subLeftCX(fi), y, 0);
+				main.setMatrixAt(base + 0, _mat.compose(_pos, _quat, _scl));
+
+				// Main: right sub-col
+				_pos.set(subRightCX(fi), y, 0);
+				main.setMatrixAt(base + 1, _mat.compose(_pos, _quat, _scl));
+
+				// Side: left
+				_pos.set(sideLeftCX(fi), y, 0);
+				side.setMatrixAt(base + 0, _mat.compose(_pos, _quat, _scl));
+
+				// Side: right
+				_pos.set(sideRightCX(fi), y, 0);
+				side.setMatrixAt(base + 1, _mat.compose(_pos, _quat, _scl));
+			}
+		}
+		main.instanceMatrix.needsUpdate = true;
+		side.instanceMatrix.needsUpdate = true;
+
 		if (isPlaying) invalidate();
 	}, [isPlaying, invalidate]);
 
+	// ── Frame loop: update bar data + instance colors ─────────────────────────
 	useFrame(({ invalidate: inv }) => {
-		store.set(
-			spectrogramAtom,
-			audioMotionAnalyzer.getBars() as AnalyzerBarData[],
-		);
+		const bars = audioMotionAnalyzer.getBars() as AnalyzerBarData[];
+		store.set(spectrogramAtom, bars);
+
+		const main = mainRef.current;
+		const side = sideRef.current;
+		if (!main || !side) {
+			if (isPlaying) inv();
+			return;
+		}
+
+		for (let fi = 0; fi < FREQ_COUNT; fi++) {
+			const freqLevel = bars[BAND_INDICES[fi]];
+			const value = freqLevel?.value?.[0] ?? 0;
+			const peak = freqLevel?.peak?.[0] ?? 0;
+
+			for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
+				const base = fi * COL_CELL_COUNT * 2 + ci * 2;
+
+				const isPeak =
+					(ci < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci + 1) ||
+					(ci - 2 < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci - 1);
+
+				_cMain.set(
+					isPeak ? "#ffffff" : value * COL_CELL_COUNT > ci ? "#a5f3fc" : "#080018",
+				);
+				main.setColorAt(base + 0, _cMain);
+				main.setColorAt(base + 1, _cMain);
+
+				_cSide.set(value * COL_CELL_COUNT <= ci ? "#0e7490" : "#050012");
+				side.setColorAt(base + 0, _cSide);
+				side.setColorAt(base + 1, _cSide);
+			}
+		}
+
+		main.instanceColor!.needsUpdate = true;
+		side.instanceColor!.needsUpdate = true;
+
 		if (isPlaying) inv();
 	});
 
-	const totalHeight =
-		(CELL_HEIGHT + COL_CELL_GAP) * COL_CELL_COUNT - COL_CELL_GAP;
-	// scale=1.6 のため、ローカル幅×(scale/2) で原点を視覚的中央に合わせる
+	const totalHeight = (CELL_HEIGHT + COL_CELL_GAP) * COL_CELL_COUNT - COL_CELL_GAP;
 	const SCALE = 1.6;
 
 	return (
@@ -199,43 +179,26 @@ export function VisualizerKenwood() {
 			scale={SCALE}
 			rotation-x={(Math.PI / 180) * -ANALYZER_ANGLE_DEGREE}
 		>
-			{Array.from({ length: FREQ_COUNT }).map((_, freqIndex) => (
-				<Fragment key={`k-freq-${freqIndex}`}>
-					{/* Left inverted side bars */}
-					{Array.from({ length: COL_CELL_COUNT }).map((__, colIndex) => (
-						<SideCell
-							key={`k-left-${freqIndex}-${colIndex}`}
-							freqIndex={freqIndex}
-							colIndex={colIndex}
-							side="left"
-						/>
-					))}
+			{/* Main bars: 2 sub-columns per band — single draw call */}
+			<instancedMesh ref={mainRef} args={[undefined, undefined, MAIN_INST]}>
+				<planeGeometry args={[SUB_COL_WIDTH, CELL_HEIGHT]} />
+				<meshBasicMaterial vertexColors />
+			</instancedMesh>
 
-					{/* Main bars (2 sub-columns per frequency band) */}
-					{Array.from({ length: COL_CELL_COUNT }).map((__, colIndex) => (
-						<MainCell
-							key={`k-cell-${freqIndex}-${colIndex}`}
-							freqIndex={freqIndex}
-							colIndex={colIndex}
-						/>
-					))}
+			{/* Side bars: left + right flanking bars — single draw call */}
+			<instancedMesh ref={sideRef} args={[undefined, undefined, SIDE_INST]}>
+				<planeGeometry args={[SIDE_BAR_WIDTH, CELL_HEIGHT]} />
+				<meshBasicMaterial vertexColors />
+			</instancedMesh>
 
-					{/* Right inverted side bars */}
-					{Array.from({ length: COL_CELL_COUNT }).map((__, colIndex) => (
-						<SideCell
-							key={`k-right-${freqIndex}-${colIndex}`}
-							freqIndex={freqIndex}
-							colIndex={colIndex}
-							side="right"
-						/>
-					))}
-
-					{/* Frequency label — unrotate to stay horizontal */}
+			{/* Frequency labels (static, 11 text nodes) */}
+			{Array.from({ length: FREQ_COUNT }).map((_, fi) => (
+				<Fragment key={`k-label-${fi}`}>
 					<mesh rotation-x={(Math.PI / 180) * ANALYZER_ANGLE_DEGREE}>
 						<Line
 							points={[
-								[bandCenterCX(freqIndex) - MAIN_BAR_WIDTH / 2, -2, 0],
-								[bandCenterCX(freqIndex) + MAIN_BAR_WIDTH / 2, -2, 0],
+								[bandCenterCX(fi) - MAIN_BAR_WIDTH / 2, -2, 0],
+								[bandCenterCX(fi) + MAIN_BAR_WIDTH / 2, -2, 0],
 							]}
 							lineWidth={4}
 							color="#67e8f9"
@@ -244,9 +207,9 @@ export function VisualizerKenwood() {
 							color="#10b981"
 							fontSize={2.4}
 							font="https://cdn.jsdelivr.net/fontsource/fonts/montserrat@latest/latin-600-normal.woff"
-							position={[bandCenterCX(freqIndex), -6, 0]}
+							position={[bandCenterCX(fi), -6, 0]}
 						>
-							{FREQ_ARRAY[freqIndex] ?? ""}
+							{FREQ_ARRAY[fi] ?? ""}
 						</Text>
 					</mesh>
 				</Fragment>
@@ -254,3 +217,4 @@ export function VisualizerKenwood() {
 		</mesh>
 	);
 }
+
