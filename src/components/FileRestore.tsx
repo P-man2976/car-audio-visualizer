@@ -93,6 +93,8 @@ export function FileRestore() {
 
 	const restoringToastId = useRef<string | number | null>(null);
 	const permissionToastId = useRef<string | number | null>(null);
+	/** restore() を 1 度だけ呼ぶためのガード。isRestoring を deps に入れると無限ループになる */
+	const hasAutoRestored = useRef(false);
 
 	const clearAll = useCallback(() => {
 		clearPersistedCurrent(null);
@@ -175,18 +177,18 @@ export function FileRestore() {
 		},
 	});
 
-	// Auto-restore when permission was already granted without user gesture
+	// Auto-restore when permission was already granted without user gesture.
+	// hasAutoRestored ref で 1 度だけ実行を保証する。
+	// isRestoring を deps に含めると restore() 呼び出し→isRestoring 変化→再実行の
+	// 無限ループが発生するため、ここでは参照しない。
 	useEffect(() => {
-		if (permissionData?.granted) {
-			// Show loading toast
-			if (!restoringToastId.current && !isRestoring) {
-				restoringToastId.current = toast.loading("前回のファイルを復元中...");
-			}
+		if (permissionData?.granted && !hasAutoRestored.current) {
+			hasAutoRestored.current = true;
 			restore(permissionData.stored);
 		}
-	}, [permissionData, restore, isRestoring]);
+	}, [permissionData, restore]);
 
-	// Show loading toast when restore mutation starts
+	// loading toast は isRestoring が true になったタイミングで表示
 	useEffect(() => {
 		if (isRestoring && !restoringToastId.current) {
 			restoringToastId.current = toast.loading("前回のファイルを復元中...");
