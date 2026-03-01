@@ -13,11 +13,11 @@ const FREQ_COUNT = 11;
 const CELL_HEIGHT = 0.6;
 const COL_CELL_COUNT = 26;
 const COL_CELL_GAP = 0.8;
-const ANALYZER_ANGLE_DEGREE = 24;
+const ANALYZER_ANGLE_DEGREE = 16;
 
-const SUB_COL_WIDTH = 3.6;
+const SUB_COL_WIDTH = 3.4;
 const SUB_COL_GAP = 0.5;
-const MAIN_BAR_WIDTH = 7.7;
+const MAIN_BAR_WIDTH = 7;
 const SIDE_BAR_WIDTH = 0.6;
 const SIDE_GAP = 0.5;
 const SIDE_UNIT = SIDE_BAR_WIDTH + SIDE_GAP; // 1.1
@@ -32,20 +32,6 @@ const TOTAL_WIDTH = BAND_STRIDE * FREQ_COUNT;
  */
 const BAND_INDICES = [4, 7, 10, 13, 16, 19, 22, 24, 25, 27, 28] as const;
 
-const FREQ_ARRAY = [
-	"63",
-	"125",
-	"250",
-	"500",
-	"1k",
-	"2k",
-	"4k",
-	"6k",
-	"8k",
-	"12k",
-	"16k",
-];
-
 // ─── Position helpers ─────────────────────────────────────────────────────────
 const sideLeftCX = (fi: number) => BAND_STRIDE * fi + SIDE_BAR_WIDTH / 2;
 const subLeftCX = (fi: number) =>
@@ -53,8 +39,6 @@ const subLeftCX = (fi: number) =>
 const subRightCX = (fi: number) => subLeftCX(fi) + SUB_COL_WIDTH + SUB_COL_GAP;
 const sideRightCX = (fi: number) =>
 	BAND_STRIDE * fi + SIDE_UNIT + MAIN_BAR_WIDTH + SIDE_GAP + SIDE_BAR_WIDTH / 2;
-const bandCenterCX = (fi: number) =>
-	BAND_STRIDE * fi + SIDE_UNIT + MAIN_BAR_WIDTH / 2;
 const cellY = (ci: number) => (CELL_HEIGHT + COL_CELL_GAP) * ci + COL_CELL_GAP;
 
 // ─── Root component ───────────────────────────────────────────────────────────
@@ -71,10 +55,11 @@ export function VisualizerKenwood() {
 	const totalHeight =
 		(CELL_HEIGHT + COL_CELL_GAP) * COL_CELL_COUNT - COL_CELL_GAP;
 	const SCALE = 1.6;
+  const OFFSET_Y = 30;
 
 	return (
 		<group
-			position={[-TOTAL_WIDTH * (SCALE / 2), -totalHeight * (SCALE / 2), 0]}
+			position={[-TOTAL_WIDTH * (SCALE / 2), -totalHeight * (SCALE / 2) + OFFSET_Y, 0]}
 			scale={SCALE}
 			rotation-x={(Math.PI / 180) * -ANALYZER_ANGLE_DEGREE}
 		>
@@ -86,24 +71,7 @@ export function VisualizerKenwood() {
 					{Array.from({ length: COL_CELL_COUNT }).map((_, ci) => (
 						<KenwoodSideCell key={`s-${fi}-${ci}`} fi={fi} ci={ci} />
 					))}
-					<group rotation-x={(Math.PI / 180) * ANALYZER_ANGLE_DEGREE}>
-						<Line
-							points={[
-								[bandCenterCX(fi) - MAIN_BAR_WIDTH / 2, -2, 0],
-								[bandCenterCX(fi) + MAIN_BAR_WIDTH / 2, -2, 0],
-							]}
-							lineWidth={4}
-							color="#67e8f9"
-						/>
-						<Text
-							color="#10b981"
-							fontSize={2.4}
-							font="https://cdn.jsdelivr.net/fontsource/fonts/montserrat@latest/latin-600-normal.woff"
-							position={[bandCenterCX(fi), -6, 0]}
-						>
-							{FREQ_ARRAY[fi] ?? ""}
-						</Text>
-					</group>
+					
 				</group>
 			))}
 		</group>

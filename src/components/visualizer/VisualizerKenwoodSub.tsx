@@ -8,7 +8,7 @@ import { spectrogramAtom, store } from "./spectrogramStore";
 // ─── Layout constants ─────────────────────────────────────────────────────────
 // Sub-visualizer: 7 bands wide (centre 7 of the 11 Kenwood bands),
 // 7 rows tall, cells slightly smaller than the main visualizer.
-const FREQ_COUNT = 7; // centre bands only
+const FREQ_COUNT = 10; // centre bands only
 const CELL_HEIGHT = 0.4; // main = 0.6
 const COL_CELL_COUNT = 7; // rows
 const COL_CELL_GAP = 0.6; // main = 0.8
@@ -18,20 +18,17 @@ const ANALYZER_ANGLE_DEGREE = 24;
 const SUB_COL_WIDTH = 2.8; // main = 3.6
 const SUB_COL_GAP = 0.4; // gap between left+right bars within band
 
-// Shared stride / positioning kept identical to main so bands line up X-wise
-const SIDE_BAR_WIDTH = 0.6;
-const SIDE_GAP = 0.5;
-const SIDE_UNIT = SIDE_BAR_WIDTH + SIDE_GAP; // 1.1  (still used for bar offset, no side bars rendered)
-const MAIN_BAR_WIDTH = 7.7;
-const BAND_GAP = 2.0;
-const BAND_STRIDE =
-	SIDE_UNIT + MAIN_BAR_WIDTH + SIDE_GAP + SIDE_BAR_WIDTH + BAND_GAP; // 11.9
+// MAIN_BAR_WIDTH is derived from SUB_COL_WIDTH so they stay in sync:
+//   left bar + gap + right bar  (mirrors VisualizerKenwood: 3.6 + 0.5 + 3.6 = 7.7)
+const MAIN_BAR_WIDTH = SUB_COL_WIDTH * 2 + SUB_COL_GAP;
+const BAND_GAP = 0;
+const BAND_STRIDE = MAIN_BAR_WIDTH + BAND_GAP; // 11.9
 
 // Group span — 7 bands centred on the same world X=0 as the main
 const TOTAL_WIDTH = BAND_STRIDE * FREQ_COUNT; // 83.3
 
 // ANSI 1/3-oct indices for the central 7 of 11 bands (~125 Hz … 6 kHz)
-const BAND_INDICES = [7, 10, 13, 16, 19, 22, 24] as const;
+const BAND_INDICES = [4, 7, 10, 13, 16, 19, 22, 24, 27, 28] as const;
 
 const SCALE = 1.6;
 
@@ -41,17 +38,16 @@ const SCALE = 1.6;
 //   topCellLocal = cellY(COL_CELL_COUNT-1) = (CELL_HEIGHT+COL_CELL_GAP)*(COL_CELL_COUNT-1) + COL_CELL_GAP
 //                = 1.0 * 6 + 0.6 = 6.6   →  world = 6.6 * 1.6 = 10.56
 //   groupY = wantedTop − topCellWorld = -29 − 10.56 = -39.56  →  use -40
-const SUB_Y_OFFSET = -40;
+const SUB_Y_OFFSET = -20;
 
 // Wing bar dimensions: widest at TOP row, narrowest at BOTTOM row.
 // This fills the triangular gap between the tilted sub-spectrum and the
 // screen vertical (screen edges).
-const WING_MAX_LOCAL_WIDTH = 32; // top row (ci = COL_CELL_COUNT-1)
-const WING_MIN_LOCAL_WIDTH = 2; // bottom row (ci = 0)
+const WING_MAX_LOCAL_WIDTH = 17; // top row (ci = COL_CELL_COUNT-1)
+const WING_MIN_LOCAL_WIDTH = 14; // bottom row (ci = 0)
 
 // ─── Position helpers ─────────────────────────────────────────────────────────
-const subLeftCX = (fi: number) =>
-	BAND_STRIDE * fi + SIDE_UNIT + SUB_COL_WIDTH / 2;
+const subLeftCX = (fi: number) => BAND_STRIDE * fi + SUB_COL_WIDTH / 2;
 const subRightCX = (fi: number) => subLeftCX(fi) + SUB_COL_WIDTH + SUB_COL_GAP;
 const cellY = (ci: number) => (CELL_HEIGHT + COL_CELL_GAP) * ci + COL_CELL_GAP;
 
@@ -131,15 +127,8 @@ function SubCell({ fi, ci }: { fi: number; ci: number }) {
 		const bars = store.get(spectrogramAtom);
 		const freqLevel = bars?.[BAND_INDICES[fi]];
 		const value = freqLevel?.value?.[0] ?? 0;
-		const peak = freqLevel?.peak?.[0] ?? 0;
 
-		const isPeak =
-			(ci < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci + 1) ||
-			(ci - 2 < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci - 1);
-
-		const c = color.set(
-			isPeak ? "#ffffff" : value * COL_CELL_COUNT > ci ? "#a5f3fc" : "#080018",
-		);
+		const c = color.set(value * COL_CELL_COUNT > ci ? "#a5f3fc" : "#3b0764");
 		leftRef.current.color.copy(c);
 		rightRef.current.color.copy(c);
 	});
