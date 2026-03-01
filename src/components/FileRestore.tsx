@@ -169,7 +169,7 @@ export function FileRestore() {
 				toast.dismiss(restoringToastId.current);
 				restoringToastId.current = null;
 			}
-			toast.success("前回のファイルを復元しました");
+			toast.success("前回のファイルを復元しました", { position: "top-right" });
 		},
 		onError: () => {
 			// Close loading toast and show error
@@ -177,7 +177,7 @@ export function FileRestore() {
 				toast.dismiss(restoringToastId.current);
 				restoringToastId.current = null;
 			}
-			toast.error("ファイルの復元に失敗しました");
+			toast.error("ファイルの復元に失敗しました", { position: "top-right" });
 			clearAll();
 		},
 	});
@@ -196,7 +196,9 @@ export function FileRestore() {
 	// loading toast は isRestoring が true になったタイミングで表示
 	useEffect(() => {
 		if (isRestoring && !restoringToastId.current) {
-			restoringToastId.current = toast.loading("前回のファイルを復元中...");
+			restoringToastId.current = toast.loading("前回のファイルを復元中...", {
+				position: "top-right",
+			});
 		}
 	}, [isRestoring]);
 
@@ -215,7 +217,9 @@ export function FileRestore() {
 					}
 					restore(stored);
 				} else {
-					toast.error("ファイルへのアクセスが拒否されました");
+					toast.error("ファイルへのアクセスが拒否されました", {
+						position: "top-right",
+					});
 					clearAll();
 				}
 			};
@@ -232,6 +236,7 @@ export function FileRestore() {
 				permissionToastId.current = toast(
 					"前回のファイルへのアクセスを許可してください",
 					{
+						position: "top-right",
 						action: {
 							label: "許可する",
 							onClick: handleAllow,

@@ -43,8 +43,8 @@ const SUB_Y_OFFSET = -26;
 // Wing bar dimensions: widest at TOP row, narrowest at BOTTOM row.
 // This fills the triangular gap between the tilted sub-spectrum and the
 // screen vertical (screen edges).
-const WING_MAX_LOCAL_WIDTH = 22; // top row (ci = COL_CELL_COUNT-1)
-const WING_MIN_LOCAL_WIDTH = 17.4; // bottom row (ci = 0)
+const WING_MAX_LOCAL_WIDTH = 18; // top row (ci = COL_CELL_COUNT-1)
+const WING_MIN_LOCAL_WIDTH = 14; // bottom row (ci = 0)
 // Gap (in local units) between the wing bar and the outermost spectrum bar.
 const WING_GAP = 1;
 
@@ -82,16 +82,8 @@ export function VisualizerKenwoodSub() {
 // Anchored flush to the outer vertical edge of the sub-spectrum, they form a
 // right-triangle that fills the gap between the tilted strip and the screen.
 function KenwoodWing({ side }: { side: "left" | "right" }) {
-	// Brighter toward the top (where the bar is widest)
-	const BAR_COLORS = [
-		"#0c4a6e", // ci=0 bottom (darkest / narrowest)
-		"#0e6090",
-		"#0e7490",
-		"#0891b2",
-		"#06b6d4",
-		"#22d3ee",
-		"#67e8f9", // ci=6 top (brightest / widest)
-	];
+	// Solid color matching the lit bar color (cyan)
+	const WING_COLOR = "#6dceff";
 
 	return (
 		<>
@@ -106,14 +98,13 @@ function KenwoodWing({ side }: { side: "left" | "right" }) {
 					side === "left"
 						? -WING_GAP - width / 2
 						: TOTAL_WIDTH - BAND_GAP + WING_GAP + width / 2;
-				const color = BAR_COLORS[ci] ?? "#0e7490";
 
 				return (
 					<Plane
 						key={`w-${ci}`}
 						position={[xCenter, y, 0]}
 						args={[width, CELL_HEIGHT]}
-						material-color={color}
+						material-color={WING_COLOR}
 					/>
 				);
 			})}
