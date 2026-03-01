@@ -18,19 +18,24 @@ export function useHLS() {
 			// 呼ぶとブラウザのジェスチャー要件を満たせないため、load() 先頭で即時呼ぶ。
 			// radiko の場合は useSelectRadio / playRadio でも呼ばれるため冗長だが、
 			// radiru（load が同期呼び出し）のカバーと防御的コーディングを兼ねる。
+			console.log("[hls] load() called, audioCtx.state:", audioMotionAnalyzer.audioCtx.state);
 			void audioMotionAnalyzer.audioCtx.resume();
 
 			if (Hls.isSupported()) {
 				const newHls = new Hls();
 				// attach 完了後に自動再生（resume は load() 先頭で既に呼んでいる）
 				newHls.on(Hls.Events.MEDIA_ATTACHED, () => {
+					console.log("[hls] MEDIA_ATTACHED, audioCtx.state:", audioMotionAnalyzer.audioCtx.state);
 					void audioElement
 						.play()
 						.then(() => {
+							console.log("[hls] play() resolved, audioCtx.state:", audioMotionAnalyzer.audioCtx.state);
 							audioMotionAnalyzer.start();
 							setIsPlaying(true);
 						})
-						.catch(() => undefined);
+						.catch((err: unknown) => {
+							console.warn("[hls] HLS.js play() failed, audioCtx.state:", audioMotionAnalyzer.audioCtx.state, err);
+						});
 				});
 				newHls.loadSource(source);
 				newHls.attachMedia(audioElement);
@@ -41,17 +46,19 @@ export function useHLS() {
 			// HLS 非対応ブラウザ（Safari のネイティブ HLS）
 			// Safari では AudioContext が "interrupted" になることがある。
 			// resume() は interrupted / suspended どちらからも機能する（確認済）。
+			console.log("[hls] native HLS path, audioCtx.state:", audioMotionAnalyzer.audioCtx.state);
 			audioElement.src = source;
 			void audioElement
 				.play()
 				.then(() => {
+					console.log("[hls] native HLS play() resolved, audioCtx.state:", audioMotionAnalyzer.audioCtx.state);
 					audioMotionAnalyzer.start();
 					setIsPlaying(true);
 				})
 				.catch((err: unknown) => {
 					// Safari で autoplay policy や interruption により再生が拒否された場合
 					// ここに来る。サイレントに握り潰さずコンソールに出力する。
-					console.warn("[hls] Safari native HLS play failed:", err);
+					console.warn("[hls] Safari native HLS play failed, audioCtx.state:", audioMotionAnalyzer.audioCtx.state, err);
 				});
 		},
 		// hls は deps に含めない：常に新規インスタンスを生成するため

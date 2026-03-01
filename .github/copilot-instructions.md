@@ -125,8 +125,85 @@ Uses Biome for automatic code formatting.
 
 Use `agent-browser` for web automation. Run `agent-browser --help` for all commands.
 
-Core workflow:
+### Core Workflow
 1. `agent-browser open <url>` - Navigate to page
 2. `agent-browser snapshot -i` - Get interactive elements with refs (@e1, @e2)
-3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs
-4. Re-snapshot after page changes
+3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs (deterministic)
+4. `agent-browser diff snapshot` - Verify actions changed page state
+5. Re-snapshot after page changes
+
+### Key Features
+
+**Element Interaction (ref-based):**
+- `snapshot -i` — Take accessibility tree snapshot with refs (`@e1`, `@e2`, etc)
+- `click @e1` / `dblclick` / `tap` — Click/double-click/tap (iOS)
+- `fill @e1 "text"` — Clear and fill input
+- `press Enter` — Press key
+- `hover @e1` / `focus @e1` — Hover/focus
+- `check/uncheck @e1` — Checkbox operations
+
+**Semantic Selectors (human-readable):**
+- `find role button click --name "Submit"` — Find by ARIA role + name
+- `find label "Email" fill "test@test.com"` — Find by label text
+- `find text "Welcome" hover` — Find by visible text
+- `find testid "my-input" fill "value"` — Find by data-testid
+
+**Verification (Diffing):**
+- `diff snapshot` — Line-level text diff against last snapshot
+- `diff snapshot --baseline baseline.txt` — Compare against saved file
+- `diff screenshot --baseline before.png` — Pixel-level visual diff (red = changed pixels)
+- `diff url URL1 URL2 --screenshot` — Compare two pages
+
+**Session & State Management:**
+- `--session-name <name>` — Auto-save/restore cookies & localStorage
+- `--profile <path>` — Persistent browser profile directory
+- `auth save <name> --url <url> --username <u> --password-stdin` — Vault credentials (encrypted)
+- `auth login <name>` — Use saved credentials
+- `state save/load <path>` — Export/import session state
+
+**Performance & Debug:**
+- `profiler start` → `profiler stop trace.json` — Chrome DevTools trace (view in Perfetto UI)
+- `trace start/stop` — DevTools trace recording
+- `record start/stop video.webm` — Video recording
+- `console` / `errors` — View console logs & errors
+- `screenshot [path]` / `--annotate` — Screenshot with element labels
+
+**Advanced:**
+- `--cdp 9222` / `--auto-connect` — Connect to existing Chrome via DevTools Protocol
+- `-p ios --device "iPhone 16 Pro"` — iOS Simulator Safari control (requires Appium)
+- `--allowed-domains "example.com,*.example.com"` — Domain allowlist (block data exfiltration)
+- `--action-policy policy.json` — Gate dangerous actions (eval, download, upload)
+- `--confirm-actions eval,download` — Require manual approval for actions
+- `--content-boundaries` — Mark untrusted page output with nonce boundaries
+- `--max-output 50000` — Truncate large page outputs to prevent context flooding
+- `--headers '{"Authorization": "Bearer <token>"}'` — Add HTTP headers scoped to origin
+- `AGENT_BROWSER_STREAM_PORT=9223` — Stream viewport via WebSocket (live preview)
+
+### Token Efficiency
+- **Text output ~200-400 tokens** vs DOM JSON ~3000-5000 tokens
+- **Refs eliminate element re-query** — snapshot captures state once, use refs for all actions
+- **Compact format** — Accessibility tree only, LLM-friendly parsing
+
+### Command Chaining
+```bash
+agent-browser open example.com && \
+  agent-browser wait --load networkidle && \
+  agent-browser snapshot -i && \
+  agent-browser fill @e1 "text" && \
+  agent-browser diff snapshot
+```
+
+### Security (Production-ready)
+- **Auth Vault** — Passwords encrypted AES-256-GCM, never passed to LLM context
+- **Content Boundaries** — Untrusted page output wrapped with nonce markers
+- **Domain Allowlist** — Block navigations & sub-resources to non-allowed domains
+- **Action Policy** — Restrict dangerous operations (eval, download, upload)
+- **Confirmation Gating** — Require explicit approval for high-risk actions
+- **Output Limits** — Cap page-sourced content to prevent context overflow
+
+### Install
+```bash
+npm install -g agent-browser    # All platforms (fastest)
+# or
+npx agent-browser open example.com
+```

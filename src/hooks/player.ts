@@ -33,7 +33,9 @@ export const usePlayer = () => {
 		async (pos?: number) => {
 			if (pos !== undefined) audioElement.currentTime = pos;
 			// Safari: AudioContext starts suspended until user gesture
+			console.log("[player] play() before resume(), audioCtx.state:", audioMotionAnalyzer.audioCtx.state);
 			await audioMotionAnalyzer.audioCtx.resume();
+			console.log("[player] play() after resume(), audioCtx.state:", audioMotionAnalyzer.audioCtx.state);
 			await audioElement.play();
 			audioMotionAnalyzer.start();
 			setIsPlaying(true);

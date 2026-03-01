@@ -21,7 +21,9 @@ export function useMediaStream() {
 		}
 
 		// Safari: AudioContext starts suspended until user gesture
+		console.log("[mediastream] connect() before resume(), audioCtx.state:", audioMotionAnalyzer.audioCtx.state);
 		await audioMotionAnalyzer.audioCtx.resume();
+		console.log("[mediastream] connect() after resume(), audioCtx.state:", audioMotionAnalyzer.audioCtx.state);
 		const source = audioMotionAnalyzer.audioCtx.createMediaStreamSource(stream);
 		const gainNode = audioMotionAnalyzer.audioCtx.createGain();
 		gainNode.gain.value = 3;

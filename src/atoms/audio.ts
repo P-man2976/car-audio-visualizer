@@ -50,6 +50,7 @@ let _analyzerWasOn = false;
 
 audioCtx.addEventListener("statechange", () => {
 	const state = audioCtx.state as string;
+	console.log("[audio] audioCtx statechange:", state);
 	if (state === "interrupted") {
 		// interruption 発生時: 再生中フラグを保存
 		_wasInterrupted = true;
@@ -60,7 +61,9 @@ audioCtx.addEventListener("statechange", () => {
 		_wasInterrupted = false;
 		if (_analyzerWasOn) {
 			// 再生中だった場合のみ自動 resume を試みる
+			console.log("[audio] interrupted → suspended: auto resume()");
 			void audioCtx.resume().then(() => {
+				console.log("[audio] auto resume() resolved, audioCtx.state:", audioCtx.state);
 				if (!analyzerInstance.isOn) analyzerInstance.start();
 			});
 		}

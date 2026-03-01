@@ -158,6 +158,7 @@ export function useSelectRadio() {
 			// radiko は mutate() の onSuccess コールバック内で load() が呼ばれるため
 			// ジェスチャーから切り離される。ここで先行して resume() することで
 			// Safari / WebKit の autoplay policy を満たす。
+			console.log("[radio] selectRadio() before resume(), audioCtx.state:", audioMotionAnalyzer.audioCtx.state);
 			void audioMotionAnalyzer.audioCtx.resume();
 			setCurrentSrc("radio");
 			setCurrentRadio(radio);
@@ -235,6 +236,7 @@ export function useRadioPlayer() {
 		// ユーザーインタラクション起点のコールバックとして resume() を同期呼び出し。
 		// radiko は mutate の onSuccess で load() が実行されるため、
 		// ここで先行して resume しないと Safari の autoplay policy に弾かれる。
+		console.log("[radio] playRadio() before resume(), audioCtx.state:", audioMotionAnalyzer.audioCtx.state);
 		void audioMotionAnalyzer.audioCtx.resume();
 		unLoad();
 		if (currentRadio.source === "radiko") {
