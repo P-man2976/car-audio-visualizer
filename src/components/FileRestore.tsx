@@ -1,7 +1,8 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { parseBlob } from "music-metadata";
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
 	currentSongAtom,
 	currentSrcAtom,
@@ -13,7 +14,6 @@ import {
 	songQueueAtom,
 } from "@/atoms/player";
 import type { Song, SongStub } from "@/types/player";
-import { Loader } from "lucide-react";
 import {
 	clearSessionHandle,
 	loadSessionHandle,
@@ -71,8 +71,11 @@ async function rehydrateFromEntries(
  *   useMutation — rehydrates Song objects from handles and pushes to atoms
  *   useEffect — auto-fires the mutation when permission is already granted
  *
- * If permission needs a user gesture, a prompt bar is shown instead.
- * Place this component outside any Sheet/Dialog so it mounts at app load.
+ * Notifications are shown using sonner toast system:
+ *   - Loading toast when restoring files
+ *   - Success toast when complete
+ *   - Action toast if permission needs approval (with user gesture)
+ *   - Error toast if restoration fails
  */
 export function FileRestore() {
 	const hasSession = useAtomValue(hasPersistedFileSessionAtom);
@@ -88,12 +91,15 @@ export function FileRestore() {
 	const clearPersistedQueue = useSetAtom(persistedSongQueueAtom);
 	const clearPersistedHistory = useSetAtom(persistedSongHistoryAtom);
 
-	const clearAll = () => {
+	const restoringToastId = useRef<string | number | null>(null);
+	const permissionToastId = useRef<string | number | null>(null);
+
+	const clearAll = useCallback(() => {
 		clearPersistedCurrent(null);
 		clearPersistedQueue([]);
 		clearPersistedHistory([]);
 		clearSessionHandle().catch(() => undefined);
-	};
+	}, [clearPersistedCurrent, clearPersistedQueue, clearPersistedHistory]);
 
 	// Step 1: Load IDB handle and attempt permission (auto, no gesture needed in Chrome)
 	const { data: permissionData } = useQuery({
@@ -147,55 +153,91 @@ export function FileRestore() {
 				}
 				setCurrentSrc("file");
 			}
+			// persisted stubs と IDB ハンドルは残す。
+			// clearAll() を呼ぶと 2 回目以降のリロードで復元できなくなる。
+			// stubs は next/prev/skipTo/FilePicker により常に最新状態に更新される。
+
+			// Close loading toast and show success
+			if (restoringToastId.current) {
+				toast.dismiss(restoringToastId.current);
+				restoringToastId.current = null;
+			}
+			toast.success("前回のファイルを復元しました");
+		},
+		onError: () => {
+			// Close loading toast and show error
+			if (restoringToastId.current) {
+				toast.dismiss(restoringToastId.current);
+				restoringToastId.current = null;
+			}
+			toast.error("ファイルの復元に失敗しました");
 			clearAll();
 		},
-		onError: clearAll,
 	});
 
 	// Auto-restore when permission was already granted without user gesture
 	useEffect(() => {
 		if (permissionData?.granted) {
+			// Show loading toast
+			if (!restoringToastId.current && !isRestoring) {
+				restoringToastId.current = toast.loading("前回のファイルを復元中...");
+			}
 			restore(permissionData.stored);
 		}
-	}, [permissionData, restore]);
+	}, [permissionData, restore, isRestoring]);
 
-	if (isRestoring) {
-		return (
-			<div className="fixed bottom-20 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full bg-neutral-900/80 px-4 py-2 text-sm text-neutral-300 shadow-lg backdrop-blur-sm">
-				<Loader className="h-4 w-4 animate-spin" />
-				前回のファイルを復元中...
-			</div>
-		);
-	}
+	// Show loading toast when restore mutation starts
+	useEffect(() => {
+		if (isRestoring && !restoringToastId.current) {
+			restoringToastId.current = toast.loading("前回のファイルを復元中...");
+		}
+	}, [isRestoring]);
 
-	if (permissionData && !permissionData.granted) {
-		const { stored } = permissionData;
-		return (
-			<div className="fixed bottom-20 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-full bg-neutral-900/80 px-4 py-2 text-sm text-neutral-300 shadow-lg backdrop-blur-sm">
-				<span>前回のファイルへのアクセスを許可してください</span>
-				<button
-					type="button"
-					className="rounded-full bg-neutral-700 px-3 py-1 text-xs font-medium text-white hover:bg-neutral-600"
-					onClick={async () => {
-						const granted = await requestPermissionForSession(stored).catch(
-							() => false,
-						);
-						if (granted) restore(stored);
-						else clearAll();
-					}}
-				>
-					許可する
-				</button>
-				<button
-					type="button"
-					className="rounded-full px-2 py-1 text-xs text-neutral-500 hover:text-neutral-300"
-					onClick={clearAll}
-				>
-					×
-				</button>
-			</div>
-		);
-	}
+	// Show permission request
+	useEffect(() => {
+		if (permissionData && !permissionData.granted) {
+			const { stored } = permissionData;
+			const handleAllow = async () => {
+				const granted = await requestPermissionForSession(stored).catch(
+					() => false,
+				);
+				if (granted) {
+					if (permissionToastId.current) {
+						toast.dismiss(permissionToastId.current);
+						permissionToastId.current = null;
+					}
+					restore(stored);
+				} else {
+					toast.error("ファイルへのアクセスが拒否されました");
+					clearAll();
+				}
+			};
+
+			const handleDeny = () => {
+				if (permissionToastId.current) {
+					toast.dismiss(permissionToastId.current);
+					permissionToastId.current = null;
+				}
+				clearAll();
+			};
+
+			if (!permissionToastId.current) {
+				permissionToastId.current = toast(
+					"前回のファイルへのアクセスを許可してください",
+					{
+						action: {
+							label: "許可する",
+							onClick: handleAllow,
+						},
+						cancel: {
+							label: "キャンセル",
+							onClick: handleDeny,
+						},
+					},
+				);
+			}
+		}
+	}, [permissionData, restore, clearAll]);
 
 	return null;
 }

@@ -11,6 +11,8 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { DevTools as JotaiDevTools } from "jotai-devtools";
 import type { ReactNode } from "react";
+import { FileRestore } from "@/components/FileRestore";
+import { Toaster } from "@/components/ui/sonner";
 import indexCss from "../index.css?url";
 import "jotai-devtools/styles.css";
 
@@ -56,6 +58,8 @@ function RootComponent() {
 	return (
 		<QueryClientProvider client={queryClient}>
 			<Outlet />
+			<FileRestore />
+			<Toaster />
 			<JotaiDevTools position="bottom-left" />
 			<ReactQueryDevtools
 				initialIsOpen={false}
