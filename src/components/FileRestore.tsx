@@ -1,6 +1,7 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { parseBlob } from "music-metadata";
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
 	currentSongAtom,
 	currentSrcAtom,
@@ -62,21 +63,15 @@ async function rehydrateFromEntries(
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-type RestoreState =
-	| { status: "idle" }
-	| { status: "restoring" }
-	| { status: "needs-permission"; stored: PersistedFSHandle }
-	| { status: "done" };
-
 /**
  * Automatically restores a file playback session after page reload.
  *
- * On mount it:
- *   1. Checks for persisted song stubs (via hasPersistedFileSessionAtom)
- *   2. Loads the FileSystem handle(s) stored in IndexedDB
- *   3. Calls requestPermission() — Chrome shows a non-blocking permission bar
- *   4. If granted, rehydrates Songs (new blob URLs) and pushes to runtime atoms
+ * Flow:
+ *   useQuery  — loads IDB handle + calls requestPermission() on mount
+ *   useMutation — rehydrates Song objects from handles and pushes to atoms
+ *   useEffect — auto-fires the mutation when permission is already granted
  *
+ * If permission needs a user gesture, a prompt bar is shown instead.
  * Place this component outside any Sheet/Dialog so it mounts at app load.
  */
 export function FileRestore() {
@@ -93,9 +88,6 @@ export function FileRestore() {
 	const clearPersistedQueue = useSetAtom(persistedSongQueueAtom);
 	const clearPersistedHistory = useSetAtom(persistedSongHistoryAtom);
 
-	const [state, setState] = useState<RestoreState>({ status: "idle" });
-	const didRun = useRef(false);
-
 	const clearAll = () => {
 		clearPersistedCurrent(null);
 		clearPersistedQueue([]);
@@ -103,78 +95,71 @@ export function FileRestore() {
 		clearSessionHandle().catch(() => undefined);
 	};
 
-	const doRestore = async (stored: PersistedFSHandle) => {
-		setState({ status: "restoring" });
-
-		const allStubs: SongStub[] = [
-			...(persistedCurrent ? [persistedCurrent] : []),
-			...persistedQueue,
-			...persistedHistory,
-		];
-
-		let restored: Song[];
-		try {
-			restored = await rehydrateFromEntries(allStubs, stored);
-		} catch {
-			clearAll();
-			setState({ status: "done" });
-			return;
-		}
-
-		const byId = new Map(restored.map((s) => [s.id, s]));
-
-		const restoredCurrent = persistedCurrent
-			? (byId.get(persistedCurrent.id) ?? null)
-			: null;
-		const restoredQueue = persistedQueue
-			.map((s) => byId.get(s.id))
-			.filter((s): s is Song => s !== undefined);
-		const restoredHistory = persistedHistory
-			.map((s) => byId.get(s.id))
-			.filter((s): s is Song => s !== undefined);
-
-		if (!restoredCurrent && restoredQueue.length === 0) {
-			clearAll();
-			setState({ status: "done" });
-			return;
-		}
-
-		if (restoredCurrent) {
-			setCurrentSong(restoredCurrent);
-			setQueue(restoredQueue);
-			setHistory(restoredHistory);
-		} else {
-			const [first, ...rest] = restoredQueue;
-			setCurrentSong(first);
-			setQueue(rest);
-			setHistory(restoredHistory);
-		}
-		setCurrentSrc("file");
-		clearAll();
-		setState({ status: "done" });
-	};
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: mount-only effect, doRestore excluded intentionally
-	useEffect(() => {
-		if (didRun.current || !hasSession) return;
-		didRun.current = true;
-
-		(async () => {
-			const stored = await loadSessionHandle().catch(() => null);
-			if (!stored) return;
-
+	// Step 1: Load IDB handle and attempt permission (auto, no gesture needed in Chrome)
+	const { data: permissionData } = useQuery({
+		queryKey: ["file-session-permission"],
+		queryFn: async () => {
+			const stored = await loadSessionHandle();
+			if (!stored) return null;
 			const granted = await requestPermissionForSession(stored).catch(
 				() => false,
 			);
-			if (!granted) {
-				setState({ status: "needs-permission", stored });
-				return;
-			}
-			await doRestore(stored);
-		})();
-	}, [hasSession]);
+			return { stored, granted };
+		},
+		enabled: hasSession,
+		staleTime: Number.POSITIVE_INFINITY,
+		gcTime: 0,
+		retry: false,
+	});
 
-	if (state.status === "restoring") {
+	// Step 2: Rehydrate Song objects from handles and push to atoms
+	const { mutate: restore, isPending: isRestoring } = useMutation({
+		mutationFn: (stored: PersistedFSHandle) => {
+			const allStubs: SongStub[] = [
+				...(persistedCurrent ? [persistedCurrent] : []),
+				...persistedQueue,
+				...persistedHistory,
+			];
+			return rehydrateFromEntries(allStubs, stored);
+		},
+		onSuccess: (restored) => {
+			const byId = new Map(restored.map((s) => [s.id, s]));
+			const restoredCurrent = persistedCurrent
+				? (byId.get(persistedCurrent.id) ?? null)
+				: null;
+			const restoredQueue = persistedQueue
+				.map((s) => byId.get(s.id))
+				.filter((s): s is Song => s !== undefined);
+			const restoredHistory = persistedHistory
+				.map((s) => byId.get(s.id))
+				.filter((s): s is Song => s !== undefined);
+
+			if (restoredCurrent || restoredQueue.length > 0) {
+				if (restoredCurrent) {
+					setCurrentSong(restoredCurrent);
+					setQueue(restoredQueue);
+					setHistory(restoredHistory);
+				} else {
+					const [first, ...rest] = restoredQueue;
+					setCurrentSong(first);
+					setQueue(rest);
+					setHistory(restoredHistory);
+				}
+				setCurrentSrc("file");
+			}
+			clearAll();
+		},
+		onError: clearAll,
+	});
+
+	// Auto-restore when permission was already granted without user gesture
+	useEffect(() => {
+		if (permissionData?.granted) {
+			restore(permissionData.stored);
+		}
+	}, [permissionData, restore]);
+
+	if (isRestoring) {
 		return (
 			<div className="fixed bottom-20 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full bg-neutral-900/80 px-4 py-2 text-sm text-neutral-300 shadow-lg backdrop-blur-sm">
 				<Loader className="h-4 w-4 animate-spin" />
@@ -183,25 +168,28 @@ export function FileRestore() {
 		);
 	}
 
-	if (state.status === "needs-permission") {
-		const { stored } = state;
+	if (permissionData && !permissionData.granted) {
+		const { stored } = permissionData;
 		return (
 			<div className="fixed bottom-20 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-full bg-neutral-900/80 px-4 py-2 text-sm text-neutral-300 shadow-lg backdrop-blur-sm">
 				<span>前回のファイルへのアクセスを許可してください</span>
 				<button
 					type="button"
 					className="rounded-full bg-neutral-700 px-3 py-1 text-xs font-medium text-white hover:bg-neutral-600"
-					onClick={() => doRestore(stored)}
+					onClick={async () => {
+						const granted = await requestPermissionForSession(stored).catch(
+							() => false,
+						);
+						if (granted) restore(stored);
+						else clearAll();
+					}}
 				>
 					許可する
 				</button>
 				<button
 					type="button"
 					className="rounded-full px-2 py-1 text-xs text-neutral-500 hover:text-neutral-300"
-					onClick={() => {
-						clearAll();
-						setState({ status: "done" });
-					}}
+					onClick={clearAll}
 				>
 					×
 				</button>
