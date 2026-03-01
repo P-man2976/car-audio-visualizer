@@ -48,6 +48,9 @@ export function VisualizerKenwood() {
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 
 	useFrame(() => {
+		// Safari 対策: start() 前は _bars が undefined のため getBars() が throw する。
+		// Safari は rAF エラーでアニメーションループを停止させるため isOn ガードが必須。
+		if (!audioMotionAnalyzer.isOn) return;
 		store.set(
 			spectrogramAtom,
 			audioMotionAnalyzer.getBars() as AnalyzerBarData[],
