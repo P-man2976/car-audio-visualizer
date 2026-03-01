@@ -2,11 +2,27 @@ import { Line, Plane } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import type { AnalyzerBarData } from "audiomotion-analyzer";
 import { useAtomValue } from "jotai";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import type { MeshStandardMaterial } from "three";
+import { Font, FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
 import { spectrogramAtom, store } from "./spectrogramStore";
+
+// ─── Montserrat 600 font singleton ───────────────────────────────────────────
+// TextGeometry は CPUサイドでグリフ形状を展開するため、
+// @react-three/drei <Text>(troika) のような追加 WebGL コンテキストを消費しない。
+// モジュールロード時にフォントJSONを取得し、コンポーネントマウント前に準備完了させる。
+const _fontLoader = new FontLoader();
+let _font: Font | null = null;
+/** フォント准備完了 Promise — 一度評価されるのみ */
+const _fontReady: Promise<Font> = fetch("/montserrat-600.typeface.json")
+	.then((r) => r.json())
+	.then((data) => {
+		_font = _fontLoader.parse(data);
+		return _font;
+	});
 
 const CELL_WIDTH = 6;
 const CELL_HEIGHT = 1;
@@ -135,15 +151,11 @@ function VisualizerCell({
 }
 
 /**
- * 周波数ラベルを Canvas 2D テクスチャ（sprite）で描画する。
+ * 周波数ラベルを Three.js TextGeometry（Montserrat 600）で描画する。
  *
- * @react-three/drei の <Text> は troika-three-text を使用しており、
- * フォントアトラス生成のたびに新しい WebGL コンテキストを作成する。
- * 18 個同時にマウントすると 30+ コンテキストが生成され、
- * ブラウザの上限（~16）を超えて Context Lost が発生する。
- *
- * Canvas 2D テクスチャにすることで追加の WebGL コンテキストを消費せず、
- * CDN フォントのネットワークリクエストも不要になる。
+ * TextGeometry は CPU サイドで Montserrat 600 のグリフ形状を展開するため、
+ * @react-three/drei <Text>(troika) のように追加 WebGL コンテキストを消費しない。
+ * グリフ形状は /public/montserrat-600.typeface.json からロードする。
  */
 function FrequencyLabel({
 	label,
@@ -152,29 +164,39 @@ function FrequencyLabel({
 	label: string;
 	position: [number, number, number];
 }) {
-	const texture = useMemo(() => {
-		if (!label) return null;
-		const canvas = document.createElement("canvas");
-		canvas.width = 128;
-		canvas.height = 48;
-		const ctx = canvas.getContext("2d");
-		if (!ctx) return null;
-		ctx.fillStyle = "#10b981";
-		ctx.font = "bold 32px system-ui, sans-serif";
-		ctx.textAlign = "left";
-		ctx.textBaseline = "middle";
-		ctx.fillText(label, 4, 24);
-		const tex = new THREE.CanvasTexture(canvas);
-		tex.needsUpdate = true;
-		return tex;
-	}, [label]);
+	// フォントがモジュールロード時点で準備済みなら即時使用、
+	// まだの場合は _fontReady 完了後に state を更新して再レンダリングする。
+	const [font, setFont] = useState<Font | null>(_font);
 
-	if (!texture) return null;
+	useEffect(() => {
+		if (_font) {
+			setFont(_font);
+			return;
+		}
+		_fontReady.then(setFont);
+	}, []);
 
-	// plane のサイズ: fontSize=2.4 に合わせて幅 8 高さ 3
+	const geometry = useMemo(() => {
+		if (!font || !label) return null;
+		const g = new TextGeometry(label, {
+			font,
+			size: 2.4,
+			depth: 0,
+			curveSegments: 4,
+			bevelEnabled: false,
+		});
+		// テキストをバウンディングボックス中心に居中新
+		// （元の <Text> の anchorX='center' anchorY='middle' と同一挙動）
+		g.computeBoundingBox();
+		g.center();
+		return g;
+	}, [font, label]);
+
+	if (!geometry) return null;
+
 	return (
-		<Plane position={position} args={[8, 3]}>
-			<meshBasicMaterial map={texture} transparent alphaTest={0.05} />
-		</Plane>
+		<mesh position={position} geometry={geometry}>
+			<meshBasicMaterial color="#10b981" />
+		</mesh>
 	);
 }
