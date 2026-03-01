@@ -4,6 +4,21 @@
 
 This is a React 19 + TypeScript + Vite app set up as a car audio visualizer, with React Compiler enabled. UI components use **shadcn/ui** (migrated from HeroUI v3) with styles matching the `2din-spectrogram` project. Tailwind CSS v4 is used for utility-first styling.
 
+## 作業終了後のチェックリスト（必須）
+
+作業が完了したら、コミット前に必ず以下をこの順番で実行すること：
+
+```bash
+npx biome format --write src/   # フォーマット適用
+npm run lint                     # lint チェック（エラーがないこと）
+npm run build                    # 型エラー・ビルドエラーがないこと
+npm run test                     # 全テストがパスすること
+```
+
+`npm run format` は check only（書き込みなし）なので、整形は必ず `npx biome format --write` を使うこと。
+
+---
+
 ## Build, Test, and Lint
 
 ### Development Server
@@ -92,6 +107,13 @@ Uses Biome for automatic code formatting.
 - tanstack
 - Context7 (`mcp_io`) for up-to-date external library docs when needed.
 - HeroUI v3 MCP は参照不要（削除済み）。
+
+### 3D Visualizer (React Three Fiber) ルール
+
+- `Canvas` は `frameloop="demand"` なので、`useEffect` 内でジオメトリ/マトリクスを更新した後は必ず `invalidate()` を呼ぶこと。呼ばないと初回描画が行われない。
+- `InstancedMesh` を使う場合、`instanceColor` バッファは `setColorAt()` を初めて呼ぶまで `null`。`vertexColors` マテリアルは `instanceColor` が `null` だと動かないので、`useEffect` でマトリクス初期化と同時に全インスタンスの初期色を `setColorAt()` で設定すること。
+- `<Line>` / `<Text>` などの drei コンポーネントは `<mesh>` の子に置かない（R3F が material/geometry として解釈してエラーになる）。コンテナには `<group>` を使うこと。
+- ビジュアライザーの周波数バンドは `audioMotionAnalyzer.getBars()` で取得し、`BAND_INDICES` で目的の帯域を選択する。`mode: 6`（ANSI 1/3 オクターブ）時は約 30 本返る。
 
 あなたはURLが与えられた時、以下のコマンドでそのURLの内容をmardownで取得できる
 `npx -y @mizchi/readability --format=md <url>`
