@@ -18,6 +18,12 @@ const ROW_CELL_GAP = 2;
 const COL_CELL_GAP = 0.6;
 const ANALYZER_ANGLE_DEGREE = 24;
 
+/**
+ * ANSI 1/3-octave indices (mode 6, minFreq 20) for 9 octave bands:
+ * 63, 125, 250, 500, 1k, 2k, 4k, 8k, 16k Hz
+ */
+const BAND_INDICES = [4, 7, 10, 13, 16, 19, 22, 25, 28] as const;
+
 const FREQ_ARRAY = ["60", "120", "250", "500", "1k", "2k", "4k", "8k", "16k"];
 
 // ─── Cell ─────────────────────────────────────────────────────────────────────
@@ -34,7 +40,7 @@ function VisualizerCell({
 	useFrame(() => {
 		if (!meshMaterialRef.current) return;
 
-		const freqLevel = store.get(spectrogramAtom)?.[Math.trunc(rowIndex / 2)];
+		const freqLevel = store.get(spectrogramAtom)?.[BAND_INDICES[Math.trunc(rowIndex / 2)]];
 		const value = freqLevel?.value?.[0] ?? 0;
 		const peak = freqLevel?.peak?.[0] ?? 0;
 
