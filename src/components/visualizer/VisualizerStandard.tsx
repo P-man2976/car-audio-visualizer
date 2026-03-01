@@ -195,9 +195,7 @@ function FrequencyLabel({
 	if (!geometry) return null;
 
 	return (
-		// typeface.js フォントは Y 座標が Three.js と反転しているため
-		// scale={[1, -1, 1]} で上下を反転して正立させる。
-		<mesh position={position} geometry={geometry} scale={[1, -1, 1]}>
+		<mesh position={position} geometry={geometry}>
 			<meshBasicMaterial color="#10b981" />
 		</mesh>
 	);

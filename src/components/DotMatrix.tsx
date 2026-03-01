@@ -84,7 +84,7 @@ function DotMatrix({ char }: { char: string }) {
 		const g = new TextGeometry(char, {
 			font,
 			// COL_COUNT (7行) × DOT_SIZE がキャラクタ高さに相当するサイズ
-			size: DOT_MATRIX_DOT_SIZE * DOT_MATRIX_COL_COUNT,
+			size: DOT_MATRIX_DOT_SIZE * DOT_MATRIX_COL_COUNT + 4,
 			depth: 0,
 			// LCD フォントは直線グリフのみのため curveSegments: 4 で十分
 			curveSegments: 4,
@@ -97,14 +97,9 @@ function DotMatrix({ char }: { char: string }) {
 
 	return (
 		<group position={[0, 0, 0]}>
-			{/* TextGeometry で LCD5x7 文字を描画。
-			    typeface.js の Y 座標が Three.js と反転しているため scale={[1,-1,1]} で正立させる。 */}
+			{/* TextGeometry で LCD5x7 文字を描画 */}
 			{geometry && (
-				<mesh
-					position={[centerX, centerY, 0.01]}
-					geometry={geometry}
-					scale={[1, -1, 1]}
-				>
+				<mesh position={[centerX, centerY, 0.01]} geometry={geometry}>
 					<meshBasicMaterial color="#67e8f9" />
 				</mesh>
 			)}
