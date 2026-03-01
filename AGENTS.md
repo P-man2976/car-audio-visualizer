@@ -44,10 +44,11 @@ npm run test                     # 全テストがパスすること
 
 ## 3D Visualizer (React Three Fiber) ルール
 - `Canvas` は `frameloop="always"` を使うこと。`demand` は `invalidate()` の管理が複雑になり得策でない。
-- ビジュアライザーの推奨実装は **ShaderMaterial + 単一 Plane**。
-  - `useFrame` 内で `mat.uniforms.uValues.value` を更新し `mat.uniformsNeedUpdate = true` を設定するだけでよい。
-  - `uniforms` オブジェクトは `useMemo` で 1 回だけ生成すること。
-  - `frameloop="always"` では `useFrame` が毎フレーム自動実行されるため `invalidate()` は不要。
+- ビジュアライザーの実装は **`<Plane>` per-cell + `useFrame`** パターン（2din-spectrogram と同方式）。
+  - `InstancedMesh` と `ShaderMaterial` は使わない（どちらも問題が発生した）。
+  - ルートコンポーネントの `useFrame` で `store.set(spectrogramAtom, getBars())` を呼ぶ。
+  - セルコンポーネントは `store.get(spectrogramAtom)` で値を読み `matRef.current.color.set(...)` で更新する。
+  - `useMemo(() => new THREE.Color(), [])` でカラーオブジェクトをキャッシュする。
 - ビジュアライザーの周波数バンドは `audioMotionAnalyzer.getBars()` で取得し、  
   `BAND_INDICES` で目的の帯域を選択する。`mode: 6`（ANSI 1/3 オクターブ）時は約 30 本返る。
 - `<Line>` / `<Text>` などの drei コンポーネントは `<mesh>` の子に置かない。コンテナには `<group>` を使うこと。

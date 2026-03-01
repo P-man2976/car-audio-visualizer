@@ -111,10 +111,11 @@ Uses Biome for automatic code formatting.
 ### 3D Visualizer (React Three Fiber) ルール
 
 - `Canvas` は `frameloop="always"` を使うこと。`demand` は `invalidate()` の管理が複雑になり得策でない。
-- ビジュアライザーの推奨実装は **ShaderMaterial + 単一 Plane**。
-  `InstancedMesh` は使用しない。
-  - `useFrame` 内で `mat.uniforms.uValues.value` を更新し `mat.uniformsNeedUpdate = true` を設定するだけでよい。
-  - `uniforms` オブジェクトは `useMemo` で 1 回だけ生成すること。
+- ビジュアライザーの実装は **`<Plane>` per-cell + `useFrame`** パターン（2din-spectrogram と同方式）。
+  `InstancedMesh` と `ShaderMaterial` は使わない（どちらも問題が発生した）。
+  - ルートコンポーネントの `useFrame` で `store.set(spectrogramAtom, getBars())` を呼ぶ。
+  - セルコンポーネントは `store.get(spectrogramAtom)` で値を読み `matRef.current.color.set(...)` で更新する。
+  - `useMemo(() => new THREE.Color(), [])` でカラーオブジェクトをキャッシュする。
   - `frameloop="always"` では `useFrame` が毎フレーム自動実行されるため `invalidate()` は不要。
 
 あなたはURLが与えられた時、以下のコマンドでそのURLの内容をmardownで取得できる
