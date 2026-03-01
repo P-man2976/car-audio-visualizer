@@ -2,7 +2,7 @@ import { Line, Text } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import type { AnalyzerBarData } from "audiomotion-analyzer";
 import { useAtomValue } from "jotai";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
 import { isPlayingAtom } from "@/atoms/player";
@@ -17,15 +17,15 @@ const ANALYZER_ANGLE_DEGREE = 20;
 
 const SUB_COL_WIDTH = 3.6;
 const SUB_COL_GAP = 0.5;
-const MAIN_BAR_WIDTH = SUB_COL_WIDTH * 2 + SUB_COL_GAP;
+const MAIN_BAR_WIDTH = SUB_COL_WIDTH * 2 + SUB_COL_GAP; // 7.7
 
 const SIDE_BAR_WIDTH = 0.6;
 const SIDE_GAP = 0.5;
-const SIDE_UNIT = SIDE_BAR_WIDTH + SIDE_GAP;
+const SIDE_UNIT = SIDE_BAR_WIDTH + SIDE_GAP; // 1.1
 
 const BAND_GAP = 2.0;
-const BAND_STRIDE = SIDE_UNIT + MAIN_BAR_WIDTH + SIDE_UNIT + BAND_GAP;
-const TOTAL_WIDTH = BAND_STRIDE * FREQ_COUNT - BAND_GAP;
+const BAND_STRIDE = SIDE_UNIT + MAIN_BAR_WIDTH + SIDE_UNIT + BAND_GAP; // 11.9
+const TOTAL_WIDTH = BAND_STRIDE * FREQ_COUNT - BAND_GAP; // 128.9
 
 /**
  * ANSI 1/3-octave indices (mode 6, minFreq 20) for DPX-5021M 11 bands:
@@ -47,131 +47,147 @@ const FREQ_ARRAY = [
 	"16k",
 ];
 
-// ─── X/Y helpers ──────────────────────────────────────────────────────────────
-const sideLeftCX = (fi: number) => BAND_STRIDE * fi + SIDE_BAR_WIDTH / 2;
-const subLeftCX = (fi: number) =>
-	BAND_STRIDE * fi + SIDE_UNIT + SUB_COL_WIDTH / 2;
-const subRightCX = (fi: number) => subLeftCX(fi) + SUB_COL_WIDTH + SUB_COL_GAP;
-const sideRightCX = (fi: number) =>
-	BAND_STRIDE * fi + SIDE_UNIT + MAIN_BAR_WIDTH + SIDE_GAP + SIDE_BAR_WIDTH / 2;
+const STRIDE_H = CELL_HEIGHT + COL_CELL_GAP; // 1.4
+const GRID_H = STRIDE_H * COL_CELL_COUNT; // 36.4
+
+// bandCenterCX for labels only (not used in shader)
 const bandCenterCX = (fi: number) =>
 	BAND_STRIDE * fi + SIDE_UNIT + MAIN_BAR_WIDTH / 2;
-const cellY = (ci: number) => (CELL_HEIGHT + COL_CELL_GAP) * ci + COL_CELL_GAP;
 
-// ─── InstancedMesh counts ─────────────────────────────────────────────────────
-// main: left-sub-col + right-sub-col  per (freq × col)
-const MAIN_COUNT = FREQ_COUNT * COL_CELL_COUNT * 2;
-// side: left-bar   + right-bar        per (freq × col)
-const SIDE_COUNT = FREQ_COUNT * COL_CELL_COUNT * 2;
+// ─── GLSL shaders ─────────────────────────────────────────────────────────────
+// Within each BAND_STRIDE the x-layout is:
+//   [0,   0.6) = left side bar  (inverted EQ)
+//   [0.6, 1.1) = gap
+//   [1.1, 4.7) = left main sub-col  (normal EQ)
+//   [4.7, 5.2) = gap
+//   [5.2, 8.8) = right main sub-col (normal EQ)
+//   [8.8, 9.3) = gap
+//   [9.3, 9.9) = right side bar (inverted EQ)
+//   [9.9,11.9) = band gap (transparent between bands)
+const VERT = /* glsl */ `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const FRAG = /* glsl */ `
+  precision highp float;
+
+  uniform float uValues[11];
+  uniform float uPeaks[11];
+
+  varying vec2 vUv;
+
+  void main() {
+    float x = vUv.x * 128.90;
+    float y = vUv.y * 36.40;
+
+    // ── Which band? ──────────────────────────────────────────────────────────
+    float fi       = floor(x / 11.90);
+    float xInBand  = x - fi * 11.90;
+    if (fi >= 11.0) {
+      gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+      return;
+    }
+
+    // Classify x position within the band
+    bool isLeftSide  = xInBand < 0.60;
+    bool isRightSide = xInBand >= 9.30 && xInBand < 9.90;
+    bool isGap       = (!isLeftSide&&!isRightSide)&&
+                       ((xInBand >= 0.60 && xInBand < 1.10) ||
+                        (xInBand >= 4.70 && xInBand < 5.20) ||
+                        (xInBand >= 8.80 && xInBand < 9.30) ||
+                        (xInBand >= 9.90));
+
+    if (isGap) {
+      gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+      return;
+    }
+
+    // ── Which row? ───────────────────────────────────────────────────────────
+    float ri      = floor(y / 1.40);
+    float yInSlot = y - ri * 1.40;
+    if (yInSlot < 0.80 || ri >= 26.0) {
+      gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+      return;
+    }
+
+    // ── Audio lookup ─────────────────────────────────────────────────────────
+    int   bandIdx = int(fi);
+    float value   = uValues[bandIdx];
+    float peak    = uPeaks[bandIdx];
+
+    float t       = ri / 26.0;
+    bool  isLit   = value > t;
+    float peakRow = floor(peak * 26.0);
+    bool  isPeak  = (ri == peakRow) || (ri == peakRow - 2.0);
+
+    vec3 color;
+    if (isLeftSide || isRightSide) {
+      // Side bars: inverted – teal when un-lit, near-black when lit
+      color = isLit ? vec3(0.020, 0.000, 0.071)   // #050012
+                    : vec3(0.055, 0.447, 0.565);   // #0e7490
+    } else {
+      // Main bars: normal EQ – cyan/white peak/near-black
+      if (isPeak) {
+        color = vec3(1.0, 1.0, 1.0);              // #ffffff white peak
+      } else if (isLit) {
+        color = vec3(0.647, 0.953, 0.988);        // #a5f3fc cyan
+      } else {
+        color = vec3(0.031, 0.000, 0.094);        // #080018 near-black
+      }
+    }
+
+    gl_FragColor = vec4(color, 1.0);
+  }
+`;
 
 // ─── Root component ───────────────────────────────────────────────────────────
 export function VisualizerKenwood() {
-	const mainRef = useRef<THREE.InstancedMesh>(null);
-	const sideRef = useRef<THREE.InstancedMesh>(null);
+	const matRef = useRef<THREE.ShaderMaterial>(null);
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 	const isPlaying = useAtomValue(isPlayingAtom);
 	const { invalidate } = useThree();
 
-	// demand モードで再生開始時に最初のフレームをキックする
+	// Render one initial frame so the dark grid appears even before playback.
+	// frameloop="demand" fires NO frames automatically — this kicks the first one.
+	useEffect(() => {
+		invalidate();
+	}, [invalidate]);
+
 	useEffect(() => {
 		if (isPlaying) invalidate();
 	}, [isPlaying, invalidate]);
 
-	// ── Per-frame: 初回のみ matrix/color 初期化、以降は色更新 ─────────────────
-	const initializedRef = useRef(false);
-	const _c = useRef(new THREE.Color());
+	// Pre-allocate uniform buffers; never re-created
+	const uniforms = useMemo(
+		() => ({
+			uValues: { value: new Float32Array(FREQ_COUNT) },
+			uPeaks: { value: new Float32Array(FREQ_COUNT) },
+		}),
+		[],
+	);
 
 	useFrame(({ invalidate: inv }) => {
-		const main = mainRef.current;
-		const side = sideRef.current;
-
-		// ── 初回フレームで matrix + instanceColor を初期化 ──────────────────
-		if (!initializedRef.current && main && side) {
-			const d = new THREE.Object3D();
-			const darkMain = new THREE.Color("#080018");
-			const darkSide = new THREE.Color("#050012");
-
-			for (let fi = 0; fi < FREQ_COUNT; fi++) {
-				for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
-					const y = cellY(ci);
-					const base = (fi * COL_CELL_COUNT + ci) * 2;
-
-					d.position.set(subLeftCX(fi), y, 0);
-					d.scale.set(SUB_COL_WIDTH, CELL_HEIGHT, 1);
-					d.updateMatrix();
-					main.setMatrixAt(base, d.matrix);
-					main.setColorAt(base, darkMain);
-
-					d.position.set(subRightCX(fi), y, 0);
-					d.updateMatrix();
-					main.setMatrixAt(base + 1, d.matrix);
-					main.setColorAt(base + 1, darkMain);
-
-					d.position.set(sideLeftCX(fi), y, 0);
-					d.scale.set(SIDE_BAR_WIDTH, CELL_HEIGHT, 1);
-					d.updateMatrix();
-					side.setMatrixAt(base, d.matrix);
-					side.setColorAt(base, darkSide);
-
-					d.position.set(sideRightCX(fi), y, 0);
-					d.updateMatrix();
-					side.setMatrixAt(base + 1, d.matrix);
-					side.setColorAt(base + 1, darkSide);
-				}
-			}
-
-			main.instanceMatrix.needsUpdate = true;
-			side.instanceMatrix.needsUpdate = true;
-			if (main.instanceColor) main.instanceColor.needsUpdate = true;
-			if (side.instanceColor) side.instanceColor.needsUpdate = true;
-			initializedRef.current = true;
-			// 初期化完了を描画に反映するためもう 1 フレーム要求
-			inv();
-			return;
-		}
-
 		const bars = audioMotionAnalyzer.getBars() as AnalyzerBarData[];
 		store.set(spectrogramAtom, bars);
 
-		if (!main || !side) {
+		const mat = matRef.current;
+		if (!mat) {
 			if (isPlaying) inv();
 			return;
 		}
 
-		const c = _c.current;
-
-		for (let fi = 0; fi < FREQ_COUNT; fi++) {
-			const freqLevel = bars[BAND_INDICES[fi]];
-			const value = freqLevel?.value?.[0] ?? 0;
-			const peak = freqLevel?.peak?.[0] ?? 0;
-
-			for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
-				const base = (fi * COL_CELL_COUNT + ci) * 2;
-
-				const isPeak =
-					(ci < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci + 1) ||
-					(ci - 2 < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci - 1);
-
-				// main: cyan when lit, near-black when dark, white at peak
-				c.set(
-					isPeak
-						? "#ffffff"
-						: value * COL_CELL_COUNT > ci
-							? "#a5f3fc"
-							: "#080018",
-				);
-				main.setColorAt(base, c);
-				main.setColorAt(base + 1, c);
-
-				// side: inverted — teal when un-lit, near-black when lit
-				c.set(value * COL_CELL_COUNT <= ci ? "#0e7490" : "#050012");
-				side.setColorAt(base, c);
-				side.setColorAt(base + 1, c);
-			}
+		const vals = mat.uniforms.uValues.value as Float32Array;
+		const peaks = mat.uniforms.uPeaks.value as Float32Array;
+		for (let i = 0; i < FREQ_COUNT; i++) {
+			const bar = bars[BAND_INDICES[i]];
+			vals[i] = bar?.value?.[0] ?? 0;
+			peaks[i] = bar?.peak?.[0] ?? 0;
 		}
-
-		if (main.instanceColor) main.instanceColor.needsUpdate = true;
-		if (side.instanceColor) side.instanceColor.needsUpdate = true;
+		mat.uniformsNeedUpdate = true;
 
 		if (isPlaying) inv();
 	});
@@ -186,27 +202,18 @@ export function VisualizerKenwood() {
 			scale={SCALE}
 			rotation-x={(Math.PI / 180) * -ANALYZER_ANGLE_DEGREE}
 		>
-			{/* Main bars: 2 sub-cols × FREQ_COUNT × COL_CELL_COUNT instances */}
-			<instancedMesh
-				ref={mainRef}
-				args={[undefined, undefined, MAIN_COUNT]}
-				frustumCulled={false}
-			>
-				<planeGeometry args={[1, 1]} />
-				<meshStandardMaterial vertexColors />
-			</instancedMesh>
+			{/* Single plane — shader draws all bars in 1 draw call */}
+			<mesh position={[TOTAL_WIDTH / 2, GRID_H / 2, 0]}>
+				<planeGeometry args={[TOTAL_WIDTH, GRID_H]} />
+				<shaderMaterial
+					ref={matRef}
+					vertexShader={VERT}
+					fragmentShader={FRAG}
+					uniforms={uniforms}
+				/>
+			</mesh>
 
-			{/* Side bars: 2 sides × FREQ_COUNT × COL_CELL_COUNT instances */}
-			<instancedMesh
-				ref={sideRef}
-				args={[undefined, undefined, SIDE_COUNT]}
-				frustumCulled={false}
-			>
-				<planeGeometry args={[1, 1]} />
-				<meshStandardMaterial vertexColors />
-			</instancedMesh>
-
-			{/* Frequency labels (11 groups — no optimization needed) */}
+			{/* Frequency labels (11 groups) */}
 			{Array.from({ length: FREQ_COUNT }).map((_, fi) => (
 				<group
 					key={`k-label-${fi}`}
