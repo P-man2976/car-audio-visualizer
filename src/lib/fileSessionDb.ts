@@ -79,12 +79,10 @@ export async function requestPermissionForSession(
 		: stored.entries.map((e) => e.handle);
 
 	for (const h of permHandles) {
-		// @ts-expect-error — queryPermission/requestPermission not yet in TS DOM lib
 		const current = await h.queryPermission({ mode: "read" });
 		if (current === "granted") continue;
 		if (current === "denied") return false;
 		// "prompt" — ask the browser (Chrome shows a non-blocking permission prompt)
-		// @ts-expect-error
 		const result = await h.requestPermission({ mode: "read" });
 		if (result !== "granted") return false;
 	}
