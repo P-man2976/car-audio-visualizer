@@ -4,43 +4,32 @@ import { atom } from "jotai";
 const sharedAudioElement = new Audio();
 sharedAudioElement.crossOrigin = "anonymous";
 
-let analyzerInstance: AudioMotionAnalyzer | null = null;
-
 /**
- * AudioMotionAnalyzer の遅延初期化。
+ * AudioMotionAnalyzer をモジュールロード時に即時生成する。
  *
- * Safari でのファイル再生時にビジュアライザーが更新されない問題を解決するために
- * lazy initializer を使用しています。eager init にすると、モジュールロード時に
- * AudioContext が suspended 状態のままアナライザーが初期化され、getBars() が
- * データを返さないという問題が発生します。
- *
- * Jotai の atom lazy initializer を使用することで、最初の useAtomValue が
- * Canvas 外で実行される際に初期化され、Safari での AudioContext の状態が
- * より安定した状態になります。
+ * 遅延初期化（lazy）にすると、最初の読み取りが R3F Canvas 内
+ * （VisualizerStandard 等の useAtomValue）になるケースがある。
+ * その場合、Three.js の WebGL コンテキスト確保と同タイミングで
+ * AudioMotionAnalyzer 内部の canvas/OffscreenCanvas が生成され、
+ * ブラウザの WebGL コンテキスト上限に達して Context Lost が発生する。
+ * Canvas より先にモジュールレベルで生成することでこの競合を防ぐ。
  */
-function getAnalyzer() {
-	if (analyzerInstance) {
-		return analyzerInstance;
-	}
-
-	analyzerInstance = new AudioMotionAnalyzer(undefined, {
-		useCanvas: false,
-		source: sharedAudioElement,
-		minDecibels: -70,
-		maxDecibels: -20,
-		minFreq: 32,
-		maxFreq: 22000,
-		mode: 8,
-		ansiBands: true,
-		weightingFilter: "A",
-		peakFallSpeed: 0.005,
-	});
-
-	return analyzerInstance;
-}
+const analyzerInstance = new AudioMotionAnalyzer(undefined, {
+	useCanvas: false,
+	source: sharedAudioElement,
+	minDecibels: -70,
+	maxDecibels: -20,
+	minFreq: 20,
+	maxFreq: 22000,
+	mode: 6,
+	ansiBands: true,
+	fftSize: 8192,
+	weightingFilter: "A",
+	peakFallSpeed: 0.005,
+});
 
 export const audioElementAtom = atom(sharedAudioElement);
-export const audioMotionAnalyzerAtom = atom(() => getAnalyzer());
+export const audioMotionAnalyzerAtom = atom(analyzerInstance);
 export const mediaStreamAtom = atom<MediaStream | null>(null);
 
 /**
@@ -61,7 +50,6 @@ let _analyzerWasOn = false;
 
 audioCtx.addEventListener("statechange", () => {
 	const state = audioCtx.state as string;
-	console.log("[audio] audioCtx statechange:", state);
 	if (state === "interrupted") {
 		// interruption 発生時: 再生中フラグを保存
 		_wasInterrupted = true;
@@ -72,9 +60,7 @@ audioCtx.addEventListener("statechange", () => {
 		_wasInterrupted = false;
 		if (_analyzerWasOn) {
 			// 再生中だった場合のみ自動 resume を試みる
-			console.log("[audio] interrupted → suspended: auto resume()");
 			void audioCtx.resume().then(() => {
-				console.log("[audio] auto resume() resolved, audioCtx.state:", audioCtx.state);
 				if (!analyzerInstance.isOn) analyzerInstance.start();
 			});
 		}
