@@ -37,7 +37,7 @@ export function SongInfo({
 			<span
 				ref={albumRef}
 				className={cn(
-					"w-fit whitespace-nowrap text-xs text-gray-400 sm:text-sm",
+					"hidden w-fit whitespace-nowrap text-xs text-gray-400 sm:block sm:text-sm",
 					{
 						"animate-scroll":
 							(albumRef.current?.clientWidth ?? 0) >

@@ -1,6 +1,7 @@
 import { Plane } from "@react-three/drei";
 import { useAtomValue } from "jotai";
 import { useEffect, useMemo, useState } from "react";
+import * as THREE from "three";
 import { Font, FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { displayStringAtom } from "@/atoms/display";
@@ -13,9 +14,10 @@ const DOT_MATRIX_DOT_GAP = 0.3;
 const DOT_MATRIX_ARRAY_COUNT = 12;
 const DOT_MATRIX_ARRAY_GAP = 2;
 
+/** TextGeometry に渡す文字サイズ。7ドット高 + ベースラインマージン */
+const CHAR_SIZE = DOT_MATRIX_DOT_SIZE * DOT_MATRIX_COL_COUNT + 4;
+
 // ─── LCD5x7 font singleton ────────────────────────────────────────────────────
-// Montserrat と同方式: typeface.js JSON をモジュールロード時に先行取得し、
-// TextGeometry で各文字を描画する。追加 WebGL コンテキストを消費しない。
 const _lcdFontLoader = new FontLoader();
 let _lcdFont: Font | null = null;
 const _lcdFontReady: Promise<Font> = fetch("/lcd5x7.typeface.json")
@@ -24,6 +26,29 @@ const _lcdFontReady: Promise<Font> = fetch("/lcd5x7.typeface.json")
 		_lcdFont = _lcdFontLoader.parse(data);
 		return _lcdFont;
 	});
+
+/**
+ * 基準セル BBox — 全文字のセンタリングに使用する。
+ * LCD5x7 フォントはモノスペースのため、フルセル文字 (M) の
+ * BoundingBox を基準にすることで、文字サイズに依存しない一貫した配置となる。
+ * font ロード完了後に一度だけ計算する。
+ */
+let _refCenter: THREE.Vector3 | null = null;
+function getRefCenter(font: Font): THREE.Vector3 {
+	if (_refCenter) return _refCenter;
+	const g = new TextGeometry("M", {
+		font,
+		size: CHAR_SIZE,
+		depth: 0,
+		curveSegments: 4,
+		bevelEnabled: false,
+	});
+	g.computeBoundingBox();
+	_refCenter = new THREE.Vector3();
+	g.boundingBox!.getCenter(_refCenter);
+	g.dispose();
+	return _refCenter;
+}
 
 export function DotMatrixArray({ y = 40 }: { y?: number }) {
 	const displayString = useAtomValue(displayStringAtom);
@@ -83,15 +108,16 @@ function DotMatrix({ char }: { char: string }) {
 		if (!font || !char || char === " ") return null;
 		const g = new TextGeometry(char, {
 			font,
-			// COL_COUNT (7行) × DOT_SIZE がキャラクタ高さに相当するサイズ
-			size: DOT_MATRIX_DOT_SIZE * DOT_MATRIX_COL_COUNT + 4,
+			size: CHAR_SIZE,
 			depth: 0,
-			// LCD フォントは直線グリフのみのため curveSegments: 4 で十分
 			curveSegments: 4,
 			bevelEnabled: false,
 		});
 		g.computeBoundingBox();
-		g.center();
+		// 基準セル (M) の中心を使って全文字を統一的にセンタリングする。
+		// g.center() は個別グリフの BBox を使うため、小さい文字 (`.`, `c` 等) がずれる。
+		const ref = getRefCenter(font);
+		g.translate(-ref.x, -ref.y, -ref.z);
 		return g;
 	}, [font, char]);
 
