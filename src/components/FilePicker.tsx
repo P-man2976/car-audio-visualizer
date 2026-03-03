@@ -84,7 +84,25 @@ export function FilePicker() {
 			const handles = await showOpenFilePicker({
 				multiple: true,
 				excludeAcceptAllOption: false,
-				types: [{ description: "Audio", accept: { "audio/*": [] } }],
+				types: [
+					{
+						description: "Audio",
+						accept: {
+							"audio/*": [
+								".mp3",
+								".m4a",
+								".aac",
+								".wav",
+								".ogg",
+								".flac",
+								".opus",
+								".webm",
+								".aiff",
+								".aif",
+							],
+						},
+					},
+				],
 			}).catch(() => null);
 			if (!handles?.length) return;
 			const songs = await Promise.all(
@@ -108,7 +126,7 @@ export function FilePicker() {
 					ref={inputRef}
 					type="file"
 					multiple
-					accept="audio/*"
+					accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac,.opus,.webm,.aiff,.aif"
 					className="sr-only"
 					onChange={async (e) => {
 						const files = Array.from(e.target.files ?? []);

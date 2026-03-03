@@ -200,7 +200,7 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 					ref={fallbackInputRef}
 					type="file"
 					multiple
-					accept="audio/*"
+					accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac,.opus,.webm,.aiff,.aif"
 					className="sr-only"
 					onChange={handleFallbackChange}
 				/>
