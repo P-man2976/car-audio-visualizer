@@ -1,6 +1,10 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback } from "react";
-import { audioElementAtom, audioMotionAnalyzerAtom } from "@/atoms/audio";
+import {
+	audioElementAtom,
+	audioMotionAnalyzerAtom,
+	connectAudioSource,
+} from "@/atoms/audio";
 import {
 	currentSongAtom,
 	currentSrcAtom,
@@ -35,6 +39,7 @@ export const usePlayer = () => {
 			// Safari: AudioContext starts suspended until user gesture
 			await audioMotionAnalyzer.audioCtx.resume();
 			await audioElement.play();
+			connectAudioSource();
 			audioMotionAnalyzer.start();
 			setIsPlaying(true);
 		},

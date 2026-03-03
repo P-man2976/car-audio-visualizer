@@ -1,7 +1,11 @@
 import Hls from "hls.js";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback } from "react";
-import { audioElementAtom, audioMotionAnalyzerAtom } from "@/atoms/audio";
+import {
+	audioElementAtom,
+	audioMotionAnalyzerAtom,
+	connectAudioSource,
+} from "@/atoms/audio";
 import { hlsAtom } from "@/atoms/hls";
 import { isPlayingAtom } from "@/atoms/player";
 
@@ -33,6 +37,7 @@ export function useHLS() {
 							if (audioMotionAnalyzer.audioCtx.state !== "running") {
 								await audioMotionAnalyzer.audioCtx.resume();
 							}
+							connectAudioSource();
 							audioMotionAnalyzer.start();
 							setIsPlaying(true);
 						})
@@ -57,6 +62,7 @@ export function useHLS() {
 					if (audioMotionAnalyzer.audioCtx.state !== "running") {
 						await audioMotionAnalyzer.audioCtx.resume();
 					}
+					connectAudioSource();
 					audioMotionAnalyzer.start();
 					setIsPlaying(true);
 				})

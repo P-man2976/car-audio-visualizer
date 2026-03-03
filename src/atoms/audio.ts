@@ -2,7 +2,6 @@ import AudioMotionAnalyzer from "audiomotion-analyzer";
 import { atom } from "jotai";
 
 const sharedAudioElement = new Audio();
-sharedAudioElement.crossOrigin = "anonymous";
 
 /**
  * AudioMotionAnalyzer をモジュールロード時に即時生成する。
@@ -13,10 +12,13 @@ sharedAudioElement.crossOrigin = "anonymous";
  * AudioMotionAnalyzer 内部の canvas/OffscreenCanvas が生成され、
  * ブラウザの WebGL コンテキスト上限に達して Context Lost が発生する。
  * Canvas より先にモジュールレベルで生成することでこの競合を防ぐ。
+ *
+ * NOTE: source を渡さずに生成し、再生開始時に connectAudioSource() で
+ * 遅延接続する。Safari では空の audio 要素に対して createMediaElementSource()
+ * を呼ぶと MECSN が無音になるバグがあるため。
  */
 const analyzerInstance = new AudioMotionAnalyzer(undefined, {
 	useCanvas: false,
-	source: sharedAudioElement,
 	minDecibels: -70,
 	maxDecibels: -20,
 	minFreq: 20,
@@ -27,6 +29,20 @@ const analyzerInstance = new AudioMotionAnalyzer(undefined, {
 	weightingFilter: "A",
 	peakFallSpeed: 0.005,
 });
+
+/**
+ * audio 要素を AudioMotionAnalyzer に接続する。
+ *
+ * Safari は audio 要素にソースが設定される前に createMediaElementSource() を
+ * 呼ぶと MediaElementAudioSourceNode が無音になる。
+ * play() 成功後（ソース確定済み）に一度だけ呼ぶことで回避する。
+ */
+let _audioSourceConnected = false;
+export function connectAudioSource(): void {
+	if (_audioSourceConnected) return;
+	_audioSourceConnected = true;
+	analyzerInstance.connectInput(sharedAudioElement);
+}
 
 export const audioElementAtom = atom(sharedAudioElement);
 export const audioMotionAnalyzerAtom = atom(analyzerInstance);
@@ -45,6 +61,7 @@ export const mediaStreamAtom = atom<MediaStream | null>(null);
  * 自動 resume() する。
  */
 const audioCtx = analyzerInstance.audioCtx;
+
 let _wasInterrupted = false;
 let _analyzerWasOn = false;
 

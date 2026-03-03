@@ -38,9 +38,8 @@ export function useFilePlayer() {
 	/** next() 直後に src 変更が来たときに自動再生するためのフラグ（ended 経由専用） */
 	const autoPlayNextRef = useRef(false);
 
-	// 音量・ミュート・crossOrigin を audioElement に同期
+	// 音量・ミュートを audioElement に同期
 	useEffect(() => {
-		audioElement.crossOrigin = "anonymous";
 		audioElement.volume = volume / 100;
 		audioElement.muted = mute;
 	}, [audioElement, volume, mute]);
