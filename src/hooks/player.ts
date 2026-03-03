@@ -32,15 +32,9 @@ export const usePlayer = () => {
 	const play = useCallback(
 		async (pos?: number) => {
 			if (pos !== undefined) audioElement.currentTime = pos;
-			// Safari 互換: audioCtx.resume() と audioElement.play() を
-			// 同じ同期コールスタック上（user gesture コンテキスト内）で
-			// 同時に起動する。await で先に resume を待ってから play() を
-			// 呼ぶと、iOS Safari では user gesture 判定が切れて
-			// play() が NotAllowedError になる、または音声が出なくなる。
-			await Promise.all([
-				audioMotionAnalyzer.audioCtx.resume(),
-				audioElement.play(),
-			]);
+			// Safari: AudioContext starts suspended until user gesture
+			await audioMotionAnalyzer.audioCtx.resume();
+			await audioElement.play();
 			audioMotionAnalyzer.start();
 			setIsPlaying(true);
 		},

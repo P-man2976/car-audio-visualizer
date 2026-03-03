@@ -82,8 +82,12 @@ export function FileRestore() {
 	// リロード前の再生モードが "file" だった時のみ復元を実行する。
 	// currentSrcAtom はページロード直後は localStorage の永続値を返すため、
 	// セッション復元の要否をここで判断できる。
+	// File System Access API 未サポートブラウザでは復元不可能なため無効化する。
 	const currentSrc = useAtomValue(currentSrcAtom);
-	const shouldRestore = hasSession && currentSrc === "file";
+	const isFileSystemAccessSupported =
+		typeof window !== "undefined" && "FileSystemFileHandle" in window;
+	const shouldRestore =
+		hasSession && currentSrc === "file" && isFileSystemAccessSupported;
 	const persistedCurrent = useAtomValue(persistedCurrentSongAtom);
 	const persistedQueue = useAtomValue(persistedSongQueueAtom);
 	const persistedHistory = useAtomValue(persistedSongHistoryAtom);
@@ -108,6 +112,14 @@ export function FileRestore() {
 		clearPersistedHistory([]);
 		clearSessionHandle().catch(() => undefined);
 	}, [clearPersistedCurrent, clearPersistedQueue, clearPersistedHistory]);
+
+	// File System Access API 未サポートブラウザではファイルハンドルが使えないため、
+	// リロード時に queue / history / current の stubs および IDB ハンドルをクリアする。
+	useEffect(() => {
+		if (!isFileSystemAccessSupported && hasSession) {
+			clearAll();
+		}
+	}, [isFileSystemAccessSupported, hasSession, clearAll]);
 
 	// Step 1: Load IDB handle and attempt permission (auto, no gesture needed in Chrome)
 	const { data: permissionData } = useQuery({
