@@ -133,19 +133,9 @@ export function ControlsOverlay() {
 			<FileRestore />
 			<SettingsDialog />
 			<div className="absolute inset-0 flex w-full flex-col">
-				{/* Header */}
-				<div className="group relative flex flex-col justify-center">
-					<div className="absolute inset-0 bg-linear-to-b from-gray-600/50 to-transparent opacity-50 transition-all duration-500 group-hover:opacity-100" />
-					<SourceSheet>
-						<Button variant={null} className="z-10 w-full">
-							<ChevronDown className="size-7 scale-x-150" />
-						</Button>
-					</SourceSheet>
-				</div>
-
-				{/* Mobile song info bar — below header, visible only on small screens */}
-				<div className="flex items-center gap-3 bg-linear-to-b from-gray-500/30 to-transparent px-4 py-2 sm:hidden">
-					<div className="relative size-10 shrink-0 group/cover">
+				{/* Mobile song info bar — above header, visible only on small screens */}
+				<div className="flex items-center gap-3 bg-linear-to-b from-gray-600/50 to-transparent px-4 py-2 sm:hidden">
+					<div className="relative size-14 shrink-0 group/cover">
 						{coverElement}
 						{isPiPSupported && (
 							<button
@@ -154,11 +144,21 @@ export function ControlsOverlay() {
 								onClick={isPiP ? exitPiP : enterPiP}
 								aria-label={isPiP ? "PiPを終了" : "PiPで表示"}
 							>
-								<PictureInPicture2 size={18} />
+								<PictureInPicture2 size={20} />
 							</button>
 						)}
 					</div>
 					<SongInfo title={title} artist={artist} album={album} />
+				</div>
+
+				{/* Header */}
+				<div className="group relative flex flex-col justify-center">
+					<div className="absolute inset-0 bg-linear-to-b from-gray-600/50 to-transparent opacity-50 transition-all duration-500 group-hover:opacity-100" />
+					<SourceSheet>
+						<Button variant={null} className="z-10 w-full">
+							<ChevronDown className="size-7 scale-x-150" />
+						</Button>
+					</SourceSheet>
 				</div>
 
 				{/* Sidebar */}
@@ -205,8 +205,8 @@ export function ControlsOverlay() {
 						<div className="hidden sm:flex sm:grow sm:overflow-hidden">
 							<SongInfo title={title} artist={artist} album={album} />
 						</div>
-						{/* Control buttons — full-width centered on mobile, right-aligned on desktop */}
-						<div className="flex w-full shrink-0 justify-center gap-1 sm:ml-auto sm:w-auto sm:gap-2">
+						{/* Control buttons — full-width evenly spaced on mobile, right-aligned on desktop */}
+						<div className="flex w-full shrink-0 justify-evenly sm:ml-auto sm:w-auto sm:justify-start sm:gap-2">
 							{/* シャッフル (ファイルのみ) */}
 							{currentSrc === "file" && (
 								<Button
