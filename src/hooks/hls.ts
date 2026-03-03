@@ -47,12 +47,16 @@ export function useHLS() {
 			}
 
 			// HLS 非対応ブラウザ（Safari のネイティブ HLS）
-			// Safari では AudioContext が "interrupted" になることがある。
-			// resume() は interrupted / suspended どちらからも機能する（確認済）。
+			// load() 先頭の resume() は fire-and-forget のため、play() の .then() が
+			// 発火したタイミングで AudioContext がまだ suspended の場合がある。
+			// Hls.js パスと同様に state を再確認して start() する。
 			audioElement.src = source;
 			void audioElement
 				.play()
-				.then(() => {
+				.then(async () => {
+					if (audioMotionAnalyzer.audioCtx.state !== "running") {
+						await audioMotionAnalyzer.audioCtx.resume();
+					}
 					audioMotionAnalyzer.start();
 					setIsPlaying(true);
 				})
