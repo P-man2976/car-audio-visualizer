@@ -148,6 +148,8 @@ export class SafariVizBridge {
 	 * BUFFER_APPENDING イベントハンドラ。
 	 * fMP4 メディアセグメント (moof + mdat) を受け取り、
 	 * 初期化セグメントと結合して decodeAudioData() でデコードする。
+	 * frag.start で取得したメディアタイムライン位置を保持し、
+	 * scheduleBuffer 内で audio 要素の currentTime と同期させる。
 	 */
 	private onBufferAppending = (
 		_event: Events.BUFFER_APPENDING,
@@ -161,6 +163,9 @@ export class SafariVizBridge {
 		const boxType = readBoxType(segmentData);
 		if (boxType !== "moof") return;
 
+		// メディアタイムライン上のセグメント開始位置
+		const mediaStartTime = data.frag.start;
+
 		// fMP4 初期化セグメント (ftyp+moov) + メディアセグメント (moof+mdat) を結合し
 		// decodeAudioData() がデコード可能な完全な MP4 にする。
 		const combined = new Uint8Array(
@@ -173,7 +178,7 @@ export class SafariVizBridge {
 		// (new Uint8Array(size) で作成したバッファは byteOffset=0 で安全)
 		void this.audioCtx
 			.decodeAudioData(combined.buffer)
-			.then((audioBuffer) => this.scheduleBuffer(audioBuffer))
+			.then((audioBuffer) => this.scheduleBuffer(audioBuffer, mediaStartTime))
 			.catch((err: unknown) => {
 				if (import.meta.env.DEV) {
 					console.warn("[SafariVizBridge] decodeAudioData failed:", err);
@@ -182,18 +187,34 @@ export class SafariVizBridge {
 	};
 
 	/**
-	 * デコード済み AudioBuffer をスケジュール再生する。
+	 * デコード済み AudioBuffer をメディアタイムラインに同期してスケジュール再生する。
 	 *
-	 * 前のセグメントの終了時刻から連続再生することでギャップを最小化する。
-	 * デコード遅延で追いつけない場合は即座に再生を開始する。
+	 * audio 要素の currentTime とセグメントの mediaStartTime の差分を
+	 * ディレイとして計算し、実際の音声再生と同期させる。
+	 * プリバッファリングされた先行セグメントは未来の時刻にスケジュールされ、
+	 * 既に通過済みのセグメントは即座に再生する。
 	 */
-	private scheduleBuffer(audioBuffer: AudioBuffer): void {
+	private scheduleBuffer(
+		audioBuffer: AudioBuffer,
+		mediaStartTime: number,
+	): void {
 		const source = this.audioCtx.createBufferSource();
 		source.buffer = audioBuffer;
 		source.connect(this.vizGain);
 
 		const now = this.audioCtx.currentTime;
-		const startTime = Math.max(this.nextStartTime, now);
+		const mediaElement = this.hls?.media;
+		let startTime: number;
+
+		if (mediaElement && !mediaElement.paused) {
+			// audio 要素の現在位置とセグメントの開始位置の差分をディレイとする
+			const delay = mediaStartTime - mediaElement.currentTime;
+			startTime = now + Math.max(delay, 0);
+		} else {
+			// 一時停止中・メディア未接続の場合はフォールバック
+			startTime = Math.max(this.nextStartTime, now);
+		}
+
 		source.start(startTime);
 		this.nextStartTime = startTime + audioBuffer.duration;
 
