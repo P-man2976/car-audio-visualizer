@@ -4,7 +4,7 @@ import { VisualizerSwitch } from "../components/Visualizer";
 
 export function HomePage() {
 	return (
-		<div className="relative h-dvh min-h-160 overflow-hidden border border-divider bg-black/90">
+		<div className="relative h-dvh overflow-hidden border border-divider bg-black/90">
 			<Container>
 				<VisualizerSwitch />
 			</Container>

@@ -130,24 +130,30 @@ export function ControlsOverlay() {
 				{/* Sidebar */}
 				<div className="flex h-full items-center justify-between">
 					<MenuSheet>
-						<Button variant={null} className="h-full group/btn relative pr-12">
+						<Button
+							variant={null}
+							className="h-full group/btn relative pr-6 sm:pr-12"
+						>
 							<div className="absolute inset-0 opacity-0 from-gray-600/50 bg-[radial-gradient(80%_60%_at_left,var(--tw-gradient-from),transparent)] transition-all duration-500 group-hover/btn:opacity-100" />
 							<ChevronRight className="size-7 scale-y-150" />
 						</Button>
 					</MenuSheet>
 					<QueueSheet>
-						<Button variant={null} className="h-full group/btn relative pl-12">
+						<Button
+							variant={null}
+							className="h-full group/btn relative pl-6 sm:pl-12"
+						>
 							<div className="absolute inset-0 opacity-0 from-gray-600/50 bg-[radial-gradient(80%_60%_at_right,var(--tw-gradient-from),transparent)] transition-all duration-500 group-hover/btn:opacity-100" />
 							<ChevronLeft className="size-7 scale-y-150" />
 						</Button>
 					</QueueSheet>
 				</div>
 				{/* Footer */}
-				<div className="flex flex-col gap-4 bg-linear-to-t from-gray-500/50 to-transparent px-12 pb-8 pt-16">
+				<div className="flex flex-col gap-1 bg-linear-to-t from-gray-500/50 to-transparent px-4 pb-2 pt-6 sm:gap-2 sm:px-8 sm:pb-4 sm:pt-10 md:gap-4 md:px-12 md:pb-8 md:pt-16">
 					<ProgressSlider />
-					<div className="flex items-center gap-8">
+					<div className="flex items-center gap-3 sm:gap-5 md:gap-8">
 						{/* Cover image / icon */}
-						<div className="relative size-20 shrink-0 group/cover">
+						<div className="relative size-12 shrink-0 group/cover sm:size-16 md:size-20">
 							<div className="size-full rounded-md shadow-lg overflow-hidden bg-gray-500/50 grid place-content-center text-2xl">
 								{coverSrc ? (
 									<img
@@ -176,7 +182,7 @@ export function ControlsOverlay() {
 						</div>
 						<SongInfo title={title} artist={artist} album={album} />
 						{/* Control buttons */}
-						<div className="ml-auto flex shrink-0 gap-2">
+						<div className="ml-auto flex shrink-0 gap-1 sm:gap-2">
 							{/* シャッフル (ファイルのみ) */}
 							{currentSrc === "file" && (
 								<Button

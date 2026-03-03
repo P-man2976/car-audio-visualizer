@@ -22,33 +22,42 @@ export function SongInfo({
 		>
 			<h2
 				ref={titleRef}
-				className={cn("w-fit whitespace-nowrap text-xl", {
-					"animate-scroll":
-						(titleRef.current?.clientWidth ?? 0) >
-						(containerRef.current?.clientWidth ?? 0),
-				})}
+				className={cn(
+					"w-fit whitespace-nowrap text-base sm:text-lg md:text-xl",
+					{
+						"animate-scroll":
+							(titleRef.current?.clientWidth ?? 0) >
+							(containerRef.current?.clientWidth ?? 0),
+					},
+				)}
 				style={{ animationDuration: `${title?.length ?? 0}s` }}
 			>
 				{title}
 			</h2>
 			<span
 				ref={albumRef}
-				className={cn("w-fit whitespace-nowrap text-sm text-gray-400", {
-					"animate-scroll":
-						(albumRef.current?.clientWidth ?? 0) >
-						(containerRef.current?.clientWidth ?? 0),
-				})}
+				className={cn(
+					"w-fit whitespace-nowrap text-xs text-gray-400 sm:text-sm",
+					{
+						"animate-scroll":
+							(albumRef.current?.clientWidth ?? 0) >
+							(containerRef.current?.clientWidth ?? 0),
+					},
+				)}
 				style={{ animationDuration: `${album?.length ?? 0}s` }}
 			>
 				{album}
 			</span>
 			<span
 				ref={artistRef}
-				className={cn("w-fit whitespace-nowrap text-sm text-gray-400", {
-					"animate-scroll":
-						(artistRef.current?.clientWidth ?? 0) >
-						(containerRef.current?.clientWidth ?? 0),
-				})}
+				className={cn(
+					"w-fit whitespace-nowrap text-xs text-gray-400 sm:text-sm",
+					{
+						"animate-scroll":
+							(artistRef.current?.clientWidth ?? 0) >
+							(containerRef.current?.clientWidth ?? 0),
+					},
+				)}
 			>
 				{artist}
 			</span>
