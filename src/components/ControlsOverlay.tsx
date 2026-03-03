@@ -137,7 +137,7 @@ export function ControlsOverlay() {
 				<div className="group relative flex flex-col justify-center">
 					<div className="absolute inset-0 bg-linear-to-b from-gray-600/50 to-transparent opacity-50 transition-all duration-500 group-hover:opacity-100" />
 					{/* Mobile song info — above SourceSheet */}
-					<div className="relative z-10 flex items-center gap-3 px-4 pt-2 sm:hidden">
+					<div className="relative z-10 flex items-center gap-3 px-4 py-3 sm:hidden">
 						<div className="relative size-14 shrink-0 group/cover">
 							{coverElement}
 							{isPiPSupported && (
