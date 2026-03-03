@@ -113,11 +113,26 @@ export function ControlsOverlay() {
 		artwork: coverSrc ?? currentRadio?.logo,
 	});
 
+	// Cover image / icon — shared between mobile top bar and desktop footer
+	const coverElement = (
+		<div className="size-full rounded-md shadow-lg overflow-hidden bg-gray-500/50 grid place-content-center text-2xl">
+			{coverSrc ? (
+				<img src={coverSrc} alt="cover" className="size-full object-cover" />
+			) : currentSrc === "radio" ? (
+				<RadioTower />
+			) : currentSrc === "aux" ? (
+				<LogIn />
+			) : currentSrc === "file" ? (
+				<Music2 className="text-neutral-400" />
+			) : null}
+		</div>
+	);
+
 	return (
 		<>
 			<FileRestore />
 			<SettingsDialog />
-			<div className="absolute inset-0 flex w-full flex-col gap-2">
+			<div className="absolute inset-0 flex w-full flex-col">
 				{/* Header */}
 				<div className="group relative flex flex-col justify-center">
 					<div className="absolute inset-0 bg-linear-to-b from-gray-600/50 to-transparent opacity-50 transition-all duration-500 group-hover:opacity-100" />
@@ -127,6 +142,25 @@ export function ControlsOverlay() {
 						</Button>
 					</SourceSheet>
 				</div>
+
+				{/* Mobile song info bar — below header, visible only on small screens */}
+				<div className="flex items-center gap-3 bg-linear-to-b from-gray-500/30 to-transparent px-4 py-2 sm:hidden">
+					<div className="relative size-10 shrink-0 group/cover">
+						{coverElement}
+						{isPiPSupported && (
+							<button
+								type="button"
+								className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover/cover:opacity-100 transition-opacity rounded-md cursor-pointer"
+								onClick={isPiP ? exitPiP : enterPiP}
+								aria-label={isPiP ? "PiPを終了" : "PiPで表示"}
+							>
+								<PictureInPicture2 size={18} />
+							</button>
+						)}
+					</div>
+					<SongInfo title={title} artist={artist} album={album} />
+				</div>
+
 				{/* Sidebar */}
 				<div className="flex h-full items-center justify-between">
 					<MenuSheet>
@@ -148,27 +182,14 @@ export function ControlsOverlay() {
 						</Button>
 					</QueueSheet>
 				</div>
+
 				{/* Footer */}
-				<div className="flex flex-col gap-1 bg-linear-to-t from-gray-500/50 to-transparent px-4 pb-2 pt-6 sm:gap-2 sm:px-8 sm:pb-4 sm:pt-10 md:gap-4 md:px-12 md:pb-8 md:pt-16">
+				<div className="flex flex-col gap-1 bg-linear-to-t from-gray-500/50 to-transparent px-4 pb-2 pt-4 sm:gap-2 sm:px-8 sm:pb-4 sm:pt-10 md:gap-4 md:px-12 md:pb-8 md:pt-16">
 					<ProgressSlider />
 					<div className="flex items-center gap-3 sm:gap-5 md:gap-8">
-						{/* Cover image / icon */}
-						<div className="relative size-12 shrink-0 group/cover sm:size-16 md:size-20">
-							<div className="size-full rounded-md shadow-lg overflow-hidden bg-gray-500/50 grid place-content-center text-2xl">
-								{coverSrc ? (
-									<img
-										src={coverSrc}
-										alt="cover"
-										className="size-full object-cover"
-									/>
-								) : currentSrc === "radio" ? (
-									<RadioTower />
-								) : currentSrc === "aux" ? (
-									<LogIn />
-								) : currentSrc === "file" ? (
-									<Music2 className="text-neutral-400" />
-								) : null}
-							</div>
+						{/* Cover image / icon — desktop only */}
+						<div className="relative hidden shrink-0 group/cover sm:block sm:size-16 md:size-20">
+							{coverElement}
 							{isPiPSupported && (
 								<button
 									type="button"
@@ -180,9 +201,12 @@ export function ControlsOverlay() {
 								</button>
 							)}
 						</div>
-						<SongInfo title={title} artist={artist} album={album} />
-						{/* Control buttons */}
-						<div className="ml-auto flex shrink-0 gap-1 sm:gap-2">
+						{/* SongInfo — desktop only */}
+						<div className="hidden sm:flex sm:grow sm:overflow-hidden">
+							<SongInfo title={title} artist={artist} album={album} />
+						</div>
+						{/* Control buttons — full-width centered on mobile, right-aligned on desktop */}
+						<div className="flex w-full shrink-0 justify-center gap-1 sm:ml-auto sm:w-auto sm:gap-2">
 							{/* シャッフル (ファイルのみ) */}
 							{currentSrc === "file" && (
 								<Button
