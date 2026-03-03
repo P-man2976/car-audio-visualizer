@@ -21,12 +21,18 @@ export function useHLS() {
 			void audioMotionAnalyzer.audioCtx.resume();
 
 			if (Hls.isSupported()) {
-				const newHls = new Hls();
+				const newHls = new Hls({ preferManagedMediaSource: false });
 				// attach 完了後に自動再生（resume は load() 先頭で既に呼んでいる）
 				newHls.on(Hls.Events.MEDIA_ATTACHED, () => {
 					void audioElement
 						.play()
-						.then(() => {
+						.then(async () => {
+							// MEDIA_ATTACHED は非同期コールバックのため load() 先頭の
+							// resume() が未完了の場合がある。Safari では AudioContext が
+							// まだ suspended のまま start() すると無音になるため再確認する。
+							if (audioMotionAnalyzer.audioCtx.state !== "running") {
+								await audioMotionAnalyzer.audioCtx.resume();
+							}
 							audioMotionAnalyzer.start();
 							setIsPlaying(true);
 						})
