@@ -7,10 +7,13 @@
  *
  * このブリッジは hls.js の内部イベントから fMP4 オーディオセグメントを横取りし、
  * decodeAudioData() でデコードして AudioBufferSourceNode 経由で
- * AudioMotionAnalyzer の入力に流す。
+ * ブリッジ専用の AnalyserNode に流す。
  *
- * 実際のオーディオ出力は audioElement が担当し（destination には接続しない）、
- * ブリッジはビジュアライザー用の周波数データのみを提供する。
+ * audiomotion-analyzer の内部 _analyzer[0] をブリッジ専用ノードに差し替えることで、
+ * getBars() がブリッジのデータを読むようにする。
+ * ブリッジ専用 AnalyserNode は destination に接続しないため二重音声を防ぐ。
+ * 実際のオーディオ出力は audioElement が直接スピーカーに出力する
+ * （Safari では MECSN が壊れているため、Web Audio グラフを経由しない）。
  */
 
 import type AudioMotionAnalyzer from "audiomotion-analyzer";
@@ -46,6 +49,10 @@ export class SafariVizBridge {
 	private readonly audioCtx: AudioContext;
 	private readonly vizGain: GainNode;
 	private readonly analyzer: AudioMotionAnalyzer;
+	/** getBars() が読む差し替え用 AnalyserNode（destination 未接続） */
+	private readonly bridgeAnalyser: AnalyserNode;
+	/** 差し替え前のオリジナル AnalyserNode（destroy 時に復元用） */
+	private readonly originalAnalyser: AnalyserNode;
 	private initSegment: Uint8Array | null = null;
 	private activeSources = new Set<AudioBufferSourceNode>();
 	private hls: Hls | null = null;
@@ -56,13 +63,29 @@ export class SafariVizBridge {
 		this.analyzer = analyzer;
 		this.audioCtx = analyzer.audioCtx;
 
-		// ビジュアライザー専用の GainNode を作成。
-		// destination には接続しない（二重音声を防ぐ）。
+		// audiomotion-analyzer の内部 AnalyserNode を取得
+		// biome-ignore lint/suspicious/noExplicitAny: private API access
+		const inst = analyzer as any;
+		const origAnalyser: AnalyserNode = inst._analyzer[0];
+		this.originalAnalyser = origAnalyser;
+
+		// ブリッジ専用 AnalyserNode を作成（destination に接続しない = 二重音声防止）
+		// オリジナルと同じ FFT 設定を引き継ぐ
+		this.bridgeAnalyser = this.audioCtx.createAnalyser();
+		this.bridgeAnalyser.fftSize = origAnalyser.fftSize;
+		this.bridgeAnalyser.minDecibels = origAnalyser.minDecibels;
+		this.bridgeAnalyser.maxDecibels = origAnalyser.maxDecibels;
+		this.bridgeAnalyser.smoothingTimeConstant =
+			origAnalyser.smoothingTimeConstant;
+
+		// vizGain → bridgeAnalyser の接続（dead-end: destination には到達しない）
 		this.vizGain = this.audioCtx.createGain();
 		this.vizGain.gain.value = 1;
+		this.vizGain.connect(this.bridgeAnalyser);
 
-		// AudioMotionAnalyzer の _input GainNode に接続
-		analyzer.connectInput(this.vizGain);
+		// _analyzer[0] を差し替えて getBars() がブリッジから読むようにする
+		// オリジナルは graph 内に残るが、MECSN が壊れているため無音のまま
+		inst._analyzer[0] = this.bridgeAnalyser;
 	}
 
 	/**
@@ -96,11 +119,14 @@ export class SafariVizBridge {
 
 	/**
 	 * ブリッジを完全に破棄する。
-	 * アナライザーからの切断も行う。
+	 * オリジナルの AnalyserNode を復元する。
 	 */
 	destroy(): void {
 		this.detach();
-		this.analyzer.disconnectInput(this.vizGain);
+		this.vizGain.disconnect();
+		// biome-ignore lint/suspicious/noExplicitAny: private API access
+		const inst = this.analyzer as any;
+		inst._analyzer[0] = this.originalAnalyser;
 	}
 
 	/**
