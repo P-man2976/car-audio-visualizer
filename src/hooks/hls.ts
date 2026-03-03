@@ -5,6 +5,7 @@ import {
 	audioElementAtom,
 	audioMotionAnalyzerAtom,
 	connectAudioSource,
+	safariVizBridge,
 } from "@/atoms/audio";
 import { hlsAtom } from "@/atoms/hls";
 import { isPlayingAtom } from "@/atoms/player";
@@ -26,6 +27,10 @@ export function useHLS() {
 
 			if (Hls.isSupported()) {
 				const newHls = new Hls({ preferManagedMediaSource: false });
+
+				// Safari MECSN バグ回避: fMP4 セグメントを横取りしてアナライザーに流す
+				safariVizBridge?.attach(newHls);
+
 				// attach 完了後に自動再生（resume は load() 先頭で既に呼んでいる）
 				newHls.on(Hls.Events.MEDIA_ATTACHED, () => {
 					void audioElement
@@ -77,6 +82,9 @@ export function useHLS() {
 	);
 
 	const unLoad = useCallback(() => {
+		// Safari ブリッジのリスナーを hls.destroy() 前に解除する
+		safariVizBridge?.detach();
+
 		if (hls) {
 			// destroy() は全イベントリスナー、バッファリング、MediaSource を一括クリーンアップする
 			hls.destroy();

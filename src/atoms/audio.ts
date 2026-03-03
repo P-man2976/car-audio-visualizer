@@ -1,5 +1,6 @@
 import AudioMotionAnalyzer from "audiomotion-analyzer";
 import { atom } from "jotai";
+import { SafariVizBridge, isMECSNBroken } from "@/lib/safari-viz-bridge";
 
 const sharedAudioElement = new Audio();
 
@@ -47,6 +48,17 @@ export function connectAudioSource(): void {
 export const audioElementAtom = atom(sharedAudioElement);
 export const audioMotionAnalyzerAtom = atom(analyzerInstance);
 export const mediaStreamAtom = atom<MediaStream | null>(null);
+
+/**
+ * Safari の MECSN バグ回避用ブリッジ。Safari 以外では null。
+ *
+ * Safari 18.x では createMediaElementSource() が返す MECSN が完全に無音になる
+ * WebKit バグ (Bug 266922, 180696) があるため、hls.js の内部イベントから
+ * fMP4 セグメントを横取りし decodeAudioData() 経由でアナライザーに流す。
+ */
+export const safariVizBridge: SafariVizBridge | null = isMECSNBroken()
+	? new SafariVizBridge(analyzerInstance)
+	: null;
 
 /**
  * WebKit/iOS Safari 固有の AudioContext 状態管理
