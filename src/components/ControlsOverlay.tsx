@@ -133,27 +133,26 @@ export function ControlsOverlay() {
 			<FileRestore />
 			<SettingsDialog />
 			<div className="absolute inset-0 flex w-full flex-col">
-				{/* Mobile song info bar — above header, visible only on small screens */}
-				<div className="flex items-center gap-3 bg-linear-to-b from-gray-600/50 to-transparent px-4 py-2 sm:hidden">
-					<div className="relative size-14 shrink-0 group/cover">
-						{coverElement}
-						{isPiPSupported && (
-							<button
-								type="button"
-								className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover/cover:opacity-100 transition-opacity rounded-md cursor-pointer"
-								onClick={isPiP ? exitPiP : enterPiP}
-								aria-label={isPiP ? "PiPを終了" : "PiPで表示"}
-							>
-								<PictureInPicture2 size={20} />
-							</button>
-						)}
-					</div>
-					<SongInfo title={title} artist={artist} album={album} />
-				</div>
-
-				{/* Header */}
+				{/* Header — mobile: SongInfo + SourceSheet を統合グラデーションで一体表示 */}
 				<div className="group relative flex flex-col justify-center">
 					<div className="absolute inset-0 bg-linear-to-b from-gray-600/50 to-transparent opacity-50 transition-all duration-500 group-hover:opacity-100" />
+					{/* Mobile song info — above SourceSheet */}
+					<div className="relative z-10 flex items-center gap-3 px-4 pt-2 sm:hidden">
+						<div className="relative size-14 shrink-0 group/cover">
+							{coverElement}
+							{isPiPSupported && (
+								<button
+									type="button"
+									className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover/cover:opacity-100 transition-opacity rounded-md cursor-pointer"
+									onClick={isPiP ? exitPiP : enterPiP}
+									aria-label={isPiP ? "PiPを終了" : "PiPで表示"}
+								>
+									<PictureInPicture2 size={20} />
+								</button>
+							)}
+						</div>
+						<SongInfo title={title} artist={artist} album={album} />
+					</div>
 					<SourceSheet>
 						<Button variant={null} className="z-10 w-full">
 							<ChevronDown className="size-7 scale-x-150" />
@@ -184,7 +183,7 @@ export function ControlsOverlay() {
 				</div>
 
 				{/* Footer */}
-				<div className="flex flex-col gap-1 bg-linear-to-t from-gray-500/50 to-transparent px-4 pb-2 pt-4 sm:gap-2 sm:px-8 sm:pb-4 sm:pt-10 md:gap-4 md:px-12 md:pb-8 md:pt-16">
+				<div className="flex flex-col gap-1 bg-linear-to-t from-gray-500/50 to-transparent px-4 pb-4 pt-4 sm:gap-2 sm:px-8 sm:pb-4 sm:pt-10 md:gap-4 md:px-12 md:pb-8 md:pt-16">
 					<ProgressSlider />
 					<div className="flex items-center gap-3 sm:gap-5 md:gap-8">
 						{/* Cover image / icon — desktop only */}
