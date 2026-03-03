@@ -199,11 +199,9 @@ export function useRadioPlayer() {
 	const currentSrc = useAtomValue(currentSrcAtom);
 	const currentRadio = useAtomValue(currentRadioAtom);
 	const setTuningFreq = useSetAtom(tuningFreqAtom);
-	const { load, unLoad } = useHLS();
-	const { mutate } = useRadikoM3u8Url();
+	const { unLoad } = useHLS();
 	const tunableStations = useTunableStations();
 	const selectRadio = useSelectRadio();
-	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 
 	const tuningTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const animFreqRef = useRef<number>(0);
@@ -229,20 +227,14 @@ export function useRadioPlayer() {
 		};
 	}, []);
 
-	/** 停止中に現在局を再ロードして再生 */
+	/**
+	 * 停止中に現在局を再ロードして再生。
+	 * useSelectRadio に委譲することで resume / unLoad / load ロジックの重複を排除する。
+	 */
 	const playRadio = useCallback(() => {
 		if (!currentRadio) return;
-		// ユーザーインタラクション起点のコールバックとして resume() を同期呼び出し。
-		// radiko は mutate の onSuccess で load() が実行されるため、
-		// ここで先行して resume しないと Safari の autoplay policy に弾かれる。
-		void audioMotionAnalyzer.audioCtx.resume();
-		unLoad();
-		if (currentRadio.source === "radiko") {
-			mutate(currentRadio.id, { onSuccess: (m3u8) => load(m3u8) });
-		} else if (currentRadio.source === "radiru") {
-			load(currentRadio.url);
-		}
-	}, [currentRadio, mutate, load, unLoad, audioMotionAnalyzer]);
+		selectRadio(currentRadio);
+	}, [currentRadio, selectRadio]);
 
 	/** HLS をアンロードして停止 */
 	const stopRadio = useCallback(() => {

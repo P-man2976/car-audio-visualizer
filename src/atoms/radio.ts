@@ -6,7 +6,6 @@ export const currentRadioAtom = atomWithStorage<Radio | null>(
 	"cav-current-radio-v2",
 	null,
 );
-export const favoriteRadioAtom = atom<Radio[]>([]);
 export const radioStationSizeAtom = atom<"sm" | "lg">("lg");
 export const customFrequencyAreaAtom = atom<
 	{ id: string; type: RadioType; freq: number }[]
