@@ -38,13 +38,13 @@ const BAND_INDICES = [4, 7, 10, 13, 16, 19, 22, 25, 28] as const;
 const FREQ_ARRAY = ["60", "120", "250", "500", "1k", "2k", "4k", "8k", "16k"];
 
 // ─── Position helpers ─────────────────────────────────────────────────────────
-const BAND_STRIDE = (CELL_WIDTH + ROW_CELL_GAP) * COLS_PER_BAND;
-/** 左列の X 中心 */
-const leftCX = (fi: number) => BAND_STRIDE * fi + ROW_CELL_GAP + CELL_WIDTH / 2;
-/** 右列の X 中心 */
-const rightCX = (fi: number) =>
-	BAND_STRIDE * fi + ROW_CELL_GAP + CELL_WIDTH + ROW_CELL_GAP + CELL_WIDTH / 2;
-/** セルの Y 中心 */
+/** 列 1 本分のストライド */
+const COL_STRIDE = CELL_WIDTH + ROW_CELL_GAP;
+/** 左列の X 位置（元 rowIndex = fi*2 と同一座標） */
+const leftCX = (fi: number) => COL_STRIDE * (fi * 2) + ROW_CELL_GAP;
+/** 右列の X 位置（元 rowIndex = fi*2+1 と同一座標） */
+const rightCX = (fi: number) => COL_STRIDE * (fi * 2 + 1) + ROW_CELL_GAP;
+/** セルの Y 位置 */
 const cellY = (ci: number) => (CELL_HEIGHT + COL_CELL_GAP) * ci + COL_CELL_GAP;
 
 // ─── Root component ───────────────────────────────────────────────────────────
@@ -122,7 +122,7 @@ export function VisualizerStandard() {
 						<FrequencyLabel
 							label={FREQ_ARRAY[fi]}
 							position={[
-								(CELL_WIDTH + ROW_CELL_GAP) * (fi * 2) - ROW_CELL_GAP,
+								(CELL_WIDTH + ROW_CELL_GAP) * (fi * 2 + 1) - ROW_CELL_GAP,
 								-2,
 								0,
 							]}
