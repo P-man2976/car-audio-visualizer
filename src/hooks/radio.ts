@@ -113,7 +113,7 @@ export function useBandToggle() {
 	const currentRadio = useAtomValue(currentRadioAtom);
 	const queue = useAtomValue(queueAtom);
 	const tunableStations = useTunableStations();
-	const selectRadio = useSelectRadio();
+	const { selectRadio } = useSelectRadio();
 
 	return useCallback(() => {
 		if (!currentRadio) return;
@@ -152,7 +152,7 @@ export function useSelectRadio() {
 	const { mutate, isPending } = useRadikoM3u8Url();
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 
-	return useCallback(
+	const selectRadio = useCallback(
 		(radio: Radio) => {
 			// ユーザーインタラクション（クリック）の同期コンテキスト内で resume() を呼ぶ。
 			// radiko は mutate() の onSuccess コールバック内で load() が呼ばれるため

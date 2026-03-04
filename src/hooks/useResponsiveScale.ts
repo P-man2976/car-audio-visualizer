@@ -3,8 +3,11 @@
  * デスクトップ 16:9 (viewport.width ≈ 308) をベースに、
  * 狭い画面では比例縮小、広い画面ではスケール 1.0 に固定する。
  * モバイルでは水平余白を少なくするため、スケール下限を 0.85 に設定。
+ * ピンチ操作によるズーム倍率 (pinchZoomAtom) を乗算する。
  */
 import { useThree } from "@react-three/fiber";
+import { useAtomValue } from "jotai";
+import { pinchZoomAtom } from "@/atoms/visualizerZoom";
 
 /** Desktop 16:9 at fov=120, z=50 → 2 × tan(60°) × 50 × (16/9) ≈ 308 */
 const REFERENCE_VP_WIDTH = 308;
@@ -13,6 +16,7 @@ const MIN_SCALE = 0.85;
 
 export function useResponsiveScale(): number {
 	const vpWidth = useThree((s) => s.viewport.width);
+	const pinchZoom = useAtomValue(pinchZoomAtom);
 	const raw = vpWidth / REFERENCE_VP_WIDTH;
-	return Math.max(Math.min(raw, 1), MIN_SCALE);
+	return Math.max(Math.min(raw, 1), MIN_SCALE) * pinchZoom;
 }
