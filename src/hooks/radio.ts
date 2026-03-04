@@ -147,6 +147,7 @@ export function useBandToggle() {
 export function useSelectRadio() {
 	const setCurrentRadio = useSetAtom(currentRadioAtom);
 	const setCurrentSrc = useSetAtom(currentSrcAtom);
+	const setIsLoading = useSetAtom(isLoadingAtom);
 	const setQueue = useSetAtom(queueAtom);
 	const { load, unLoad } = useHLS();
 	const { mutate } = useRadikoM3u8Url();
@@ -159,6 +160,7 @@ export function useSelectRadio() {
 			// ジェスチャーから切り離される。ここで先行して resume() することで
 			// Safari / WebKit の autoplay policy を満たす。
 			void audioMotionAnalyzer.audioCtx.resume();
+			setIsLoading(true);
 			setCurrentSrc("radio");
 			setCurrentRadio(radio);
 			unLoad();
@@ -181,6 +183,7 @@ export function useSelectRadio() {
 		[
 			setCurrentSrc,
 			setCurrentRadio,
+			setIsLoading,
 			unLoad,
 			mutate,
 			load,

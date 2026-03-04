@@ -6,6 +6,7 @@ import {
 	ChevronRight,
 	ChevronFirst,
 	ChevronLast,
+	Loader,
 	LogIn,
 	Minus,
 	Music2,
@@ -23,6 +24,7 @@ import { useMemo } from "react";
 import {
 	currentSongAtom,
 	currentSrcAtom,
+	isLoadingAtom,
 	persistedCurrentSongAtom,
 	repeatModeAtom,
 	shuffleAtom,
@@ -58,6 +60,7 @@ export function ControlsOverlay() {
 	const [shuffle, setShuffle] = useAtom(shuffleAtom);
 	const [repeat, setRepeat] = useAtom(repeatModeAtom);
 
+	const isLoading = useAtomValue(isLoadingAtom);
 	const { isPlaying, play, pause, next, prev } = usePlayer();
 	const { playRadio, stopRadio, tune } = useRadioPlayer();
 	const toggleBand = useBandToggle();
@@ -255,6 +258,7 @@ export function ControlsOverlay() {
 								size="icon-lg"
 								variant="ghost"
 								className="p-2"
+								disabled={isLoading}
 								onClick={async () => {
 									if (currentSrc === "radio") {
 										isPlaying ? stopRadio() : playRadio();
@@ -263,7 +267,9 @@ export function ControlsOverlay() {
 									}
 								}}
 							>
-								{currentSrc === "radio" && isPlaying ? (
+								{isLoading ? (
+									<Loader className="animate-spin" />
+								) : currentSrc === "radio" && isPlaying ? (
 									<Square />
 								) : isPlaying ? (
 									<Pause />
