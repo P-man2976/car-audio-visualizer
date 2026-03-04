@@ -38,6 +38,7 @@ import { useBandToggle, useRadioPlayer } from "@/hooks/radio";
 import { useAppHotkeys } from "@/hooks/hotkeys";
 import { useLastfmScrobble } from "@/hooks/lastfm";
 import { useRestoreState } from "@/hooks/restore";
+import { usePinchZoom } from "@/hooks/usePinchZoom";
 import { MenuSheet } from "./MenuSheet";
 import { QueueSheet } from "./QueueSheet";
 import { ProgressSlider } from "./player/ProgressSlider";
@@ -67,6 +68,7 @@ export function ControlsOverlay() {
 	useAppHotkeys({ enterPiP, exitPiP, isPiP });
 	useLastfmScrobble();
 	useRestoreState();
+	const pinchRef = usePinchZoom();
 
 	const title = useMemo(() => {
 		switch (currentSrc) {
@@ -133,7 +135,7 @@ export function ControlsOverlay() {
 		<>
 			<FileRestore />
 			<SettingsDialog />
-			<div className="absolute inset-0 flex w-full flex-col">
+			<div ref={pinchRef} className="absolute inset-0 flex w-full flex-col">
 				{/* Header — mobile: SongInfo + SourceSheet を統合グラデーションで一体表示 */}
 				<div className="group relative flex flex-col justify-center">
 					<div className="absolute inset-0 bg-linear-to-b from-gray-600/50 to-transparent opacity-50 transition-all duration-500 group-hover:opacity-100" />
