@@ -29,7 +29,8 @@ export function useHLS() {
 				const newHls = new Hls({ preferManagedMediaSource: false });
 
 				// Safari MECSN バグ回避: fMP4 セグメントを横取りしてアナライザーに流す
-				safariVizBridge?.attach(newHls);
+				// audio 要素を渡してネイティブ出力をミュート（二重音声防止）
+				safariVizBridge?.attach(newHls, audioElement);
 
 				// attach 完了後に自動再生（resume は load() 先頭で既に呼んでいる）
 				newHls.on(Hls.Events.MEDIA_ATTACHED, () => {
