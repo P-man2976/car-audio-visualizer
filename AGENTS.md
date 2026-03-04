@@ -22,9 +22,11 @@ npm run test                     # 全テストがパスすること
 - Use **shadcn/ui** (new-york style, neutral base) for UI primitives — components live in `src/components/ui/`.
 
 ## Architecture
-- Entry flow: `index.html` → `src/main.tsx` → TanStack Router → `src/pages/HomePage.tsx`.
+- TanStack Start (SSR) + Cloudflare Workers。`index.html` / `src/main.tsx` は存在しない。
+- Entry flow: `@tanstack/react-start/server-entry` → `src/routes/__root.tsx` → `src/routes/index.tsx` → `src/pages/HomePage.tsx`.
 - Vite 8 uses React Compiler via Babel plugin in `vite.config.ts`; avoid patterns that conflict with it.
 - `@` alias resolves to `src/` (configured in `vite.config.ts` and `tsconfig.app.json`).
+- PWA: `public/manifest.webmanifest` + `public/icon.svg`。Service Worker は未導入。
 
 ## Build and Test
 - Install: `npm install`
@@ -62,6 +64,7 @@ npm run test                     # 全テストがパスすること
 - Audio: **audiomotion-analyzer** (`src/atoms/audio.ts`)
 - 3D rendering: **@react-three/fiber** + **@react-three/drei** (`src/components/visualizer/`)
 - Build/runtime stack: Vite 8 + React 19 + TypeScript 5.9
+- Deploy: Cloudflare Workers (`wrangler deploy`, region: `gcp:asia-northeast1`)
 
 ## Project Conventions
 - Add/maintain related tests while implementing features whenever testable logic exists.

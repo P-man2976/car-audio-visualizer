@@ -30,9 +30,20 @@ export const Route = createRootRoute({
 			{ charSet: "utf-8" },
 			{ name: "viewport", content: "width=device-width, initial-scale=1" },
 			{ title: "car-audio-visualizer" },
+			{ name: "theme-color", content: "#0a0a0a" },
+			{
+				name: "apple-mobile-web-app-capable",
+				content: "yes",
+			},
+			{
+				name: "apple-mobile-web-app-status-bar-style",
+				content: "black-translucent",
+			},
 		],
 		links: [
-			{ rel: "icon", type: "image/svg+xml", href: "/vite.svg" },
+			{ rel: "icon", type: "image/svg+xml", href: "/icon.svg" },
+			{ rel: "apple-touch-icon", href: "/icon.svg" },
+			{ rel: "manifest", href: "/manifest.webmanifest" },
 			{ rel: "stylesheet", href: indexCss },
 		],
 	}),

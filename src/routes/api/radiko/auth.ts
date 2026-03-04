@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-
-const RADIKO_BASE = "https://radiko.jp";
-const AUTH_KEY = "bcd151073c03b352e1ef2fd66c32209da9ca0afa";
+import {
+	errorResponse,
+	jsonResponse,
+	performRadikoAuth,
+} from "@/lib/radiko-auth";
 
 export const Route = createFileRoute("/api/radiko/auth")({
 	server: {
@@ -20,70 +22,18 @@ export const Route = createFileRoute("/api/radiko/auth")({
 						? `JP${Number(cf.regionCode)}`
 						: "JP13"; // デフォルト: 東京
 
-				// --- auth1 ---
-				const resAuth1 = await fetch(`${RADIKO_BASE}/v2/api/auth1`, {
-					headers: {
-						"X-Radiko-App": "pc_html5",
-						"X-Radiko-App-Version": "0.0.1",
-						"X-Radiko-Device": "pc",
-						"X-Radiko-User": "dummy_user",
-					},
-				});
-
-				if (!resAuth1.ok) {
-					return new Response(
-						JSON.stringify({ error: "Auth1 failed", status: resAuth1.status }),
-						{ status: 502, headers: { "Content-Type": "application/json" } },
-					);
-				}
-
-				const authToken = resAuth1.headers.get("x-radiko-authtoken");
-				const keyLength = Number(resAuth1.headers.get("x-radiko-keylength"));
-				const keyOffset = Number(resAuth1.headers.get("x-radiko-keyoffset"));
-
-				if (!authToken) {
-					return new Response(
-						JSON.stringify({
-							error: "No X-Radiko-AuthToken in auth1 response",
-						}),
-						{ status: 502, headers: { "Content-Type": "application/json" } },
-					);
-				}
-
-				// partialKey を Worker 上で計算
-				const partialKey = btoa(
-					AUTH_KEY.slice(keyOffset, keyOffset + keyLength),
-				);
-
-				// --- auth2 ---
-				const resAuth2 = await fetch(`${RADIKO_BASE}/v2/api/auth2`, {
-					headers: {
-						"X-Radiko-AuthToken": authToken,
-						"X-Radiko-PartialKey": partialKey,
-						"X-Radiko-Device": "pc",
-						"X-Radiko-User": "dummy_user",
-					},
-				});
-
-				if (!resAuth2.ok) {
-					return new Response(
-						JSON.stringify({ error: "Auth2 failed", status: resAuth2.status }),
-						{ status: 502, headers: { "Content-Type": "application/json" } },
-					);
-				}
-
-				// auth2 のレスポンスボディは破棄（areaId は request.cf から取得済み）
-				await resAuth2.text();
-
-				return new Response(JSON.stringify({ authToken, areaId }), {
-					status: 200,
-					headers: {
-						"Content-Type": "application/json",
-						"Access-Control-Allow-Origin": "*",
+				try {
+					const { authToken } = await performRadikoAuth();
+					return jsonResponse(
+						{ authToken, areaId },
+						200,
 						// 8分キャッシュ（Radiko トークンの有効期限に合わせる）
-						"Cache-Control": "private, max-age=480",
-					},
-				});
+						{ "Cache-Control": "private, max-age=480" },
+					);
+				} catch (e) {
+					if (e instanceof Response) return e;
+					return errorResponse("Internal server error", 500);
+				}
 			},
 		},
 	},

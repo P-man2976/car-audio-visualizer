@@ -17,6 +17,8 @@ npm run test                     # 全テストがパスすること
 
 `npm run format` は check only（書き込みなし）なので、整形は必ず `npx biome format --write` を使うこと。
 
+全ての作業が終了したら、ask_user でユーザの入力を待機すること。
+
 ---
 
 ## Build, Test, and Lint
@@ -64,11 +66,12 @@ Uses Biome for automatic code formatting.
 - **Biome 2.4.4** as primary formatter/linter, with ESLint flat config also present
 
 ### Runtime and Build Flow
-1. `index.html` hosts the `#root` mount point.
-2. `src/main.tsx` renders `<App />` via `createRoot` inside `StrictMode`.
-3. `src/index.css` imports `tailwindcss`, `tw-animate-css`, and `shadcn/tailwind.css` (via `@tailwindcss/vite`). shadcn CSS variables are defined in `:root`.
-4. `vite.config.ts` enables React Compiler through Babel (`babel-plugin-react-compiler`).
-5. `npm run build` runs `tsc -b` (app + node tsconfigs) before `vite build`.
+1. TanStack Start (SSR) + Cloudflare Workers — `index.html` / `src/main.tsx` は存在しない。HTML シェルは `src/routes/__root.tsx` の `shellComponent` が生成する。
+2. エントリ: `@tanstack/react-start/server-entry` → `src/routes/__root.tsx` → `src/routes/index.tsx` → `src/pages/HomePage.tsx`。
+3. `src/index.css` を `?url` サフィックスで `__root.tsx` から読み込み。`@import "tailwindcss"` + shadcn CSS 変数を定義。
+4. `vite.config.ts` で React Compiler (`babel-plugin-react-compiler`) を有効化。Cloudflare Workers SSR は `@cloudflare/vite-plugin` で設定。
+5. `npm run build` は `vite build` のみ（TanStack Start が tsc チェックを統合）。
+6. デプロイ: `wrangler deploy` → Cloudflare Workers (`gcp:asia-northeast1`)。
 
 ### UI Composition Pattern
 - Uses shadcn/ui flat exports: `CardHeader`, `CardContent`, `CardFooter`, `CardTitle`, `CardDescription`, `AvatarFallback`, `AvatarImage`, etc.
@@ -120,10 +123,14 @@ Uses Biome for automatic code formatting.
   - ルートコンポーネントの `useFrame` で `store.set(spectrogramAtom, getBars())` を呼ぶ。
   - `frameloop="always"` では `useFrame` が毎フレーム自動実行されるため `invalidate()` は不要。
 
+### PWA
+- `public/manifest.webmanifest` に Web App Manifest を配置。`display: "standalone"`, `orientation: "landscape"`。
+- `public/icon.svg` がアプリアイコン（SVG、any + maskable）。
+- `__root.tsx` の `head()` で `<link rel="manifest">`, `<meta name="theme-color">`, `apple-mobile-web-app-*` を設定済み。
+- Service Worker は未導入（Cloudflare Workers SSR ではオフラインキャッシュの実益が薄いため）。必要に応じて `vite-plugin-pwa` または手動 SW を追加可能。
+
 あなたはURLが与えられた時、以下のコマンドでそのURLの内容をmardownで取得できる
 `npx -y @mizchi/readability --format=md <url>`
-
-タスクの終了時には、ask_userでユーザの入力を待機する
 
 ## Browser Automation
 

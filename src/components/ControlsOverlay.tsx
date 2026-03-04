@@ -45,7 +45,6 @@ import { ProgressSlider } from "./player/ProgressSlider";
 import { SongInfo } from "./player/SongInfo";
 import { SourceSheet } from "./SourceSheet";
 import { SettingsDialog } from "./settings/SettingsDialog";
-import { FileRestore } from "./FileRestore";
 
 export function ControlsOverlay() {
 	const currentSrc = useAtomValue(currentSrcAtom);
@@ -133,7 +132,6 @@ export function ControlsOverlay() {
 
 	return (
 		<>
-			<FileRestore />
 			<SettingsDialog />
 			<div ref={pinchRef} className="absolute inset-0 flex w-full flex-col">
 				{/* Header — mobile: SongInfo + SourceSheet を統合グラデーションで一体表示 */}

@@ -13,6 +13,9 @@ const MIN_ZOOM = 0.5;
 /** ズーム倍率の上限 */
 const MAX_ZOOM = 3.0;
 
+/** マウスホイール 1 イベントあたりの zoom 変化率 */
+const WHEEL_FACTOR = 0.001;
+
 /** 2 点間の距離を計算する */
 function getDistance(t1: Touch, t2: Touch): number {
 	const dx = t1.clientX - t2.clientX;
@@ -64,6 +67,20 @@ export function usePinchZoom() {
 		}
 	}, [setZoom]);
 
+	const onWheel = useCallback(
+		(e: WheelEvent) => {
+			e.preventDefault();
+			// deltaY > 0 = scroll down = zoom out
+			const factor = 1 - e.deltaY * WHEEL_FACTOR;
+			setZoom((current) => {
+				const next = Math.min(Math.max(current * factor, MIN_ZOOM), MAX_ZOOM);
+				baseZoomRef.current = next;
+				return next;
+			});
+		},
+		[setZoom],
+	);
+
 	useEffect(() => {
 		const el = elementRef.current;
 		if (!el) return;
@@ -72,14 +89,16 @@ export function usePinchZoom() {
 		el.addEventListener("touchmove", onTouchMove, { passive: false });
 		el.addEventListener("touchend", onTouchEnd, { passive: true });
 		el.addEventListener("touchcancel", onTouchEnd, { passive: true });
+		el.addEventListener("wheel", onWheel, { passive: false });
 
 		return () => {
 			el.removeEventListener("touchstart", onTouchStart);
 			el.removeEventListener("touchmove", onTouchMove);
 			el.removeEventListener("touchend", onTouchEnd);
 			el.removeEventListener("touchcancel", onTouchEnd);
+			el.removeEventListener("wheel", onWheel);
 		};
-	}, [onTouchStart, onTouchMove, onTouchEnd]);
+	}, [onTouchStart, onTouchMove, onTouchEnd, onWheel]);
 
 	return elementRef;
 }

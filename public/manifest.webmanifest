@@ -1,0 +1,20 @@
+{
+	"name": "Car Audio Visualizer",
+	"short_name": "CarAudioViz",
+	"description": "Car audio spectrum visualizer with radio and file playback",
+	"start_url": "/",
+	"display": "standalone",
+	"orientation": "landscape",
+	"background_color": "#0a0a0a",
+	"theme_color": "#0a0a0a",
+	"icons": [
+		{
+			"src": "/icon.svg",
+			"sizes": "any",
+			"type": "image/svg+xml",
+			"purpose": "any maskable"
+		}
+	],
+	"categories": ["music", "entertainment"],
+	"lang": "ja"
+}

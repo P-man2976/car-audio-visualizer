@@ -34,7 +34,7 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 	const [customFreqList, setCustomFreqList] = useAtom(customFrequencyAreaAtom);
 	const [channelsByArea, setChannelsByArea] = useAtom(radioChannelsByAreaAtom);
 	const areaId = useRadikoArea();
-	const selectRadio = useSelectRadio();
+	const { selectRadio } = useSelectRadio();
 
 	const { data: frequencies } = useRadioFrequencies();
 

@@ -9,8 +9,9 @@ import { VisualizerStandard } from "./visualizer/VisualizerStandard";
 /**
  * Renders the active visualizer style and positions DotMatrix accordingly.
  * ビューポート幅に応じてシーン全体をレスポンシブスケーリングする。
- *   standard  → DotMatrix at top (y=40)
- *   dpx5021m  → main + sub + DotMatrix at bottom (y=-43)
+ *   standard     → 3D InstancedMesh + DotMatrix at top (y=40)
+ *   dpx5021m     → main + sub + DotMatrix at bottom (y=-43)
+ *   standard-2d  → HomePage で PixiJS によりレンダー（R3F 外）
  */
 export function VisualizerSwitch() {
 	const style = useAtomValue(visualizerStyleAtom);

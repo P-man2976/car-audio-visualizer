@@ -1,8 +1,6 @@
-import { Plane } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import type { MeshStandardMaterial } from "three";
 import { spectrogramAtom, store } from "./spectrogramStore";
 
 // ─── Layout constants ─────────────────────────────────────────────────────────
@@ -62,88 +60,110 @@ export function VisualizerKenwoodSub() {
 			rotation-x={(Math.PI / 180) * -ANALYZER_ANGLE_DEGREE}
 		>
 			{/* Wings: inverted triangle, widest at top, narrowest at bottom */}
-			<KenwoodWing side="left" />
-			<KenwoodWing side="right" />
+			<KenwoodWingInstanced side="left" />
+			<KenwoodWingInstanced side="right" />
 
-			{/* Sub-spectrum cells — 7 bands × 7 rows, no side ticks */}
+			{/* Sub-spectrum cells — 10 bands × 7 rows, no side ticks */}
 			{Array.from({ length: FREQ_COUNT }).map((_, fi) => (
 				<group key={`sub-band-${fi}`}>
-					{Array.from({ length: COL_CELL_COUNT }).map((_, ci) => (
-						<SubCell key={`sc-${fi}-${ci}`} fi={fi} ci={ci} />
-					))}
+					<SubBandInstanced fi={fi} />
 				</group>
 			))}
 		</group>
 	);
 }
 
-// ─── Wing decoration ─────────────────────────────────────────────────────────
+// ─── Shared geometries ────────────────────────────────────────────────────────
+const subCellGeometry = new THREE.PlaneGeometry(SUB_COL_WIDTH, CELL_HEIGHT);
+const SUB_INSTANCES_PER_BAND = COL_CELL_COUNT * 2;
+
+// ─── Wing InstancedMesh ──────────────────────────────────────────────────────
 // Horizontal bars whose width increases from bottom (ci=0) to top (ci=6).
-// Anchored flush to the outer vertical edge of the sub-spectrum, they form a
-// right-triangle that fills the gap between the tilted strip and the screen.
-function KenwoodWing({ side }: { side: "left" | "right" }) {
-	// Solid color matching the lit bar color (cyan)
-	const WING_COLOR = "#6dceff";
+// Each wing is a single InstancedMesh with COL_CELL_COUNT instances,
+// each having a different-sized PlaneGeometry encoded via scale in the matrix.
+function KenwoodWingInstanced({ side }: { side: "left" | "right" }) {
+	const meshRef = useRef<THREE.InstancedMesh>(null);
+
+	useEffect(() => {
+		const mesh = meshRef.current;
+		if (!mesh) return;
+		const mat = new THREE.Matrix4();
+		const wingColor = new THREE.Color("#6dceff");
+		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
+			const t = ci / (COL_CELL_COUNT - 1);
+			const width = WING_MIN_LOCAL_WIDTH * (1 - t) + WING_MAX_LOCAL_WIDTH * t;
+			const y = cellY(ci);
+			const xCenter =
+				side === "left"
+					? -WING_GAP - width / 2
+					: TOTAL_WIDTH - BAND_GAP + WING_GAP + width / 2;
+			// Scale X to match desired width (geometry is 1×CELL_HEIGHT)
+			mat.makeScale(width, 1, 1);
+			mat.setPosition(xCenter, y, 0);
+			mesh.setMatrixAt(ci, mat);
+			mesh.setColorAt(ci, wingColor);
+		}
+		mesh.instanceMatrix.needsUpdate = true;
+		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+	}, [side]);
 
 	return (
-		<>
-			{Array.from({ length: COL_CELL_COUNT }).map((_, ci) => {
-				// t=0 at bottom (ci=0), t=1 at top (ci=COL_CELL_COUNT-1)
-				const t = ci / (COL_CELL_COUNT - 1);
-				const width = WING_MIN_LOCAL_WIDTH * (1 - t) + WING_MAX_LOCAL_WIDTH * t;
-				const y = cellY(ci);
-				// Left wing:  right edge flush to x = -WING_GAP            (left  edge of band 0 minus gap)
-				// Right wing: left  edge flush to x = TOTAL_WIDTH - BAND_GAP + WING_GAP (right edge of last band plus gap)
-				const xCenter =
-					side === "left"
-						? -WING_GAP - width / 2
-						: TOTAL_WIDTH - BAND_GAP + WING_GAP + width / 2;
-
-				return (
-					<Plane
-						key={`w-${ci}`}
-						position={[xCenter, y, 0]}
-						args={[width, CELL_HEIGHT]}
-						material-color={WING_COLOR}
-					/>
-				);
-			})}
-		</>
+		<instancedMesh
+			ref={meshRef}
+			args={[wingUnitGeometry, undefined, COL_CELL_COUNT]}
+		>
+			<meshStandardMaterial />
+		</instancedMesh>
 	);
 }
 
-// ─── Sub cell (left + right bars, cyan when lit, white peak) ─────────────────
-function SubCell({ fi, ci }: { fi: number; ci: number }) {
+/** Unit geometry (1 × CELL_HEIGHT) — scaled per-instance for varying widths */
+const wingUnitGeometry = new THREE.PlaneGeometry(1, CELL_HEIGHT);
+
+// ─── Sub band InstancedMesh (left + right bars, cyan when lit) ───────────────
+function SubBandInstanced({ fi }: { fi: number }) {
+	const meshRef = useRef<THREE.InstancedMesh>(null);
 	const color = useMemo(() => new THREE.Color(), []);
-	const leftRef = useRef<MeshStandardMaterial>(null);
-	const rightRef = useRef<MeshStandardMaterial>(null);
+
+	useEffect(() => {
+		const mesh = meshRef.current;
+		if (!mesh) return;
+		const mat = new THREE.Matrix4();
+		const dark = new THREE.Color("#3b0764");
+		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
+			const y = cellY(ci);
+			mat.makeTranslation(subLeftCX(fi), y, 0);
+			mesh.setMatrixAt(ci * 2, mat);
+			mesh.setColorAt(ci * 2, dark);
+			mat.makeTranslation(subRightCX(fi), y, 0);
+			mesh.setMatrixAt(ci * 2 + 1, mat);
+			mesh.setColorAt(ci * 2 + 1, dark);
+		}
+		mesh.instanceMatrix.needsUpdate = true;
+		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+	}, [fi]);
 
 	useFrame(() => {
-		if (!leftRef.current || !rightRef.current) return;
+		const mesh = meshRef.current;
+		if (!mesh) return;
 		const bars = store.get(spectrogramAtom);
 		const freqLevel = bars?.[BAND_INDICES[fi]];
 		const value = freqLevel?.value?.[0] ?? 0;
 
-		const c = color.set(value * COL_CELL_COUNT > ci ? "#6dceff" : "#3b0764");
-		leftRef.current.color.copy(c);
-		rightRef.current.color.copy(c);
+		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
+			color.set(value * COL_CELL_COUNT > ci ? "#6dceff" : "#3b0764");
+			mesh.setColorAt(ci * 2, color);
+			mesh.setColorAt(ci * 2 + 1, color);
+		}
+		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
 	});
 
-	const y = cellY(ci);
 	return (
-		<>
-			<Plane
-				position={[subLeftCX(fi), y, 0]}
-				args={[SUB_COL_WIDTH, CELL_HEIGHT]}
-			>
-				<meshStandardMaterial ref={leftRef} />
-			</Plane>
-			<Plane
-				position={[subRightCX(fi), y, 0]}
-				args={[SUB_COL_WIDTH, CELL_HEIGHT]}
-			>
-				<meshStandardMaterial ref={rightRef} />
-			</Plane>
-		</>
+		<instancedMesh
+			ref={meshRef}
+			args={[subCellGeometry, undefined, SUB_INSTANCES_PER_BAND]}
+		>
+			<meshStandardMaterial />
+		</instancedMesh>
 	);
 }
