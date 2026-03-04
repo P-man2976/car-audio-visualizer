@@ -4,7 +4,7 @@
  * 2 本指のピンチイン/アウトに応じて pinchZoomAtom を更新する。
  * zoom は MIN_ZOOM〜MAX_ZOOM の範囲にクランプされる。
  */
-import { useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useRef } from "react";
 import { pinchZoomAtom } from "@/atoms/visualizerZoom";
 
@@ -25,10 +25,11 @@ function getDistance(t1: Touch, t2: Touch): number {
  * 返り値の ref を対象要素に設定すると、ピンチ操作でズーム倍率が変化する。
  */
 export function usePinchZoom() {
+	const currentZoom = useAtomValue(pinchZoomAtom);
 	const setZoom = useSetAtom(pinchZoomAtom);
 	const elementRef = useRef<HTMLDivElement | null>(null);
 	const initialDistRef = useRef<number | null>(null);
-	const baseZoomRef = useRef(1);
+	const baseZoomRef = useRef(currentZoom);
 
 	const onTouchStart = useCallback((e: TouchEvent) => {
 		if (e.touches.length === 2) {
