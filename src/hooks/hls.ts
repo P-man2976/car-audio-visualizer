@@ -104,15 +104,7 @@ export function useHLS() {
 		}
 		audioMotionAnalyzer.stop();
 		setIsPlaying(false);
-		setIsLoading(false);
-	}, [
-		hls,
-		audioElement,
-		audioMotionAnalyzer,
-		setIsPlaying,
-		setIsLoading,
-		setHls,
-	]);
+	}, [hls, audioElement, audioMotionAnalyzer, setIsPlaying, setHls]);
 
 	return { load, unLoad };
 }

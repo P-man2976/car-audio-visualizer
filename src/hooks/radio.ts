@@ -202,6 +202,7 @@ export function useRadioPlayer() {
 	const currentSrc = useAtomValue(currentSrcAtom);
 	const currentRadio = useAtomValue(currentRadioAtom);
 	const setTuningFreq = useSetAtom(tuningFreqAtom);
+	const setIsLoading = useSetAtom(isLoadingAtom);
 	const { unLoad } = useHLS();
 	const tunableStations = useTunableStations();
 	const selectRadio = useSelectRadio();
@@ -214,6 +215,7 @@ export function useRadioPlayer() {
 	useEffect(() => {
 		if (currentSrc !== "radio") {
 			unLoad();
+			setIsLoading(false);
 			if (tuningTimerRef.current) {
 				clearInterval(tuningTimerRef.current);
 				tuningTimerRef.current = null;
@@ -221,7 +223,7 @@ export function useRadioPlayer() {
 			animFreqRef.current = 0;
 			setTuningFreq(null);
 		}
-	}, [currentSrc, unLoad, setTuningFreq]);
+	}, [currentSrc, unLoad, setTuningFreq, setIsLoading]);
 
 	// アンマウント時のクリーンアップ
 	useEffect(() => {
@@ -242,7 +244,8 @@ export function useRadioPlayer() {
 	/** HLS をアンロードして停止 */
 	const stopRadio = useCallback(() => {
 		unLoad();
-	}, [unLoad]);
+		setIsLoading(false);
+	}, [unLoad, setIsLoading]);
 
 	/**
 	 * 選局アニメーション (+1 = 周波数↑, -1 = 周波数↓)
