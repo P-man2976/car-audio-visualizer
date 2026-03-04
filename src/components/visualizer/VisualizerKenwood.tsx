@@ -1,10 +1,8 @@
-import { Plane } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import type { AnalyzerBarData } from "audiomotion-analyzer";
 import { useAtomValue } from "jotai";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import type { MeshStandardMaterial } from "three";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
 import { spectrogramAtom, store } from "./spectrogramStore";
 
@@ -73,96 +71,123 @@ export function VisualizerKenwood() {
 		>
 			{Array.from({ length: FREQ_COUNT }).map((_, fi) => (
 				<group key={`band-${fi}`}>
-					{Array.from({ length: COL_CELL_COUNT }).map((_, ci) => (
-						<KenwoodMainCell key={`m-${fi}-${ci}`} fi={fi} ci={ci} />
-					))}
-					{Array.from({ length: COL_CELL_COUNT }).map((_, ci) => (
-						<KenwoodSideCell key={`s-${fi}-${ci}`} fi={fi} ci={ci} />
-					))}
+					<KenwoodMainBandInstanced fi={fi} />
+					<KenwoodSideBandInstanced fi={fi} />
 				</group>
 			))}
 		</group>
 	);
 }
 
-// ─── Main sub-bar cell (left + right, cyan when lit) ─────────────────────────
-function KenwoodMainCell({ fi, ci }: { fi: number; ci: number }) {
+// ─── Shared geometries ────────────────────────────────────────────────────────
+const mainGeometry = new THREE.PlaneGeometry(SUB_COL_WIDTH, CELL_HEIGHT);
+const sideGeometry = new THREE.PlaneGeometry(SIDE_BAR_WIDTH, CELL_HEIGHT);
+const INSTANCES_PER_BAND = COL_CELL_COUNT * 2;
+
+// ─── Main sub-bar InstancedMesh (left + right, cyan when lit) ─────────────────
+function KenwoodMainBandInstanced({ fi }: { fi: number }) {
+	const meshRef = useRef<THREE.InstancedMesh>(null);
 	const color = useMemo(() => new THREE.Color(), []);
-	const leftRef = useRef<MeshStandardMaterial>(null);
-	const rightRef = useRef<MeshStandardMaterial>(null);
+
+	useEffect(() => {
+		const mesh = meshRef.current;
+		if (!mesh) return;
+		const mat = new THREE.Matrix4();
+		const dark = new THREE.Color("#3b0764");
+		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
+			const y = cellY(ci);
+			mat.makeTranslation(subLeftCX(fi), y, 0);
+			mesh.setMatrixAt(ci * 2, mat);
+			mesh.setColorAt(ci * 2, dark);
+			mat.makeTranslation(subRightCX(fi), y, 0);
+			mesh.setMatrixAt(ci * 2 + 1, mat);
+			mesh.setColorAt(ci * 2 + 1, dark);
+		}
+		mesh.instanceMatrix.needsUpdate = true;
+		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+	}, [fi]);
 
 	useFrame(() => {
-		if (!leftRef.current || !rightRef.current) return;
+		const mesh = meshRef.current;
+		if (!mesh) return;
 		const bars = store.get(spectrogramAtom);
 		const freqLevel = bars?.[BAND_INDICES[fi]];
 		const value = freqLevel?.value?.[0] ?? 0;
 		const peak = freqLevel?.peak?.[0] ?? 0;
 
-		const isPeak =
-			(ci < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci + 1) ||
-			(ci - 1 < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci);
+		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
+			const isPeak =
+				(ci < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci + 1) ||
+				(ci - 1 < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci);
 
-		const c = color.set(
-			isPeak ? "#ffffff" : value * COL_CELL_COUNT > ci ? "#6dceff" : "#3b0764",
-		);
-		leftRef.current.color.copy(c);
-		rightRef.current.color.copy(c);
+			color.set(
+				isPeak
+					? "#ffffff"
+					: value * COL_CELL_COUNT > ci
+						? "#6dceff"
+						: "#3b0764",
+			);
+			mesh.setColorAt(ci * 2, color);
+			mesh.setColorAt(ci * 2 + 1, color);
+		}
+		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
 	});
 
-	const y = cellY(ci);
-
 	return (
-		<>
-			<Plane
-				position={[subLeftCX(fi), y, 0]}
-				args={[SUB_COL_WIDTH, CELL_HEIGHT]}
-			>
-				<meshStandardMaterial ref={leftRef} />
-			</Plane>
-			<Plane
-				position={[subRightCX(fi), y, 0]}
-				args={[SUB_COL_WIDTH, CELL_HEIGHT]}
-			>
-				<meshStandardMaterial ref={rightRef} />
-			</Plane>
-		</>
+		<instancedMesh
+			ref={meshRef}
+			args={[mainGeometry, undefined, INSTANCES_PER_BAND]}
+		>
+			<meshStandardMaterial />
+		</instancedMesh>
 	);
 }
 
-// ─── Side tick cell (left + right, inverted: unlit = cyan) ───────────────────
-function KenwoodSideCell({ fi, ci }: { fi: number; ci: number }) {
+// ─── Side tick InstancedMesh (left + right, inverted: unlit = cyan) ───────────
+function KenwoodSideBandInstanced({ fi }: { fi: number }) {
+	const meshRef = useRef<THREE.InstancedMesh>(null);
 	const color = useMemo(() => new THREE.Color(), []);
-	const leftRef = useRef<MeshStandardMaterial>(null);
-	const rightRef = useRef<MeshStandardMaterial>(null);
+
+	useEffect(() => {
+		const mesh = meshRef.current;
+		if (!mesh) return;
+		const mat = new THREE.Matrix4();
+		const cyan = new THREE.Color("#91daff");
+		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
+			const y = cellY(ci);
+			mat.makeTranslation(sideLeftCX(fi), y, 0);
+			mesh.setMatrixAt(ci * 2, mat);
+			mesh.setColorAt(ci * 2, cyan);
+			mat.makeTranslation(sideRightCX(fi), y, 0);
+			mesh.setMatrixAt(ci * 2 + 1, mat);
+			mesh.setColorAt(ci * 2 + 1, cyan);
+		}
+		mesh.instanceMatrix.needsUpdate = true;
+		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+	}, [fi]);
 
 	useFrame(() => {
-		if (!leftRef.current || !rightRef.current) return;
+		const mesh = meshRef.current;
+		if (!mesh) return;
 		const bars = store.get(spectrogramAtom);
 		const freqLevel = bars?.[BAND_INDICES[fi]];
 		const value = freqLevel?.value?.[0] ?? 0;
 
-		// inverted: below signal level = dark, above = cyan
-		const c = color.set(value * COL_CELL_COUNT > ci ? "#3b0764" : "#91daff");
-		leftRef.current.color.copy(c);
-		rightRef.current.color.copy(c);
+		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
+			// inverted: below signal level = dark, above = cyan
+			color.set(value * COL_CELL_COUNT > ci ? "#3b0764" : "#91daff");
+			mesh.setColorAt(ci * 2, color);
+			mesh.setColorAt(ci * 2 + 1, color);
+		}
+		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
 	});
 
-	const y = cellY(ci);
-
 	return (
-		<>
-			<Plane
-				position={[sideLeftCX(fi), y, 0]}
-				args={[SIDE_BAR_WIDTH, CELL_HEIGHT]}
-			>
-				<meshStandardMaterial ref={leftRef} />
-			</Plane>
-			<Plane
-				position={[sideRightCX(fi), y, 0]}
-				args={[SIDE_BAR_WIDTH, CELL_HEIGHT]}
-			>
-				<meshStandardMaterial ref={rightRef} />
-			</Plane>
-		</>
+		<instancedMesh
+			ref={meshRef}
+			args={[sideGeometry, undefined, INSTANCES_PER_BAND]}
+		>
+			<meshStandardMaterial />
+		</instancedMesh>
 	);
 }

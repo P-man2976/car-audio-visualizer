@@ -111,15 +111,19 @@ Uses Biome for automatic code formatting.
 ### 3D Visualizer (React Three Fiber) ルール
 
 - `Canvas` は `frameloop="always"` を使うこと。`demand` は `invalidate()` の管理が複雑になり得策でない。
-- ビジュアライザーの実装は **`<Plane>` per-cell + `useFrame`** パターン（2din-spectrogram と同方式）。
-  `InstancedMesh` と `ShaderMaterial` は使わない（どちらも問題が発生した）。
-  - ルートコンポーネントの `useFrame` で `store.set(spectrogramAtom, getBars())` を呼ぶ。
-  - セルコンポーネントは `store.get(spectrogramAtom)` で値を読み `matRef.current.color.set(...)` で更新する。
+- ビジュアライザーの実装は **`<instancedMesh>` per-band + `useFrame`** パターン。
+  - 1 周波数バンドにつき 1 つの `<instancedMesh>` で左右 2 列 × 全セルをまとめて描画する（`ShaderMaterial` は使わない）。
+  - 共有ジオメトリ (`THREE.PlaneGeometry`) はモジュールスコープで生成し、全バンドで再利用する。
+  - `useEffect` でインスタンスの位置（`setMatrixAt`）と初期色（`setColorAt`）を設定する。
+  - `useFrame` 内では `store.get(spectrogramAtom)` で値を読み、`setColorAt` で各インスタンスの色を更新する。
   - `useMemo(() => new THREE.Color(), [])` でカラーオブジェクトをキャッシュする。
+  - ルートコンポーネントの `useFrame` で `store.set(spectrogramAtom, getBars())` を呼ぶ。
   - `frameloop="always"` では `useFrame` が毎フレーム自動実行されるため `invalidate()` は不要。
 
 あなたはURLが与えられた時、以下のコマンドでそのURLの内容をmardownで取得できる
 `npx -y @mizchi/readability --format=md <url>`
+
+タスクの終了時には、ask_userでユーザの入力を待機する
 
 ## Browser Automation
 

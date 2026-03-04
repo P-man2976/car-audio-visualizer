@@ -44,10 +44,12 @@ npm run test                     # 全テストがパスすること
 
 ## 3D Visualizer (React Three Fiber) ルール
 - `Canvas` は `frameloop="always"` を使うこと。`demand` は `invalidate()` の管理が複雑になり得策でない。
-- ビジュアライザーの実装は **`<Plane>` per-cell + `useFrame`** パターン（2din-spectrogram と同方式）。
-  - `InstancedMesh` と `ShaderMaterial` は使わない（どちらも問題が発生した）。
+- ビジュアライザーの実装は **`<instancedMesh>` per-band + `useFrame`** パターン。
+  - 1 周波数バンドにつき 1 つの `<instancedMesh>` で左右 2 列 × 全セルをまとめて描画する（`ShaderMaterial` は使わない）。
+  - 共有ジオメトリ (`THREE.PlaneGeometry`) はモジュールスコープで生成し、全バンドで再利用する。
+  - `useEffect` でインスタンスの位置（`setMatrixAt`）と初期色（`setColorAt`）を設定する。
+  - `useFrame` 内では `store.get(spectrogramAtom)` で値を読み、`setColorAt` で各インスタンスの色を更新する。
   - ルートコンポーネントの `useFrame` で `store.set(spectrogramAtom, getBars())` を呼ぶ。
-  - セルコンポーネントは `store.get(spectrogramAtom)` で値を読み `matRef.current.color.set(...)` で更新する。
   - `useMemo(() => new THREE.Color(), [])` でカラーオブジェクトをキャッシュする。
 - ビジュアライザーの周波数バンドは `audioMotionAnalyzer.getBars()` で取得し、  
   `BAND_INDICES` で目的の帯域を選択する。`mode: 6`（ANSI 1/3 オクターブ）時は約 30 本返る。
