@@ -1,7 +1,7 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
-import { currentSrcAtom, queueAtom } from "@/atoms/player";
+import { currentSrcAtom, isLoadingAtom, queueAtom } from "@/atoms/player";
 import {
 	currentRadioAtom,
 	customFrequencyAreaAtom,
