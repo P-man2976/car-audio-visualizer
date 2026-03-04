@@ -51,6 +51,7 @@ import {
 	WEIGHTING_FILTER_LABELS,
 	type WeightingFilter,
 } from "@/atoms/audioMotion";
+import { amFilterEnabledAtom } from "@/atoms/amFilter";
 import { visualizerStyleAtom, type VisualizerStyle } from "@/atoms/visualizer";
 
 // ─── Visualizer Preview SVG Components ────────────────────────────────────────
@@ -390,12 +391,14 @@ function VisualizerPane() {
 
 function AudioPane() {
 	const [settings, setSettings] = useAtom(audioMotionSettingsAtom);
+	const [amFilterEnabled, setAmFilterEnabled] = useAtom(amFilterEnabledAtom);
 	const fftId = useId();
 	const weightId = useId();
 	const smoothingId = useId();
 	const peakId = useId();
 	const minDbId = useId();
 	const maxDbId = useId();
+	const amFilterId = useId();
 
 	const update = useCallback(
 		<K extends keyof AudioMotionSettings>(
@@ -426,6 +429,23 @@ function AudioPane() {
 					<RotateCcw className="size-3" />
 					リセット
 				</button>
+			</div>
+
+			{/* AM ラジオフィルタ */}
+			<div className="flex flex-col gap-3">
+				<SectionHeader title="AM ラジオフィルタ" />
+
+				<SettingRow
+					htmlFor={amFilterId}
+					label="AM 帯域制限"
+					description="AM ラジオ再生時にローパスフィルタ（4500Hz）を適用し、AM 放送風の音質にします。"
+				>
+					<Switch
+						id={amFilterId}
+						checked={amFilterEnabled}
+						onCheckedChange={setAmFilterEnabled}
+					/>
+				</SettingRow>
 			</div>
 
 			{/* FFT / スムージング */}

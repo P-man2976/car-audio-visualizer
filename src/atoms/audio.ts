@@ -1,6 +1,7 @@
 import AudioMotionAnalyzer from "audiomotion-analyzer";
 import { atom } from "jotai";
 import { SafariVizBridge, isMECSNBroken } from "@/lib/safari-viz-bridge";
+import { AM_FILTER_FREQ } from "./amFilter";
 
 const sharedAudioElement = new Audio();
 
@@ -31,18 +32,51 @@ const analyzerInstance = new AudioMotionAnalyzer(undefined, {
 	peakFallSpeed: 0.005,
 });
 
+// ─── AM ラジオ帯域フィルタ ────────────────────────────────────────────────────
+//
+// audio 要素 → MECSN → amLowpassFilter → analyzerInstance._input → ...destination
+// フィルタは常にチェーンに挿入され、無効時はカットオフを Nyquist に設定して
+// 全帯域通過（実質バイパス）にする。
+
+const _audioCtx = analyzerInstance.audioCtx;
+
+const amLowpassFilter = _audioCtx.createBiquadFilter();
+amLowpassFilter.type = "lowpass";
+// 初期状態はバイパス（Nyquist ＝ 全帯域通過）
+amLowpassFilter.frequency.value = _audioCtx.sampleRate / 2;
+// Butterworth フラットレスポンス
+amLowpassFilter.Q.value = 0.707;
+
+/**
+ * AM フィルタの有効/無効を切り替える。
+ *
+ * @param active - true: ローパス 4500Hz（AM 帯域制限）、false: バイパス
+ */
+export function setAmFilterActive(active: boolean): void {
+	amLowpassFilter.frequency.setTargetAtTime(
+		active ? AM_FILTER_FREQ : _audioCtx.sampleRate / 2,
+		_audioCtx.currentTime,
+		0.02, // 20ms スムーズ遷移
+	);
+}
+
 /**
  * audio 要素を AudioMotionAnalyzer に接続する。
  *
  * Safari は audio 要素にソースが設定される前に createMediaElementSource() を
  * 呼ぶと MediaElementAudioSourceNode が無音になる。
  * play() 成功後（ソース確定済み）に一度だけ呼ぶことで回避する。
+ *
+ * audio → MECSN → amLowpassFilter → analyzerInstance（→ destination）
  */
 let _audioSourceConnected = false;
 export function connectAudioSource(): void {
 	if (_audioSourceConnected) return;
 	_audioSourceConnected = true;
-	analyzerInstance.connectInput(sharedAudioElement);
+
+	const mecsn = _audioCtx.createMediaElementSource(sharedAudioElement);
+	mecsn.connect(amLowpassFilter);
+	analyzerInstance.connectInput(amLowpassFilter);
 }
 
 export const audioElementAtom = atom(sharedAudioElement);
@@ -72,7 +106,7 @@ export const safariVizBridge: SafariVizBridge | null = isMECSNBroken()
  * statechange イベントを監視して interrupted → suspended 遷移後に
  * 自動 resume() する。
  */
-const audioCtx = analyzerInstance.audioCtx;
+const audioCtx = _audioCtx;
 
 let _wasInterrupted = false;
 let _analyzerWasOn = false;
