@@ -1,10 +1,9 @@
-import { Line, Plane } from "@react-three/drei";
+import { Line } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import type { AnalyzerBarData } from "audiomotion-analyzer";
 import { useAtomValue } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import type { MeshStandardMaterial } from "three";
 import { Font, FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
@@ -72,9 +71,7 @@ export function VisualizerStandard() {
 		>
 			{Array.from({ length: FREQ_COUNT }).map((_, fi) => (
 				<group key={`band-${fi}`}>
-					{Array.from({ length: COL_CELL_COUNT }).map((_, ci) => (
-						<VisualizerCell key={`c-${fi}-${ci}`} fi={fi} ci={ci} />
-					))}
+					<BandInstanced fi={fi} />
 					{/* Underline decorations (left col + right col) */}
 					<group rotation-x={(Math.PI / 180) * ANALYZER_ANGLE_DEGREE}>
 						<Line
@@ -134,45 +131,70 @@ export function VisualizerStandard() {
 	);
 }
 
-// ─── Cell component: draws left + right columns for one band ─────────────────
-function VisualizerCell({ fi, ci }: { fi: number; ci: number }) {
+// ─── InstancedMesh per band: 32 cells × 2 planes = 64 instances ──────────────
+/** 共有ジオメトリ — 全バンド共通の PlaneGeometry */
+const sharedGeometry = new THREE.PlaneGeometry(CELL_WIDTH, CELL_HEIGHT);
+/** インスタンス数 = セル数 × 左右 2 面 */
+const INSTANCES_PER_BAND = COL_CELL_COUNT * 2;
+
+function BandInstanced({ fi }: { fi: number }) {
+	const meshRef = useRef<THREE.InstancedMesh>(null);
 	const color = useMemo(() => new THREE.Color(), []);
-	const leftRef = useRef<MeshStandardMaterial>(null);
-	const rightRef = useRef<MeshStandardMaterial>(null);
+
+	// 初回マウント時にインスタンスの位置（行列）とデフォルト色を設定
+	useEffect(() => {
+		const mesh = meshRef.current;
+		if (!mesh) return;
+		const mat = new THREE.Matrix4();
+		const dark = new THREE.Color("#3b0764");
+		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
+			const y = cellY(ci);
+			// 左列: index = ci * 2
+			mat.makeTranslation(leftCX(fi), y, 0);
+			mesh.setMatrixAt(ci * 2, mat);
+			mesh.setColorAt(ci * 2, dark);
+			// 右列: index = ci * 2 + 1
+			mat.makeTranslation(rightCX(fi), y, 0);
+			mesh.setMatrixAt(ci * 2 + 1, mat);
+			mesh.setColorAt(ci * 2 + 1, dark);
+		}
+		mesh.instanceMatrix.needsUpdate = true;
+		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+	}, [fi]);
 
 	useFrame(() => {
-		if (!leftRef.current || !rightRef.current) return;
+		const mesh = meshRef.current;
+		if (!mesh) return;
 		const bars = store.get(spectrogramAtom);
 		const freqLevel = bars?.[BAND_INDICES[fi]];
 		const value = freqLevel?.value?.[0] ?? 0;
 		const peak = freqLevel?.peak?.[0] ?? 0;
 
-		const isPeak =
-			(ci < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci + 1) ||
-			(ci - 2 < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci - 1);
+		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
+			const isPeak =
+				(ci < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci + 1) ||
+				(ci - 2 < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci - 1);
 
-		const c = color.set(
-			isPeak ? "#3b82f6" : value * COL_CELL_COUNT > ci ? "#a5f3fc" : "#3b0764",
-		);
-		leftRef.current.color.copy(c);
-		rightRef.current.color.copy(c);
+			color.set(
+				isPeak
+					? "#3b82f6"
+					: value * COL_CELL_COUNT > ci
+						? "#a5f3fc"
+						: "#3b0764",
+			);
+			mesh.setColorAt(ci * 2, color);
+			mesh.setColorAt(ci * 2 + 1, color);
+		}
+		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
 	});
 
 	return (
-		<>
-			<Plane
-				position={[leftCX(fi), cellY(ci), 0]}
-				args={[CELL_WIDTH, CELL_HEIGHT]}
-			>
-				<meshStandardMaterial ref={leftRef} />
-			</Plane>
-			<Plane
-				position={[rightCX(fi), cellY(ci), 0]}
-				args={[CELL_WIDTH, CELL_HEIGHT]}
-			>
-				<meshStandardMaterial ref={rightRef} />
-			</Plane>
-		</>
+		<instancedMesh
+			ref={meshRef}
+			args={[sharedGeometry, undefined, INSTANCES_PER_BAND]}
+		>
+			<meshStandardMaterial />
+		</instancedMesh>
 	);
 }
 
