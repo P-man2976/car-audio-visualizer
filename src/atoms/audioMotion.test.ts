@@ -51,7 +51,7 @@ describe("DEFAULT_AUDIO_MOTION_SETTINGS", () => {
 	});
 
 	it("weightingFilter は空文字または有効なフィルター名", () => {
-		const valid = ["", "A", "B", "C", "D", "ITU-R 468"];
+		const valid = ["", "A", "B", "C", "D", "468"];
 		expect(valid).toContain(DEFAULT_AUDIO_MOTION_SETTINGS.weightingFilter);
 	});
 });
@@ -95,7 +95,7 @@ describe("AUDIO_MOTION_MODE_LABELS", () => {
 });
 
 describe("WEIGHTING_FILTER_LABELS", () => {
-	const EXPECTED_KEYS = ["", "A", "B", "C", "D", "ITU-R 468"];
+	const EXPECTED_KEYS = ["", "A", "B", "C", "D", "468"];
 
 	it("すべての有効なフィルター名のラベルが存在する", () => {
 		for (const key of EXPECTED_KEYS) {

@@ -44,9 +44,7 @@ import {
 } from "@/atoms/hotkeys";
 import {
 	audioMotionSettingsAtom,
-	type AudioMotionMode,
 	type AudioMotionSettings,
-	AUDIO_MOTION_MODE_LABELS,
 	DEFAULT_AUDIO_MOTION_SETTINGS,
 	FFT_SIZE_OPTIONS,
 	type FftSize,
@@ -360,7 +358,7 @@ function VisualizerPane() {
 							`}
 							aria-pressed={isActive}
 						>
-							<div className="w-28 shrink-0 rounded overflow-hidden border border-neutral-700">
+							<div className="w-20 sm:w-28 shrink-0 rounded overflow-hidden border border-neutral-700">
 								{preview}
 							</div>
 							<div className="flex flex-col gap-1 min-w-0">
@@ -393,12 +391,9 @@ function VisualizerPane() {
 function AudioPane() {
 	const [settings, setSettings] = useAtom(audioMotionSettingsAtom);
 	const fftId = useId();
-	const modeId = useId();
 	const weightId = useId();
 	const smoothingId = useId();
 	const peakId = useId();
-	const minFreqId = useId();
-	const maxFreqId = useId();
 	const minDbId = useId();
 	const maxDbId = useId();
 
@@ -444,7 +439,7 @@ function AudioPane() {
 				>
 					<select
 						id={fftId}
-					className="w-full sm:w-auto rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs text-neutral-200 focus:border-neutral-500 focus:outline-none"
+						className="w-full sm:w-auto rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs text-neutral-200 focus:border-neutral-500 focus:outline-none"
 						value={settings.fftSize}
 						onChange={(e) =>
 							update("fftSize", Number(e.target.value) as FftSize)
@@ -465,56 +460,13 @@ function AudioPane() {
 				>
 					<Slider
 						id={smoothingId}
-						className="w-28"
+						className="w-full sm:w-28"
 						min={0}
 						max={0.99}
 						step={0.01}
 						value={[settings.smoothingTimeConstant]}
 						onValueChange={([v]) =>
 							v !== undefined && update("smoothingTimeConstant", v)
-						}
-					/>
-				</SettingRow>
-			</div>
-
-			{/* 周波数レンジ */}
-			<div className="flex flex-col gap-3">
-				<SectionHeader title="周波数レンジ" />
-
-				<SettingRow
-					htmlFor={minFreqId}
-					label="最小周波数 [Hz]"
-					description="表示する最低周波数。通常は 20 Hz（可聴域下限）。"
-				>
-					<input
-						id={minFreqId}
-						type="number"
-						className="w-20 rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs text-neutral-200 focus:border-neutral-500 focus:outline-none"
-						min={20}
-						max={2000}
-						step={10}
-						value={settings.minFreq}
-						onChange={(e) =>
-							update("minFreq", Math.max(20, Number(e.target.value)))
-						}
-					/>
-				</SettingRow>
-
-				<SettingRow
-					htmlFor={maxFreqId}
-					label="最大周波数 [Hz]"
-					description="表示する最高周波数。通常は 22000 Hz（可聴域上限）。"
-				>
-					<input
-						id={maxFreqId}
-						type="number"
-						className="w-20 rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs text-neutral-200 focus:border-neutral-500 focus:outline-none"
-						min={1000}
-						max={24000}
-						step={1000}
-						value={settings.maxFreq}
-						onChange={(e) =>
-							update("maxFreq", Math.min(24000, Number(e.target.value)))
 						}
 					/>
 				</SettingRow>
@@ -531,7 +483,7 @@ function AudioPane() {
 				>
 					<Slider
 						id={minDbId}
-						className="w-28"
+						className="w-full sm:w-28"
 						min={-100}
 						max={-30}
 						step={1}
@@ -550,7 +502,7 @@ function AudioPane() {
 				>
 					<Slider
 						id={maxDbId}
-						className="w-28"
+						className="w-full sm:w-28"
 						min={-60}
 						max={0}
 						step={1}
@@ -559,47 +511,6 @@ function AudioPane() {
 							if (v !== undefined && v > settings.minDecibels)
 								update("maxDecibels", v);
 						}}
-					/>
-				</SettingRow>
-			</div>
-
-			{/* バンドモード */}
-			<div className="flex flex-col gap-3">
-				<SectionHeader title="バンドモード" />
-
-				<SettingRow
-					htmlFor={modeId}
-					label="解析モード"
-					description="周波数バンドの分割方法。モード 6（1/3 オクターブ ANSI）が推奨です。"
-				>
-					<select
-						id={modeId}
-					className="w-full sm:w-auto sm:max-w-[200px] rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs text-neutral-200 focus:border-neutral-500 focus:outline-none"
-						value={settings.mode}
-						onChange={(e) =>
-							update("mode", Number(e.target.value) as AudioMotionMode)
-						}
-					>
-						{(
-							Object.keys(
-								AUDIO_MOTION_MODE_LABELS,
-							) as unknown as AudioMotionMode[]
-						).map((m) => (
-							<option key={m} value={m}>
-								{AUDIO_MOTION_MODE_LABELS[m]}
-							</option>
-						))}
-					</select>
-				</SettingRow>
-
-				<SettingRow
-					label="ANSI バンド"
-					description="ANSI 規格のバンド分割を使用します（モード 6〜8 で有効）。"
-				>
-					<Switch
-						checked={settings.ansiBands}
-						onCheckedChange={(checked) => update("ansiBands", checked)}
-						aria-label="ANSI バンドの切り替え"
 					/>
 				</SettingRow>
 			</div>
@@ -615,7 +526,7 @@ function AudioPane() {
 				>
 					<select
 						id={weightId}
-					className="w-full sm:w-auto sm:max-w-[200px] rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs text-neutral-200 focus:border-neutral-500 focus:outline-none"
+						className="w-full sm:w-auto sm:max-w-[200px] rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs text-neutral-200 focus:border-neutral-500 focus:outline-none"
 						value={settings.weightingFilter}
 						onChange={(e) =>
 							update("weightingFilter", e.target.value as WeightingFilter)
@@ -643,9 +554,9 @@ function AudioPane() {
 				>
 					<Slider
 						id={peakId}
-						className="w-28"
+						className="w-full sm:w-28"
 						min={0.001}
-						max={0.1}
+						max={0.01}
 						step={0.001}
 						value={[settings.peakFallSpeed]}
 						onValueChange={([v]) =>
@@ -884,7 +795,7 @@ export function SettingsDialog() {
 			 * モバイル: w-[calc(100%-1rem)] max-h-[90dvh] で画面いっぱいに近い高さ
 			 * デスクトップ: sm:max-w-[820px] sm:h-[80vh] sm:max-h-[660px] でワイドレイアウト
 			 */}
-			<DialogContent className="w-[calc(100%-1rem)] max-h-[90dvh] h-[90dvh] sm:max-w-[820px] sm:h-[80vh] sm:max-h-[660px] flex flex-col overflow-hidden p-0 gap-0">
+			<DialogContent className="w-[calc(100%-1rem)] max-h-[90dvh] h-[90dvh] sm:max-w-[820px] sm:h-[80vh] sm:max-h-[660px] flex flex-col overflow-hidden p-0 gap-0 mt-4 sm:mt-0">
 				<DialogHeader className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-5 pb-3 sm:pb-4 border-b border-neutral-800">
 					<DialogTitle>設定</DialogTitle>
 				</DialogHeader>
@@ -896,7 +807,7 @@ export function SettingsDialog() {
 				>
 					{isSm ? (
 						/* デスクトップ: 縦サイドバー */
-						<TabsList className="w-36 shrink-0 flex-col justify-start h-full bg-neutral-950/50 border-r border-neutral-800 rounded-none p-2 gap-0.5">
+						<TabsList className="w-44 shrink-0 flex-col justify-start h-full bg-neutral-950/50 border-r border-neutral-800 rounded-none p-2 gap-0.5">
 							{NAV_ITEMS.map(({ value, label, icon }) => (
 								<TabsTrigger
 									key={value}
@@ -912,7 +823,7 @@ export function SettingsDialog() {
 						/* モバイル: 横ナビゲーションバー（line variant） */
 						<TabsList
 							variant="line"
-							className="shrink-0 flex-row flex-nowrap overflow-x-auto w-full h-auto px-2 py-0 border-b border-neutral-800 rounded-none bg-transparent gap-0 justify-start"
+							className="shrink-0 flex-row flex-nowrap overflow-x-auto overflow-y-hidden w-full h-auto px-2 py-0 border-b border-neutral-800 rounded-none bg-transparent gap-0 justify-start"
 						>
 							{NAV_ITEMS.map(({ value, label, icon }) => (
 								<TabsTrigger

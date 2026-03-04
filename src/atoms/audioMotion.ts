@@ -5,12 +5,12 @@
  * storage キー: "cav-audiomotion-settings-v1"
  */
 import { atomWithStorage } from "jotai/utils";
+import type { WeightingFilter } from "audiomotion-analyzer";
+
+export type { WeightingFilter };
 
 /** FFT サイズ（2の累乗のみ有効） */
 export type FftSize = 512 | 1024 | 2048 | 4096 | 8192 | 16384 | 32768;
-
-/** 周波数重み付けフィルター */
-export type WeightingFilter = "" | "A" | "B" | "C" | "D" | "ITU-R 468";
 
 /**
  * audiomotion-analyzer の解析モード
@@ -85,7 +85,7 @@ export const WEIGHTING_FILTER_LABELS: Record<WeightingFilter, string> = {
 	B: "B 特性",
 	C: "C 特性（高レベル音向け）",
 	D: "D 特性（航空騒音測定向け）",
-	"ITU-R 468": "ITU-R 468（放送・録音向け）",
+	"468": "ITU-R 468（放送・録音向け）",
 };
 
 export const FFT_SIZE_OPTIONS: FftSize[] = [

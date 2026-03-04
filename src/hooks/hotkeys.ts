@@ -53,7 +53,7 @@ export function useAppHotkeys(opts: AppHotkeysOptions = {}) {
 	const { connect, disconnect } = useMediaStream();
 	const areaId = useRadikoArea();
 	const tunableStations = useTunableStations();
-	const {selectRadio} = useSelectRadio();
+	const { selectRadio } = useSelectRadio();
 
 	/** 設定ダイアログが開いている間は再生操作系を無効化 */
 	const enabled = !settingsOpen;
