@@ -8,14 +8,13 @@ import {
 	safariVizBridge,
 } from "@/atoms/audio";
 import { hlsAtom } from "@/atoms/hls";
-import { isLoadingAtom, isPlayingAtom } from "@/atoms/player";
+import { isPlayingAtom } from "@/atoms/player";
 
 export function useHLS() {
 	const [hls, setHls] = useAtom(hlsAtom);
 	const audioElement = useAtomValue(audioElementAtom);
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 	const setIsPlaying = useSetAtom(isPlayingAtom);
-	const setIsLoading = useSetAtom(isLoadingAtom);
 
 	const load = useCallback(
 		(source: string) => {
@@ -46,10 +45,8 @@ export function useHLS() {
 							connectAudioSource();
 							audioMotionAnalyzer.start();
 							setIsPlaying(true);
-							setIsLoading(false);
 						})
 						.catch((err: unknown) => {
-							setIsLoading(false);
 							console.warn("[hls] HLS.js play() failed:", err);
 						});
 				});
@@ -73,17 +70,15 @@ export function useHLS() {
 					connectAudioSource();
 					audioMotionAnalyzer.start();
 					setIsPlaying(true);
-					setIsLoading(false);
 				})
 				.catch((err: unknown) => {
-					setIsLoading(false);
 					// Safari で autoplay policy や interruption により再生が拒否された場合
 					// ここに来る。サイレントに握り潰さずコンソールに出力する。
 					console.warn("[hls] Safari native HLS play failed:", err);
 				});
 		},
 		// hls は deps に含めない：常に新規インスタンスを生成するため
-		[audioElement, audioMotionAnalyzer, setIsPlaying, setHls, setIsLoading],
+		[audioElement, audioMotionAnalyzer, setIsPlaying, setHls],
 	);
 
 	const unLoad = useCallback(() => {

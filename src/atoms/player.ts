@@ -27,8 +27,6 @@ export const currentSrcAtom = atom(
 	},
 );
 export const isPlayingAtom = atom(false);
-/** ラジオ局選択〜HLS 再生開始までのローディング状態 */
-export const isLoadingAtom = atom(false);
 export const progressAtom = atom(0);
 export const volumeAtom = atom(70);
 /** ミュート状態。true のとき audioElement.muted を true にする */

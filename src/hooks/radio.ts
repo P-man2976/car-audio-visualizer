@@ -1,7 +1,7 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
-import { currentSrcAtom, isLoadingAtom, queueAtom } from "@/atoms/player";
+import { currentSrcAtom, queueAtom } from "@/atoms/player";
 import {
 	currentRadioAtom,
 	customFrequencyAreaAtom,
@@ -147,10 +147,9 @@ export function useBandToggle() {
 export function useSelectRadio() {
 	const setCurrentRadio = useSetAtom(currentRadioAtom);
 	const setCurrentSrc = useSetAtom(currentSrcAtom);
-	const setIsLoading = useSetAtom(isLoadingAtom);
 	const setQueue = useSetAtom(queueAtom);
 	const { load, unLoad } = useHLS();
-	const { mutate } = useRadikoM3u8Url();
+	const { mutate, isPending } = useRadikoM3u8Url();
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 
 	return useCallback(
@@ -160,7 +159,6 @@ export function useSelectRadio() {
 			// ジェスチャーから切り離される。ここで先行して resume() することで
 			// Safari / WebKit の autoplay policy を満たす。
 			void audioMotionAnalyzer.audioCtx.resume();
-			setIsLoading(true);
 			setCurrentSrc("radio");
 			setCurrentRadio(radio);
 			unLoad();
@@ -183,7 +181,6 @@ export function useSelectRadio() {
 		[
 			setCurrentSrc,
 			setCurrentRadio,
-			setIsLoading,
 			unLoad,
 			mutate,
 			load,
@@ -191,6 +188,8 @@ export function useSelectRadio() {
 			audioMotionAnalyzer,
 		],
 	);
+
+	return { selectRadio, isPending };
 }
 
 /**
@@ -202,10 +201,9 @@ export function useRadioPlayer() {
 	const currentSrc = useAtomValue(currentSrcAtom);
 	const currentRadio = useAtomValue(currentRadioAtom);
 	const setTuningFreq = useSetAtom(tuningFreqAtom);
-	const setIsLoading = useSetAtom(isLoadingAtom);
 	const { unLoad } = useHLS();
 	const tunableStations = useTunableStations();
-	const selectRadio = useSelectRadio();
+	const { selectRadio, isPending: isRadikoLoading } = useSelectRadio();
 
 	const tuningTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const animFreqRef = useRef<number>(0);
@@ -215,7 +213,6 @@ export function useRadioPlayer() {
 	useEffect(() => {
 		if (currentSrc !== "radio") {
 			unLoad();
-			setIsLoading(false);
 			if (tuningTimerRef.current) {
 				clearInterval(tuningTimerRef.current);
 				tuningTimerRef.current = null;
@@ -223,7 +220,7 @@ export function useRadioPlayer() {
 			animFreqRef.current = 0;
 			setTuningFreq(null);
 		}
-	}, [currentSrc, unLoad, setTuningFreq, setIsLoading]);
+	}, [currentSrc, unLoad, setTuningFreq]);
 
 	// アンマウント時のクリーンアップ
 	useEffect(() => {
@@ -244,8 +241,7 @@ export function useRadioPlayer() {
 	/** HLS をアンロードして停止 */
 	const stopRadio = useCallback(() => {
 		unLoad();
-		setIsLoading(false);
-	}, [unLoad, setIsLoading]);
+	}, [unLoad]);
 
 	/**
 	 * 選局アニメーション (+1 = 周波数↑, -1 = 周波数↓)
@@ -342,5 +338,5 @@ export function useRadioPlayer() {
 		],
 	);
 
-	return { playRadio, stopRadio, tune };
+	return { playRadio, stopRadio, tune, isRadikoLoading };
 }

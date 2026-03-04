@@ -6,7 +6,6 @@ import {
 	ChevronRight,
 	ChevronFirst,
 	ChevronLast,
-	Loader,
 	LogIn,
 	Minus,
 	Music2,
@@ -19,12 +18,12 @@ import {
 	Repeat1,
 	Shuffle,
 	Square,
+	LoaderCircle,
 } from "lucide-react";
 import { useMemo } from "react";
 import {
 	currentSongAtom,
 	currentSrcAtom,
-	isLoadingAtom,
 	persistedCurrentSongAtom,
 	repeatModeAtom,
 	shuffleAtom,
@@ -60,9 +59,8 @@ export function ControlsOverlay() {
 	const [shuffle, setShuffle] = useAtom(shuffleAtom);
 	const [repeat, setRepeat] = useAtom(repeatModeAtom);
 
-	const isLoading = useAtomValue(isLoadingAtom);
 	const { isPlaying, play, pause, next, prev } = usePlayer();
-	const { playRadio, stopRadio, tune } = useRadioPlayer();
+	const { playRadio, stopRadio, tune, isRadikoLoading } = useRadioPlayer();
 	const toggleBand = useBandToggle();
 	useFilePlayer();
 	const { isPiP, enterPiP, exitPiP, isSupported: isPiPSupported } = usePiP();
@@ -258,7 +256,7 @@ export function ControlsOverlay() {
 								size="icon-lg"
 								variant="ghost"
 								className="p-2"
-								disabled={isLoading}
+								disabled={isRadikoLoading}
 								onClick={async () => {
 									if (currentSrc === "radio") {
 										isPlaying ? stopRadio() : playRadio();
@@ -267,8 +265,8 @@ export function ControlsOverlay() {
 									}
 								}}
 							>
-								{isLoading ? (
-									<Loader className="animate-spin" />
+								{isRadikoLoading ? (
+									<LoaderCircle className="animate-spin" />
 								) : currentSrc === "radio" && isPlaying ? (
 									<Square />
 								) : isPlaying ? (
