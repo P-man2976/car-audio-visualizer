@@ -4,6 +4,7 @@ import { useAtomValue } from "jotai";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
+import { createPerspParams, perspProject } from "@/lib/perspProject";
 import { spectrogramAtom, store } from "./spectrogramStore";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -24,7 +25,6 @@ const SIDE_UNIT = SIDE_BAR_WIDTH + SIDE_GAP; // 1.1
 const BAND_GAP = 1.6;
 const BAND_STRIDE =
 	SIDE_UNIT + MAIN_BAR_WIDTH + SIDE_GAP + SIDE_BAR_WIDTH + BAND_GAP;
-const TOTAL_WIDTH = BAND_STRIDE * FREQ_COUNT;
 
 /**
  * ANSI 1/3-octave indices for 11 bands:
@@ -41,6 +41,11 @@ const sideRightCX = (fi: number) =>
 	BAND_STRIDE * fi + SIDE_UNIT + MAIN_BAR_WIDTH + SIDE_GAP + SIDE_BAR_WIDTH / 2;
 const cellY = (ci: number) => (CELL_HEIGHT + COL_CELL_GAP) * ci + COL_CELL_GAP;
 
+// ─── Perspective projection (台形レイアウト) ───────────────────────────────────
+const GRID_CX = (sideLeftCX(0) + sideRightCX(FREQ_COUNT - 1)) / 2;
+const GRID_CY = (cellY(0) + cellY(COL_CELL_COUNT - 1)) / 2;
+const PERSP = createPerspParams(GRID_CX, GRID_CY, 50, ANALYZER_ANGLE_DEGREE);
+
 // ─── Root component ───────────────────────────────────────────────────────────
 export function VisualizerKenwood() {
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
@@ -54,20 +59,13 @@ export function VisualizerKenwood() {
 		);
 	});
 
-	const totalHeight =
-		(CELL_HEIGHT + COL_CELL_GAP) * COL_CELL_COUNT - COL_CELL_GAP;
 	const SCALE = 1.8;
 	const OFFSET_Y = 24;
 
 	return (
 		<group
-			position={[
-				-TOTAL_WIDTH * (SCALE / 2),
-				-totalHeight * (SCALE / 2) + OFFSET_Y,
-				0,
-			]}
+			position={[-GRID_CX * SCALE, -GRID_CY * SCALE + OFFSET_Y, 0]}
 			scale={SCALE}
-			rotation-x={(Math.PI / 180) * -ANALYZER_ANGLE_DEGREE}
 		>
 			{Array.from({ length: FREQ_COUNT }).map((_, fi) => (
 				<group key={`band-${fi}`}>
@@ -95,11 +93,15 @@ function KenwoodMainBandInstanced({ fi }: { fi: number }) {
 		const mat = new THREE.Matrix4();
 		const dark = new THREE.Color("#3b0764");
 		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
-			const y = cellY(ci);
-			mat.makeTranslation(subLeftCX(fi), y, 0);
+			const flatY = cellY(ci);
+			const l = perspProject(subLeftCX(fi), flatY, PERSP);
+			mat.makeScale(l.s, l.s, 1);
+			mat.setPosition(l.px, l.py, 0);
 			mesh.setMatrixAt(ci * 2, mat);
 			mesh.setColorAt(ci * 2, dark);
-			mat.makeTranslation(subRightCX(fi), y, 0);
+			const r = perspProject(subRightCX(fi), flatY, PERSP);
+			mat.makeScale(r.s, r.s, 1);
+			mat.setPosition(r.px, r.py, 0);
 			mesh.setMatrixAt(ci * 2 + 1, mat);
 			mesh.setColorAt(ci * 2 + 1, dark);
 		}
@@ -155,11 +157,15 @@ function KenwoodSideBandInstanced({ fi }: { fi: number }) {
 		const mat = new THREE.Matrix4();
 		const cyan = new THREE.Color("#91daff");
 		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
-			const y = cellY(ci);
-			mat.makeTranslation(sideLeftCX(fi), y, 0);
+			const flatY = cellY(ci);
+			const l = perspProject(sideLeftCX(fi), flatY, PERSP);
+			mat.makeScale(l.s, l.s, 1);
+			mat.setPosition(l.px, l.py, 0);
 			mesh.setMatrixAt(ci * 2, mat);
 			mesh.setColorAt(ci * 2, cyan);
-			mat.makeTranslation(sideRightCX(fi), y, 0);
+			const r = perspProject(sideRightCX(fi), flatY, PERSP);
+			mat.makeScale(r.s, r.s, 1);
+			mat.setPosition(r.px, r.py, 0);
 			mesh.setMatrixAt(ci * 2 + 1, mat);
 			mesh.setColorAt(ci * 2 + 1, cyan);
 		}

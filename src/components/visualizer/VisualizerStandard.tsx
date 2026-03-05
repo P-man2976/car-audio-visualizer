@@ -7,6 +7,7 @@ import * as THREE from "three";
 import { Font, FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
+import { createPerspParams, perspProject } from "@/lib/perspProject";
 import { spectrogramAtom, store } from "./spectrogramStore";
 
 // ─── Montserrat 600 font singleton ───────────────────────────────────────────
@@ -22,16 +23,12 @@ const _fontReady: Promise<Font> = fetch("/montserrat-600.typeface.json")
 // ─── Constants ────────────────────────────────────────────────────────────────
 const CELL_WIDTH = 6;
 const CELL_HEIGHT = 1;
-/** 1バンドあたりの列数（左右2列） */
-const COLS_PER_BAND = 2;
 const COL_CELL_COUNT = 32;
 const ROW_CELL_GAP = 2;
 const COL_CELL_GAP = 0.6;
 const ANALYZER_ANGLE_DEGREE = 24;
 /** 周波数バンド数（ANSI 1/3-octave から 9 バンド選択） */
 const FREQ_COUNT = 9;
-/** 総列数 = バンド数 × 列/バンド */
-const TOTAL_COLS = FREQ_COUNT * COLS_PER_BAND;
 
 const BAND_INDICES = [4, 7, 10, 13, 16, 19, 22, 25, 28] as const;
 const FREQ_ARRAY = ["60", "120", "250", "500", "1k", "2k", "4k", "8k", "16k"];
@@ -46,6 +43,14 @@ const rightCX = (fi: number) => COL_STRIDE * (fi * 2 + 1) + ROW_CELL_GAP;
 /** セルの Y 位置 */
 const cellY = (ci: number) => (CELL_HEIGHT + COL_CELL_GAP) * ci + COL_CELL_GAP;
 
+// ─── Perspective projection (台形レイアウト) ───────────────────────────────────
+/** グリッド中心 X: 左端列中心と右端列中心の中点 */
+const GRID_CX = (leftCX(0) + rightCX(FREQ_COUNT - 1)) / 2;
+/** グリッド中心 Y */
+const GRID_CY = (cellY(0) + cellY(COL_CELL_COUNT - 1)) / 2;
+/** パースペクティブ射影パラメータ */
+const PERSP = createPerspParams(GRID_CX, GRID_CY, 50, ANALYZER_ANGLE_DEGREE);
+
 // ─── Root component ───────────────────────────────────────────────────────────
 export function VisualizerStandard() {
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
@@ -58,75 +63,61 @@ export function VisualizerStandard() {
 		);
 	});
 
-	const totalWidth =
-		(CELL_WIDTH + ROW_CELL_GAP) * TOTAL_COLS - ROW_CELL_GAP + 80;
-	const totalHeight =
-		(CELL_HEIGHT + COL_CELL_GAP) * COL_CELL_COUNT - COL_CELL_GAP;
-
 	return (
-		<group
-			position={[-(totalWidth / 2), -(totalHeight / 2), 0]}
-			scale={1.6}
-			rotation-x={(Math.PI / 180) * -ANALYZER_ANGLE_DEGREE}
-		>
-			{Array.from({ length: FREQ_COUNT }).map((_, fi) => (
-				<group key={`band-${fi}`}>
-					<BandInstanced fi={fi} />
-					{/* Underline decorations (left col + right col) */}
-					<group rotation-x={(Math.PI / 180) * ANALYZER_ANGLE_DEGREE}>
+		<group position={[-GRID_CX, -GRID_CY, 0]} scale={1.6}>
+			{Array.from({ length: FREQ_COUNT }).map((_, fi) => {
+				const lineY = -2;
+				const lStart = perspProject(
+					COL_STRIDE * (fi * 2) - ROW_CELL_GAP / 2 + 0.3,
+					lineY,
+					PERSP,
+				);
+				const lEnd = perspProject(
+					COL_STRIDE * (fi * 2) - ROW_CELL_GAP / 2 + CELL_WIDTH - 2,
+					lineY,
+					PERSP,
+				);
+				const rStart = perspProject(
+					COL_STRIDE * (fi * 2 + 1) - ROW_CELL_GAP / 2 + 2,
+					lineY,
+					PERSP,
+				);
+				const rEnd = perspProject(
+					COL_STRIDE * (fi * 2 + 1) - ROW_CELL_GAP / 2 + CELL_WIDTH - 0.3,
+					lineY,
+					PERSP,
+				);
+				const labelPos = perspProject(
+					COL_STRIDE * (fi * 2 + 1) - ROW_CELL_GAP,
+					lineY,
+					PERSP,
+				);
+				return (
+					<group key={`band-${fi}`}>
+						<BandInstanced fi={fi} />
 						<Line
 							points={[
-								[
-									(CELL_WIDTH + ROW_CELL_GAP) * (fi * 2) -
-										ROW_CELL_GAP / 2 +
-										0.3,
-									-2,
-									0,
-								],
-								[
-									(CELL_WIDTH + ROW_CELL_GAP) * (fi * 2) -
-										ROW_CELL_GAP / 2 +
-										CELL_WIDTH -
-										2,
-									-2,
-									0,
-								],
+								[lStart.px, lStart.py, 0],
+								[lEnd.px, lEnd.py, 0],
 							]}
 							lineWidth={4}
 							color="#67e8f9"
 						/>
 						<Line
 							points={[
-								[
-									(CELL_WIDTH + ROW_CELL_GAP) * (fi * 2 + 1) -
-										ROW_CELL_GAP / 2 +
-										2,
-									-2,
-									0,
-								],
-								[
-									(CELL_WIDTH + ROW_CELL_GAP) * (fi * 2 + 1) -
-										ROW_CELL_GAP / 2 +
-										CELL_WIDTH -
-										0.3,
-									-2,
-									0,
-								],
+								[rStart.px, rStart.py, 0],
+								[rEnd.px, rEnd.py, 0],
 							]}
 							lineWidth={4}
 							color="#67e8f9"
 						/>
 						<FrequencyLabel
 							label={FREQ_ARRAY[fi]}
-							position={[
-								(CELL_WIDTH + ROW_CELL_GAP) * (fi * 2 + 1) - ROW_CELL_GAP,
-								-2,
-								0,
-							]}
+							position={[labelPos.px, labelPos.py, 0]}
 						/>
 					</group>
-				</group>
-			))}
+				);
+			})}
 		</group>
 	);
 }
@@ -148,13 +139,17 @@ function BandInstanced({ fi }: { fi: number }) {
 		const mat = new THREE.Matrix4();
 		const dark = new THREE.Color("#3b0764");
 		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
-			const y = cellY(ci);
+			const flatY = cellY(ci);
 			// 左列: index = ci * 2
-			mat.makeTranslation(leftCX(fi), y, 0);
+			const l = perspProject(leftCX(fi), flatY, PERSP);
+			mat.makeScale(l.s, l.s, 1);
+			mat.setPosition(l.px, l.py, 0);
 			mesh.setMatrixAt(ci * 2, mat);
 			mesh.setColorAt(ci * 2, dark);
 			// 右列: index = ci * 2 + 1
-			mat.makeTranslation(rightCX(fi), y, 0);
+			const r = perspProject(rightCX(fi), flatY, PERSP);
+			mat.makeScale(r.s, r.s, 1);
+			mat.setPosition(r.px, r.py, 0);
 			mesh.setMatrixAt(ci * 2 + 1, mat);
 			mesh.setColorAt(ci * 2 + 1, dark);
 		}

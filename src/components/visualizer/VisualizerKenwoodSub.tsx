@@ -1,6 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { createPerspParams, perspProject } from "@/lib/perspProject";
 import { spectrogramAtom, store } from "./spectrogramStore";
 
 // ─── Layout constants ─────────────────────────────────────────────────────────
@@ -51,14 +52,15 @@ const subLeftCX = (fi: number) => BAND_STRIDE * fi + SUB_COL_WIDTH / 2;
 const subRightCX = (fi: number) => subLeftCX(fi) + SUB_COL_WIDTH + SUB_COL_GAP;
 const cellY = (ci: number) => (CELL_HEIGHT + COL_CELL_GAP) * ci + COL_CELL_GAP;
 
+// ─── Perspective projection (台形レイアウト) ───────────────────────────────────
+const GRID_CX = (subLeftCX(0) + subRightCX(FREQ_COUNT - 1)) / 2;
+const GRID_CY = (cellY(0) + cellY(COL_CELL_COUNT - 1)) / 2;
+const PERSP = createPerspParams(GRID_CX, GRID_CY, 50, ANALYZER_ANGLE_DEGREE);
+
 // ─── Root component ───────────────────────────────────────────────────────────
 export function VisualizerKenwoodSub() {
 	return (
-		<group
-			position={[-TOTAL_WIDTH * (SCALE / 2), SUB_Y_OFFSET, 0]}
-			scale={SCALE}
-			rotation-x={(Math.PI / 180) * -ANALYZER_ANGLE_DEGREE}
-		>
+		<group position={[-GRID_CX * SCALE, SUB_Y_OFFSET, 0]} scale={SCALE}>
 			{/* Wings: inverted triangle, widest at top, narrowest at bottom */}
 			<KenwoodWingInstanced side="left" />
 			<KenwoodWingInstanced side="right" />
@@ -92,14 +94,14 @@ function KenwoodWingInstanced({ side }: { side: "left" | "right" }) {
 		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
 			const t = ci / (COL_CELL_COUNT - 1);
 			const width = WING_MIN_LOCAL_WIDTH * (1 - t) + WING_MAX_LOCAL_WIDTH * t;
-			const y = cellY(ci);
+			const flatY = cellY(ci);
 			const xCenter =
 				side === "left"
 					? -WING_GAP - width / 2
 					: TOTAL_WIDTH - BAND_GAP + WING_GAP + width / 2;
-			// Scale X to match desired width (geometry is 1×CELL_HEIGHT)
-			mat.makeScale(width, 1, 1);
-			mat.setPosition(xCenter, y, 0);
+			const p = perspProject(xCenter, flatY, PERSP);
+			mat.makeScale(width * p.s, p.s, 1);
+			mat.setPosition(p.px, p.py, 0);
 			mesh.setMatrixAt(ci, mat);
 			mesh.setColorAt(ci, wingColor);
 		}
@@ -132,11 +134,15 @@ function SubBandInstanced({ fi }: { fi: number }) {
 		const mat = new THREE.Matrix4();
 		const dark = new THREE.Color("#3b0764");
 		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
-			const y = cellY(ci);
-			mat.makeTranslation(subLeftCX(fi), y, 0);
+			const flatY = cellY(ci);
+			const l = perspProject(subLeftCX(fi), flatY, PERSP);
+			mat.makeScale(l.s, l.s, 1);
+			mat.setPosition(l.px, l.py, 0);
 			mesh.setMatrixAt(ci * 2, mat);
 			mesh.setColorAt(ci * 2, dark);
-			mat.makeTranslation(subRightCX(fi), y, 0);
+			const r = perspProject(subRightCX(fi), flatY, PERSP);
+			mat.makeScale(r.s, r.s, 1);
+			mat.setPosition(r.px, r.py, 0);
 			mesh.setMatrixAt(ci * 2 + 1, mat);
 			mesh.setColorAt(ci * 2 + 1, dark);
 		}
