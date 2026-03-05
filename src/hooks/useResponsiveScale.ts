@@ -4,12 +4,16 @@
  * 狭い画面では比例縮小、広い画面ではスケール 1.0 に固定する。
  * モバイルでは水平余白を少なくするため、スケール下限を 0.85 に設定。
  * ピンチ操作によるズーム倍率 (pinchZoomAtom) を乗算する。
+ *
+ * OrthographicCamera + AdaptiveZoom により viewport.width は
+ * 旧 PerspectiveCamera(FOV=120, z=50) と同等のワールド単位で返るため、
+ * REFERENCE_VP_WIDTH の基準値はそのまま適用できる。
  */
 import { useThree } from "@react-three/fiber";
 import { useAtomValue } from "jotai";
 import { pinchZoomAtom } from "@/atoms/visualizerZoom";
 
-/** Desktop 16:9 at fov=120, z=50 → 2 × tan(60°) × 50 × (16/9) ≈ 308 */
+/** Desktop 16:9 — OrthographicCamera(AdaptiveZoom) で viewport.width ≈ 308 */
 const REFERENCE_VP_WIDTH = 308;
 /** モバイル時のスケール下限 — 水平余白を詰めるため */
 const MIN_SCALE = 0.85;
