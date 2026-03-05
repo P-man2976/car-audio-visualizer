@@ -15,7 +15,7 @@ export function HomePage() {
 	useAmFilter();
 
 	return (
-		<div className="relative h-full overflow-hidden border border-divider bg-black/90">
+		<div className="fixed inset-0 overflow-hidden bg-black/90">
 			{style === "standard-2d" ? (
 				<VisualizerCanvas2D />
 			) : (

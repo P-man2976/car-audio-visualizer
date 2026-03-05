@@ -140,9 +140,9 @@
 	}
 	html,
 	body {
-		@apply bg-gray-500/50 h-full text-white overflow-hidden;
+		@apply bg-[#060109] h-dvh text-white overflow-hidden;
 	}
 	#root {
-		@apply bg-gray-500/50 h-full;
+		@apply bg-[#060109] h-full;
 	}
 }
