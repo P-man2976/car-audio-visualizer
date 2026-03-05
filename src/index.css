@@ -140,7 +140,7 @@
 	}
 	html,
 	body {
-		@apply bg-[#060109] h-dvh text-white overflow-hidden;
+		@apply bg-[#060109] h-screen text-white overflow-hidden overscroll-none;
 	}
 	#root {
 		@apply bg-[#060109] h-full;
