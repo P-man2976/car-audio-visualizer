@@ -363,18 +363,11 @@ function VisualizerPane() {
 								{preview}
 							</div>
 							<div className="flex flex-col gap-1 min-w-0">
-								<div className="flex items-center gap-2">
-									<span
-										className={`text-sm font-medium ${isActive ? "text-cyan-300" : "text-neutral-200"}`}
-									>
-										{label}
-									</span>
-									{isActive && (
-										<span className="inline-flex items-center rounded-full bg-cyan-500/20 px-2 py-0.5 text-[10px] font-medium text-cyan-300">
-											使用中
-										</span>
-									)}
-								</div>
+								<span
+									className={`text-sm font-medium ${isActive ? "text-cyan-300" : "text-neutral-200"}`}
+								>
+									{label}
+								</span>
 								<p className="text-xs text-neutral-500 leading-relaxed line-clamp-3">
 									{description}
 								</p>
@@ -459,7 +452,7 @@ function AudioPane() {
 				>
 					<select
 						id={fftId}
-						className="w-full sm:w-auto rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs text-neutral-200 focus:border-neutral-500 focus:outline-none"
+						className="w-full sm:w-auto rounded border border-neutral-700 bg-neutral-900/50 px-2 py-1 text-xs text-neutral-200 focus:border-neutral-500 focus:outline-none"
 						value={settings.fftSize}
 						onChange={(e) =>
 							update("fftSize", Number(e.target.value) as FftSize)
@@ -546,7 +539,7 @@ function AudioPane() {
 				>
 					<select
 						id={weightId}
-						className="w-full sm:w-auto sm:max-w-[200px] rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs text-neutral-200 focus:border-neutral-500 focus:outline-none"
+						className="w-full sm:w-auto sm:max-w-[200px] rounded border border-neutral-700 bg-neutral-900/50 px-2 py-1 text-xs text-neutral-200 focus:border-neutral-500 focus:outline-none"
 						value={settings.weightingFilter}
 						onChange={(e) =>
 							update("weightingFilter", e.target.value as WeightingFilter)
@@ -752,7 +745,7 @@ function HotkeysPane() {
 									${
 										capturing === action
 											? "border-blue-400 bg-blue-500/20 text-blue-300 animate-pulse"
-											: "border-neutral-600 bg-neutral-800 text-neutral-200 hover:border-neutral-400"
+											: "border-neutral-600 bg-neutral-800/50 text-neutral-200 hover:border-neutral-400"
 									}
 								`}
 								onClick={() => setCapturing(action)}
