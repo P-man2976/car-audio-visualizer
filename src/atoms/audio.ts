@@ -1,7 +1,7 @@
 import AudioMotionAnalyzer from "audiomotion-analyzer";
 import { atom } from "jotai";
 import { SafariVizBridge, isMECSNBroken } from "@/lib/safari-viz-bridge";
-import { AM_FILTER_FREQ } from "./amFilter";
+import { AM_FILTER_FREQ, AM_HPF_FREQ } from "./amFilter";
 
 const sharedAudioElement = new Audio();
 
@@ -32,20 +32,36 @@ const analyzerInstance = new AudioMotionAnalyzer(undefined, {
 	peakFallSpeed: 0.005,
 });
 
-// ─── AM ラジオ帯域フィルタ + モノラル化 ──────────────────────────────────────
+// ─── AM ラジオフィルタチェーン ────────────────────────────────────────────────
 //
-// audio 要素 → MECSN → amLowpassFilter → monoNode → analyzerInstance → destination
-// フィルタは常にチェーンに挿入され、無効時はカットオフを Nyquist に設定して
-// 全帯域通過（実質バイパス）にする。モノラル化もフィルタ連動。
+// 有効時: MECSN → HPF(30Hz) → LPF(4500Hz) → compressor → monoNode → analyzer
+// 無効時: 全ノードがバイパス状態で全帯域ステレオパススルー。
+//
+// フィルタは常にチェーンに挿入され、無効時は HPF=1Hz / LPF=Nyquist /
+// compressor threshold=0dB（実質無圧縮）に設定してバイパスする。
 
 const _audioCtx = analyzerInstance.audioCtx;
 
+// ── HPF (ハイパスフィルタ): 超低域カット ──
+const amHighpassFilter = _audioCtx.createBiquadFilter();
+amHighpassFilter.type = "highpass";
+amHighpassFilter.frequency.value = 1; // 初期: バイパス（1Hz = 全帯域通過）
+amHighpassFilter.Q.value = 0.707;
+
+// ── LPF (ローパスフィルタ): AM 帯域上限カット ──
 const amLowpassFilter = _audioCtx.createBiquadFilter();
 amLowpassFilter.type = "lowpass";
-// 初期状態はバイパス（Nyquist ＝ 全帯域通過）
-amLowpassFilter.frequency.value = _audioCtx.sampleRate / 2;
-// Butterworth フラットレスポンス
+amLowpassFilter.frequency.value = _audioCtx.sampleRate / 2; // 初期: バイパス
 amLowpassFilter.Q.value = 0.707;
+
+// ── コンプレッサー (自動利得制御 / AGC) ──
+// AM 放送のダイナミックレンジ圧縮を再現する。
+const amCompressor = _audioCtx.createDynamicsCompressor();
+amCompressor.threshold.value = 0; // 初期: バイパス（0dB = 圧縮なし）
+amCompressor.knee.value = 10;
+amCompressor.ratio.value = 1; // 初期: バイパス（1:1 = 圧縮なし）
+amCompressor.attack.value = 0.003;
+amCompressor.release.value = 0.25;
 
 /**
  * ステレオ → モノラル ダウンミックスノード。
@@ -59,21 +75,39 @@ monoNode.channelCountMode = "max";
 monoNode.channelInterpretation = "speakers";
 monoNode.gain.value = 1;
 
-amLowpassFilter.connect(monoNode);
+// チェーン接続: HPF → LPF → compressor → mono
+amHighpassFilter.connect(amLowpassFilter);
+amLowpassFilter.connect(amCompressor);
+amCompressor.connect(monoNode);
 
 /**
  * AM フィルタの有効/無効を切り替える。
- * ローパスフィルタとモノラル化を同時に制御する。
+ * HPF + LPF + コンプレッサー + モノラル化を同時に制御する。
  *
- * @param active - true: ローパス 4500Hz + モノラル、false: バイパス + ステレオ
+ * @param active - true: AM 帯域制限 + AGC + モノラル、false: 全バイパス + ステレオ
  */
 export function setAmFilterActive(active: boolean): void {
+	const now = _audioCtx.currentTime;
+	const smooth = 0.02; // 20ms スムーズ遷移
+
+	// ハイパスフィルタ
+	amHighpassFilter.frequency.setTargetAtTime(
+		active ? AM_HPF_FREQ : 1,
+		now,
+		smooth,
+	);
+
 	// ローパスフィルタ
 	amLowpassFilter.frequency.setTargetAtTime(
 		active ? AM_FILTER_FREQ : _audioCtx.sampleRate / 2,
-		_audioCtx.currentTime,
-		0.02, // 20ms スムーズ遷移
+		now,
+		smooth,
 	);
+
+	// コンプレッサー (AGC)
+	amCompressor.threshold.setTargetAtTime(active ? -24 : 0, now, smooth);
+	amCompressor.ratio.setTargetAtTime(active ? 8 : 1, now, smooth);
+
 	// モノラル化
 	monoNode.channelCount = active ? 1 : 2;
 	monoNode.channelCountMode = active ? "explicit" : "max";
@@ -86,7 +120,7 @@ export function setAmFilterActive(active: boolean): void {
  * 呼ぶと MediaElementAudioSourceNode が無音になる。
  * play() 成功後（ソース確定済み）に一度だけ呼ぶことで回避する。
  *
- * audio → MECSN → amLowpassFilter → monoNode → analyzerInstance（→ destination）
+ * audio → MECSN → HPF → LPF → compressor → monoNode → analyzer（→ destination）
  */
 let _audioSourceConnected = false;
 export function connectAudioSource(): void {
@@ -94,7 +128,7 @@ export function connectAudioSource(): void {
 	_audioSourceConnected = true;
 
 	const mecsn = _audioCtx.createMediaElementSource(sharedAudioElement);
-	mecsn.connect(amLowpassFilter);
+	mecsn.connect(amHighpassFilter);
 	analyzerInstance.connectInput(monoNode);
 }
 
@@ -108,17 +142,9 @@ export const mediaStreamAtom = atom<MediaStream | null>(null);
  * Safari 18.x では createMediaElementSource() が返す MECSN が完全に無音になる
  * WebKit バグ (Bug 266922, 180696) があるため、hls.js の内部イベントから
  * fMP4 セグメントを横取りし decodeAudioData() 経由でアナライザーに流す。
- *
- * フィルタチェーン（amLowpassFilter → monoNode）を渡すことで、
- * Safari でも AM フィルタ + モノラル化を経由した音声がブリッジ経由で
- * destination に出力される。attach 時に audio 要素をミュートし、
- * detach 時にアンミュートすることで二重音声を防ぐ。
  */
 export const safariVizBridge: SafariVizBridge | null = isMECSNBroken()
-	? new SafariVizBridge(analyzerInstance, {
-			input: amLowpassFilter,
-			output: monoNode,
-		})
+	? new SafariVizBridge(analyzerInstance)
 	: null;
 
 /**

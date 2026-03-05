@@ -11,17 +11,9 @@
  *
  * audiomotion-analyzer の内部 _analyzer[0] をブリッジ専用ノードに差し替えることで、
  * getBars() がブリッジのデータを読むようにする。
- *
- * ## フィルタチェーン統合
- *
- * コンストラクタに FilterChain を渡すと、ブリッジ音声がフィルタ（AM ローパス +
- * モノラル化等）を経由してから bridgeAnalyser に到達する。
- * 同時に、connectAudioSource() でフィルタ出力が analyzer._input → destination
- * に接続されるため、Safari でもフィルタ済み音声がスピーカーから出力される。
- *
- * attach() で audio 要素のネイティブ出力をミュートし、detach() で復元することで
- * 二重音声を防ぐ。ファイル/AUX 再生時は bridge が detach されるため
- * ネイティブ出力に自動的に戻る。
+ * ブリッジ専用 AnalyserNode は destination に接続しないため二重音声を防ぐ。
+ * 実際のオーディオ出力は audioElement が直接スピーカーに出力する
+ * （Safari では MECSN が壊れているため、Web Audio グラフを経由しない）。
  */
 
 import type AudioMotionAnalyzer from "audiomotion-analyzer";
@@ -53,17 +45,6 @@ export function readBoxType(data: Uint8Array): string {
 	return String.fromCharCode(data[4], data[5], data[6], data[7]);
 }
 
-/**
- * AM フィルタ等のフィルタチェーンを表すインターフェース。
- * ブリッジ音声を input に流し、output から bridgeAnalyser + destination へ接続する。
- */
-export interface FilterChain {
-	/** フィルタチェーンの入力ノード（例: amLowpassFilter） */
-	readonly input: AudioNode;
-	/** フィルタチェーンの出力ノード（例: monoNode） */
-	readonly output: AudioNode;
-}
-
 export class SafariVizBridge {
 	private readonly audioCtx: AudioContext;
 	private readonly vizGain: GainNode;
@@ -75,19 +56,10 @@ export class SafariVizBridge {
 	private initSegment: Uint8Array | null = null;
 	private activeSources = new Set<AudioBufferSourceNode>();
 	private hls: Hls | null = null;
-	/** attach() でミュートした audio 要素。detach() で復元する */
-	private audioElement: HTMLAudioElement | null = null;
 	/** 次の AudioBufferSourceNode の再生開始時刻 (audioCtx.currentTime 基準) */
 	private nextStartTime = 0;
 
-	/**
-	 * @param analyzer - audiomotion-analyzer インスタンス
-	 * @param filterChain - オプションのフィルタチェーン。指定すると
-	 *   vizGain → filterChain.input → ... → filterChain.output → bridgeAnalyser
-	 *   のルーティングとなり、フィルタ済み音声が destination にも出力される。
-	 *   attach() 時に audio 要素をミュートして二重音声を防ぐ。
-	 */
-	constructor(analyzer: AudioMotionAnalyzer, filterChain?: FilterChain) {
+	constructor(analyzer: AudioMotionAnalyzer) {
 		this.analyzer = analyzer;
 		this.audioCtx = analyzer.audioCtx;
 
@@ -97,7 +69,7 @@ export class SafariVizBridge {
 		const origAnalyser: AnalyserNode = inst._analyzer[0];
 		this.originalAnalyser = origAnalyser;
 
-		// ブリッジ専用 AnalyserNode を作成
+		// ブリッジ専用 AnalyserNode を作成（destination に接続しない = 二重音声防止）
 		// オリジナルと同じ FFT 設定を引き継ぐ
 		this.bridgeAnalyser = this.audioCtx.createAnalyser();
 		this.bridgeAnalyser.fftSize = origAnalyser.fftSize;
@@ -106,20 +78,10 @@ export class SafariVizBridge {
 		this.bridgeAnalyser.smoothingTimeConstant =
 			origAnalyser.smoothingTimeConstant;
 
+		// vizGain → bridgeAnalyser の接続（dead-end: destination には到達しない）
 		this.vizGain = this.audioCtx.createGain();
 		this.vizGain.gain.value = 1;
-
-		if (filterChain) {
-			// フィルタチェーン経由: vizGain → filter → ... → bridgeAnalyser
-			// フィルタ済み音声がビジュアライザーに反映される。
-			// 音声出力は connectAudioSource() で monoNode → analyzer._input →
-			// ... → destination に接続される。
-			this.vizGain.connect(filterChain.input);
-			filterChain.output.connect(this.bridgeAnalyser);
-		} else {
-			// フィルタなし: vizGain → bridgeAnalyser（dead-end）
-			this.vizGain.connect(this.bridgeAnalyser);
-		}
+		this.vizGain.connect(this.bridgeAnalyser);
 
 		// _analyzer[0] を差し替えて getBars() がブリッジから読むようにする
 		// オリジナルは graph 内に残るが、MECSN が壊れているため無音のまま
@@ -129,22 +91,12 @@ export class SafariVizBridge {
 	/**
 	 * hls.js インスタンスにイベントリスナーを登録し、
 	 * オーディオセグメントの横取りを開始する。
-	 *
-	 * @param hls - hls.js インスタンス
-	 * @param audioElement - 再生中の audio 要素。ミュートして二重音声を防ぐ。
 	 */
-	attach(hls: Hls, audioElement?: HTMLAudioElement): void {
+	attach(hls: Hls): void {
 		this.detach();
 		this.hls = hls;
 		this.initSegment = null;
 		this.nextStartTime = 0;
-
-		// audio 要素のネイティブ出力をミュートし、
-		// ブリッジ経由のフィルタ済み音声のみを出力する
-		if (audioElement) {
-			this.audioElement = audioElement;
-			audioElement.volume = 0;
-		}
 
 		hls.on(Events.BUFFER_CODECS, this.onBufferCodecs);
 		hls.on(Events.BUFFER_APPENDING, this.onBufferAppending);
@@ -153,18 +105,12 @@ export class SafariVizBridge {
 	/**
 	 * hls.js からイベントリスナーを解除し、再生中のソースを停止する。
 	 * ブリッジ自体は破棄せず再利用可能。
-	 * attach() でミュートした audio 要素の音量を復元する。
 	 */
 	detach(): void {
 		if (this.hls) {
 			this.hls.off(Events.BUFFER_CODECS, this.onBufferCodecs);
 			this.hls.off(Events.BUFFER_APPENDING, this.onBufferAppending);
 			this.hls = null;
-		}
-		// audio 要素のネイティブ出力を復元
-		if (this.audioElement) {
-			this.audioElement.volume = 1;
-			this.audioElement = null;
 		}
 		this.stopAllSources();
 		this.initSegment = null;

@@ -1,8 +1,9 @@
 /**
- * AM ラジオフィルタの有効/無効を永続化する Jotai atom。
+ * AM ラジオフィルタの有効/無効を永続化する Jotai atom と定数。
  *
- * AM 放送帯域（~4500Hz）を模したローパスフィルタの ON/OFF 設定。
- * 実際の BiquadFilterNode は audio.ts で管理し、本モジュールは
+ * AM 放送帯域（~30Hz〜4500Hz）を模したバンドパスフィルタ（HPF + LPF）、
+ * モノラル化、自動利得制御（コンプレッサー）の ON/OFF 設定。
+ * 実際の AudioNode は audio.ts で管理し、本モジュールは
  * 設定アトムと定数のみを提供する。
  */
 import { atomWithStorage } from "jotai/utils";
@@ -15,3 +16,6 @@ export const amFilterEnabledAtom = atomWithStorage(
 
 /** AM ローパスフィルタのカットオフ周波数 [Hz] */
 export const AM_FILTER_FREQ = 4500;
+
+/** AM ハイパスフィルタのカットオフ周波数 [Hz] */
+export const AM_HPF_FREQ = 30;
