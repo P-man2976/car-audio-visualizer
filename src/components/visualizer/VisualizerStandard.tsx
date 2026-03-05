@@ -192,6 +192,7 @@ function BandInstanced({ fi }: { fi: number }) {
 		<instancedMesh
 			ref={meshRef}
 			args={[sharedGeometry, undefined, INSTANCES_PER_BAND]}
+			frustumCulled={false}
 		>
 			<meshStandardMaterial />
 		</instancedMesh>

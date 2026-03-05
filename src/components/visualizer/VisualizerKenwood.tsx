@@ -137,6 +137,7 @@ function KenwoodMainBandInstanced({ fi }: { fi: number }) {
 		<instancedMesh
 			ref={meshRef}
 			args={[mainGeometry, undefined, INSTANCES_PER_BAND]}
+			frustumCulled={false}
 		>
 			<meshStandardMaterial />
 		</instancedMesh>
@@ -186,6 +187,7 @@ function KenwoodSideBandInstanced({ fi }: { fi: number }) {
 		<instancedMesh
 			ref={meshRef}
 			args={[sideGeometry, undefined, INSTANCES_PER_BAND]}
+			frustumCulled={false}
 		>
 			<meshStandardMaterial />
 		</instancedMesh>

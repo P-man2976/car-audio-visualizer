@@ -111,6 +111,7 @@ function KenwoodWingInstanced({ side }: { side: "left" | "right" }) {
 		<instancedMesh
 			ref={meshRef}
 			args={[wingUnitGeometry, undefined, COL_CELL_COUNT]}
+			frustumCulled={false}
 		>
 			<meshStandardMaterial />
 		</instancedMesh>
@@ -162,6 +163,7 @@ function SubBandInstanced({ fi }: { fi: number }) {
 		<instancedMesh
 			ref={meshRef}
 			args={[subCellGeometry, undefined, SUB_INSTANCES_PER_BAND]}
+			frustumCulled={false}
 		>
 			<meshStandardMaterial />
 		</instancedMesh>

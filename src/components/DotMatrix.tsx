@@ -111,6 +111,7 @@ export function DotMatrixArray({ y = 40 }: { y?: number }) {
 			<instancedMesh
 				ref={meshRef}
 				args={[sharedGeometry, sharedMaterial, TOTAL_DOTS]}
+				frustumCulled={false}
 			/>
 		</group>
 	);
