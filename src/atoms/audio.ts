@@ -1,7 +1,7 @@
 import AudioMotionAnalyzer from "audiomotion-analyzer";
 import { atom } from "jotai";
 import { SafariVizBridge, isMECSNBroken } from "@/lib/safari-viz-bridge";
-import { AM_FILTER_FREQ, AM_HPF_FREQ } from "./amFilter";
+import { AM_FILTER_FREQ, AM_HPF_FREQ, makeDistortionCurve } from "./amFilter";
 
 const sharedAudioElement = new Audio();
 
@@ -34,11 +34,11 @@ const analyzerInstance = new AudioMotionAnalyzer(undefined, {
 
 // ─── AM ラジオフィルタチェーン ────────────────────────────────────────────────
 //
-// 有効時: MECSN → HPF(30Hz) → LPF(4500Hz) → compressor → monoNode → analyzer
+// 有効時: MECSN → HPF(30Hz) → LPF(4500Hz) → distortion → compressor → mono → analyzer
 // 無効時: 全ノードがバイパス状態で全帯域ステレオパススルー。
 //
 // フィルタは常にチェーンに挿入され、無効時は HPF=1Hz / LPF=Nyquist /
-// compressor threshold=0dB（実質無圧縮）に設定してバイパスする。
+// distortion=リニア / compressor threshold=0dB に設定してバイパスする。
 
 const _audioCtx = analyzerInstance.audioCtx;
 
@@ -53,6 +53,15 @@ const amLowpassFilter = _audioCtx.createBiquadFilter();
 amLowpassFilter.type = "lowpass";
 amLowpassFilter.frequency.value = _audioCtx.sampleRate / 2; // 初期: バイパス
 amLowpassFilter.Q.value = 0.707;
+
+// ── 歪み (WaveShaper): AM 放送のソフトクリッピングを再現 ──
+
+const amDistortion = _audioCtx.createWaveShaper();
+amDistortion.curve = null; // 初期: バイパス（リニア）
+amDistortion.oversample = "2x"; // エイリアシング防止
+
+/** AM 歪み有効時の curve。モジュールスコープでキャッシュして毎回生成しない */
+const AM_DISTORTION_CURVE = makeDistortionCurve(1.5);
 
 // ── コンプレッサー (自動利得制御 / AGC) ──
 // AM 放送のダイナミックレンジ圧縮を再現する。
@@ -75,16 +84,17 @@ monoNode.channelCountMode = "max";
 monoNode.channelInterpretation = "speakers";
 monoNode.gain.value = 1;
 
-// チェーン接続: HPF → LPF → compressor → mono
+// チェーン接続: HPF → LPF → distortion → compressor → mono
 amHighpassFilter.connect(amLowpassFilter);
-amLowpassFilter.connect(amCompressor);
+amLowpassFilter.connect(amDistortion);
+amDistortion.connect(amCompressor);
 amCompressor.connect(monoNode);
 
 /**
  * AM フィルタの有効/無効を切り替える。
- * HPF + LPF + コンプレッサー + モノラル化を同時に制御する。
+ * HPF + LPF + 歪み + コンプレッサー + モノラル化を同時に制御する。
  *
- * @param active - true: AM 帯域制限 + AGC + モノラル、false: 全バイパス + ステレオ
+ * @param active - true: AM 帯域制限 + 歪み + AGC + モノラル、false: 全バイパス + ステレオ
  */
 export function setAmFilterActive(active: boolean): void {
 	const now = _audioCtx.currentTime;
@@ -103,6 +113,9 @@ export function setAmFilterActive(active: boolean): void {
 		now,
 		smooth,
 	);
+
+	// 歪み
+	amDistortion.curve = active ? AM_DISTORTION_CURVE : null;
 
 	// コンプレッサー (AGC)
 	amCompressor.threshold.setTargetAtTime(active ? -24 : 0, now, smooth);
