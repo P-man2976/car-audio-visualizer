@@ -1,5 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { createPerspParams, perspProject } from "./perspProject";
+import {
+	createPerspParams,
+	fillQuadColor,
+	perspProject,
+	projectedCenterY,
+	writePerspQuad,
+	writeQuadIndices,
+} from "./perspProject";
 
 describe("createPerspParams", () => {
 	test("sin/cos が tiltDeg から正しく計算される", () => {
@@ -79,5 +86,74 @@ describe("perspProject", () => {
 		expect(50 - left.px).toBeCloseTo(right.px - 50, 10);
 		expect(left.py).toBeCloseTo(right.py);
 		expect(left.s).toBeCloseTo(right.s);
+	});
+});
+
+describe("writePerspQuad", () => {
+	test("4 頂点を射影して positions 配列に書き込む", () => {
+		const p = createPerspParams(10, 10, 100, 0);
+		const positions = new Float32Array(12);
+		writePerspQuad(positions, 0, 10, 10, 3, 1, p);
+		// tiltDeg=0 → 歪みなし、そのまま
+		expect(positions[0]).toBeCloseTo(7); // bl x = 10-3
+		expect(positions[1]).toBeCloseTo(9); // bl y = 10-1
+		expect(positions[3]).toBeCloseTo(13); // br x = 10+3
+		expect(positions[6]).toBeCloseTo(13); // tr x
+		expect(positions[7]).toBeCloseTo(11); // tr y = 10+1
+		expect(positions[9]).toBeCloseTo(7); // tl x
+	});
+
+	test("tiltDeg>0 で上辺が下辺より狭くなる", () => {
+		const p = createPerspParams(10, 10, 50, 24);
+		const positions = new Float32Array(12);
+		writePerspQuad(positions, 0, 10, 15, 3, 1, p);
+		const blX = positions[0];
+		const brX = positions[3];
+		const tlX = positions[9];
+		const trX = positions[6];
+		const bottomWidth = brX - blX;
+		const topWidth = trX - tlX;
+		expect(topWidth).toBeLessThan(bottomWidth);
+	});
+});
+
+describe("writeQuadIndices", () => {
+	test("2 三角形のインデックスを正しく書き込む", () => {
+		const indices = new Uint16Array(6);
+		writeQuadIndices(indices, 0);
+		expect(Array.from(indices)).toEqual([0, 1, 2, 0, 2, 3]);
+	});
+
+	test("cellIdx=2 のオフセットが正しい", () => {
+		const indices = new Uint16Array(18);
+		writeQuadIndices(indices, 2);
+		expect(Array.from(indices.slice(12, 18))).toEqual([8, 9, 10, 8, 10, 11]);
+	});
+});
+
+describe("fillQuadColor", () => {
+	test("4 頂点に同一色を設定する", () => {
+		const colors = new Float32Array(12);
+		fillQuadColor(colors, 0, 0.5, 0.3, 0.1);
+		for (let v = 0; v < 4; v++) {
+			expect(colors[v * 3]).toBeCloseTo(0.5);
+			expect(colors[v * 3 + 1]).toBeCloseTo(0.3);
+			expect(colors[v * 3 + 2]).toBeCloseTo(0.1);
+		}
+	});
+});
+
+describe("projectedCenterY", () => {
+	test("tiltDeg=0 では元の中心と一致", () => {
+		const p = createPerspParams(50, 25, 80, 0);
+		const cy = projectedCenterY(0, 50, p);
+		expect(cy).toBeCloseTo(25);
+	});
+
+	test("tiltDeg>0 では中心が下方にシフトする", () => {
+		const p = createPerspParams(50, 25, 80, 24);
+		const cy = projectedCenterY(0, 50, p);
+		// 下方（近い）は拡大、上方（遠い）は縮小 → 中心が下方にずれる
+		expect(cy).toBeLessThan(25);
 	});
 });

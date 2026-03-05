@@ -30,7 +30,7 @@ export function VisualizerSwitch() {
 	return (
 		<group scale={scale}>
 			<VisualizerStandard />
-			<DotMatrixArray y={40} />
+			<DotMatrixArray y={50} scale={1.3} />
 		</group>
 	);
 }

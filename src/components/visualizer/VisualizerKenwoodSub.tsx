@@ -1,7 +1,12 @@
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { createPerspParams, perspProject } from "@/lib/perspProject";
+import {
+	createPerspParams,
+	fillQuadColor,
+	writePerspQuad,
+	writeQuadIndices,
+} from "@/lib/perspProject";
 import { spectrogramAtom, store } from "./spectrogramStore";
 
 // ─── Layout constants ─────────────────────────────────────────────────────────
@@ -11,7 +16,7 @@ const FREQ_COUNT = 10; // centre bands only
 const CELL_HEIGHT = 0.4; // main = 0.6
 const COL_CELL_COUNT = 7; // rows
 const COL_CELL_GAP = 0.6; // main = 0.8
-const ANALYZER_ANGLE_DEGREE = 24;
+const ANALYZER_ANGLE_DEGREE = 32;
 
 // Sub bar geometry (pair per band, no side-tick bars)
 const SUB_COL_WIDTH = 2.2; // main = 3.6
@@ -42,8 +47,8 @@ const SUB_Y_OFFSET = -26;
 // Wing bar dimensions: widest at TOP row, narrowest at BOTTOM row.
 // This fills the triangular gap between the tilted sub-spectrum and the
 // screen vertical (screen edges).
-const WING_MAX_LOCAL_WIDTH = 18; // top row (ci = COL_CELL_COUNT-1)
-const WING_MIN_LOCAL_WIDTH = 14; // bottom row (ci = 0)
+const WING_MAX_LOCAL_WIDTH = 28; // top row (ci = COL_CELL_COUNT-1)
+const WING_MIN_LOCAL_WIDTH = 24.5; // bottom row (ci = 0)
 // Gap (in local units) between the wing bar and the outermost spectrum bar.
 const WING_GAP = 1;
 
@@ -57,97 +62,120 @@ const GRID_CX = (subLeftCX(0) + subRightCX(FREQ_COUNT - 1)) / 2;
 const GRID_CY = (cellY(0) + cellY(COL_CELL_COUNT - 1)) / 2;
 const PERSP = createPerspParams(GRID_CX, GRID_CY, 50, ANALYZER_ANGLE_DEGREE);
 
+// ─── Cached colors ────────────────────────────────────────────────────────────
+const COLOR_DARK = new THREE.Color("#3b0764");
+const COLOR_LIT = new THREE.Color("#6dceff");
+const COLOR_WING = new THREE.Color("#6dceff");
+
 // ─── Root component ───────────────────────────────────────────────────────────
 export function VisualizerKenwoodSub() {
 	return (
 		<group position={[-GRID_CX * SCALE, SUB_Y_OFFSET, 0]} scale={SCALE}>
 			{/* Wings: inverted triangle, widest at top, narrowest at bottom */}
-			<KenwoodWingInstanced side="left" />
-			<KenwoodWingInstanced side="right" />
+			<KenwoodWingMesh side="left" />
+			<KenwoodWingMesh side="right" />
 
 			{/* Sub-spectrum cells — 10 bands × 7 rows, no side ticks */}
 			{Array.from({ length: FREQ_COUNT }).map((_, fi) => (
 				<group key={`sub-band-${fi}`}>
-					<SubBandInstanced fi={fi} />
+					<SubBandMesh fi={fi} />
 				</group>
 			))}
 		</group>
 	);
 }
 
-// ─── Shared geometries ────────────────────────────────────────────────────────
-const subCellGeometry = new THREE.PlaneGeometry(SUB_COL_WIDTH, CELL_HEIGHT);
-const SUB_INSTANCES_PER_BAND = COL_CELL_COUNT * 2;
+// ─── Per-band BufferGeometry constants ───────────────────────────────────────
+const CELLS_PER_BAND = COL_CELL_COUNT * 2;
+const SUB_HALF_W = SUB_COL_WIDTH / 2;
+const HALF_H = CELL_HEIGHT / 2;
 
-// ─── Wing InstancedMesh ──────────────────────────────────────────────────────
+// ─── Wing BufferGeometry ─────────────────────────────────────────────────────
 // Horizontal bars whose width increases from bottom (ci=0) to top (ci=6).
-// Each wing is a single InstancedMesh with COL_CELL_COUNT instances,
-// each having a different-sized PlaneGeometry encoded via scale in the matrix.
-function KenwoodWingInstanced({ side }: { side: "left" | "right" }) {
-	const meshRef = useRef<THREE.InstancedMesh>(null);
+// Each wing is a single mesh with COL_CELL_COUNT quads, each with different width.
+function KenwoodWingMesh({ side }: { side: "left" | "right" }) {
+	const meshRef = useRef<THREE.Mesh>(null);
 
-	useEffect(() => {
-		const mesh = meshRef.current;
-		if (!mesh) return;
-		const mat = new THREE.Matrix4();
-		const wingColor = new THREE.Color("#6dceff");
+	const geometry = useMemo(() => {
+		const geo = new THREE.BufferGeometry();
+		const positions = new Float32Array(COL_CELL_COUNT * 12);
+		const colors = new Float32Array(COL_CELL_COUNT * 12);
+		const indices = new Uint16Array(COL_CELL_COUNT * 6);
+
 		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
 			const t = ci / (COL_CELL_COUNT - 1);
 			const width = WING_MIN_LOCAL_WIDTH * (1 - t) + WING_MAX_LOCAL_WIDTH * t;
-			const flatY = cellY(ci);
+			const y = cellY(ci);
 			const xCenter =
 				side === "left"
 					? -WING_GAP - width / 2
 					: TOTAL_WIDTH - BAND_GAP + WING_GAP + width / 2;
-			const p = perspProject(xCenter, flatY, PERSP);
-			mat.makeScale(width * p.s, p.s, 1);
-			mat.setPosition(p.px, p.py, 0);
-			mesh.setMatrixAt(ci, mat);
-			mesh.setColorAt(ci, wingColor);
+			writePerspQuad(positions, ci, xCenter, y, width / 2, HALF_H, PERSP);
+			writeQuadIndices(indices, ci);
+			fillQuadColor(colors, ci, COLOR_WING.r, COLOR_WING.g, COLOR_WING.b);
 		}
-		mesh.instanceMatrix.needsUpdate = true;
-		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+
+		geo.setAttribute(
+			"position",
+			new THREE.Float32BufferAttribute(positions, 3),
+		);
+		geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+		geo.setIndex(new THREE.BufferAttribute(indices, 1));
+		return geo;
 	}, [side]);
 
 	return (
-		<instancedMesh
-			ref={meshRef}
-			args={[wingUnitGeometry, undefined, COL_CELL_COUNT]}
-			frustumCulled={false}
-		>
-			<meshStandardMaterial />
-		</instancedMesh>
+		<mesh ref={meshRef} geometry={geometry} frustumCulled={false}>
+			<meshStandardMaterial vertexColors />
+		</mesh>
 	);
 }
 
-/** Unit geometry (1 × CELL_HEIGHT) — scaled per-instance for varying widths */
-const wingUnitGeometry = new THREE.PlaneGeometry(1, CELL_HEIGHT);
+// ─── Sub band BufferGeometry (left + right bars, cyan when lit) ──────────────
+function SubBandMesh({ fi }: { fi: number }) {
+	const meshRef = useRef<THREE.Mesh>(null);
 
-// ─── Sub band InstancedMesh (left + right bars, cyan when lit) ───────────────
-function SubBandInstanced({ fi }: { fi: number }) {
-	const meshRef = useRef<THREE.InstancedMesh>(null);
-	const color = useMemo(() => new THREE.Color(), []);
+	const { geometry, colorArray } = useMemo(() => {
+		const geo = new THREE.BufferGeometry();
+		const positions = new Float32Array(CELLS_PER_BAND * 12);
+		const colors = new Float32Array(CELLS_PER_BAND * 12);
+		const indices = new Uint16Array(CELLS_PER_BAND * 6);
 
-	useEffect(() => {
-		const mesh = meshRef.current;
-		if (!mesh) return;
-		const mat = new THREE.Matrix4();
-		const dark = new THREE.Color("#3b0764");
 		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
-			const flatY = cellY(ci);
-			const l = perspProject(subLeftCX(fi), flatY, PERSP);
-			mat.makeScale(l.s, l.s, 1);
-			mat.setPosition(l.px, l.py, 0);
-			mesh.setMatrixAt(ci * 2, mat);
-			mesh.setColorAt(ci * 2, dark);
-			const r = perspProject(subRightCX(fi), flatY, PERSP);
-			mat.makeScale(r.s, r.s, 1);
-			mat.setPosition(r.px, r.py, 0);
-			mesh.setMatrixAt(ci * 2 + 1, mat);
-			mesh.setColorAt(ci * 2 + 1, dark);
+			const y = cellY(ci);
+			const lIdx = ci * 2;
+			const rIdx = ci * 2 + 1;
+			writePerspQuad(
+				positions,
+				lIdx,
+				subLeftCX(fi),
+				y,
+				SUB_HALF_W,
+				HALF_H,
+				PERSP,
+			);
+			writePerspQuad(
+				positions,
+				rIdx,
+				subRightCX(fi),
+				y,
+				SUB_HALF_W,
+				HALF_H,
+				PERSP,
+			);
+			writeQuadIndices(indices, lIdx);
+			writeQuadIndices(indices, rIdx);
+			fillQuadColor(colors, lIdx, COLOR_DARK.r, COLOR_DARK.g, COLOR_DARK.b);
+			fillQuadColor(colors, rIdx, COLOR_DARK.r, COLOR_DARK.g, COLOR_DARK.b);
 		}
-		mesh.instanceMatrix.needsUpdate = true;
-		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+
+		geo.setAttribute(
+			"position",
+			new THREE.Float32BufferAttribute(positions, 3),
+		);
+		geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+		geo.setIndex(new THREE.BufferAttribute(indices, 1));
+		return { geometry: geo, colorArray: colors };
 	}, [fi]);
 
 	useFrame(() => {
@@ -158,20 +186,17 @@ function SubBandInstanced({ fi }: { fi: number }) {
 		const value = freqLevel?.value?.[0] ?? 0;
 
 		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
-			color.set(value * COL_CELL_COUNT > ci ? "#6dceff" : "#3b0764");
-			mesh.setColorAt(ci * 2, color);
-			mesh.setColorAt(ci * 2 + 1, color);
+			const c = value * COL_CELL_COUNT > ci ? COLOR_LIT : COLOR_DARK;
+			fillQuadColor(colorArray, ci * 2, c.r, c.g, c.b);
+			fillQuadColor(colorArray, ci * 2 + 1, c.r, c.g, c.b);
 		}
-		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+		const attr = mesh.geometry.getAttribute("color");
+		attr.needsUpdate = true;
 	});
 
 	return (
-		<instancedMesh
-			ref={meshRef}
-			args={[subCellGeometry, undefined, SUB_INSTANCES_PER_BAND]}
-			frustumCulled={false}
-		>
-			<meshStandardMaterial />
-		</instancedMesh>
+		<mesh ref={meshRef} geometry={geometry} frustumCulled={false}>
+			<meshStandardMaterial vertexColors />
+		</mesh>
 	);
 }

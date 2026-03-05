@@ -1,10 +1,16 @@
 import { useFrame } from "@react-three/fiber";
 import type { AnalyzerBarData } from "audiomotion-analyzer";
 import { useAtomValue } from "jotai";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
-import { createPerspParams, perspProject } from "@/lib/perspProject";
+import {
+	createPerspParams,
+	fillQuadColor,
+	projectedCenterY,
+	writePerspQuad,
+	writeQuadIndices,
+} from "@/lib/perspProject";
 import { spectrogramAtom, store } from "./spectrogramStore";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -12,7 +18,7 @@ const FREQ_COUNT = 11;
 const CELL_HEIGHT = 0.6;
 const COL_CELL_COUNT = 26;
 const COL_CELL_GAP = 0.8;
-const ANALYZER_ANGLE_DEGREE = 16;
+const ANALYZER_ANGLE_DEGREE = 28;
 
 const SUB_COL_WIDTH = 3;
 const SUB_COL_GAP = 0.5;
@@ -45,6 +51,14 @@ const cellY = (ci: number) => (CELL_HEIGHT + COL_CELL_GAP) * ci + COL_CELL_GAP;
 const GRID_CX = (sideLeftCX(0) + sideRightCX(FREQ_COUNT - 1)) / 2;
 const GRID_CY = (cellY(0) + cellY(COL_CELL_COUNT - 1)) / 2;
 const PERSP = createPerspParams(GRID_CX, GRID_CY, 50, ANALYZER_ANGLE_DEGREE);
+/** 射影後の Y 中心 */
+const PROJ_CY = projectedCenterY(cellY(0), cellY(COL_CELL_COUNT - 1), PERSP);
+
+// ─── Cached colors ────────────────────────────────────────────────────────────
+const COLOR_DARK = new THREE.Color("#3b0764");
+const COLOR_LIT = new THREE.Color("#6dceff");
+const COLOR_PEAK = new THREE.Color("#ffffff");
+const COLOR_SIDE_OFF = new THREE.Color("#91daff");
 
 // ─── Root component ───────────────────────────────────────────────────────────
 export function VisualizerKenwood() {
@@ -64,49 +78,70 @@ export function VisualizerKenwood() {
 
 	return (
 		<group
-			position={[-GRID_CX * SCALE, -GRID_CY * SCALE + OFFSET_Y, 0]}
+			position={[-GRID_CX * SCALE, -PROJ_CY * SCALE + OFFSET_Y, 0]}
 			scale={SCALE}
 		>
 			{Array.from({ length: FREQ_COUNT }).map((_, fi) => (
 				<group key={`band-${fi}`}>
-					<KenwoodMainBandInstanced fi={fi} />
-					<KenwoodSideBandInstanced fi={fi} />
+					<KenwoodMainBandMesh fi={fi} />
+					<KenwoodSideBandMesh fi={fi} />
 				</group>
 			))}
 		</group>
 	);
 }
 
-// ─── Shared geometries ────────────────────────────────────────────────────────
-const mainGeometry = new THREE.PlaneGeometry(SUB_COL_WIDTH, CELL_HEIGHT);
-const sideGeometry = new THREE.PlaneGeometry(SIDE_BAR_WIDTH, CELL_HEIGHT);
-const INSTANCES_PER_BAND = COL_CELL_COUNT * 2;
+// ─── Per-band BufferGeometry constants ───────────────────────────────────────
+const CELLS_PER_BAND = COL_CELL_COUNT * 2;
+const MAIN_HALF_W = SUB_COL_WIDTH / 2;
+const SIDE_HALF_W = SIDE_BAR_WIDTH / 2;
+const HALF_H = CELL_HEIGHT / 2;
 
-// ─── Main sub-bar InstancedMesh (left + right, cyan when lit) ─────────────────
-function KenwoodMainBandInstanced({ fi }: { fi: number }) {
-	const meshRef = useRef<THREE.InstancedMesh>(null);
-	const color = useMemo(() => new THREE.Color(), []);
+// ─── Main sub-bar BufferGeometry (left + right, cyan when lit) ────────────────
+function KenwoodMainBandMesh({ fi }: { fi: number }) {
+	const meshRef = useRef<THREE.Mesh>(null);
 
-	useEffect(() => {
-		const mesh = meshRef.current;
-		if (!mesh) return;
-		const mat = new THREE.Matrix4();
-		const dark = new THREE.Color("#3b0764");
+	const { geometry, colorArray } = useMemo(() => {
+		const geo = new THREE.BufferGeometry();
+		const positions = new Float32Array(CELLS_PER_BAND * 12);
+		const colors = new Float32Array(CELLS_PER_BAND * 12);
+		const indices = new Uint16Array(CELLS_PER_BAND * 6);
+
 		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
-			const flatY = cellY(ci);
-			const l = perspProject(subLeftCX(fi), flatY, PERSP);
-			mat.makeScale(l.s, l.s, 1);
-			mat.setPosition(l.px, l.py, 0);
-			mesh.setMatrixAt(ci * 2, mat);
-			mesh.setColorAt(ci * 2, dark);
-			const r = perspProject(subRightCX(fi), flatY, PERSP);
-			mat.makeScale(r.s, r.s, 1);
-			mat.setPosition(r.px, r.py, 0);
-			mesh.setMatrixAt(ci * 2 + 1, mat);
-			mesh.setColorAt(ci * 2 + 1, dark);
+			const y = cellY(ci);
+			const lIdx = ci * 2;
+			const rIdx = ci * 2 + 1;
+			writePerspQuad(
+				positions,
+				lIdx,
+				subLeftCX(fi),
+				y,
+				MAIN_HALF_W,
+				HALF_H,
+				PERSP,
+			);
+			writePerspQuad(
+				positions,
+				rIdx,
+				subRightCX(fi),
+				y,
+				MAIN_HALF_W,
+				HALF_H,
+				PERSP,
+			);
+			writeQuadIndices(indices, lIdx);
+			writeQuadIndices(indices, rIdx);
+			fillQuadColor(colors, lIdx, COLOR_DARK.r, COLOR_DARK.g, COLOR_DARK.b);
+			fillQuadColor(colors, rIdx, COLOR_DARK.r, COLOR_DARK.g, COLOR_DARK.b);
 		}
-		mesh.instanceMatrix.needsUpdate = true;
-		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+
+		geo.setAttribute(
+			"position",
+			new THREE.Float32BufferAttribute(positions, 3),
+		);
+		geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+		geo.setIndex(new THREE.BufferAttribute(indices, 1));
+		return { geometry: geo, colorArray: colors };
 	}, [fi]);
 
 	useFrame(() => {
@@ -121,56 +156,82 @@ function KenwoodMainBandInstanced({ fi }: { fi: number }) {
 			const isPeak =
 				(ci < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci + 1) ||
 				(ci - 1 < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci);
-
-			color.set(
-				isPeak
-					? "#ffffff"
-					: value * COL_CELL_COUNT > ci
-						? "#6dceff"
-						: "#3b0764",
-			);
-			mesh.setColorAt(ci * 2, color);
-			mesh.setColorAt(ci * 2 + 1, color);
+			const c = isPeak
+				? COLOR_PEAK
+				: value * COL_CELL_COUNT > ci
+					? COLOR_LIT
+					: COLOR_DARK;
+			fillQuadColor(colorArray, ci * 2, c.r, c.g, c.b);
+			fillQuadColor(colorArray, ci * 2 + 1, c.r, c.g, c.b);
 		}
-		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+		const attr = mesh.geometry.getAttribute("color");
+		attr.needsUpdate = true;
 	});
 
 	return (
-		<instancedMesh
-			ref={meshRef}
-			args={[mainGeometry, undefined, INSTANCES_PER_BAND]}
-			frustumCulled={false}
-		>
-			<meshStandardMaterial />
-		</instancedMesh>
+		<mesh ref={meshRef} geometry={geometry} frustumCulled={false}>
+			<meshStandardMaterial vertexColors />
+		</mesh>
 	);
 }
 
-// ─── Side tick InstancedMesh (left + right, inverted: unlit = cyan) ───────────
-function KenwoodSideBandInstanced({ fi }: { fi: number }) {
-	const meshRef = useRef<THREE.InstancedMesh>(null);
-	const color = useMemo(() => new THREE.Color(), []);
+// ─── Side tick BufferGeometry (left + right, inverted: unlit = cyan) ──────────
+function KenwoodSideBandMesh({ fi }: { fi: number }) {
+	const meshRef = useRef<THREE.Mesh>(null);
 
-	useEffect(() => {
-		const mesh = meshRef.current;
-		if (!mesh) return;
-		const mat = new THREE.Matrix4();
-		const cyan = new THREE.Color("#91daff");
+	const { geometry, colorArray } = useMemo(() => {
+		const geo = new THREE.BufferGeometry();
+		const positions = new Float32Array(CELLS_PER_BAND * 12);
+		const colors = new Float32Array(CELLS_PER_BAND * 12);
+		const indices = new Uint16Array(CELLS_PER_BAND * 6);
+
 		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
-			const flatY = cellY(ci);
-			const l = perspProject(sideLeftCX(fi), flatY, PERSP);
-			mat.makeScale(l.s, l.s, 1);
-			mat.setPosition(l.px, l.py, 0);
-			mesh.setMatrixAt(ci * 2, mat);
-			mesh.setColorAt(ci * 2, cyan);
-			const r = perspProject(sideRightCX(fi), flatY, PERSP);
-			mat.makeScale(r.s, r.s, 1);
-			mat.setPosition(r.px, r.py, 0);
-			mesh.setMatrixAt(ci * 2 + 1, mat);
-			mesh.setColorAt(ci * 2 + 1, cyan);
+			const y = cellY(ci);
+			const lIdx = ci * 2;
+			const rIdx = ci * 2 + 1;
+			writePerspQuad(
+				positions,
+				lIdx,
+				sideLeftCX(fi),
+				y,
+				SIDE_HALF_W,
+				HALF_H,
+				PERSP,
+			);
+			writePerspQuad(
+				positions,
+				rIdx,
+				sideRightCX(fi),
+				y,
+				SIDE_HALF_W,
+				HALF_H,
+				PERSP,
+			);
+			writeQuadIndices(indices, lIdx);
+			writeQuadIndices(indices, rIdx);
+			fillQuadColor(
+				colors,
+				lIdx,
+				COLOR_SIDE_OFF.r,
+				COLOR_SIDE_OFF.g,
+				COLOR_SIDE_OFF.b,
+			);
+			fillQuadColor(
+				colors,
+				rIdx,
+				COLOR_SIDE_OFF.r,
+				COLOR_SIDE_OFF.g,
+				COLOR_SIDE_OFF.b,
+			);
 		}
-		mesh.instanceMatrix.needsUpdate = true;
-		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+
+		geo.setAttribute(
+			"position",
+			new THREE.Float32BufferAttribute(positions, 3),
+		);
+		geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+		geo.setIndex(new THREE.BufferAttribute(indices, 1));
+		return { geometry: geo, colorArray: colors };
 	}, [fi]);
 
 	useFrame(() => {
@@ -181,21 +242,17 @@ function KenwoodSideBandInstanced({ fi }: { fi: number }) {
 		const value = freqLevel?.value?.[0] ?? 0;
 
 		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
-			// inverted: below signal level = dark, above = cyan
-			color.set(value * COL_CELL_COUNT > ci ? "#3b0764" : "#91daff");
-			mesh.setColorAt(ci * 2, color);
-			mesh.setColorAt(ci * 2 + 1, color);
+			const c = value * COL_CELL_COUNT > ci ? COLOR_DARK : COLOR_SIDE_OFF;
+			fillQuadColor(colorArray, ci * 2, c.r, c.g, c.b);
+			fillQuadColor(colorArray, ci * 2 + 1, c.r, c.g, c.b);
 		}
-		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+		const attr = mesh.geometry.getAttribute("color");
+		attr.needsUpdate = true;
 	});
 
 	return (
-		<instancedMesh
-			ref={meshRef}
-			args={[sideGeometry, undefined, INSTANCES_PER_BAND]}
-			frustumCulled={false}
-		>
-			<meshStandardMaterial />
-		</instancedMesh>
+		<mesh ref={meshRef} geometry={geometry} frustumCulled={false}>
+			<meshStandardMaterial vertexColors />
+		</mesh>
 	);
 }

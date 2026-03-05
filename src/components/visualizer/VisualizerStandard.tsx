@@ -7,7 +7,14 @@ import * as THREE from "three";
 import { Font, FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
-import { createPerspParams, perspProject } from "@/lib/perspProject";
+import {
+	createPerspParams,
+	fillQuadColor,
+	perspProject,
+	projectedCenterY,
+	writePerspQuad,
+	writeQuadIndices,
+} from "@/lib/perspProject";
 import { spectrogramAtom, store } from "./spectrogramStore";
 
 // ─── Montserrat 600 font singleton ───────────────────────────────────────────
@@ -50,6 +57,15 @@ const GRID_CX = (leftCX(0) + rightCX(FREQ_COUNT - 1)) / 2;
 const GRID_CY = (cellY(0) + cellY(COL_CELL_COUNT - 1)) / 2;
 /** パースペクティブ射影パラメータ */
 const PERSP = createPerspParams(GRID_CX, GRID_CY, 50, ANALYZER_ANGLE_DEGREE);
+/** 射影後の Y 中心（台形が上方に圧縮されるため GRID_CY より低い） */
+const PROJ_CY = projectedCenterY(cellY(0), cellY(COL_CELL_COUNT - 1), PERSP);
+
+const VIZ_SCALE = 1.6;
+
+// ─── Cached colors ────────────────────────────────────────────────────────────
+const COLOR_DARK = new THREE.Color("#3b0764");
+const COLOR_LIT = new THREE.Color("#a5f3fc");
+const COLOR_PEAK = new THREE.Color("#3b82f6");
 
 // ─── Root component ───────────────────────────────────────────────────────────
 export function VisualizerStandard() {
@@ -64,7 +80,10 @@ export function VisualizerStandard() {
 	});
 
 	return (
-		<group position={[-GRID_CX, -GRID_CY, 0]} scale={1.6}>
+		<group
+			position={[-GRID_CX * VIZ_SCALE, -PROJ_CY * VIZ_SCALE, 0]}
+			scale={VIZ_SCALE}
+		>
 			{Array.from({ length: FREQ_COUNT }).map((_, fi) => {
 				const lineY = -2;
 				const lStart = perspProject(
@@ -94,7 +113,7 @@ export function VisualizerStandard() {
 				);
 				return (
 					<group key={`band-${fi}`}>
-						<BandInstanced fi={fi} />
+						<BandMesh fi={fi} />
 						<Line
 							points={[
 								[lStart.px, lStart.py, 0],
@@ -122,39 +141,39 @@ export function VisualizerStandard() {
 	);
 }
 
-// ─── InstancedMesh per band: 32 cells × 2 planes = 64 instances ──────────────
-/** 共有ジオメトリ — 全バンド共通の PlaneGeometry */
-const sharedGeometry = new THREE.PlaneGeometry(CELL_WIDTH, CELL_HEIGHT);
-/** インスタンス数 = セル数 × 左右 2 面 */
-const INSTANCES_PER_BAND = COL_CELL_COUNT * 2;
+// ─── Per-band BufferGeometry: 32 cells × 2 columns = 64 trapezoid quads ──────
+const CELLS_PER_BAND = COL_CELL_COUNT * 2;
+const HALF_W = CELL_WIDTH / 2;
+const HALF_H = CELL_HEIGHT / 2;
 
-function BandInstanced({ fi }: { fi: number }) {
-	const meshRef = useRef<THREE.InstancedMesh>(null);
-	const color = useMemo(() => new THREE.Color(), []);
+function BandMesh({ fi }: { fi: number }) {
+	const meshRef = useRef<THREE.Mesh>(null);
 
-	// 初回マウント時にインスタンスの位置（行列）とデフォルト色を設定
-	useEffect(() => {
-		const mesh = meshRef.current;
-		if (!mesh) return;
-		const mat = new THREE.Matrix4();
-		const dark = new THREE.Color("#3b0764");
+	const { geometry, colorArray } = useMemo(() => {
+		const geo = new THREE.BufferGeometry();
+		const positions = new Float32Array(CELLS_PER_BAND * 12);
+		const colors = new Float32Array(CELLS_PER_BAND * 12);
+		const indices = new Uint16Array(CELLS_PER_BAND * 6);
+
 		for (let ci = 0; ci < COL_CELL_COUNT; ci++) {
-			const flatY = cellY(ci);
-			// 左列: index = ci * 2
-			const l = perspProject(leftCX(fi), flatY, PERSP);
-			mat.makeScale(l.s, l.s, 1);
-			mat.setPosition(l.px, l.py, 0);
-			mesh.setMatrixAt(ci * 2, mat);
-			mesh.setColorAt(ci * 2, dark);
-			// 右列: index = ci * 2 + 1
-			const r = perspProject(rightCX(fi), flatY, PERSP);
-			mat.makeScale(r.s, r.s, 1);
-			mat.setPosition(r.px, r.py, 0);
-			mesh.setMatrixAt(ci * 2 + 1, mat);
-			mesh.setColorAt(ci * 2 + 1, dark);
+			const y = cellY(ci);
+			const lIdx = ci * 2;
+			const rIdx = ci * 2 + 1;
+			writePerspQuad(positions, lIdx, leftCX(fi), y, HALF_W, HALF_H, PERSP);
+			writePerspQuad(positions, rIdx, rightCX(fi), y, HALF_W, HALF_H, PERSP);
+			writeQuadIndices(indices, lIdx);
+			writeQuadIndices(indices, rIdx);
+			fillQuadColor(colors, lIdx, COLOR_DARK.r, COLOR_DARK.g, COLOR_DARK.b);
+			fillQuadColor(colors, rIdx, COLOR_DARK.r, COLOR_DARK.g, COLOR_DARK.b);
 		}
-		mesh.instanceMatrix.needsUpdate = true;
-		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+
+		geo.setAttribute(
+			"position",
+			new THREE.Float32BufferAttribute(positions, 3),
+		);
+		geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+		geo.setIndex(new THREE.BufferAttribute(indices, 1));
+		return { geometry: geo, colorArray: colors };
 	}, [fi]);
 
 	useFrame(() => {
@@ -169,28 +188,22 @@ function BandInstanced({ fi }: { fi: number }) {
 			const isPeak =
 				(ci < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci + 1) ||
 				(ci - 2 < peak * COL_CELL_COUNT && peak * COL_CELL_COUNT < ci - 1);
-
-			color.set(
-				isPeak
-					? "#3b82f6"
-					: value * COL_CELL_COUNT > ci
-						? "#a5f3fc"
-						: "#3b0764",
-			);
-			mesh.setColorAt(ci * 2, color);
-			mesh.setColorAt(ci * 2 + 1, color);
+			const c = isPeak
+				? COLOR_PEAK
+				: value * COL_CELL_COUNT > ci
+					? COLOR_LIT
+					: COLOR_DARK;
+			fillQuadColor(colorArray, ci * 2, c.r, c.g, c.b);
+			fillQuadColor(colorArray, ci * 2 + 1, c.r, c.g, c.b);
 		}
-		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+		const attr = mesh.geometry.getAttribute("color");
+		attr.needsUpdate = true;
 	});
 
 	return (
-		<instancedMesh
-			ref={meshRef}
-			args={[sharedGeometry, undefined, INSTANCES_PER_BAND]}
-			frustumCulled={false}
-		>
-			<meshStandardMaterial />
-		</instancedMesh>
+		<mesh ref={meshRef} geometry={geometry} frustumCulled={false}>
+			<meshStandardMaterial vertexColors />
+		</mesh>
 	);
 }
 

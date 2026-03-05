@@ -1,7 +1,11 @@
 import AudioMotionAnalyzer from "audiomotion-analyzer";
 import { atom } from "jotai";
 import { SafariVizBridge, isMECSNBroken } from "@/lib/safari-viz-bridge";
-import { AM_FILTER_FREQ, AM_HPF_FREQ, makeDistortionCurve } from "./amFilter";
+import {
+	type AmFilterSettings,
+	DEFAULT_AM_FILTER_SETTINGS,
+	makeDistortionCurve,
+} from "./amFilter";
 
 const sharedAudioElement = new Audio();
 
@@ -34,7 +38,8 @@ const analyzerInstance = new AudioMotionAnalyzer(undefined, {
 
 // ─── AM ラジオフィルタチェーン ────────────────────────────────────────────────
 //
-// 有効時: MECSN → HPF(30Hz) → LPF(4500Hz) → distortion → compressor → mono → analyzer
+// 有効時: MECSN → HPF → LPF → distortion → compressor → mono → analyzer
+//         noise ↗
 // 無効時: 全ノードがバイパス状態で全帯域ステレオパススルー。
 //
 // フィルタは常にチェーンに挿入され、無効時は HPF=1Hz / LPF=Nyquist /
@@ -60,8 +65,21 @@ const amDistortion = _audioCtx.createWaveShaper();
 amDistortion.curve = null; // 初期: バイパス（リニア）
 amDistortion.oversample = "2x"; // エイリアシング防止
 
-/** AM 歪み有効時の curve。モジュールスコープでキャッシュして毎回生成しない */
-const AM_DISTORTION_CURVE = makeDistortionCurve(1.5);
+/** 最後に適用した distortion amount（同じ値の再生成を避ける） */
+let _lastDistortionAmount = -1;
+/** 現在のキャッシュ済み curve */
+let _cachedDistortionCurve: Float32Array | null = null;
+
+/**
+ * 指定 amount の歪みカーブを取得する。同じ値なら前回のキャッシュを返す。
+ */
+function getDistortionCurve(amount: number): Float32Array {
+	if (amount !== _lastDistortionAmount || _cachedDistortionCurve === null) {
+		_cachedDistortionCurve = makeDistortionCurve(amount);
+		_lastDistortionAmount = amount;
+	}
+	return _cachedDistortionCurve;
+}
 
 // ── コンプレッサー (自動利得制御 / AGC) ──
 // AM 放送のダイナミックレンジ圧縮を再現する。
@@ -84,6 +102,29 @@ monoNode.channelCountMode = "max";
 monoNode.channelInterpretation = "speakers";
 monoNode.gain.value = 1;
 
+// ── ホワイトノイズ: AM 受信ノイズを再現 ──
+// ループ再生される 2 秒間のホワイトノイズバッファ。
+// GainNode で音量を制御し、HPF の前段にミックスすることで
+// 帯域フィルタを通過したバンドリミテッドノイズになる。
+const _noiseBuffer = _audioCtx.createBuffer(
+	1,
+	_audioCtx.sampleRate * 2,
+	_audioCtx.sampleRate,
+);
+const _noiseData = _noiseBuffer.getChannelData(0);
+for (let i = 0; i < _noiseData.length; i++) {
+	_noiseData[i] = Math.random() * 2 - 1;
+}
+const noiseSource = _audioCtx.createBufferSource();
+noiseSource.buffer = _noiseBuffer;
+noiseSource.loop = true;
+noiseSource.start();
+
+const noiseGain = _audioCtx.createGain();
+noiseGain.gain.value = 0; // 初期: 無音
+noiseSource.connect(noiseGain);
+noiseGain.connect(amHighpassFilter); // HPF の前段に接続
+
 // チェーン接続: HPF → LPF → distortion → compressor → mono
 amHighpassFilter.connect(amLowpassFilter);
 amLowpassFilter.connect(amDistortion);
@@ -92,34 +133,51 @@ amCompressor.connect(monoNode);
 
 /**
  * AM フィルタの有効/無効を切り替える。
- * HPF + LPF + 歪み + コンプレッサー + モノラル化を同時に制御する。
+ * HPF + LPF + 歪み + コンプレッサー + モノラル化 + ノイズを同時に制御する。
  *
- * @param active - true: AM 帯域制限 + 歪み + AGC + モノラル、false: 全バイパス + ステレオ
+ * @param active - true: AM 帯域制限 + 歪み + AGC + モノラル + ノイズ、false: 全バイパス + ステレオ
+ * @param settings - AM フィルタの各パラメーター（デフォルト値使用可）
  */
-export function setAmFilterActive(active: boolean): void {
+export function setAmFilterActive(
+	active: boolean,
+	settings: AmFilterSettings = DEFAULT_AM_FILTER_SETTINGS,
+): void {
 	const now = _audioCtx.currentTime;
 	const smooth = 0.02; // 20ms スムーズ遷移
 
 	// ハイパスフィルタ
 	amHighpassFilter.frequency.setTargetAtTime(
-		active ? AM_HPF_FREQ : 1,
+		active ? settings.hpfFreq : 1,
 		now,
 		smooth,
 	);
 
 	// ローパスフィルタ
 	amLowpassFilter.frequency.setTargetAtTime(
-		active ? AM_FILTER_FREQ : _audioCtx.sampleRate / 2,
+		active ? settings.lpfFreq : _audioCtx.sampleRate / 2,
 		now,
 		smooth,
 	);
 
 	// 歪み
-	amDistortion.curve = active ? AM_DISTORTION_CURVE : null;
+	amDistortion.curve = active
+		? getDistortionCurve(settings.distortionAmount)
+		: null;
 
 	// コンプレッサー (AGC)
-	amCompressor.threshold.setTargetAtTime(active ? -24 : 0, now, smooth);
-	amCompressor.ratio.setTargetAtTime(active ? 8 : 1, now, smooth);
+	amCompressor.threshold.setTargetAtTime(
+		active ? settings.compThreshold : 0,
+		now,
+		smooth,
+	);
+	amCompressor.ratio.setTargetAtTime(
+		active ? settings.compRatio : 1,
+		now,
+		smooth,
+	);
+
+	// ホワイトノイズ
+	noiseGain.gain.setTargetAtTime(active ? settings.noiseLevel : 0, now, smooth);
 
 	// モノラル化
 	monoNode.channelCount = active ? 1 : 2;

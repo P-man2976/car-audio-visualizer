@@ -20,9 +20,9 @@ const DOT_ROWS = 7;
 /** 表示文字数 */
 const CHAR_COUNT = 12;
 /** 1ドットの辺の長さ */
-const DOT_SIZE = 1.75;
+const DOT_SIZE = 1.7;
 /** ドット間の隙間 */
-const DOT_GAP = 0.3;
+const DOT_GAP = 0.5;
 /** 文字間の追加隙間 */
 const CHAR_GAP = 2;
 
@@ -50,7 +50,13 @@ const TOTAL_W = CHAR_COUNT * CHAR_W + (CHAR_COUNT - 1) * CHAR_GAP;
  *
  * @param y - ディスプレイの Y 座標（グループ配置）
  */
-export function DotMatrixArray({ y = 40 }: { y?: number }) {
+export function DotMatrixArray({
+	y = 40,
+	scale = 1,
+}: {
+	y?: number;
+	scale?: number;
+}) {
 	const displayString = useAtomValue(displayStringAtom);
 	const meshRef = useRef<THREE.InstancedMesh>(null);
 	const tempMatrix = useMemo(() => new THREE.Matrix4(), []);
@@ -107,7 +113,7 @@ export function DotMatrixArray({ y = 40 }: { y?: number }) {
 	}, [displayString, tempColor]);
 
 	return (
-		<group position={[0, y, 0]}>
+		<group position={[0, y, 0]} scale={scale}>
 			<instancedMesh
 				ref={meshRef}
 				args={[sharedGeometry, sharedMaterial, TOTAL_DOTS]}

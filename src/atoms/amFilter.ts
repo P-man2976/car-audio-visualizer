@@ -1,9 +1,10 @@
 /**
  * AM ラジオフィルタの有効/無効を永続化する Jotai atom と定数、
- * および歪みカーブ生成関数。
+ * 設定パラメーター、および歪みカーブ生成関数。
  *
  * AM 放送帯域（~30Hz〜4500Hz）を模したバンドパスフィルタ（HPF + LPF）、
- * ソフトクリッピング歪み、モノラル化、自動利得制御（コンプレッサー）の ON/OFF 設定。
+ * ソフトクリッピング歪み、モノラル化、自動利得制御（コンプレッサー）、
+ * ホワイトノイズの ON/OFF 設定と各パラメーター。
  * 実際の AudioNode は audio.ts で管理し、本モジュールは
  * 設定アトム・定数・純粋関数のみを提供する。
  */
@@ -20,6 +21,40 @@ export const AM_FILTER_FREQ = 4500;
 
 /** AM ハイパスフィルタのカットオフ周波数 [Hz] */
 export const AM_HPF_FREQ = 30;
+
+// ─── AM フィルタ設定 ──────────────────────────────────────────────────────────
+
+/** AM フィルタの各ノードパラメーター */
+export interface AmFilterSettings {
+	/** LPF カットオフ周波数 [Hz] */
+	lpfFreq: number;
+	/** HPF カットオフ周波数 [Hz] */
+	hpfFreq: number;
+	/** 歪みの強さ (0 = なし、大きいほど歪む) */
+	distortionAmount: number;
+	/** コンプレッサー閾値 [dB] */
+	compThreshold: number;
+	/** コンプレッサーレシオ */
+	compRatio: number;
+	/** ホワイトノイズレベル (0 = なし、1 = 最大) */
+	noiseLevel: number;
+}
+
+/** デフォルトの AM フィルタ設定 */
+export const DEFAULT_AM_FILTER_SETTINGS: AmFilterSettings = {
+	lpfFreq: 4000,
+	hpfFreq: 100,
+	distortionAmount: 2.5,
+	compThreshold: -24,
+	compRatio: 8,
+	noiseLevel: 0.005,
+};
+
+/** AM フィルタ設定アトム（永続化） */
+export const amFilterSettingsAtom = atomWithStorage<AmFilterSettings>(
+	"cav-am-filter-settings",
+	DEFAULT_AM_FILTER_SETTINGS,
+);
 
 /**
  * ソフトクリッピング用の転送関数カーブを生成する。

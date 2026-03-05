@@ -1,10 +1,15 @@
 /**
  * amFilter.ts / audio.ts のユニットテスト
  *
- * AM フィルタ設定アトムのデフォルト値・定数・歪みカーブ生成を検証する。
+ * AM フィルタ設定アトムのデフォルト値・定数・設定・歪みカーブ生成を検証する。
  */
 import { describe, expect, it } from "vitest";
-import { AM_FILTER_FREQ, AM_HPF_FREQ, makeDistortionCurve } from "./amFilter";
+import {
+	AM_FILTER_FREQ,
+	AM_HPF_FREQ,
+	DEFAULT_AM_FILTER_SETTINGS,
+	makeDistortionCurve,
+} from "./amFilter";
 
 describe("AM_FILTER_FREQ", () => {
 	it("4500Hz（AM 放送帯域の上限付近）である", () => {
@@ -28,6 +33,49 @@ describe("AM_HPF_FREQ", () => {
 
 	it("LPF のカットオフより低い", () => {
 		expect(AM_HPF_FREQ).toBeLessThan(AM_FILTER_FREQ);
+	});
+});
+
+describe("DEFAULT_AM_FILTER_SETTINGS", () => {
+	it("LPF/HPF 周波数が可聴域内である", () => {
+		expect(DEFAULT_AM_FILTER_SETTINGS.lpfFreq).toBeGreaterThanOrEqual(20);
+		expect(DEFAULT_AM_FILTER_SETTINGS.lpfFreq).toBeLessThanOrEqual(20000);
+		expect(DEFAULT_AM_FILTER_SETTINGS.hpfFreq).toBeGreaterThanOrEqual(10);
+		expect(DEFAULT_AM_FILTER_SETTINGS.hpfFreq).toBeLessThanOrEqual(
+			DEFAULT_AM_FILTER_SETTINGS.lpfFreq,
+		);
+	});
+
+	it("歪み量が正の値である", () => {
+		expect(DEFAULT_AM_FILTER_SETTINGS.distortionAmount).toBeGreaterThan(0);
+	});
+
+	it("コンプレッサー閾値が負の dB 値である", () => {
+		expect(DEFAULT_AM_FILTER_SETTINGS.compThreshold).toBeLessThan(0);
+	});
+
+	it("コンプレッサーレシオが 1 以上である", () => {
+		expect(DEFAULT_AM_FILTER_SETTINGS.compRatio).toBeGreaterThanOrEqual(1);
+	});
+
+	it("ノイズレベルが 0〜1 の範囲内である", () => {
+		expect(DEFAULT_AM_FILTER_SETTINGS.noiseLevel).toBeGreaterThanOrEqual(0);
+		expect(DEFAULT_AM_FILTER_SETTINGS.noiseLevel).toBeLessThanOrEqual(1);
+	});
+
+	it("全プロパティが定義されている", () => {
+		const keys: (keyof typeof DEFAULT_AM_FILTER_SETTINGS)[] = [
+			"lpfFreq",
+			"hpfFreq",
+			"distortionAmount",
+			"compThreshold",
+			"compRatio",
+			"noiseLevel",
+		];
+		for (const key of keys) {
+			expect(DEFAULT_AM_FILTER_SETTINGS).toHaveProperty(key);
+			expect(typeof DEFAULT_AM_FILTER_SETTINGS[key]).toBe("number");
+		}
 	});
 });
 
