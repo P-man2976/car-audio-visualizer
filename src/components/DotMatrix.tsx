@@ -1,148 +1,117 @@
-import { Plane } from "@react-three/drei";
+/**
+ * DotMatrix ビットマップレンダラー (React Three Fiber / InstancedMesh)
+ *
+ * FONT_5X7 ビットマスクデータから各ドットの ON/OFF を判定し、
+ * 単一の InstancedMesh で 12文字 × 5列 × 7行 = 420 ドットを描画する。
+ *
+ * 従来の TextGeometry + typeface JSON アプローチと異なり、
+ * 実際の LCD ドットマトリクスのように個別のドットが点灯/消灯する。
+ */
 import { useAtomValue } from "jotai";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { Font, FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
-import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { displayStringAtom } from "@/atoms/display";
+import { FONT_5X7 } from "@/lib/dotmatrix-font";
 
-const DOT_MATRIX_COL_COUNT = 7;
-const DOT_MATRIX_ROW_COUNT = 5;
-const DOT_MATRIX_DOT_SIZE = 1.75;
-const DOT_MATRIX_DOT_GAP = 0.3;
+/** ドットマトリクスフォントの列数 */
+const DOT_COLS = 5;
+/** ドットマトリクスフォントの行数 */
+const DOT_ROWS = 7;
+/** 表示文字数 */
+const CHAR_COUNT = 12;
+/** 1ドットの辺の長さ */
+const DOT_SIZE = 1.75;
+/** ドット間の隙間 */
+const DOT_GAP = 0.3;
+/** 文字間の追加隙間 */
+const CHAR_GAP = 2;
 
-const DOT_MATRIX_ARRAY_COUNT = 12;
-const DOT_MATRIX_ARRAY_GAP = 2;
+/** 全ドット数 (12 × 7 × 5 = 420) */
+const TOTAL_DOTS = CHAR_COUNT * DOT_ROWS * DOT_COLS;
 
-/** TextGeometry に渡す文字サイズ。7ドット高 + ベースラインマージン */
-const CHAR_SIZE = DOT_MATRIX_DOT_SIZE * DOT_MATRIX_COL_COUNT + 4;
+/** 点灯色 (シアン #67e8f9) */
+const COLOR_ACTIVE = new THREE.Color(0x67e8f9);
+/** 消灯色 (ダークパープル #3b0764) */
+const COLOR_INACTIVE = new THREE.Color(0x3b0764);
 
-// ─── LCD5x7 font singleton ────────────────────────────────────────────────────
-const _lcdFontLoader = new FontLoader();
-let _lcdFont: Font | null = null;
-const _lcdFontReady: Promise<Font> = fetch("/lcd5x7.typeface.json")
-	.then((r) => r.json())
-	.then((data) => {
-		_lcdFont = _lcdFontLoader.parse(data);
-		return _lcdFont;
-	});
+/** 共有ジオメトリ — 全インスタンスで再利用 */
+const sharedGeometry = new THREE.PlaneGeometry(DOT_SIZE, DOT_SIZE);
+/** 共有マテリアル — vertexColors を使ってインスタンスごとに色を変える */
+const sharedMaterial = new THREE.MeshBasicMaterial();
+
+/** 1文字の幅（ドット中心間） */
+const CHAR_W = DOT_COLS * DOT_SIZE + (DOT_COLS - 1) * DOT_GAP;
+/** 全体の幅 */
+const TOTAL_W = CHAR_COUNT * CHAR_W + (CHAR_COUNT - 1) * CHAR_GAP;
 
 /**
- * 基準セル BBox — 全文字のセンタリングに使用する。
- * LCD5x7 フォントはモノスペースのため、フルセル文字 (M) の
- * BoundingBox を基準にすることで、文字サイズに依存しない一貫した配置となる。
- * font ロード完了後に一度だけ計算する。
+ * 12文字の DotMatrix ディスプレイ。
+ * displayStringAtom の値を FONT_5X7 ビットマスクで描画する。
+ *
+ * @param y - ディスプレイの Y 座標（グループ配置）
  */
-let _refCenter: THREE.Vector3 | null = null;
-function getRefCenter(font: Font): THREE.Vector3 {
-	if (_refCenter) return _refCenter;
-	const g = new TextGeometry("M", {
-		font,
-		size: CHAR_SIZE,
-		depth: 0,
-		curveSegments: 4,
-		bevelEnabled: false,
-	});
-	g.computeBoundingBox();
-	_refCenter = new THREE.Vector3();
-	g.boundingBox!.getCenter(_refCenter);
-	g.dispose();
-	return _refCenter;
-}
-
 export function DotMatrixArray({ y = 40 }: { y?: number }) {
 	const displayString = useAtomValue(displayStringAtom);
+	const meshRef = useRef<THREE.InstancedMesh>(null);
+	const tempMatrix = useMemo(() => new THREE.Matrix4(), []);
+	const tempColor = useMemo(() => new THREE.Color(), []);
 
-	return (
-		<group
-			position={[
-				-(
-					(DOT_MATRIX_DOT_SIZE * DOT_MATRIX_ROW_COUNT +
-						DOT_MATRIX_DOT_GAP * (DOT_MATRIX_ROW_COUNT - 1)) *
-						DOT_MATRIX_ARRAY_COUNT +
-					DOT_MATRIX_ARRAY_GAP * (DOT_MATRIX_ARRAY_COUNT - 1)
-				) / 2,
-				y,
-				0,
-			]}
-		>
-			{Array.from({ length: DOT_MATRIX_ARRAY_COUNT }).map((_, index) => (
-				<group
-					key={`dot-matrix-${index}`}
-					position={[
-						index *
-							DOT_MATRIX_ROW_COUNT *
-							(DOT_MATRIX_DOT_GAP + DOT_MATRIX_DOT_SIZE) +
-							DOT_MATRIX_ARRAY_GAP * index,
-						0,
-						0,
-					]}
-				>
-					<DotMatrix char={displayString[index] ?? " "} />
-				</group>
-			))}
-		</group>
-	);
-}
-
-function DotMatrix({ char }: { char: string }) {
-	const [font, setFont] = useState<Font | null>(_lcdFont);
-
+	// インスタンス位置を一度だけ設定する
 	useEffect(() => {
-		if (_lcdFont) {
-			setFont(_lcdFont);
-			return;
+		const mesh = meshRef.current;
+		if (!mesh) return;
+
+		const startX = -TOTAL_W / 2;
+		let idx = 0;
+
+		for (let ci = 0; ci < CHAR_COUNT; ci++) {
+			const charX = startX + ci * (CHAR_W + CHAR_GAP);
+			for (let row = 0; row < DOT_ROWS; row++) {
+				for (let col = 0; col < DOT_COLS; col++) {
+					const x = charX + col * (DOT_SIZE + DOT_GAP);
+					// row 0 = 上端 → Y が大きい方に配置
+					const yPos = (DOT_ROWS - 1 - row) * (DOT_SIZE + DOT_GAP);
+					tempMatrix.makeTranslation(x, yPos, 0);
+					mesh.setMatrixAt(idx, tempMatrix);
+					mesh.setColorAt(idx, COLOR_INACTIVE);
+					idx++;
+				}
+			}
 		}
-		_lcdFontReady.then(setFont);
-	}, []);
 
-	// ドットグリッド中心 (TextGeometry の g.center() と合わせるため)
-	const centerX =
-		((DOT_MATRIX_ROW_COUNT - 1) * (DOT_MATRIX_DOT_SIZE + DOT_MATRIX_DOT_GAP)) /
-		2;
-	const centerY =
-		((DOT_MATRIX_COL_COUNT - 1) * (DOT_MATRIX_DOT_SIZE + DOT_MATRIX_DOT_GAP)) /
-		2;
+		mesh.instanceMatrix.needsUpdate = true;
+		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+	}, [tempMatrix]);
 
-	const geometry = useMemo(() => {
-		if (!font || !char || char === " ") return null;
-		const g = new TextGeometry(char, {
-			font,
-			size: CHAR_SIZE,
-			depth: 0,
-			curveSegments: 4,
-			bevelEnabled: false,
-		});
-		g.computeBoundingBox();
-		// 基準セル (M) の中心を使って全文字を統一的にセンタリングする。
-		// g.center() は個別グリフの BBox を使うため、小さい文字 (`.`, `c` 等) がずれる。
-		const ref = getRefCenter(font);
-		g.translate(-ref.x, -ref.y, -ref.z);
-		return g;
-	}, [font, char]);
+	// displayString が変化したらドット色を更新する
+	useEffect(() => {
+		const mesh = meshRef.current;
+		if (!mesh) return;
+
+		let idx = 0;
+		for (let ci = 0; ci < CHAR_COUNT; ci++) {
+			const ch = displayString[ci] ?? " ";
+			const bitmap = FONT_5X7[ch] ?? FONT_5X7[" "];
+			for (let row = 0; row < DOT_ROWS; row++) {
+				const rowBits = bitmap![row]!;
+				for (let col = 0; col < DOT_COLS; col++) {
+					const isOn = (rowBits >> (DOT_COLS - 1 - col)) & 1;
+					tempColor.copy(isOn ? COLOR_ACTIVE : COLOR_INACTIVE);
+					mesh.setColorAt(idx, tempColor);
+					idx++;
+				}
+			}
+		}
+
+		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+	}, [displayString, tempColor]);
 
 	return (
-		<group position={[0, 0, 0]}>
-			{/* TextGeometry で LCD5x7 文字を描画 */}
-			{geometry && (
-				<mesh position={[centerX, centerY, 0.01]} geometry={geometry}>
-					<meshBasicMaterial color="#67e8f9" />
-				</mesh>
-			)}
-			{Array.from({ length: DOT_MATRIX_ROW_COUNT }).map((_, rowIndex) =>
-				Array.from({ length: DOT_MATRIX_COL_COUNT }).map((__, colIndex) => (
-					<Plane
-						key={`${rowIndex}-${colIndex}`}
-						position={[
-							(DOT_MATRIX_DOT_SIZE + DOT_MATRIX_DOT_GAP) * rowIndex,
-							(DOT_MATRIX_DOT_SIZE + DOT_MATRIX_DOT_GAP) * colIndex,
-							0,
-						]}
-						args={[DOT_MATRIX_DOT_SIZE, DOT_MATRIX_DOT_SIZE]}
-						material-color="#3b0764"
-					/>
-				)),
-			)}
+		<group position={[0, y, 0]}>
+			<instancedMesh
+				ref={meshRef}
+				args={[sharedGeometry, sharedMaterial, TOTAL_DOTS]}
+			/>
 		</group>
 	);
 }

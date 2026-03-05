@@ -136,7 +136,7 @@ export function ControlsOverlay() {
 			<div ref={pinchRef} className="absolute inset-0 flex w-full flex-col">
 				{/* Header — mobile: SongInfo + SourceSheet を統合グラデーションで一体表示 */}
 				<div className="group relative flex flex-col justify-center">
-					<div className="absolute inset-0 bg-linear-to-b from-gray-600/50 to-transparent opacity-50 transition-all duration-500 group-hover:opacity-100" />
+					<div className="absolute inset-0 bg-linear-to-b from-gray-600/50 to-transparent  transition-all duration-500 group-hover:opacity-100" />
 					{/* Mobile song info — above SourceSheet */}
 					<div className="relative z-10 flex items-center gap-3 px-4 py-3 sm:hidden">
 						<div className="relative size-14 shrink-0 group/cover">
