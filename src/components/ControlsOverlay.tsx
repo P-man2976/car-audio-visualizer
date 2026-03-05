@@ -133,7 +133,10 @@ export function ControlsOverlay() {
 	return (
 		<>
 			<SettingsDialog />
-			<div ref={pinchRef} className="absolute inset-0 flex w-full flex-col">
+			<div
+				ref={pinchRef}
+				className="absolute inset-0 flex w-full flex-col pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]"
+			>
 				{/* Header — mobile: SongInfo + SourceSheet を統合グラデーションで一体表示 */}
 				<div className="group relative flex flex-col justify-center">
 					<div className="absolute inset-0 bg-linear-to-b from-gray-600/50 to-transparent  transition-all duration-500 group-hover:opacity-100" />

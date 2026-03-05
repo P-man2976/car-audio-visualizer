@@ -815,7 +815,7 @@ export function SettingsDialog() {
 			 * モバイル: w-[calc(100%-1rem)] max-h-[90dvh] で画面いっぱいに近い高さ
 			 * デスクトップ: sm:max-w-[820px] sm:h-[80vh] sm:max-h-[660px] でワイドレイアウト
 			 */}
-			<DialogContent className="w-[calc(100%-1rem)] max-h-[90dvh] h-[90dvh] sm:max-w-[820px] sm:h-[80vh] sm:max-h-[660px] flex flex-col overflow-hidden p-0 gap-0 mt-4 sm:mt-0">
+			<DialogContent className="w-[calc(100%-1rem-env(safe-area-inset-left,0px)-env(safe-area-inset-right,0px))] max-h-[90dvh] h-[90dvh] sm:max-w-[820px] sm:h-[80vh] sm:max-h-[660px] flex flex-col overflow-hidden p-0 gap-0 mt-4 sm:mt-0">
 				<DialogHeader className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-5 pb-3 sm:pb-4 border-b border-neutral-800">
 					<DialogTitle>設定</DialogTitle>
 				</DialogHeader>
