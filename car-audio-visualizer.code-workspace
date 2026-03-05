@@ -25,7 +25,8 @@
 			},
 			"playwright-cli": true,
 			"npx playwright": true,
-			"agent-browser": true
+			"agent-browser": true,
+			"npx -y @mizchi/readability": true
 		}
 	}
 }
