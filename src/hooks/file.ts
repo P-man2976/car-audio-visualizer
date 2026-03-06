@@ -79,9 +79,9 @@ export function useFilePlayer() {
 		return () => audioElement.removeEventListener("ended", onEnded);
 	}, [audioElement, currentSrc, next, play]);
 
-	// off / aux モードへ切り替えたらオーディオ停止
+	// off / radio / aux モードへ切り替えたらオーディオ停止
 	useEffect(() => {
-		if (currentSrc === "off" || currentSrc === "aux") {
+		if (currentSrc !== "file") {
 			audioElement.pause();
 		}
 	}, [audioElement, currentSrc]);

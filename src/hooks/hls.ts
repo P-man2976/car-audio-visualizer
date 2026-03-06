@@ -87,12 +87,9 @@ export function useHLS() {
 
 		if (hls) {
 			// destroy() は全イベントリスナー、バッファリング、MediaSource を一括クリーンアップする
+			hls.stopLoad();
 			hls.destroy();
 			setHls(null);
-			// destroy 後に残る blob: MediaSource URL をクリアして
-			// ファイルプレイヤーが src を切り替えできる状態にする
-			audioElement.removeAttribute("src");
-			audioElement.load();
 		} else {
 			// ネイティブ HLS またはセッションなし—一時停止のみ
 			audioElement.pause();

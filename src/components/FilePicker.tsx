@@ -112,7 +112,7 @@ export function FilePicker() {
 						const files = Array.from(e.target.files ?? []);
 						// File[] → Song[] へ変換（fileToSong で blob URL 生成 + メタデータ解析）
 						// FSA 非対応環境（iOS Safari 等）ではこのフォールバックパスが使われる
-						const songs = await Promise.all(files.map(fileToSong));
+						const songs = await Promise.all(files.map((f) => fileToSong(f)));
 						await loadSongs(songs);
 						// 同じファイルを再選択できるようリセット
 						e.target.value = "";

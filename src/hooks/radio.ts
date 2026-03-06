@@ -1,7 +1,7 @@
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom, getDefaultStore } from "jotai";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
-import { currentSrcAtom, queueAtom } from "@/atoms/player";
+import { currentSrcAtom, isPlayingAtom, queueAtom } from "@/atoms/player";
 import {
 	currentRadioAtom,
 	customFrequencyAreaAtom,
@@ -11,6 +11,8 @@ import { useRadikoM3u8Url, useRadikoStationList } from "@/services/radiko";
 import { useRadioFrequencies } from "@/services/radio";
 import type { Radio, RadioType } from "@/types/radio";
 import { useHLS } from "./hls";
+
+const store = getDefaultStore();
 
 /** FM バンド周波数範囲 (MHz) — 76〜99 MHz (ワイドFM含む日本の FM バンド全域) */
 const FM_MIN = 76.0;
@@ -223,6 +225,8 @@ export function useRadioPlayer() {
 
 	const tuningTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const animFreqRef = useRef<number>(0);
+	/** 自動再生ガード: radio モードに入った際に同じ局を二重ロードしないための ID */
+	const prevSrcRef = useRef<string | null>(null);
 
 	// ラジオ以外のモードへ切り替わったら HLS を即停止して選局アニメーションをキャンセル
 	// file モードも含む（SourceBuffer が残るとファイル再生と競合するため）
@@ -234,9 +238,22 @@ export function useRadioPlayer() {
 				tuningTimerRef.current = null;
 			}
 			animFreqRef.current = 0;
+			prevSrcRef.current = null;
 			setTuningFreq(null);
 		}
 	}, [currentSrc, unLoad, setTuningFreq]);
+
+	// ラジオモードに切り替わったら、前回の局を自動再生する
+	// selectRadio の参照変更による二重ロードを prevSrcRef で防止
+	useEffect(() => {
+		const isPlaying = store.get(isPlayingAtom);
+		const radio = store.get(currentRadioAtom);
+		if (!isPlaying || currentSrc !== "radio" || !radio) return;
+		// 同じ局を二重ロードしない（selectRadio/playRadio の参照変更による effect 再実行対策）
+		if (prevSrcRef.current === "radio") return;
+		prevSrcRef.current = "radio";
+		selectRadio(radio);
+	}, [currentSrc, selectRadio]);
 
 	// アンマウント時のクリーンアップ
 	useEffect(() => {
