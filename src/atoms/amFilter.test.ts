@@ -4,9 +4,11 @@
  * AM フィルタ設定アトムのデフォルト値・定数・設定・歪みカーブ生成を検証する。
  */
 import { describe, expect, it } from "vitest";
+import { createStore } from "jotai";
 import {
 	AM_FILTER_FREQ,
 	AM_HPF_FREQ,
+	amFilterSettingsAtom,
 	calcMakeupGain,
 	DEFAULT_AM_FILTER_SETTINGS,
 	makeDistortionCurve,
@@ -181,5 +183,33 @@ describe("calcMakeupGain", () => {
 		const gain2 = calcMakeupGain(-20, 2);
 		const gain10 = calcMakeupGain(-20, 10);
 		expect(gain10).toBeGreaterThan(gain2);
+	});
+});
+
+describe("amFilterSettingsAtom", () => {
+	it("デフォルト値が DEFAULT_AM_FILTER_SETTINGS と一致する", () => {
+		const store = createStore();
+		const settings = store.get(amFilterSettingsAtom);
+		expect(settings).toEqual(DEFAULT_AM_FILTER_SETTINGS);
+	});
+
+	it("直接値で set した値が read で反映される", () => {
+		const store = createStore();
+		const updated = { ...DEFAULT_AM_FILTER_SETTINGS, hpfFreq: 999 };
+		store.set(amFilterSettingsAtom, updated);
+		expect(store.get(amFilterSettingsAtom).hpfFreq).toBe(999);
+	});
+
+	it("updater 関数で set した値が read で反映される", () => {
+		const store = createStore();
+		store.set(amFilterSettingsAtom, (prev) => ({
+			...prev,
+			noiseLevel: 0.1,
+		}));
+		expect(store.get(amFilterSettingsAtom).noiseLevel).toBe(0.1);
+		// 他のフィールドはデフォルトのまま
+		expect(store.get(amFilterSettingsAtom).hpfFreq).toBe(
+			DEFAULT_AM_FILTER_SETTINGS.hpfFreq,
+		);
 	});
 });
