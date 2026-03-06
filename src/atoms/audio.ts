@@ -159,51 +159,48 @@ export function setAmFilterActive(
 	active: boolean,
 	settings: AmFilterSettings = DEFAULT_AM_FILTER_SETTINGS,
 ): void {
+	// localStorage から読み込んだ旧形式の設定に新フィールドが欠けている場合に備え、
+	// デフォルト値とマージする
+	const s = { ...DEFAULT_AM_FILTER_SETTINGS, ...settings };
 	const now = _audioCtx.currentTime;
 	const smooth = 0.02; // 20ms スムーズ遷移
 
 	// ハイパスフィルタ
 	amHighpassFilter.frequency.setTargetAtTime(
-		active ? settings.hpfFreq : 1,
+		active ? s.hpfFreq : 1,
 		now,
 		smooth,
 	);
 
 	// ローパスフィルタ
 	amLowpassFilter.frequency.setTargetAtTime(
-		active ? settings.lpfFreq : _audioCtx.sampleRate / 2,
+		active ? s.lpfFreq : _audioCtx.sampleRate / 2,
 		now,
 		smooth,
 	);
 
 	// 歪み
-	amDistortion.curve = active
-		? getDistortionCurve(settings.distortionAmount)
-		: null;
+	amDistortion.curve = active ? getDistortionCurve(s.distortionAmount) : null;
 
 	// コンプレッサー (AGC)
 	amCompressor.threshold.setTargetAtTime(
-		active ? settings.compThreshold : 0,
+		active ? s.compThreshold : 0,
 		now,
 		smooth,
 	);
-	amCompressor.ratio.setTargetAtTime(
-		active ? settings.compRatio : 1,
-		now,
-		smooth,
-	);
+	amCompressor.ratio.setTargetAtTime(active ? s.compRatio : 1, now, smooth);
 
-	// ホワイトノイズ
-	noiseGain.gain.setTargetAtTime(active ? settings.noiseLevel : 0, now, smooth);
+	// ブラウンノイズ
+	noiseGain.gain.setTargetAtTime(active ? s.noiseLevel : 0, now, smooth);
 
 	// スピーカーシミュレーション（ピーキング EQ）
 	amSpeakerResonance.frequency.setTargetAtTime(
-		active ? settings.speakerResonanceFreq : 1200,
+		active ? s.speakerResonanceFreq : 1200,
 		now,
 		smooth,
 	);
 	amSpeakerResonance.gain.setTargetAtTime(
-		active ? settings.speakerResonanceGain : 0,
+		active ? s.speakerResonanceGain : 0,
 		now,
 		smooth,
 	);
