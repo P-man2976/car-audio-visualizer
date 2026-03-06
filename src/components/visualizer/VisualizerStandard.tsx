@@ -4,8 +4,8 @@ import type { AnalyzerBarData } from "audiomotion-analyzer";
 import { useAtomValue } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { Font, FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
+import { Font, FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
 import {
 	createPerspParams,

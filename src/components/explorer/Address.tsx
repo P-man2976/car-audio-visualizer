@@ -1,12 +1,12 @@
+import { Fragment } from "react";
 import {
 	LuArrowLeft,
 	LuArrowRight,
 	LuArrowUp,
 	LuChevronRight,
 } from "react-icons/lu";
-import { Button } from "../ui/button";
 import { useAddress } from "@/hooks/explorer";
-import { Fragment } from "react";
+import { Button } from "../ui/button";
 
 export function Address() {
 	const { stack, forwardStack, back, advance, goUp } = useAddress();

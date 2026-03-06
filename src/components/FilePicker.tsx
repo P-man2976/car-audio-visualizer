@@ -1,11 +1,11 @@
-import { parseBlob } from "music-metadata";
-import { Button } from "./ui/button";
 import { useAtom, useSetAtom } from "jotai";
-import { useRef } from "react";
-import { currentSongAtom, currentSrcAtom, songQueueAtom } from "@/atoms/player";
-import { displayStringAtom } from "@/atoms/display";
 import { StepBack } from "lucide-react";
+import { parseBlob } from "music-metadata";
+import { useRef } from "react";
+import { displayStringAtom } from "@/atoms/display";
+import { currentSongAtom, currentSrcAtom, songQueueAtom } from "@/atoms/player";
 import type { Song } from "@/types/player";
+import { Button } from "./ui/button";
 
 /** showOpenFilePicker が使えるかどうか */
 const hasFSA = "showOpenFilePicker" in window;

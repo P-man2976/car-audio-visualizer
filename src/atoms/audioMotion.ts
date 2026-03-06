@@ -4,8 +4,9 @@
  * 各プロパティは setOptions() で AudioMotionAnalyzer に適用される。
  * storage キー: "cav-audiomotion-settings-v1"
  */
-import { atomWithStorage } from "jotai/utils";
+
 import type { WeightingFilter } from "audiomotion-analyzer";
+import { atomWithStorage } from "jotai/utils";
 
 export type { WeightingFilter };
 

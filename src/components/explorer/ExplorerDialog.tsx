@@ -1,25 +1,25 @@
-import { useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import { FileEntries } from "./FileEntries";
+import { useMutation } from "@tanstack/react-query";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import mime from "mime/lite";
-import { explorerSelectedFilesAtom } from "@/atoms/explorer";
-import { useMutation } from "@tanstack/react-query";
-import { Address } from "./Address";
-import { useAddress } from "@/hooks/explorer";
-import { Button } from "../ui/button";
 import { parseBlob } from "music-metadata";
+import type { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
+import { LuFolderOpen, LuLoader, LuX } from "react-icons/lu";
 import { audioElementAtom } from "@/atoms/audio";
+import { explorerSelectedFilesAtom } from "@/atoms/explorer";
 import {
 	currentSongAtom,
 	currentSrcAtom,
 	savedDirectoryHandlesAtom,
 	songQueueAtom,
 } from "@/atoms/player";
-import { LuFolderOpen, LuLoader, LuX } from "react-icons/lu";
+import { useAddress } from "@/hooks/explorer";
 import type { SelectedFile } from "@/types/explorer";
 import type { Song } from "@/types/player";
+import { Button } from "../ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { Address } from "./Address";
+import { FileEntries } from "./FileEntries";
 
 const hasFSAPI = "showDirectoryPicker" in window;
 

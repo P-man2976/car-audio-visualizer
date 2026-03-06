@@ -2,8 +2,8 @@ import { useAtomCallback } from "jotai/utils";
 import { useCallback, useEffect, useRef } from "react";
 import { currentSrcAtom } from "@/atoms/player";
 import { currentRadioAtom } from "@/atoms/radio";
-import { useHLS } from "./hls";
 import { useRadikoM3u8Url } from "@/services/radiko";
+import { useHLS } from "./hls";
 
 /**
  * ページリロード時に localStorage から復元されたラジオ再生を自動で再開するフック。

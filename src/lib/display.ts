@@ -1,6 +1,6 @@
 import type { Source } from "../atoms/player";
-import type { Radio } from "../types/radio";
 import type { Song } from "../types/player";
+import type { Radio } from "../types/radio";
 
 export function buildDisplayString(
 	source: Source,

@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { getSession } from "../lib/lastfm";
+import { useEffect, useState } from "react";
 import { LASTFM_SESSION_STORAGE_KEY } from "../atoms/lastfm";
+import { getSession } from "../lib/lastfm";
 
 function LastfmCallbackPage() {
 	const navigate = useNavigate();

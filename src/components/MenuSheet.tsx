@@ -1,9 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Slider } from "@/components/ui/slider";
 import { useAtom, useSetAtom } from "jotai";
 import { Settings, Volume2 } from "lucide-react";
 import { type ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Slider } from "@/components/ui/slider";
 import { settingsOpenAtom } from "../atoms/hotkeys";
 import { volumeAtom } from "../atoms/player";
 

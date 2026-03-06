@@ -13,9 +13,9 @@
  * updater functions like `setQueue(prev => [...prev, ...songs])`).
  */
 
-import { atom } from "jotai";
-import type { SetStateAction } from "jotai";
 import { createStore, del, get, set } from "idb-keyval";
+import type { SetStateAction } from "jotai";
+import { atom } from "jotai";
 import type { Song } from "@/types/player";
 
 /** Lazy singleton — only created when running in the browser. */

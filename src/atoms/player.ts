@@ -1,13 +1,13 @@
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import type { Song } from "@/types/player";
-import type { Radio } from "../types/radio";
 import {
 	atomWithIDB,
 	createDirectoryHandleArrayStorage,
 	createSongArrayStorage,
 	createSongStorage,
 } from "@/lib/idbStorage";
+import type { Song } from "@/types/player";
+import type { Radio } from "../types/radio";
 
 export type Source = "off" | "radio" | "aux" | "file";
 

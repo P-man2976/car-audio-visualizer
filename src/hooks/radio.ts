@@ -1,4 +1,4 @@
-import { useAtomValue, useSetAtom, getDefaultStore } from "jotai";
+import { getDefaultStore, useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
 import { currentSrcAtom, isPlayingAtom, queueAtom } from "@/atoms/player";

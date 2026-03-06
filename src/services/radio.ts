@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import type { FrequencyList } from "@/types/radio";
 import { useRadikoArea } from "@/services/radiko";
+import type { FrequencyList } from "@/types/radio";
 
 /**
  * radiko で取得した都道府県コード (JP13 等) に対応する

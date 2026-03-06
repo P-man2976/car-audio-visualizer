@@ -1,10 +1,10 @@
 import AudioMotionAnalyzer from "audiomotion-analyzer";
 import { atom } from "jotai";
-import { SafariVizBridge, isMECSNBroken } from "@/lib/safari-viz-bridge";
+import { isMECSNBroken, SafariVizBridge } from "@/lib/safari-viz-bridge";
 import {
 	type AmFilterSettings,
-	DEFAULT_AM_FILTER_SETTINGS,
 	calcMakeupGain,
+	DEFAULT_AM_FILTER_SETTINGS,
 	makeDistortionCurve,
 } from "./amFilter";
 

@@ -1,3 +1,13 @@
+import { useAtom, useAtomValue } from "jotai";
+import { useMemo } from "react";
+import { currentSrcAtom } from "@/atoms/player";
+import {
+	type ChannelNum,
+	currentRadioAtom,
+	customFrequencyAreaAtom,
+	radioChannelsByAreaAtom,
+	radioStationSizeAtom,
+} from "@/atoms/radio";
 import { Button } from "@/components/ui/button";
 import {
 	ContextMenu,
@@ -11,21 +21,11 @@ import {
 	ContextMenuSubTrigger,
 	ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { cn } from "@/lib/utils";
-import { useAtom, useAtomValue } from "jotai";
-import {
-	currentRadioAtom,
-	customFrequencyAreaAtom,
-	radioChannelsByAreaAtom,
-	radioStationSizeAtom,
-	type ChannelNum,
-} from "@/atoms/radio";
-import { currentSrcAtom } from "@/atoms/player";
 import { useSelectRadio } from "@/hooks/radio";
-import { useRadioFrequencies } from "@/services/radio";
+import { cn } from "@/lib/utils";
 import { useRadikoArea } from "@/services/radiko";
+import { useRadioFrequencies } from "@/services/radio";
 import type { RadikoStation, RadioType } from "@/types/radio";
-import { useMemo } from "react";
 
 export function RadioStation({ name, id, logo }: RadikoStation) {
 	const [currentRadio, setCurrentRadio] = useAtom(currentRadioAtom);

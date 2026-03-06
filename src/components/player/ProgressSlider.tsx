@@ -1,14 +1,14 @@
-import { Slider } from "@/components/ui/slider";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo } from "react";
 import { audioElementAtom } from "@/atoms/audio";
+import { displayStringAtom } from "@/atoms/display";
 import { currentSongAtom, currentSrcAtom, progressAtom } from "@/atoms/player";
 import {
 	currentRadioAtom,
 	radioChannelsByAreaAtom,
 	tuningFreqAtom,
 } from "@/atoms/radio";
-import { displayStringAtom } from "@/atoms/display";
+import { Slider } from "@/components/ui/slider";
 import { buildDisplayString } from "@/lib/display";
 import { useRadikoArea } from "@/services/radiko";
 

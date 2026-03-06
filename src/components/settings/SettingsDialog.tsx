@@ -8,17 +8,7 @@
  *   - Last.fm           : Last.fm OAuth 連携
  *   - ショートカット    : キーボードショートカット割り当て
  */
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { useAtom } from "jotai";
 import {
 	Activity,
@@ -29,22 +19,15 @@ import {
 	RotateCcw,
 } from "lucide-react";
 import { type KeyboardEvent, useCallback, useId, useState } from "react";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { lastfmSessionAtom } from "@/atoms/lastfm";
 import {
-	type HotkeyAction,
-	HOTKEY_ACTION_LABELS,
-	HOTKEY_ACTION_SECTIONS,
-	type HotkeyBindings,
-	DEFAULT_HOTKEY_BINDINGS,
-	displayKey,
-	hotkeyBindingsAtom,
-	normalizeKey,
-	settingsOpenAtom,
-} from "@/atoms/hotkeys";
+	type AmFilterSettings,
+	amFilterEnabledAtom,
+	amFilterSettingsAtom,
+	DEFAULT_AM_FILTER_SETTINGS,
+} from "@/atoms/amFilter";
 import {
-	audioMotionSettingsAtom,
 	type AudioMotionSettings,
+	audioMotionSettingsAtom,
 	DEFAULT_AUDIO_MOTION_SETTINGS,
 	FFT_SIZE_OPTIONS,
 	type FftSize,
@@ -52,12 +35,30 @@ import {
 	type WeightingFilter,
 } from "@/atoms/audioMotion";
 import {
-	type AmFilterSettings,
-	DEFAULT_AM_FILTER_SETTINGS,
-	amFilterEnabledAtom,
-	amFilterSettingsAtom,
-} from "@/atoms/amFilter";
-import { visualizerStyleAtom, type VisualizerStyle } from "@/atoms/visualizer";
+	DEFAULT_HOTKEY_BINDINGS,
+	displayKey,
+	HOTKEY_ACTION_LABELS,
+	HOTKEY_ACTION_SECTIONS,
+	type HotkeyAction,
+	type HotkeyBindings,
+	hotkeyBindingsAtom,
+	normalizeKey,
+	settingsOpenAtom,
+} from "@/atoms/hotkeys";
+import { lastfmSessionAtom } from "@/atoms/lastfm";
+import { type VisualizerStyle, visualizerStyleAtom } from "@/atoms/visualizer";
+import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 // ─── Visualizer Preview SVG Components ────────────────────────────────────────
 

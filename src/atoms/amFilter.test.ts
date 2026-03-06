@@ -7,8 +7,8 @@ import { describe, expect, it } from "vitest";
 import {
 	AM_FILTER_FREQ,
 	AM_HPF_FREQ,
-	DEFAULT_AM_FILTER_SETTINGS,
 	calcMakeupGain,
+	DEFAULT_AM_FILTER_SETTINGS,
 	makeDistortionCurve,
 } from "./amFilter";
 

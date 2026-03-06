@@ -1,9 +1,9 @@
+import { useAtom } from "jotai";
+import { useCallback, useMemo } from "react";
 import {
 	explorerForwardStackAtom,
 	explorerNavigationStackAtom,
 } from "@/atoms/explorer";
-import { useAtom } from "jotai";
-import { useCallback, useMemo } from "react";
 
 export function useAddress() {
 	const [stack, setStack] = useAtom(explorerNavigationStackAtom);

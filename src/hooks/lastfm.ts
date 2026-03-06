@@ -1,8 +1,8 @@
 import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useRef } from "react";
-import { currentSrcAtom, currentSongAtom, isPlayingAtom } from "@/atoms/player";
 import { lastfmSessionAtom } from "@/atoms/lastfm";
-import { updateNowPlaying, scrobble } from "@/lib/lastfm";
+import { currentSongAtom, currentSrcAtom, isPlayingAtom } from "@/atoms/player";
+import { scrobble, updateNowPlaying } from "@/lib/lastfm";
 
 /**
  * Last.fm スクロブリングを担うフック。

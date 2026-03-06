@@ -14,15 +14,15 @@ import {
 	volumeAtom,
 } from "@/atoms/player";
 import {
+	type ChannelNum,
 	currentRadioAtom,
 	radioChannelsByAreaAtom,
-	type ChannelNum,
 } from "@/atoms/radio";
 import { getDisplayMediaConstraints } from "@/lib/aux-media";
 import { useRadikoArea } from "@/services/radiko";
 import { useMediaStream } from "./mediastream";
 import { usePlayer } from "./player";
-import { useRadioPlayer, useTunableStations, useSelectRadio } from "./radio";
+import { useRadioPlayer, useSelectRadio, useTunableStations } from "./radio";
 
 export interface AppHotkeysOptions {
 	/** ControlsOverlay の usePiP インスタンスから渡す */

@@ -1,21 +1,21 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAtomValue, useSetAtom } from "jotai";
 import { parseBlob } from "music-metadata";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
 	currentSongAtom,
 	currentSrcAtom,
-	savedDirectoryHandlesAtom,
 	hasPersistedFileSessionAtom,
+	savedDirectoryHandlesAtom,
 	songHistoryAtom,
 	songQueueAtom,
 } from "@/atoms/player";
-import type { Song } from "@/types/player";
 import {
 	clearLegacySessionStore,
 	requestPermission,
 } from "@/lib/fileSessionDb";
+import type { Song } from "@/types/player";
 
 // ─── Rehydration helpers ──────────────────────────────────────────────────────
 

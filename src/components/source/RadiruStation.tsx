@@ -1,11 +1,11 @@
-import { cn } from "@/lib/utils";
 import { useAtomValue } from "jotai";
-import { currentRadioAtom } from "@/atoms/radio";
 import { currentSrcAtom } from "@/atoms/player";
+import { currentRadioAtom } from "@/atoms/radio";
 import { useSelectRadio } from "@/hooks/radio";
+import { cn } from "@/lib/utils";
 import type {
-	RadiruStation as RadiruStationType,
 	RadioType,
+	RadiruStation as RadiruStationType,
 } from "@/types/radio";
 
 type RadiruChannel = {

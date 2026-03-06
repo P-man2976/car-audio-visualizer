@@ -1,16 +1,16 @@
+import { useQuery } from "@tanstack/react-query";
+import { useAtom, useAtomValue } from "jotai";
+import { Folder } from "lucide-react";
+import mime from "mime/lite";
+import { useCallback, useMemo } from "react";
 import { audioElementAtom } from "@/atoms/audio";
 import {
 	explorerCurrentDirAtom,
 	explorerSelectedFilesAtom,
 } from "@/atoms/explorer";
 import { useAddress } from "@/hooks/explorer";
-import type { SelectedFile } from "@/types/explorer";
 import { cn } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { useAtom, useAtomValue } from "jotai";
-import { Folder } from "lucide-react";
-import mime from "mime/lite";
-import { useCallback, useMemo } from "react";
+import type { SelectedFile } from "@/types/explorer";
 import { Checkbox } from "../ui/checkbox";
 
 interface EntryInfo {

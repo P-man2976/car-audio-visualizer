@@ -17,12 +17,12 @@
  */
 
 import type AudioMotionAnalyzer from "audiomotion-analyzer";
+import type Hls from "hls.js";
 import {
-	Events,
 	type BufferAppendingData,
 	type BufferCodecsData,
+	Events,
 } from "hls.js";
-import type Hls from "hls.js";
 
 /**
  * Safari の MECSN バグが存在するかを判定する。
