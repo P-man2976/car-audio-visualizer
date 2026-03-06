@@ -12,7 +12,8 @@ This is a React 19 + TypeScript + Vite app set up as a car audio visualizer, wit
 npx biome format --write src/   # フォーマット適用
 npm run lint                     # lint チェック（エラーがないこと）
 npm run build                    # 型エラー・ビルドエラーがないこと
-npm run test                     # 全テストがパスすること
+npm run test                     # 全ユニットテストがパスすること
+npm run test:browser             # 全ブラウザテストがパスすること（コンポーネント変更時）
 ```
 
 `npm run format` は check only（書き込みなし）なので、整形は必ず `npx biome format --write` を使うこと。
@@ -41,10 +42,6 @@ npm run preview
 ```
 Serves the production build locally for testing.
 
-### Tests
-- Test runner: Vitest (`npm run test`).
-- Implement features while adding/maintaining related tests in parallel where feasible.
-
 ### Linting
 ```bash
 npm run lint
@@ -53,9 +50,90 @@ Uses Biome 2.4.4 for code linting.
 
 ### Code Formatting
 ```bash
-npm run format
+npm run format     # check only
+npx biome format --write src/   # 実際に書き込み
 ```
-Uses Biome for automatic code formatting.
+
+---
+
+## テスト（必須）
+
+### テスト必須ルール
+
+**コード変更時は、対応するテストを必ず追加・更新すること。**
+
+- `src/lib/` や `src/atoms/` のロジック変更 → **ユニットテスト** (`*.test.ts`) を追加・更新
+- `src/components/` のコンポーネント変更 → **ブラウザテスト** (`*.browser.test.tsx`) を追加・更新
+- 新規ファイル作成時 → 対応するテストファイルも必ず作成
+- 既存テストが壊れた場合 → 原因を調査し修正（テストを削除しない）
+
+### テスト構成
+
+| 種別 | コマンド | 設定ファイル | パターン | 環境 |
+|------|---------|-------------|---------|------|
+| ユニットテスト | `npm run test` | `vitest.config.ts` | `src/**/*.test.ts` | Node |
+| ブラウザテスト | `npm run test:browser` | `vitest.browser.config.ts` | `src/**/*.browser.test.tsx` | Chromium (Playwright) |
+
+### ユニットテスト (`*.test.ts`)
+
+- 純粋関数・ユーティリティ・atom ロジックの検証
+- `vitest` の `describe` / `test` / `expect` を使用
+- テストファイルは実装ファイルと同じディレクトリに配置（例: `src/lib/utils.ts` → `src/lib/utils.test.ts`）
+
+**モックパターン:**
+```typescript
+// fetch モック
+vi.stubGlobal("fetch", vi.fn());
+afterEach(() => vi.unstubAllGlobals());
+
+// 環境変数モック
+vi.stubEnv("VITE_API_KEY", "test-key");
+
+// モジュールモック
+vi.mock("idb-keyval", () => ({ get: vi.fn(), set: vi.fn(), del: vi.fn() }));
+
+// Jotai atom テスト
+import { createStore } from "jotai";
+const store = createStore();
+store.set(myAtom, value);
+expect(store.get(myAtom)).toBe(expected);
+```
+
+### ブラウザテスト (`*.browser.test.tsx`)
+
+- React コンポーネントの描画・操作・表示の検証
+- `vitest-browser-react` の `render` + `@vitest/browser/context` の `page` / `userEvent` を使用
+- 実ブラウザ (Chromium) で実行
+
+**テスト作成パターン:**
+```typescript
+import { render } from "vitest-browser-react";
+import { page, userEvent } from "@vitest/browser/context";
+
+// 副作用のあるモジュールは vi.mock で完全モック
+vi.mock("@/atoms/audio", () => ({ audioAtom: atom(null) }));
+
+// 子コンポーネントのスタブ
+vi.mock("@/components/ChildComponent", () => ({
+  ChildComponent: () => <div data-testid="child-stub" />,
+}));
+
+// Jotai Provider でラップ
+import { Provider, createStore } from "jotai";
+const store = createStore();
+render(<Provider store={store}><MyComponent /></Provider>);
+
+// ロケーター
+page.getByRole("button", { name: /submit/i });
+page.getByText("テキスト");
+page.getByTestId("test-id");
+```
+
+**注意事項:**
+- `@/atoms/audio` はモジュールスコープで AudioContext を生成するため、必ず `vi.mock` すること
+- `atomWithIDB` を使用する atom は DataCloneError を避けるためプレーンな `atom()` でモック
+- 重複 DOM 要素がある場合は `.first()` を使用
+- 空のモック関数ボディには `/* noop stub */` コメントを追加（Biome lint 対策）
 
 ## Architecture
 
@@ -64,6 +142,7 @@ Uses Biome for automatic code formatting.
 - **Vite 8** with `@vitejs/plugin-react` and `@tailwindcss/vite`
 - **shadcn/ui** (new-york style, neutral base, Tailwind v4 mode) — components in `src/components/ui/`
 - **Biome 2.4.4** as primary formatter/linter, with ESLint flat config also present
+- **Vitest 4** — ユニットテスト (Node) + ブラウザテスト (Chromium via `vitest-browser-react` + `@vitest/browser-playwright`)
 
 ### Runtime and Build Flow
 1. TanStack Start (SSR) + Cloudflare Workers — `index.html` / `src/main.tsx` は存在しない。HTML シェルは `src/routes/__root.tsx` の `shellComponent` が生成する。

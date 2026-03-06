@@ -8,7 +8,8 @@
 npx biome format --write src/   # フォーマット適用
 npm run lint                     # lint チェック（エラーがないこと）
 npm run build                    # 型エラー・ビルドエラーがないこと
-npm run test                     # 全テストがパスすること
+npm run test                     # 全ユニットテストがパスすること
+npm run test:browser             # 全ブラウザテストがパスすること（コンポーネント変更時）
 ```
 
 `npm run format` は check only（書き込みなし）なので、整形は必ず `npx biome format --write` を使うこと。
@@ -36,7 +37,61 @@ npm run test                     # 全テストがパスすること
 - Lint: `npm run lint`
 - Format (check only): `npm run format`
 - Format (write): `npx biome format --write src/`
-- Test: `npm run test` (Vitest)
+- Unit test: `npm run test` (Vitest, Node 環境, `src/**/*.test.ts`)
+- Browser test: `npm run test:browser` (Vitest, Chromium via Playwright, `src/**/*.browser.test.tsx`)
+
+## テスト必須ルール
+
+**コード変更時は、対応するテストを必ず追加・更新すること。**
+
+- `src/lib/` や `src/atoms/` のロジック変更 → **ユニットテスト** (`*.test.ts`) を追加・更新
+- `src/components/` のコンポーネント変更 → **ブラウザテスト** (`*.browser.test.tsx`) を追加・更新
+- 新規ファイル作成時 → 対応するテストファイルも必ず作成
+- 既存テストが壊れた場合 → 原因を調査し修正（テストを削除しない）
+
+### ユニットテストのモックパターン
+```typescript
+// fetch モック
+vi.stubGlobal("fetch", vi.fn());
+afterEach(() => vi.unstubAllGlobals());
+
+// 環境変数モック
+vi.stubEnv("VITE_API_KEY", "test-key");
+
+// モジュールモック
+vi.mock("idb-keyval", () => ({ get: vi.fn(), set: vi.fn(), del: vi.fn() }));
+
+// Jotai atom テスト
+import { createStore } from "jotai";
+const store = createStore();
+store.set(myAtom, value);
+expect(store.get(myAtom)).toBe(expected);
+```
+
+### ブラウザテストのパターン
+```typescript
+import { render } from "vitest-browser-react";
+import { page, userEvent } from "@vitest/browser/context";
+
+// 副作用のあるモジュールは vi.mock で完全モック
+vi.mock("@/atoms/audio", () => ({ audioAtom: atom(null) }));
+
+// Jotai Provider でラップ
+import { Provider, createStore } from "jotai";
+const store = createStore();
+render(<Provider store={store}><MyComponent /></Provider>);
+
+// ロケーター
+page.getByRole("button", { name: /submit/i });
+page.getByText("テキスト");
+page.getByTestId("test-id");
+```
+
+### テストの注意事項
+- `@/atoms/audio` はモジュールスコープで AudioContext を生成するため、必ず `vi.mock` すること
+- `atomWithIDB` を使用する atom は DataCloneError を避けるためプレーンな `atom()` でモック
+- 重複 DOM 要素がある場合は `.first()` を使用
+- 空のモック関数ボディには `/* noop stub */` コメントを追加（Biome lint 対策）
 
 ## UI Conventions (shadcn/ui)
 - **HeroUI v3 は削除済み**。新規コンポーネントは `npx shadcn@latest add <name>` で `src/components/ui/` に生成する。
@@ -67,7 +122,7 @@ npm run test                     # 全テストがパスすること
 - Deploy: Cloudflare Workers (`wrangler deploy`, region: `gcp:asia-northeast1`)
 
 ## Project Conventions
-- Add/maintain related tests while implementing features whenever testable logic exists.
+- **コード変更時は対応するテストを必ず追加・更新すること。** テストなしのコード変更は許容しない。
 - For external library docs, prefer Context7 (`mcp_io`) and TanStack MCP before relying on memory.
 - `src/atoms/` — Jotai atoms and side effects  
   `src/components/` — React コンポーネント  
