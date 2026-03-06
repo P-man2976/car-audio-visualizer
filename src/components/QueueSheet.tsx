@@ -125,8 +125,8 @@ function SongHistoryList() {
 
 	return (
 		<VList className="flex-1 min-h-0 mt-4">
-			{reversed.map((song) => (
-				<div key={song.id} className="pb-2">
+			{reversed.map((song, index) => (
+				<div key={`${song.id}-${index}`} className="pb-2">
 					<QueueSongCard song={song} context="history" />
 				</div>
 			))}
@@ -178,10 +178,10 @@ function QueueSongCard({
 					if (context === "queue") {
 						skipTo(id);
 					} else {
-						// 履歴からはキューの先頭に追加して再生
-						setSongQueue((prev) => [song, ...prev]);
-						// tiny delay to let state update, then skipTo
-						queueMicrotask(() => skipTo(id));
+						// 履歴からはキューの先頭に新IDで追加して再生
+						const newId = crypto.randomUUID();
+						setSongQueue((prev) => [{ ...song, id: newId }, ...prev]);
+						queueMicrotask(() => skipTo(newId));
 					}
 				}}
 			>
@@ -297,7 +297,10 @@ function HistoryContextMenuItems({ song }: { song: Song }) {
 		<>
 			<ContextMenuItem
 				onClick={() => {
-					setSongQueue((prev) => [song, ...prev]);
+					setSongQueue((prev) => [
+						{ ...song, id: crypto.randomUUID() },
+						...prev,
+					]);
 				}}
 				className="gap-2"
 			>
@@ -306,7 +309,10 @@ function HistoryContextMenuItems({ song }: { song: Song }) {
 			</ContextMenuItem>
 			<ContextMenuItem
 				onClick={() => {
-					setSongQueue((prev) => [...prev, song]);
+					setSongQueue((prev) => [
+						...prev,
+						{ ...song, id: crypto.randomUUID() },
+					]);
 				}}
 				className="gap-2"
 			>
