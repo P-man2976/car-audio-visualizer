@@ -280,7 +280,7 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 					</div>
 					<div className="self-stretch border border-gray-700" />
 					{/* File listing */}
-					<div className="w-full basis-3/4 overflow-auto">
+					<div className="w-full basis-3/4 overflow-hidden">
 						<FileEntries />
 					</div>
 				</div>

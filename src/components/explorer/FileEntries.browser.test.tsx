@@ -97,7 +97,9 @@ function renderEntries(
 		...render(
 			<QueryClientProvider client={queryClient}>
 				<Provider store={store}>
-					<FileEntries />
+					<div style={{ height: 600 }}>
+						<FileEntries />
+					</div>
 				</Provider>
 			</QueryClientProvider>,
 		),

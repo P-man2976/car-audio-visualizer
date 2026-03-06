@@ -3,6 +3,7 @@ import { useAtom, useAtomValue } from "jotai";
 import { Folder } from "lucide-react";
 import mime from "mime/lite";
 import { useCallback, useMemo } from "react";
+import { VList } from "virtua";
 import { audioElementAtom } from "@/atoms/audio";
 import {
 	explorerCurrentDirAtom,
@@ -51,11 +52,11 @@ export function FileEntries() {
 	}
 
 	return (
-		<div className="flex flex-col overflow-y-auto">
+		<VList className="h-full">
 			{data?.map((entry) => (
 				<Entry key={entry.name} {...entry} />
 			))}
-		</div>
+		</VList>
 	);
 }
 
