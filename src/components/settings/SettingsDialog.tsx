@@ -60,204 +60,14 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
-// ─── Visualizer Preview SVG Components ────────────────────────────────────────
+// ─── Visualizer Preview Images ────────────────────────────────────────────────
 
-/** スタンダード（3D 傾斜マトリクス）のプレビュー */
-function PreviewStandard() {
-	const BANDS = 9;
-	const ROWS = 14;
-	const LIT_ROWS = [6, 9, 5, 11, 9, 7, 12, 8, 5] as const;
-	const BAND_W = 13;
-	const CELL_H = 3.5;
-	const CELL_GAP = 0.8;
-	const STEP = CELL_H + CELL_GAP;
-	const SKEW_X = -6;
-
-	return (
-		<svg
-			viewBox="0 0 130 70"
-			xmlns="http://www.w3.org/2000/svg"
-			aria-hidden="true"
-		>
-			<rect width="130" height="70" fill="#0a0a0a" />
-			{Array.from({ length: ROWS }, (_, r) => (
-				<line
-					key={r}
-					x1="2"
-					y1={68 - r * STEP}
-					x2="128"
-					y2={68 - r * STEP}
-					stroke="#1e1b2e"
-					strokeWidth="0.4"
-				/>
-			))}
-			<g transform={`skewX(${SKEW_X}) translate(10, 0)`}>
-				{Array.from({ length: BANDS }, (_, b) => {
-					const bx = b * (BAND_W + 2);
-					const litCount = LIT_ROWS[b];
-					return Array.from({ length: ROWS }, (_, r) => {
-						const y = 68 - r * STEP;
-						const lit = r < litCount;
-						const isPeak = r === litCount;
-						const fill = isPeak ? "#3b82f6" : lit ? "#a5f3fc" : "#1e1b2e";
-						const opacity = lit || isPeak ? 1 : 0.6;
-						return (
-							<rect
-								key={`${b}-${r}`}
-								x={bx}
-								y={y}
-								width={BAND_W - 1}
-								height={CELL_H}
-								fill={fill}
-								opacity={opacity}
-								rx={0.5}
-							/>
-						);
-					});
-				})}
-			</g>
-			<line
-				x1="2"
-				y1="68"
-				x2="128"
-				y2="68"
-				stroke="#67e8f9"
-				strokeWidth="0.8"
-			/>
-		</svg>
-	);
-}
-
-/** DPX-5021M（Kenwood フラットスペクトラム）のプレビュー */
-function PreviewDpx5021m() {
-	const BARS = 30;
-	const mainHeights = [
-		0.3, 0.5, 0.4, 0.7, 0.9, 0.8, 0.6, 0.75, 0.85, 0.7, 0.55, 0.65, 0.8, 0.9,
-		0.85, 0.7, 0.6, 0.5, 0.45, 0.55, 0.65, 0.7, 0.6, 0.5, 0.4, 0.35, 0.3, 0.25,
-		0.2, 0.15,
-	];
-	const subHeights = [
-		0.25, 0.4, 0.35, 0.6, 0.75, 0.7, 0.5, 0.65, 0.75, 0.6, 0.45, 0.55, 0.7, 0.8,
-		0.75, 0.6, 0.5, 0.42, 0.38, 0.48, 0.58, 0.62, 0.52, 0.42, 0.33, 0.28, 0.23,
-		0.18, 0.15, 0.1,
-	];
-	const BAR_W = 3.4;
-	const BAR_GAP = 0.6;
-	const BAR_STEP = BAR_W + BAR_GAP;
-	const hues = Array.from({ length: BARS }, (_, i) => 180 + i * 4.5);
-
-	return (
-		<svg
-			viewBox="0 0 130 70"
-			xmlns="http://www.w3.org/2000/svg"
-			aria-hidden="true"
-		>
-			<rect width="130" height="70" fill="#0a0a0a" />
-			<line x1="2" y1="35" x2="128" y2="35" stroke="#222" strokeWidth="0.8" />
-			{Array.from({ length: BARS }, (_, i) => {
-				const x = 2 + i * BAR_STEP;
-				const maxH = 28;
-				const h = mainHeights[i] * maxH;
-				const y = 33 - h;
-				return (
-					<rect
-						key={`main-${i}`}
-						x={x}
-						y={y}
-						width={BAR_W}
-						height={h}
-						fill={`hsl(${hues[i]}, 80%, 60%)`}
-						rx={0.4}
-					/>
-				);
-			})}
-			{Array.from({ length: BARS }, (_, i) => {
-				const x = 2 + i * BAR_STEP;
-				const maxH = 26;
-				const h = subHeights[i] * maxH;
-				return (
-					<rect
-						key={`sub-${i}`}
-						x={x}
-						y={37}
-						width={BAR_W}
-						height={h}
-						fill={`hsl(${hues[i]}, 70%, 50%)`}
-						opacity={0.8}
-						rx={0.4}
-					/>
-				);
-			})}
-			<text
-				x="65"
-				y="8"
-				textAnchor="middle"
-				fill="#888"
-				fontSize="5"
-				fontFamily="monospace"
-			>
-				DPX-5021M
-			</text>
-		</svg>
-	);
-}
-
-/** スタンダード 2D（PixiJS フラットグリッド）のプレビュー */
-function PreviewStandard2d() {
-	const BANDS = 9;
-	const ROWS = 14;
-	const LIT_ROWS = [5, 8, 4, 10, 7, 5, 11, 7, 4] as const;
-	const CELL_W = 10;
-	const CELL_H = 3.5;
-	const CELL_GAP_H = 1.5;
-	const CELL_GAP_V = 0.8;
-	const BAND_GAP = 2;
-	const STEP_V = CELL_H + CELL_GAP_V;
-	const BAND_STEP = (CELL_W + CELL_GAP_H) * 2 + BAND_GAP;
-
-	return (
-		<svg
-			viewBox="0 0 130 70"
-			xmlns="http://www.w3.org/2000/svg"
-			aria-hidden="true"
-		>
-			<rect width="130" height="70" fill="#0a0a0a" />
-			{Array.from({ length: BANDS }, (_, b) => {
-				const bx = 2 + b * BAND_STEP;
-				const litCount = LIT_ROWS[b];
-				return Array.from({ length: ROWS }, (_, r) => {
-					const y = 66 - r * STEP_V;
-					const lit = r < litCount;
-					const isPeak = r === litCount;
-					const fill = isPeak ? "#3b82f6" : lit ? "#a5f3fc" : "#1e1b2e";
-					const opacity = lit || isPeak ? 1 : 0.55;
-					return (
-						<g key={`${b}-${r}`}>
-							<rect
-								x={bx}
-								y={y}
-								width={CELL_W}
-								height={CELL_H}
-								fill={fill}
-								opacity={opacity}
-								rx={0.3}
-							/>
-							<rect
-								x={bx + CELL_W + CELL_GAP_H}
-								y={y}
-								width={CELL_W}
-								height={CELL_H}
-								fill={fill}
-								opacity={opacity}
-								rx={0.3}
-							/>
-						</g>
-					);
-				});
-			})}
-		</svg>
-	);
-}
+/** ビジュアライザーのスクリーンショットプレビュー画像パス */
+const VISUALIZER_PREVIEW_IMAGES: Record<VisualizerStyle, string> = {
+	standard: "/visualizer/standard.png",
+	dpx5021m: "/visualizer/dpx5021m.png",
+	"standard-2d": "/visualizer/standard-2d.png",
+};
 
 // ─── VisualiserCard items ─────────────────────────────────────────────────────
 
@@ -265,28 +75,24 @@ const VISUALIZER_ITEMS: {
 	value: VisualizerStyle;
 	label: string;
 	description: string;
-	preview: React.ReactNode;
 }[] = [
 	{
 		value: "standard",
 		label: "スタンダード（3D）",
 		description:
 			"React Three Fiber + InstancedMesh による 3D 傾斜マトリクス表示。1/3 オクターブ 9 バンド × 32 行のセルがパースペクティブ投影で描画される。",
-		preview: <PreviewStandard />,
 	},
 	{
 		value: "dpx5021m",
 		label: "DPX-5021M（Kenwood）",
 		description:
 			"Kenwood DPX-5021M を模したフラットスペクトラムアナライザー。メイン + サブの 2 チャンネルで表示される。",
-		preview: <PreviewDpx5021m />,
 	},
 	{
 		value: "standard-2d",
 		label: "スタンダード（2D）",
 		description:
 			"PixiJS による 2D キャンバス描画。3D レンダリングなしで描画されるため低スペック環境でも動作が軽い。",
-		preview: <PreviewStandard2d />,
 	},
 ];
 
@@ -348,7 +154,7 @@ function VisualizerPane() {
 				変更は即時反映されます。
 			</p>
 			<div className="flex flex-col gap-3">
-				{VISUALIZER_ITEMS.map(({ value, label, description, preview }) => {
+				{VISUALIZER_ITEMS.map(({ value, label, description }) => {
 					const isActive = style === value;
 					return (
 						<button
@@ -366,7 +172,11 @@ function VisualizerPane() {
 							aria-pressed={isActive}
 						>
 							<div className="w-20 sm:w-28 shrink-0 rounded overflow-hidden border border-neutral-700">
-								{preview}
+								<img
+									src={VISUALIZER_PREVIEW_IMAGES[value]}
+									alt={label}
+									className="w-full h-auto object-cover aspect-square"
+								/>
 							</div>
 							<div className="flex flex-col gap-1 min-w-0">
 								<span
