@@ -88,9 +88,11 @@ export function useFilePlayer() {
 	}, [audioElement, currentSrc, next, play]);
 
 	// off / radio / aux モードへ切り替えたらオーディオ停止
+	// autoPlayNextRef もリセットし、後で file に戻った際に意図しない自動再生を防ぐ
 	useEffect(() => {
 		if (currentSrc !== "file") {
 			audioElement.pause();
+			autoPlayNextRef.current = false;
 			safariVizBridge?.detachFile();
 		}
 	}, [audioElement, currentSrc]);
