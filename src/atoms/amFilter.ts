@@ -54,7 +54,7 @@ export const DEFAULT_AM_FILTER_SETTINGS: AmFilterSettings = {
 	compRatio: 8,
 	noiseLevel: 0.005,
 	speakerResonanceFreq: 1200,
-	speakerResonanceGain: 6,
+	speakerResonanceGain: 2,
 };
 
 /**

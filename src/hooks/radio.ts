@@ -47,7 +47,7 @@ export function useTunableStations(): TunableEntry[] {
 
 			const customFreq = customFreqList.find((s) => s.id === station.id);
 
-			// ─── カスタム設定あり: その周波数 1 件のみ ───
+			// ─── カスタム設定あり: その周波数 + primary バンドも追加 ───
 			if (customFreq) {
 				entries.push({
 					id: station.id,
@@ -56,6 +56,22 @@ export function useTunableStations(): TunableEntry[] {
 					freq: customFreq.freq,
 					logo: station.logo?.[0],
 				});
+
+				// カスタム周波数が局の primary type と異なるバンドの場合、
+				// primary バンドの周波数も追加して AM チューニングで見つかるようにする
+				if (customFreq.type !== freqData.type && freqData.type === "AM") {
+					const amArea =
+						freqData.frequencies_am.find((a) => a.primary) ??
+						freqData.frequencies_am[0];
+					entries.push({
+						id: station.id,
+						name: station.name,
+						type: "AM",
+						freq: amArea.frequency,
+						logo: station.logo?.[0],
+					});
+				}
+
 				continue;
 			}
 
