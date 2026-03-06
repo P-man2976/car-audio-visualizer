@@ -38,7 +38,7 @@ const analyzerInstance = new AudioMotionAnalyzer(undefined, {
 
 // ─── AM ラジオフィルタチェーン ────────────────────────────────────────────────
 //
-// 有効時: MECSN → HPF → LPF → distortion → compressor → mono → analyzer
+// 有効時: MECSN → HPF → LPF → speaker → distortion → compressor → mono → analyzer
 //         noise ↗
 // 無効時: 全ノードがバイパス状態で全帯域ステレオパススルー。
 //
@@ -64,6 +64,15 @@ amLowpassFilter.Q.value = 0.707;
 const amDistortion = _audioCtx.createWaveShaper();
 amDistortion.curve = null; // 初期: バイパス（リニア）
 amDistortion.oversample = "2x"; // エイリアシング防止
+
+// ── スピーカーシミュレーション (ピーキング EQ) ──
+// AM ラジオの小型スピーカー特有の共振ピークを再現する。
+// gain=0 でバイパス。LPF と歪みの間に配置。
+const amSpeakerResonance = _audioCtx.createBiquadFilter();
+amSpeakerResonance.type = "peaking";
+amSpeakerResonance.frequency.value = 1200; // 初期値
+amSpeakerResonance.Q.value = 1.5; // 程よい帯域幅
+amSpeakerResonance.gain.value = 0; // 初期: バイパス
 
 /** 最後に適用した distortion amount（同じ値の再生成を避ける） */
 let _lastDistortionAmount = -1;
@@ -132,9 +141,10 @@ noiseGain.gain.value = 0; // 初期: 無音
 noiseSource.connect(noiseGain);
 noiseGain.connect(amHighpassFilter); // HPF の前段に接続
 
-// チェーン接続: HPF → LPF → distortion → compressor → mono
+// チェーン接続: HPF → LPF → speaker → distortion → compressor → mono
 amHighpassFilter.connect(amLowpassFilter);
-amLowpassFilter.connect(amDistortion);
+amLowpassFilter.connect(amSpeakerResonance);
+amSpeakerResonance.connect(amDistortion);
 amDistortion.connect(amCompressor);
 amCompressor.connect(monoNode);
 
@@ -185,6 +195,18 @@ export function setAmFilterActive(
 
 	// ホワイトノイズ
 	noiseGain.gain.setTargetAtTime(active ? settings.noiseLevel : 0, now, smooth);
+
+	// スピーカーシミュレーション（ピーキング EQ）
+	amSpeakerResonance.frequency.setTargetAtTime(
+		active ? settings.speakerResonanceFreq : 1200,
+		now,
+		smooth,
+	);
+	amSpeakerResonance.gain.setTargetAtTime(
+		active ? settings.speakerResonanceGain : 0,
+		now,
+		smooth,
+	);
 
 	// モノラル化
 	monoNode.channelCount = active ? 1 : 2;

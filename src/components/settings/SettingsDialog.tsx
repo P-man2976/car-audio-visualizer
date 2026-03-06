@@ -404,6 +404,8 @@ function AudioPane() {
 	const amThreshId = useId();
 	const amRatioId = useId();
 	const amNoiseId = useId();
+	const amSpkFreqId = useId();
+	const amSpkGainId = useId();
 
 	const update = useCallback(
 		<K extends keyof AudioMotionSettings>(
@@ -572,6 +574,38 @@ function AudioPane() {
 								step={0.005}
 								value={[amSettings.noiseLevel]}
 								onValueChange={([v]) => updateAm("noiseLevel", v)}
+							/>
+						</SettingRow>
+
+						<SettingRow
+							htmlFor={amSpkFreqId}
+							label={`SP 共振: ${amSettings.speakerResonanceFreq.toLocaleString()} Hz`}
+							description="スピーカー共振周波数。AM ラジオの小型スピーカーの箱鳴りを再現します。"
+						>
+							<Slider
+								id={amSpkFreqId}
+								className="w-full sm:w-28"
+								min={500}
+								max={3000}
+								step={50}
+								value={[amSettings.speakerResonanceFreq]}
+								onValueChange={([v]) => updateAm("speakerResonanceFreq", v)}
+							/>
+						</SettingRow>
+
+						<SettingRow
+							htmlFor={amSpkGainId}
+							label={`SP ゲイン: ${amSettings.speakerResonanceGain} dB`}
+							description="共振ピークの強さ。0 dB でバイパス。大きいほど箱鳴り感が強くなります。"
+						>
+							<Slider
+								id={amSpkGainId}
+								className="w-full sm:w-28"
+								min={0}
+								max={15}
+								step={1}
+								value={[amSettings.speakerResonanceGain]}
+								onValueChange={([v]) => updateAm("speakerResonanceGain", v)}
 							/>
 						</SettingRow>
 					</>

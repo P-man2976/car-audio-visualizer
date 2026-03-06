@@ -63,6 +63,21 @@ describe("DEFAULT_AM_FILTER_SETTINGS", () => {
 		expect(DEFAULT_AM_FILTER_SETTINGS.noiseLevel).toBeLessThanOrEqual(1);
 	});
 
+	it("スピーカー共振周波数が可聴域内である", () => {
+		expect(
+			DEFAULT_AM_FILTER_SETTINGS.speakerResonanceFreq,
+		).toBeGreaterThanOrEqual(20);
+		expect(DEFAULT_AM_FILTER_SETTINGS.speakerResonanceFreq).toBeLessThanOrEqual(
+			20000,
+		);
+	});
+
+	it("スピーカー共振ゲインが 0 以上である", () => {
+		expect(
+			DEFAULT_AM_FILTER_SETTINGS.speakerResonanceGain,
+		).toBeGreaterThanOrEqual(0);
+	});
+
 	it("全プロパティが定義されている", () => {
 		const keys: (keyof typeof DEFAULT_AM_FILTER_SETTINGS)[] = [
 			"lpfFreq",
@@ -71,6 +86,8 @@ describe("DEFAULT_AM_FILTER_SETTINGS", () => {
 			"compThreshold",
 			"compRatio",
 			"noiseLevel",
+			"speakerResonanceFreq",
+			"speakerResonanceGain",
 		];
 		for (const key of keys) {
 			expect(DEFAULT_AM_FILTER_SETTINGS).toHaveProperty(key);

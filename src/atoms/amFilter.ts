@@ -38,6 +38,10 @@ export interface AmFilterSettings {
 	compRatio: number;
 	/** ブラウンノイズレベル (0 = なし、1 = 最大) */
 	noiseLevel: number;
+	/** スピーカー共振周波数 [Hz]。AM ラジオの小型スピーカーのピーキング EQ */
+	speakerResonanceFreq: number;
+	/** スピーカー共振ゲイン [dB]。0 = バイパス */
+	speakerResonanceGain: number;
 }
 
 /** デフォルトの AM フィルタ設定 */
@@ -48,6 +52,8 @@ export const DEFAULT_AM_FILTER_SETTINGS: AmFilterSettings = {
 	compThreshold: -24,
 	compRatio: 8,
 	noiseLevel: 0.005,
+	speakerResonanceFreq: 1200,
+	speakerResonanceGain: 6,
 };
 
 /** AM フィルタ設定アトム（永続化） */
