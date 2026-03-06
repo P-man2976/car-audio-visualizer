@@ -202,7 +202,7 @@ export function setAmFilterActive(
 	// 閾値を上げる（圧縮減）→ 負のゲイン（減衰）、下げる → 正のゲイン（ブースト）。
 	// AM_MAKEUP_OFFSET_DB で全体をさらに減衰させる。
 	// 無効時は 1.0 (0dB) でバイパス。
-	const AM_MAKEUP_OFFSET_DB = -10;
+	const AM_MAKEUP_OFFSET_DB = -8;
 	let makeupLinear = 1; // バイパス
 	if (active) {
 		const referenceDb = calcMakeupGain(

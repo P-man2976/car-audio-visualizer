@@ -6,6 +6,8 @@ import {
 	ChevronRight,
 	ChevronFirst,
 	ChevronLast,
+	Disc3,
+	ListMusic,
 	LogIn,
 	Minus,
 	Music2,
@@ -16,6 +18,7 @@ import {
 	RadioTower,
 	Repeat,
 	Repeat1,
+	Settings,
 	Shuffle,
 	Square,
 	LoaderCircle,
@@ -155,14 +158,17 @@ export function ControlsOverlay() {
 						<SongInfo title={title} artist={artist} album={album} />
 					</div>
 					<SourceSheet>
-						<Button variant={null} className="z-10 w-full">
+						<Button
+							variant={null}
+							className="z-10 w-full hidden sm:inline-flex"
+						>
 							<ChevronDown className="size-7 scale-x-150" />
 						</Button>
 					</SourceSheet>
 				</div>
 
-				{/* Sidebar */}
-				<div className="flex h-full items-center justify-between">
+				{/* Sidebar — desktop only */}
+				<div className="hidden sm:flex h-full items-center justify-between">
 					<MenuSheet>
 						<Button
 							variant={null}
@@ -184,7 +190,7 @@ export function ControlsOverlay() {
 				</div>
 
 				{/* Footer */}
-				<div className="flex flex-col gap-1 bg-linear-to-t from-gray-500/50 to-transparent px-[max(1rem,env(safe-area-inset-left))] pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:gap-2 sm:px-[max(2rem,env(safe-area-inset-left))] sm:pb-[max(1rem,env(safe-area-inset-bottom))] sm:pt-10 md:gap-4 md:px-[max(3rem,env(safe-area-inset-left))] md:pb-[max(2rem,env(safe-area-inset-bottom))] md:pt-16">
+				<div className="flex flex-col gap-3 bg-linear-to-t from-gray-500/50 to-transparent px-[max(1rem,env(safe-area-inset-left))] pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:gap-2 sm:px-[max(2rem,env(safe-area-inset-left))] sm:pb-[max(1rem,env(safe-area-inset-bottom))] sm:pt-10 md:gap-4 md:px-[max(3rem,env(safe-area-inset-left))] md:pb-[max(2rem,env(safe-area-inset-bottom))] md:pt-16">
 					<ProgressSlider />
 					<div className="flex items-center gap-3 sm:gap-5 md:gap-8">
 						{/* Cover image / icon — desktop only */}
@@ -312,6 +318,24 @@ export function ControlsOverlay() {
 								</Button>
 							)}
 						</div>
+					</div>
+					{/* Mobile: Sheet toggle buttons */}
+					<div className="flex justify-evenly sm:hidden">
+						<MenuSheet>
+							<Button size="icon-lg" variant="ghost" className="p-2">
+								<Settings />
+							</Button>
+						</MenuSheet>
+						<SourceSheet>
+							<Button size="icon-lg" variant="ghost" className="p-2">
+								<Disc3 />
+							</Button>
+						</SourceSheet>
+						<QueueSheet>
+							<Button size="icon-lg" variant="ghost" className="p-2">
+								<ListMusic />
+							</Button>
+						</QueueSheet>
 					</div>
 				</div>
 			</div>
