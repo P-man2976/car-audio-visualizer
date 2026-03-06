@@ -95,6 +95,21 @@ export const amFilterSettingsAtom = atom(
 );
 
 /**
+ * コンプレッサーの閾値・レシオから静的メイクアップゲインを計算する。
+ *
+ * 閾値を下げるほど圧縮量が増えて出力レベルが下がるため、
+ * その分を補正するゲイン (dB) を近似式で算出する。
+ *
+ * @param threshold - コンプレッサー閾値 [dB] (≤ 0)
+ * @param ratio - コンプレッサーレシオ (≥ 1)
+ * @returns メイクアップゲイン [dB] (≥ 0)
+ */
+export function calcMakeupGain(threshold: number, ratio: number): number {
+	if (threshold >= 0 || ratio <= 1) return 0;
+	return -threshold * (1 - 1 / ratio) * 0.5;
+}
+
+/**
  * ソフトクリッピング用の転送関数カーブを生成する。
  * tanh ベースのサチュレーションで AM ラジオ特有の倍音歪みを再現する。
  *

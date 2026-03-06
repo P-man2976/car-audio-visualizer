@@ -8,6 +8,7 @@ import {
 	AM_FILTER_FREQ,
 	AM_HPF_FREQ,
 	DEFAULT_AM_FILTER_SETTINGS,
+	calcMakeupGain,
 	makeDistortionCurve,
 } from "./amFilter";
 
@@ -143,5 +144,42 @@ describe("makeDistortionCurve", () => {
 		const idx = Math.floor(((0.5 + 1) / 2) * (512 - 1));
 		// amount が大きい方が 1.0 に近い（サチュレーション）
 		expect(curveHigh[idx]).toBeGreaterThan(curveLow[idx]);
+	});
+});
+
+describe("calcMakeupGain", () => {
+	it("threshold=0 のとき 0dB を返す（バイパス）", () => {
+		expect(calcMakeupGain(0, 8)).toBe(0);
+	});
+
+	it("ratio=1 のとき 0dB を返す（圧縮なし）", () => {
+		expect(calcMakeupGain(-24, 1)).toBe(0);
+	});
+
+	it("ratio<1 のとき 0dB を返す（無効値ガード）", () => {
+		expect(calcMakeupGain(-24, 0.5)).toBe(0);
+	});
+
+	it("threshold>0 のとき 0dB を返す（無効値ガード）", () => {
+		expect(calcMakeupGain(6, 4)).toBe(0);
+	});
+
+	it("デフォルト設定 (threshold=-24, ratio=8) で正の補正ゲインを返す", () => {
+		const gain = calcMakeupGain(-24, 8);
+		expect(gain).toBeGreaterThan(0);
+		// -(-24) * (1 - 1/8) * 0.5 = 24 * 0.875 * 0.5 = 10.5
+		expect(gain).toBeCloseTo(10.5, 2);
+	});
+
+	it("閾値が低いほど補正ゲインが大きい", () => {
+		const gain10 = calcMakeupGain(-10, 4);
+		const gain30 = calcMakeupGain(-30, 4);
+		expect(gain30).toBeGreaterThan(gain10);
+	});
+
+	it("レシオが高いほど補正ゲインが大きい", () => {
+		const gain2 = calcMakeupGain(-20, 2);
+		const gain10 = calcMakeupGain(-20, 10);
+		expect(gain10).toBeGreaterThan(gain2);
 	});
 });

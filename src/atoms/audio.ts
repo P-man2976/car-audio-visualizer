@@ -4,6 +4,7 @@ import { SafariVizBridge, isMECSNBroken } from "@/lib/safari-viz-bridge";
 import {
 	type AmFilterSettings,
 	DEFAULT_AM_FILTER_SETTINGS,
+	calcMakeupGain,
 	makeDistortionCurve,
 } from "./amFilter";
 
@@ -38,7 +39,7 @@ const analyzerInstance = new AudioMotionAnalyzer(undefined, {
 
 // ─── AM ラジオフィルタチェーン ────────────────────────────────────────────────
 //
-// 有効時: MECSN → HPF → LPF → speaker → distortion → compressor → mono → analyzer
+// 有効時: MECSN → HPF → LPF → speaker → distortion → compressor → makeupGain → mono → analyzer
 //         noise ↗
 // 無効時: 全ノードがバイパス状態で全帯域ステレオパススルー。
 //
@@ -99,6 +100,12 @@ amCompressor.ratio.value = 1; // 初期: バイパス（1:1 = 圧縮なし）
 amCompressor.attack.value = 0.003;
 amCompressor.release.value = 0.25;
 
+// ── メイクアップゲイン ──
+// コンプレッサーで失われた音量を静的に補正する。
+// threshold/ratio から calcMakeupGain() で算出した dB をリニアに変換して適用。
+const makeupGainNode = _audioCtx.createGain();
+makeupGainNode.gain.value = 1; // 初期: バイパス（0dB）
+
 /**
  * ステレオ → モノラル ダウンミックスノード。
  *
@@ -141,12 +148,13 @@ noiseGain.gain.value = 0; // 初期: 無音
 noiseSource.connect(noiseGain);
 noiseGain.connect(amHighpassFilter); // HPF の前段に接続
 
-// チェーン接続: HPF → LPF → speaker → distortion → compressor → mono
+// チェーン接続: HPF → LPF → speaker → distortion → compressor → makeupGain → mono
 amHighpassFilter.connect(amLowpassFilter);
 amLowpassFilter.connect(amSpeakerResonance);
 amSpeakerResonance.connect(amDistortion);
 amDistortion.connect(amCompressor);
-amCompressor.connect(monoNode);
+amCompressor.connect(makeupGainNode);
+makeupGainNode.connect(monoNode);
 
 /**
  * AM フィルタの有効/無効を切り替える。
@@ -190,6 +198,11 @@ export function setAmFilterActive(
 	);
 	amCompressor.ratio.setTargetAtTime(active ? s.compRatio : 1, now, smooth);
 
+	// メイクアップゲイン: 圧縮で失われた音量を補正
+	const makeupDb = active ? calcMakeupGain(s.compThreshold, s.compRatio) : 0;
+	const makeupLinear = 10 ** (makeupDb / 20);
+	makeupGainNode.gain.setTargetAtTime(makeupLinear, now, smooth);
+
 	// ブラウンノイズ
 	noiseGain.gain.setTargetAtTime(active ? s.noiseLevel : 0, now, smooth);
 
@@ -217,7 +230,7 @@ export function setAmFilterActive(
  * 呼ぶと MediaElementAudioSourceNode が無音になる。
  * play() 成功後（ソース確定済み）に一度だけ呼ぶことで回避する。
  *
- * audio → MECSN → HPF → LPF → compressor → monoNode → analyzer（→ destination）
+ * audio → MECSN → HPF → LPF → speaker → distortion → compressor → makeupGain → monoNode → analyzer（→ destination）
  */
 let _audioSourceConnected = false;
 export function connectAudioSource(): void {
