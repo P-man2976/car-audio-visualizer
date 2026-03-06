@@ -201,7 +201,7 @@ export function setAmFilterActive(
 	// メイクアップゲイン: デフォルト設定を基準 (0dB) として相対的に補正。
 	// 閾値を上げる（圧縮減）→ 負のゲイン（減衰）、下げる → 正のゲイン（ブースト）。
 	// AM_MAKEUP_OFFSET_DB で全体をさらに減衰させる。
-	const AM_MAKEUP_OFFSET_DB = -6;
+	const AM_MAKEUP_OFFSET_DB = -10;
 	const referenceDb = calcMakeupGain(
 		DEFAULT_AM_FILTER_SETTINGS.compThreshold,
 		DEFAULT_AM_FILTER_SETTINGS.compRatio,

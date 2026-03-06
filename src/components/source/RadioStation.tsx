@@ -127,7 +127,7 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 							<div className="flex flex-col items-start">
 								{frequency != null && (
 									<span className="text-gray-300 text-sm">
-										{frequency}
+										{frequency.toFixed(type === "AM" ? 0 : 1)}
 										{type === "AM" ? "kHz" : "MHz"}
 									</span>
 								)}
@@ -180,7 +180,7 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 									key={area.area.toString()}
 									value={`FM-${area.frequency}`}
 								>
-									{area.frequency}MHz ({area.area.join(", ")})
+									{area.frequency.toFixed(1)}MHz ({area.area.join(", ")})
 								</ContextMenuRadioItem>
 							))}
 							{station?.frequencies_am?.map((area) => (
