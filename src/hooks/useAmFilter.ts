@@ -3,7 +3,7 @@
  *
  * currentRadioAtom, amFilterEnabledAtom, amFilterSettingsAtom を監視し、
  * AM 局再生中かつ設定が有効な場合にフィルタ（帯域制限 + 歪み + AGC +
- * ホワイトノイズ + モノラル化）を適用する。
+ * ブラウンノイズ + モノラル化）を適用する。
  * HomePage など、アプリのルート近くで一度だけ使用すること。
  */
 import { useAtomValue } from "jotai";

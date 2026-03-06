@@ -4,7 +4,7 @@
  *
  * AM 放送帯域（~30Hz〜4500Hz）を模したバンドパスフィルタ（HPF + LPF）、
  * ソフトクリッピング歪み、モノラル化、自動利得制御（コンプレッサー）、
- * ホワイトノイズの ON/OFF 設定と各パラメーター。
+ * ブラウンノイズの ON/OFF 設定と各パラメーター。
  * 実際の AudioNode は audio.ts で管理し、本モジュールは
  * 設定アトム・定数・純粋関数のみを提供する。
  */
@@ -36,7 +36,7 @@ export interface AmFilterSettings {
 	compThreshold: number;
 	/** コンプレッサーレシオ */
 	compRatio: number;
-	/** ホワイトノイズレベル (0 = なし、1 = 最大) */
+	/** ブラウンノイズレベル (0 = なし、1 = 最大) */
 	noiseLevel: number;
 }
 

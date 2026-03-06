@@ -562,7 +562,7 @@ function AudioPane() {
 						<SettingRow
 							htmlFor={amNoiseId}
 							label={`ノイズ: ${(amSettings.noiseLevel * 100).toFixed(1)}%`}
-							description="ホワイトノイズの混合量。AM 受信時の環境ノイズを再現します。"
+							description="ブラウンノイズの混合量。AM 受信時の大気ノイズを再現します。"
 						>
 							<Slider
 								id={amNoiseId}
