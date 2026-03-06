@@ -131,13 +131,28 @@ export function createSongArrayStorage(): IDBStorage<Song[]> {
 }
 
 /**
- * IDBStorage<FileSystemDirectoryHandle | null> for the explorer root handle.
+ * IDBStorage<FileSystemDirectoryHandle[]> for saved explorer directory handles.
+ * Handles are structured-cloneable and stored natively in IDB.
  */
-export function createDirectoryHandleStorage(): IDBStorage<FileSystemDirectoryHandle | null> {
+export function createDirectoryHandleArrayStorage(): IDBStorage<
+	FileSystemDirectoryHandle[]
+> {
 	return {
 		getItem: async (key, initialValue) => {
-			const v = await get<FileSystemDirectoryHandle | null>(key, getStore());
-			return v !== undefined ? v : initialValue;
+			const v = await get<FileSystemDirectoryHandle[]>(key, getStore());
+			if (v !== undefined) return v;
+			// Migrate from old single-handle key (cav-dir-handle-v1)
+			const legacy = await get<FileSystemDirectoryHandle | null>(
+				"cav-dir-handle-v1",
+				getStore(),
+			);
+			if (legacy) {
+				const migrated = [legacy];
+				await set(key, migrated, getStore());
+				await del("cav-dir-handle-v1", getStore());
+				return migrated;
+			}
+			return initialValue;
 		},
 		setItem: async (key, value) => {
 			await set(key, value, getStore());

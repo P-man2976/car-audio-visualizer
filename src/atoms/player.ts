@@ -4,7 +4,7 @@ import type { Song } from "@/types/player";
 import type { Radio } from "../types/radio";
 import {
 	atomWithIDB,
-	createDirectoryHandleStorage,
+	createDirectoryHandleArrayStorage,
 	createSongArrayStorage,
 	createSongStorage,
 } from "@/lib/idbStorage";
@@ -72,15 +72,13 @@ export const songHistoryAtom = atomWithIDB<Song[]>(
 );
 
 /**
- * Explorer root directory handle — persisted in IDB for permission re-request.
- * Requesting permission once on the directory handle covers all descendant files.
+ * Saved directory handles — persisted in IDB for permission re-request.
+ * Requesting permission once on a directory handle covers all descendant files.
+ * Handles are deduplicated by name (the directory's base name).
  */
-export const directoryHandleAtom =
-	atomWithIDB<FileSystemDirectoryHandle | null>(
-		"cav-dir-handle-v1",
-		null,
-		createDirectoryHandleStorage(),
-	);
+export const savedDirectoryHandlesAtom = atomWithIDB<
+	FileSystemDirectoryHandle[]
+>("cav-dir-handles-v2", [], createDirectoryHandleArrayStorage());
 
 /** True when there is a persisted file session that can be restored. */
 export const hasPersistedFileSessionAtom = atom(

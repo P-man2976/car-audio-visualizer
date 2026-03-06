@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import {
 	currentSongAtom,
 	currentSrcAtom,
-	directoryHandleAtom,
+	savedDirectoryHandlesAtom,
 	hasPersistedFileSessionAtom,
 	songHistoryAtom,
 	songQueueAtom,
@@ -70,7 +70,7 @@ export function FileRestore() {
 	const currentSong = useAtomValue(currentSongAtom);
 	const queue = useAtomValue(songQueueAtom);
 	const history = useAtomValue(songHistoryAtom);
-	const dirHandle = useAtomValue(directoryHandleAtom);
+	const dirHandles = useAtomValue(savedDirectoryHandlesAtom);
 
 	const setCurrentSong = useSetAtom(currentSongAtom);
 	const setQueue = useSetAtom(songQueueAtom);
@@ -93,13 +93,13 @@ export function FileRestore() {
 
 	/** Collect unique handles for permission request. */
 	const getPermissionHandles = useCallback((): FileSystemHandle[] => {
-		if (dirHandle) return [dirHandle];
+		if (dirHandles.length > 0) return dirHandles;
 		const handles: FileSystemHandle[] = [];
 		for (const s of allSongs) {
 			if (s.handle) handles.push(s.handle);
 		}
 		return handles;
-	}, [dirHandle, allSongs]);
+	}, [dirHandles, allSongs]);
 
 	const clearAll = useCallback(() => {
 		setCurrentSong(null);

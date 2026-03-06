@@ -1,6 +1,6 @@
 import { useAtomValue } from "jotai";
 import { useEffect, useRef } from "react";
-import { audioElementAtom } from "@/atoms/audio";
+import { audioElementAtom, connectAudioSource } from "@/atoms/audio";
 import {
 	currentSongAtom,
 	currentSrcAtom,
@@ -51,6 +51,10 @@ export function useFilePlayer() {
 		if (currentSrc !== "file" || !currentSong?.url) return;
 		audioElement.src = currentSong.url;
 		audioElement.load();
+		// audio 要素にソースが設定された後で AudioMotionAnalyzer に接続する。
+		// Safari は src 設定前に createMediaElementSource() を呼ぶと無音になるため、
+		// 必ず src 設定後に呼ぶ必要がある。内部ガードで二重接続は防止済み。
+		connectAudioSource();
 		// ended 由来フラグ OR 再生中のスキップ どちらでも自動再生
 		if (autoPlayNextRef.current || isPlayingRef.current) {
 			autoPlayNextRef.current = false;

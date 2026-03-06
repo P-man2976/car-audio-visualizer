@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { FileEntries } from "./FileEntries";
@@ -14,10 +14,10 @@ import { audioElementAtom } from "@/atoms/audio";
 import {
 	currentSongAtom,
 	currentSrcAtom,
-	directoryHandleAtom,
+	savedDirectoryHandlesAtom,
 	songQueueAtom,
 } from "@/atoms/player";
-import { LuFolderOpen, LuLoader } from "react-icons/lu";
+import { LuFolderOpen, LuLoader, LuX } from "react-icons/lu";
 import type { SelectedFile } from "@/types/explorer";
 import type { Song } from "@/types/player";
 
@@ -63,18 +63,58 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 	const setQueue = useSetAtom(songQueueAtom);
 	const [currentSong, setCurrentSong] = useAtom(currentSongAtom);
 	const setCurrentSrc = useSetAtom(currentSrcAtom);
-	const setDirectoryHandle = useSetAtom(directoryHandleAtom);
+	const [savedHandles, setSavedHandles] = useAtom(savedDirectoryHandlesAtom);
 	const { stack, push } = useAddress();
 	const fallbackInputRef = useRef<HTMLInputElement>(null);
+	const [isOpen, setIsOpen] = useState(false);
+	const autoOpenedRef = useRef(false);
+
+	// ダイアログ初回オープン時に保存済みフォルダで自動展開
+	useEffect(() => {
+		if (
+			isOpen &&
+			!autoOpenedRef.current &&
+			savedHandles.length > 0 &&
+			stack.length === 0
+		) {
+			autoOpenedRef.current = true;
+			push(savedHandles[0]);
+		}
+	}, [isOpen, savedHandles, stack.length, push]);
+
+	// ダイアログを閉じたらフラグリセット
+	useEffect(() => {
+		if (!isOpen) {
+			autoOpenedRef.current = false;
+		}
+	}, [isOpen]);
 
 	const handleSelectRoot = async () => {
 		const handle = await showDirectoryPicker({ mode: "read" }).catch(
 			() => null,
 		);
 		if (!handle) return;
-		setDirectoryHandle(handle);
+		// 重複チェック: 同名フォルダがなければ追加
+		setSavedHandles((prev) => {
+			if (prev.some((h) => h.name === handle.name)) return prev;
+			return [...prev, handle];
+		});
 		// Reset navigation to new root
 		push(handle);
+	};
+
+	/** 保存済みフォルダを選択してナビゲーション */
+	const handleOpenSavedFolder = (handle: FileSystemDirectoryHandle) => {
+		push(handle);
+	};
+
+	/** 保存済みフォルダを削除 */
+	const handleRemoveSavedFolder = (
+		e: React.MouseEvent,
+		handle: FileSystemDirectoryHandle,
+	) => {
+		e.stopPropagation();
+		setSavedHandles((prev) => prev.filter((h) => h.name !== handle.name));
 	};
 
 	/** Recursively collect all FileSystemFileHandles from a selection */
@@ -163,7 +203,10 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 			// Persist directory handle for bulk permission on reload
 			const rootHandle = stack[0];
 			if (rootHandle) {
-				setDirectoryHandle(rootHandle);
+				setSavedHandles((prev) => {
+					if (prev.some((h) => h.name === rootHandle.name)) return prev;
+					return [...prev, rootHandle];
+				});
 			}
 
 			setSelected([]);
@@ -192,7 +235,7 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 	}
 
 	return (
-		<Dialog>
+		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogTrigger asChild>{children}</DialogTrigger>
 			<DialogContent className="flex flex-col h-[calc(100dvh-8rem)] sm:max-w-4xl">
 				<Address />
@@ -207,6 +250,33 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 							<LuFolderOpen />
 							{stack.length > 0 ? "別のフォルダを開く" : "フォルダを選択"}
 						</Button>
+						{/* 保存済みフォルダ一覧 */}
+						{savedHandles.length > 0 && (
+							<div className="flex flex-col gap-0.5">
+								<span className="text-xs text-muted-foreground px-2 pt-1">
+									保存済みフォルダ
+								</span>
+								{savedHandles.map((h) => (
+									<Button
+										key={h.name}
+										variant="ghost"
+										size="sm"
+										className="justify-start gap-2 group text-xs h-8"
+										onClick={() => handleOpenSavedFolder(h)}
+									>
+										<LuFolderOpen className="shrink-0 size-3.5" />
+										<span className="truncate">{h.name}</span>
+										<button
+											type="button"
+											className="ml-auto opacity-0 group-hover:opacity-100 shrink-0 p-0.5 rounded hover:bg-neutral-700"
+											onClick={(e) => handleRemoveSavedFolder(e, h)}
+										>
+											<LuX className="size-3" />
+										</button>
+									</Button>
+								))}
+							</div>
+						)}
 					</div>
 					<div className="self-stretch border border-gray-700" />
 					{/* File listing */}
