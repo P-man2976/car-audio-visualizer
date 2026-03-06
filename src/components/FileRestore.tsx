@@ -1,29 +1,32 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { parseBlob } from "music-metadata";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
 	currentSongAtom,
 	currentSrcAtom,
+	directoryHandleAtom,
 	hasPersistedFileSessionAtom,
-	persistedCurrentSongAtom,
-	persistedSongHistoryAtom,
-	persistedSongQueueAtom,
 	songHistoryAtom,
 	songQueueAtom,
 } from "@/atoms/player";
-import type { Song, SongStub } from "@/types/player";
+import type { Song } from "@/types/player";
 import {
-	clearSessionHandle,
-	loadSessionHandle,
-	requestPermissionForSession,
-	type PersistedFSHandle,
+	clearLegacySessionStore,
+	requestPermission,
 } from "@/lib/fileSessionDb";
 
 // ─── Rehydration helpers ──────────────────────────────────────────────────────
 
-async function buildSongFromFile(stub: SongStub, file: File): Promise<Song> {
+/**
+ * Create blob URLs (audio + artwork) for a Song that has a FileSystemFileHandle
+ * but no runtime blob URL yet.
+ */
+async function hydrateSong(song: Song): Promise<Song> {
+	if (song.url) return song; // already hydrated
+	if (!song.handle) return song; // no handle — can't hydrate
+	const file = await song.handle.getFile();
 	const url = URL.createObjectURL(file);
 	let artwork: string | undefined;
 	try {
@@ -37,28 +40,11 @@ async function buildSongFromFile(stub: SongStub, file: File): Promise<Song> {
 	} catch {
 		// non-fatal
 	}
-	return { ...stub, url, artwork };
+	return { ...song, url, artwork };
 }
 
-/**
- * Rehydrate songs from stored FileSystemFileHandle entries.
- * Each entry is keyed by songId, so no directory walking or filename matching
- * is needed — the handle already points to the exact file.
- * isSameEntry() deduplication is handled at save time (mergeSessionEntries).
- */
-async function rehydrateFromEntries(
-	stubs: SongStub[],
-	stored: PersistedFSHandle,
-): Promise<Song[]> {
-	const handleMap = new Map(stored.entries.map((e) => [e.songId, e.handle]));
-	const results = await Promise.all(
-		stubs.map(async (stub) => {
-			const handle = handleMap.get(stub.id);
-			if (!handle) return null;
-			return buildSongFromFile(stub, await handle.getFile());
-		}),
-	);
-	return results.filter((s): s is Song => s !== null);
+async function hydrateSongs(songs: Song[]): Promise<Song[]> {
+	return Promise.all(songs.map(hydrateSong));
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -66,118 +52,108 @@ async function rehydrateFromEntries(
 /**
  * Automatically restores a file playback session after page reload.
  *
- * Flow:
- *   useQuery  — loads IDB handle + calls requestPermission() on mount
- *   useMutation — rehydrates Song objects from handles and pushes to atoms
- *   useEffect — auto-fires the mutation when permission is already granted
- *
- * Notifications are shown using sonner toast system:
- *   - Loading toast when restoring files
- *   - Success toast when complete
- *   - Action toast if permission needs approval (with user gesture)
- *   - Error toast if restoration fails
+ * Song atoms are backed by IndexedDB and include FileSystemFileHandle.
+ * After IDB hydration, this component:
+ *   1. Collects handles from the atom values
+ *   2. Requests read permission (directory handle preferred for bulk grant)
+ *   3. Creates blob URLs from the file handles
+ *   4. Updates the atoms with the hydrated Song objects
  */
 export function FileRestore() {
 	const hasSession = useAtomValue(hasPersistedFileSessionAtom);
-	// リロード前の再生モードが "file" だった時のみ復元を実行する。
-	// currentSrcAtom はページロード直後は localStorage の永続値を返すため、
-	// セッション復元の要否をここで判断できる。
-	// File System Access API 未サポートブラウザでは復元不可能なため無効化する。
 	const currentSrc = useAtomValue(currentSrcAtom);
 	const isFileSystemAccessSupported =
 		typeof window !== "undefined" && "FileSystemFileHandle" in window;
 	const shouldRestore =
 		hasSession && currentSrc === "file" && isFileSystemAccessSupported;
-	const persistedCurrent = useAtomValue(persistedCurrentSongAtom);
-	const persistedQueue = useAtomValue(persistedSongQueueAtom);
-	const persistedHistory = useAtomValue(persistedSongHistoryAtom);
+
+	const currentSong = useAtomValue(currentSongAtom);
+	const queue = useAtomValue(songQueueAtom);
+	const history = useAtomValue(songHistoryAtom);
+	const dirHandle = useAtomValue(directoryHandleAtom);
 
 	const setCurrentSong = useSetAtom(currentSongAtom);
 	const setQueue = useSetAtom(songQueueAtom);
 	const setHistory = useSetAtom(songHistoryAtom);
-	// currentSrcAtom はリロード時に atomWithStorage によりすでに "file" が復元されているため
-	// ここで setCurrentSrc("file") を呼ぶ必要はない。
-	const clearPersistedCurrent = useSetAtom(persistedCurrentSongAtom);
-	const clearPersistedQueue = useSetAtom(persistedSongQueueAtom);
-	const clearPersistedHistory = useSetAtom(persistedSongHistoryAtom);
 
 	const restoringToastId = useRef<string | number | null>(null);
 	const permissionToastId = useRef<string | number | null>(null);
-	/** restore() を 1 度だけ呼ぶためのガード。isRestoring を deps に入れると無限ループになる */
 	const hasAutoRestored = useRef(false);
 
-	const clearAll = useCallback(() => {
-		clearPersistedCurrent(null);
-		clearPersistedQueue([]);
-		clearPersistedHistory([]);
-		clearSessionHandle().catch(() => undefined);
-	}, [clearPersistedCurrent, clearPersistedQueue, clearPersistedHistory]);
+	/**
+	 * Determine whether hydration is needed: at least one song has a handle but
+	 * no blob URL.
+	 */
+	const allSongs = useMemo(
+		() => [...(currentSong ? [currentSong] : []), ...queue, ...history],
+		[currentSong, queue, history],
+	);
+	const needsHydration =
+		shouldRestore && allSongs.some((s) => s.handle && !s.url);
 
-	// File System Access API 未サポートブラウザではファイルハンドルが使えないため、
-	// リロード時に queue / history / current の stubs および IDB ハンドルをクリアする。
+	/** Collect unique handles for permission request. */
+	const getPermissionHandles = useCallback((): FileSystemHandle[] => {
+		if (dirHandle) return [dirHandle];
+		const handles: FileSystemHandle[] = [];
+		for (const s of allSongs) {
+			if (s.handle) handles.push(s.handle);
+		}
+		return handles;
+	}, [dirHandle, allSongs]);
+
+	const clearAll = useCallback(() => {
+		setCurrentSong(null);
+		setQueue([]);
+		setHistory([]);
+		clearLegacySessionStore().catch(() => undefined);
+	}, [setCurrentSong, setQueue, setHistory]);
+
+	// Cleanup legacy IDB store from previous architecture
+	useEffect(() => {
+		clearLegacySessionStore().catch(() => undefined);
+	}, []);
+
+	// FSA 未サポートブラウザではハンドルが使えないためクリア
 	useEffect(() => {
 		if (!isFileSystemAccessSupported && hasSession) {
 			clearAll();
 		}
 	}, [isFileSystemAccessSupported, hasSession, clearAll]);
 
-	// Step 1: Load IDB handle and attempt permission (auto, no gesture needed in Chrome)
+	// Step 1: Attempt permission (auto-grant in Chrome for previously-granted handles)
 	const { data: permissionData } = useQuery({
 		queryKey: ["file-session-permission"],
 		queryFn: async () => {
-			const stored = await loadSessionHandle();
-			if (!stored) return null;
-			const granted = await requestPermissionForSession(stored).catch(
-				() => false,
-			);
-			return { stored, granted };
+			const handles = getPermissionHandles();
+			if (handles.length === 0) return null;
+			const granted = await requestPermission(handles).catch(() => false);
+			return { granted };
 		},
-		enabled: shouldRestore,
+		enabled: needsHydration,
 		staleTime: Number.POSITIVE_INFINITY,
 		gcTime: 0,
 		retry: false,
 	});
 
-	// Step 2: Rehydrate Song objects from handles and push to atoms
+	// Step 2: Hydrate blob URLs from handles
 	const { mutate: restore, isPending: isRestoring } = useMutation({
-		mutationFn: (stored: PersistedFSHandle) => {
-			const allStubs: SongStub[] = [
-				...(persistedCurrent ? [persistedCurrent] : []),
-				...persistedQueue,
-				...persistedHistory,
-			];
-			return rehydrateFromEntries(allStubs, stored);
-		},
-		onSuccess: (restored) => {
-			const byId = new Map(restored.map((s) => [s.id, s]));
-			const restoredCurrent = persistedCurrent
-				? (byId.get(persistedCurrent.id) ?? null)
+		mutationFn: async () => {
+			const hydratedCurrent = currentSong
+				? await hydrateSong(currentSong)
 				: null;
-			const restoredQueue = persistedQueue
-				.map((s) => byId.get(s.id))
-				.filter((s): s is Song => s !== undefined);
-			const restoredHistory = persistedHistory
-				.map((s) => byId.get(s.id))
-				.filter((s): s is Song => s !== undefined);
+			const hydratedQueue = await hydrateSongs(queue);
+			const hydratedHistory = await hydrateSongs(history);
+			return {
+				current: hydratedCurrent,
+				queue: hydratedQueue,
+				history: hydratedHistory,
+			};
+		},
+		onSuccess: ({ current, queue: q, history: h }) => {
+			if (current) setCurrentSong(current);
+			if (q.length > 0) setQueue(q);
+			if (h.length > 0) setHistory(h);
 
-			if (restoredCurrent || restoredQueue.length > 0) {
-				if (restoredCurrent) {
-					setCurrentSong(restoredCurrent);
-					setQueue(restoredQueue);
-					setHistory(restoredHistory);
-				} else {
-					const [first, ...rest] = restoredQueue;
-					setCurrentSong(first);
-					setQueue(rest);
-					setHistory(restoredHistory);
-				}
-				// currentSrcAtom はリロード時に atomWithStorage によりすでに "file" なので明示的なセットは不要
-			}
-			// persisted stubs と IDB ハンドルは残す。
-			// clearAll() を呼ぶと 2 回目以降のリロードで復元できなくなる。
-			// stubs は next/prev/skipTo/FilePicker により常に最新状態に更新される。
-
-			// Close loading toast and show success
 			if (restoringToastId.current) {
 				toast.dismiss(restoringToastId.current);
 				restoringToastId.current = null;
@@ -185,7 +161,6 @@ export function FileRestore() {
 			toast.success("前回のファイルを復元しました", { position: "top-right" });
 		},
 		onError: () => {
-			// Close loading toast and show error
 			if (restoringToastId.current) {
 				toast.dismiss(restoringToastId.current);
 				restoringToastId.current = null;
@@ -195,18 +170,15 @@ export function FileRestore() {
 		},
 	});
 
-	// Auto-restore when permission was already granted without user gesture.
-	// hasAutoRestored ref で 1 度だけ実行を保証する。
-	// isRestoring を deps に含めると restore() 呼び出し→isRestoring 変化→再実行の
-	// 無限ループが発生するため、ここでは参照しない。
+	// Auto-restore when permission already granted
 	useEffect(() => {
 		if (permissionData?.granted && !hasAutoRestored.current) {
 			hasAutoRestored.current = true;
-			restore(permissionData.stored);
+			restore();
 		}
 	}, [permissionData, restore]);
 
-	// loading toast は isRestoring が true になったタイミングで表示
+	// Loading toast
 	useEffect(() => {
 		if (isRestoring && !restoringToastId.current) {
 			restoringToastId.current = toast.loading("前回のファイルを復元中...", {
@@ -215,20 +187,18 @@ export function FileRestore() {
 		}
 	}, [isRestoring]);
 
-	// Show permission request
+	// Permission request UI
 	useEffect(() => {
 		if (permissionData && !permissionData.granted) {
-			const { stored } = permissionData;
 			const handleAllow = async () => {
-				const granted = await requestPermissionForSession(stored).catch(
-					() => false,
-				);
+				const handles = getPermissionHandles();
+				const granted = await requestPermission(handles).catch(() => false);
 				if (granted) {
 					if (permissionToastId.current) {
 						toast.dismiss(permissionToastId.current);
 						permissionToastId.current = null;
 					}
-					restore(stored);
+					restore();
 				} else {
 					toast.error("ファイルへのアクセスが拒否されました", {
 						position: "top-right",
@@ -262,7 +232,7 @@ export function FileRestore() {
 				);
 			}
 		}
-	}, [permissionData, restore, clearAll]);
+	}, [permissionData, restore, clearAll, getPermissionHandles]);
 
 	return null;
 }

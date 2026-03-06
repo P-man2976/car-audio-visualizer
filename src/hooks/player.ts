@@ -1,23 +1,15 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback } from "react";
-import {
-	audioElementAtom,
-	audioMotionAnalyzerAtom,
-	connectAudioSource,
-} from "@/atoms/audio";
+import { audioElementAtom, audioMotionAnalyzerAtom } from "@/atoms/audio";
 import {
 	currentSongAtom,
 	currentSrcAtom,
 	isPlayingAtom,
-	persistedCurrentSongAtom,
-	persistedSongHistoryAtom,
-	persistedSongQueueAtom,
 	repeatModeAtom,
 	shuffleAtom,
 	songHistoryAtom,
 	songQueueAtom,
 } from "@/atoms/player";
-import { songToStub } from "@/types/player";
 
 export const usePlayer = () => {
 	const [, setCurrentSrc] = useAtom(currentSrcAtom);
@@ -29,9 +21,6 @@ export const usePlayer = () => {
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 	const shuffle = useAtomValue(shuffleAtom);
 	const repeat = useAtomValue(repeatModeAtom);
-	const setPersistedCurrent = useSetAtom(persistedCurrentSongAtom);
-	const setPersistedQueue = useSetAtom(persistedSongQueueAtom);
-	const setPersistedHistory = useSetAtom(persistedSongHistoryAtom);
 
 	const play = useCallback(
 		async (pos?: number) => {
@@ -39,7 +28,6 @@ export const usePlayer = () => {
 			// Safari: AudioContext starts suspended until user gesture
 			await audioMotionAnalyzer.audioCtx.resume();
 			await audioElement.play();
-			connectAudioSource();
 			audioMotionAnalyzer.start();
 			setIsPlaying(true);
 		},
@@ -84,10 +72,6 @@ export const usePlayer = () => {
 				setSongHistory([]);
 				setCurrentSong(first);
 				setSongQueue(rest);
-				// Sync persisted stubs
-				setPersistedCurrent(songToStub(first));
-				setPersistedQueue(rest.map(songToStub));
-				setPersistedHistory([]);
 			} else {
 				setSongHistory(newHistory);
 				stop();
@@ -97,10 +81,6 @@ export const usePlayer = () => {
 		setSongHistory(newHistory);
 		setCurrentSong(nextSong);
 		setSongQueue(newQueue);
-		// Sync persisted stubs
-		setPersistedCurrent(songToStub(nextSong));
-		setPersistedQueue(newQueue.map(songToStub));
-		setPersistedHistory(newHistory.map(songToStub));
 	}, [
 		currentSong,
 		songQueue,
@@ -110,9 +90,6 @@ export const usePlayer = () => {
 		setSongHistory,
 		setCurrentSong,
 		setSongQueue,
-		setPersistedCurrent,
-		setPersistedQueue,
-		setPersistedHistory,
 		stop,
 	]);
 
@@ -123,12 +100,6 @@ export const usePlayer = () => {
 		const newQueue = currentSong ? [currentSong, ...songQueue] : songQueue;
 		setSongQueue(newQueue);
 		setCurrentSong(lastSong ?? null);
-		// Sync persisted stubs
-		if (lastSong) {
-			setPersistedCurrent(songToStub(lastSong));
-			setPersistedQueue(newQueue.map(songToStub));
-			setPersistedHistory(newHistory.map(songToStub));
-		}
 	}, [
 		currentSong,
 		songQueue,
@@ -136,9 +107,6 @@ export const usePlayer = () => {
 		setSongHistory,
 		setCurrentSong,
 		setSongQueue,
-		setPersistedCurrent,
-		setPersistedQueue,
-		setPersistedHistory,
 	]);
 
 	const skipTo = useCallback(
@@ -152,10 +120,6 @@ export const usePlayer = () => {
 			setSongHistory(newHistory);
 			setCurrentSong(target);
 			setSongQueue(newQueue);
-			// Sync persisted stubs
-			setPersistedCurrent(songToStub(target));
-			setPersistedQueue(newQueue.map(songToStub));
-			setPersistedHistory(newHistory.map(songToStub));
 		},
 		[
 			currentSong,
@@ -164,9 +128,6 @@ export const usePlayer = () => {
 			setSongHistory,
 			setCurrentSong,
 			setSongQueue,
-			setPersistedCurrent,
-			setPersistedQueue,
-			setPersistedHistory,
 		],
 	);
 

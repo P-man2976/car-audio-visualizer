@@ -46,8 +46,9 @@ export function useFilePlayer() {
 
 	// ファイルモード: 楽曲変更時に src を差し替え、必要なら自動再生
 	// isPlayingRef を使うことで「再生中にスキップ」した場合も確実に自動再生する
+	// url が未生成（IDB ハイドレーション直後）の場合はスキップ
 	useEffect(() => {
-		if (currentSrc !== "file" || !currentSong) return;
+		if (currentSrc !== "file" || !currentSong?.url) return;
 		audioElement.src = currentSong.url;
 		audioElement.load();
 		// ended 由来フラグ OR 再生中のスキップ どちらでも自動再生

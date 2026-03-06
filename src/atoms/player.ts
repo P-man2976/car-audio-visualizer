@@ -1,7 +1,13 @@
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import type { Song, SongStub } from "@/types/player";
+import type { Song } from "@/types/player";
 import type { Radio } from "../types/radio";
+import {
+	atomWithIDB,
+	createDirectoryHandleStorage,
+	createSongArrayStorage,
+	createSongStorage,
+} from "@/lib/idbStorage";
 
 export type Source = "off" | "radio" | "aux" | "file";
 
@@ -40,31 +46,43 @@ export const repeatModeAtom = atom<RepeatMode>("off");
 /** Radio recently-played stations */
 export const queueAtom = atom<Radio[]>([]);
 
-/** File playback */
-export const currentSongAtom = atom<Song | null>(null);
-export const songQueueAtom = atom<Song[]>([]);
-export const songHistoryAtom = atom<Song[]>([]);
+// ─── File playback atoms (IndexedDB-backed) ───────────────────────────────────
+// Blob URLs (url, artwork) are stripped on write by the IDB storage adapter.
+// FileSystemFileHandle is structured-cloneable and persisted directly in IDB.
+// On page reload the atoms hydrate from IDB with metadata + handles (no blob
+// URLs). FileRestore then requests permission, reads files, and populates
+// the blob URLs.
 
-// ─── Persisted file-session stubs ─────────────────────────────────────────────
-// These survive page reloads and are used to restore the file queue after the
-// user re-grants directory access via showDirectoryPicker.
-// They are intentionally separate from the runtime atoms so that blob URLs in
-// the runtime atoms are never accidentally serialised.
-export const persistedCurrentSongAtom = atomWithStorage<SongStub | null>(
-	"cav-file-current-v1",
+export const currentSongAtom = atomWithIDB<Song | null>(
+	"cav-current-song-v2",
 	null,
+	createSongStorage(),
 );
-export const persistedSongQueueAtom = atomWithStorage<SongStub[]>(
-	"cav-file-queue-v1",
+
+export const songQueueAtom = atomWithIDB<Song[]>(
+	"cav-song-queue-v2",
 	[],
+	createSongArrayStorage(),
 );
-export const persistedSongHistoryAtom = atomWithStorage<SongStub[]>(
-	"cav-file-history-v1",
+
+export const songHistoryAtom = atomWithIDB<Song[]>(
+	"cav-song-history-v2",
 	[],
+	createSongArrayStorage(),
 );
+
+/**
+ * Explorer root directory handle — persisted in IDB for permission re-request.
+ * Requesting permission once on the directory handle covers all descendant files.
+ */
+export const directoryHandleAtom =
+	atomWithIDB<FileSystemDirectoryHandle | null>(
+		"cav-dir-handle-v1",
+		null,
+		createDirectoryHandleStorage(),
+	);
+
 /** True when there is a persisted file session that can be restored. */
 export const hasPersistedFileSessionAtom = atom(
-	(get) =>
-		get(persistedCurrentSongAtom) !== null ||
-		get(persistedSongQueueAtom).length > 0,
+	(get) => get(currentSongAtom) !== null || get(songQueueAtom).length > 0,
 );

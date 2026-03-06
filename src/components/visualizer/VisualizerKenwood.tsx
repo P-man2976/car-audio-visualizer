@@ -73,8 +73,8 @@ export function VisualizerKenwood() {
 		);
 	});
 
-	const SCALE = 1.8;
-	const OFFSET_Y = 24;
+	const SCALE = 1.6;
+	const OFFSET_Y = 20;
 
 	return (
 		<group

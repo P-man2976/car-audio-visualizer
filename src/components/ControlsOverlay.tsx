@@ -27,7 +27,6 @@ import { useMemo } from "react";
 import {
 	currentSongAtom,
 	currentSrcAtom,
-	persistedCurrentSongAtom,
 	repeatModeAtom,
 	shuffleAtom,
 	type RepeatMode,
@@ -53,10 +52,9 @@ export function ControlsOverlay() {
 	const currentSrc = useAtomValue(currentSrcAtom);
 	const currentRadio = useAtomValue(currentRadioAtom);
 	const currentSong = useAtomValue(currentSongAtom);
-	const persistedSong = useAtomValue(persistedCurrentSongAtom);
-	// 復元完了前は persistedSong（localStorage）をフォールバックにしてテキストメタデータを即時表示する。
-	// blob URL (url / artwork) は持たないため、テキスト情報のみ先行して使用する。
-	const displaySong = currentSong ?? persistedSong;
+	// IDB atom は非同期ハイドレーション後にメタデータ（handle 含む）を返す。
+	// blob URL が未生成でもテキストメタデータは即利用可能。
+	const displaySong = currentSong;
 	const tuningFreq = useAtomValue(tuningFreqAtom);
 
 	const [shuffle, setShuffle] = useAtom(shuffleAtom);
