@@ -1,6 +1,10 @@
 import { useAtomValue } from "jotai";
 import { useEffect, useRef } from "react";
-import { audioElementAtom, connectAudioSource } from "@/atoms/audio";
+import {
+	audioElementAtom,
+	connectAudioSource,
+	safariVizBridge,
+} from "@/atoms/audio";
 import {
 	currentSongAtom,
 	currentSrcAtom,
@@ -55,6 +59,10 @@ export function useFilePlayer() {
 		// Safari は src 設定前に createMediaElementSource() を呼ぶと無音になるため、
 		// 必ず src 設定後に呼ぶ必要がある。内部ガードで二重接続は防止済み。
 		connectAudioSource();
+		// Safari MECSN バグ回避: ブリッジ経由でビジュアライザーにデータを供給
+		safariVizBridge
+			?.attachFile(currentSong.url, audioElement)
+			.catch(console.error);
 		// ended 由来フラグ OR 再生中のスキップ どちらでも自動再生
 		if (autoPlayNextRef.current || isPlayingRef.current) {
 			autoPlayNextRef.current = false;
@@ -83,6 +91,7 @@ export function useFilePlayer() {
 	useEffect(() => {
 		if (currentSrc !== "file") {
 			audioElement.pause();
+			safariVizBridge?.detachFile();
 		}
 	}, [audioElement, currentSrc]);
 }

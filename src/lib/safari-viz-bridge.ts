@@ -59,6 +59,14 @@ export class SafariVizBridge {
 	/** 次の AudioBufferSourceNode の再生開始時刻 (audioCtx.currentTime 基準) */
 	private nextStartTime = 0;
 
+	// ─── File playback fields ─────────────────────────────────────────────
+	/** デコード済み AudioBuffer（ファイル全体） */
+	private fileAudioBuffer: AudioBuffer | null = null;
+	/** ファイルモードで監視中の audio 要素 */
+	private fileAudioElement: HTMLAudioElement | null = null;
+	/** 現在再生中の AudioBufferSourceNode（ファイルモード用・1 つだけ） */
+	private fileSource: AudioBufferSourceNode | null = null;
+
 	constructor(analyzer: AudioMotionAnalyzer) {
 		this.analyzer = analyzer;
 		this.audioCtx = analyzer.audioCtx;
@@ -94,6 +102,7 @@ export class SafariVizBridge {
 	 */
 	attach(hls: Hls): void {
 		this.detach();
+		this.detachFile();
 		this.hls = hls;
 		this.initSegment = null;
 		this.nextStartTime = 0;
@@ -117,12 +126,115 @@ export class SafariVizBridge {
 		this.nextStartTime = 0;
 	}
 
+	// ─── File playback mode ──────────────────────────────────────────────
+
+	/**
+	 * ファイル（blob URL）をデコードし、audioElement と同期して
+	 * ブリッジ AnalyserNode にデータを流す。
+	 *
+	 * Safari では MECSN が壊れているため、ファイル再生時もこのブリッジ経由で
+	 * ビジュアライザーにデータを供給する必要がある。
+	 *
+	 * decodeAudioData() でファイル全体をメモリ上にデコードするため、
+	 * 長時間のファイルではメモリ消費が増加する点に注意。
+	 */
+	async attachFile(
+		blobUrl: string,
+		audioElement: HTMLAudioElement,
+	): Promise<void> {
+		this.detach();
+		this.detachFile();
+
+		const response = await fetch(blobUrl);
+		const arrayBuffer = await response.arrayBuffer();
+		const audioBuffer = await this.audioCtx.decodeAudioData(arrayBuffer);
+
+		this.fileAudioBuffer = audioBuffer;
+		this.fileAudioElement = audioElement;
+
+		// イベントリスナーで play/pause/seek に同期
+		audioElement.addEventListener("play", this.onFilePlay);
+		audioElement.addEventListener("pause", this.onFilePause);
+		audioElement.addEventListener("seeked", this.onFileSeeked);
+
+		// 既に再生中なら即座にブリッジ再生を開始
+		if (!audioElement.paused) {
+			this.startFilePlayback();
+		}
+	}
+
+	/**
+	 * ファイルモードをクリーンアップする。
+	 * イベントリスナー解除、ソース停止、AudioBuffer 解放。
+	 */
+	detachFile(): void {
+		this.stopFileSource();
+		if (this.fileAudioElement) {
+			this.fileAudioElement.removeEventListener("play", this.onFilePlay);
+			this.fileAudioElement.removeEventListener("pause", this.onFilePause);
+			this.fileAudioElement.removeEventListener("seeked", this.onFileSeeked);
+			this.fileAudioElement = null;
+		}
+		this.fileAudioBuffer = null;
+	}
+
+	/**
+	 * AudioBufferSourceNode を作成し、audioElement.currentTime に合わせて
+	 * オフセット再生を開始する。
+	 */
+	private startFilePlayback(): void {
+		if (!this.fileAudioBuffer || !this.fileAudioElement) return;
+		this.stopFileSource();
+
+		const source = this.audioCtx.createBufferSource();
+		source.buffer = this.fileAudioBuffer;
+		source.connect(this.vizGain);
+
+		const offset = this.fileAudioElement.currentTime;
+		source.start(0, offset);
+
+		this.fileSource = source;
+		source.onended = () => {
+			if (this.fileSource === source) {
+				this.fileSource = null;
+			}
+		};
+	}
+
+	/** ファイルモードの再生中ソースを停止する。 */
+	private stopFileSource(): void {
+		if (this.fileSource) {
+			try {
+				this.fileSource.stop();
+				this.fileSource.disconnect();
+			} catch {
+				// 既に停止済み
+			}
+			this.fileSource = null;
+		}
+	}
+
+	private onFilePlay = (): void => {
+		this.startFilePlayback();
+	};
+
+	private onFilePause = (): void => {
+		this.stopFileSource();
+	};
+
+	private onFileSeeked = (): void => {
+		if (this.fileAudioElement && !this.fileAudioElement.paused) {
+			this.startFilePlayback();
+		}
+	};
+
 	/**
 	 * ブリッジを完全に破棄する。
 	 * オリジナルの AnalyserNode を復元する。
 	 */
 	destroy(): void {
 		this.detach();
+		this.detachFile();
 		this.vizGain.disconnect();
 		// biome-ignore lint/suspicious/noExplicitAny: private API access
 		const inst = this.analyzer as any;
