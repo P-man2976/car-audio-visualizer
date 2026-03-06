@@ -1,8 +1,27 @@
 import { Reorder, useDragControls } from "framer-motion";
-import { useAtom, useAtomValue } from "jotai";
-import { GripVertical, RadioTower } from "lucide-react";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import {
+	GripVertical,
+	ListEnd,
+	ListStart,
+	Play,
+	RadioTower,
+	Trash2,
+} from "lucide-react";
 import { type ReactNode, useRef } from "react";
-import { currentSrcAtom, queueAtom, songQueueAtom } from "@/atoms/player";
+import {
+	currentSrcAtom,
+	queueAtom,
+	songHistoryAtom,
+	songQueueAtom,
+} from "@/atoms/player";
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuSeparator,
+	ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import {
 	Sheet,
 	SheetContent,
@@ -10,6 +29,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePlayer } from "@/hooks/player";
 import { useSelectRadio } from "@/hooks/radio";
 import { cn } from "@/lib/utils";
@@ -29,12 +49,31 @@ export function QueueSheet({ children }: { children: ReactNode }) {
 			>
 				<SheetHeader>
 					<SheetTitle className="text-xl pl-2">
-						{isFile ? "再生待ち" : "最近再生した局"}
+						{isFile ? "キュー" : "最近再生した局"}
 					</SheetTitle>
 				</SheetHeader>
-				{isFile ? <SongQueueList /> : <RadioQueueList />}
+				{isFile ? <SongQueueTabs /> : <RadioQueueList />}
 			</SheetContent>
 		</Sheet>
+	);
+}
+
+/* ---------- ファイルキュー タブ ---------- */
+
+function SongQueueTabs() {
+	return (
+		<Tabs defaultValue="queue" className="mt-2">
+			<TabsList variant="line" className="w-full">
+				<TabsTrigger value="queue">再生待ち</TabsTrigger>
+				<TabsTrigger value="history">履歴</TabsTrigger>
+			</TabsList>
+			<TabsContent value="queue">
+				<SongQueueList />
+			</TabsContent>
+			<TabsContent value="history">
+				<SongHistoryList />
+			</TabsContent>
+		</Tabs>
 	);
 }
 
@@ -59,33 +98,62 @@ function SongQueueList() {
 			className="flex flex-col gap-2 mt-4"
 		>
 			{songQueue.map((song) => (
-				<QueueSongCard key={song.id} song={song} />
+				<QueueSongCard key={song.id} song={song} context="queue" />
 			))}
 		</Reorder.Group>
 	);
 }
 
-function QueueSongCard({ song }: { song: Song }) {
+/* ---------- ファイル履歴 ---------- */
+
+function SongHistoryList() {
+	const songHistory = useAtomValue(songHistoryAtom);
+
+	if (!songHistory.length) {
+		return (
+			<p className="text-sm text-muted-foreground pl-2 mt-4">
+				履歴はありません
+			</p>
+		);
+	}
+
+	return (
+		<div className="flex flex-col gap-2 mt-4">
+			{[...songHistory].reverse().map((song) => (
+				<QueueSongCard key={song.id} song={song} context="history" />
+			))}
+		</div>
+	);
+}
+
+/* ---------- 曲カード ---------- */
+
+function QueueSongCard({
+	song,
+	context,
+}: {
+	song: Song;
+	context: "queue" | "history";
+}) {
 	const { id, filename, title, album, artwork } = song;
 	const controls = useDragControls();
 	const { skipTo } = usePlayer();
+	const setSongQueue = useSetAtom(songQueueAtom);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const titleRef = useRef<HTMLSpanElement>(null);
 	const albumRef = useRef<HTMLSpanElement>(null);
 
-	return (
-		<Reorder.Item
-			as="div"
-			value={song}
-			dragListener={false}
-			dragControls={controls}
-			className="rounded-md bg-neutral-800/50 flex items-center gap-2 pr-3 py-2 cursor-default select-none"
-		>
-			<GripVertical
-				size={20}
-				className="shrink-0 text-gray-500 hover:text-gray-300 hover:cursor-move touch-none ml-1"
-				onPointerDown={(e) => controls.start(e)}
-			/>
+	const isDraggable = context === "queue";
+
+	const cardBody = (
+		<>
+			{isDraggable && (
+				<GripVertical
+					size={20}
+					className="shrink-0 text-gray-500 hover:text-gray-300 hover:cursor-move touch-none ml-1"
+					onPointerDown={(e) => controls.start(e)}
+				/>
+			)}
 			{artwork ? (
 				<img
 					src={artwork}
@@ -98,7 +166,16 @@ function QueueSongCard({ song }: { song: Song }) {
 			<div
 				ref={containerRef}
 				className="flex flex-col gap-0.5 overflow-hidden w-full hover:cursor-pointer"
-				onClick={() => skipTo(id)}
+				onClick={() => {
+					if (context === "queue") {
+						skipTo(id);
+					} else {
+						// 履歴からはキューの先頭に追加して再生
+						setSongQueue((prev) => [song, ...prev]);
+						// tiny delay to let state update, then skipTo
+						queueMicrotask(() => skipTo(id));
+					}
+				}}
 			>
 				<span
 					ref={titleRef}
@@ -125,7 +202,110 @@ function QueueSongCard({ song }: { song: Song }) {
 					</span>
 				)}
 			</div>
+		</>
+	);
+
+	const card = isDraggable ? (
+		<Reorder.Item
+			as="div"
+			value={song}
+			dragListener={false}
+			dragControls={controls}
+			className={cn(
+				"rounded-md bg-neutral-800/50 flex items-center gap-2 pr-3 py-2 cursor-default select-none",
+				!isDraggable && "pl-3",
+			)}
+		>
+			{cardBody}
 		</Reorder.Item>
+	) : (
+		<div
+			className={cn(
+				"rounded-md bg-neutral-800/50 flex items-center gap-2 pr-3 py-2 cursor-default select-none pl-3",
+			)}
+		>
+			{cardBody}
+		</div>
+	);
+
+	return (
+		<ContextMenu>
+			<ContextMenuTrigger asChild>{card}</ContextMenuTrigger>
+			<ContextMenuContent>
+				{context === "queue" ? (
+					<QueueContextMenuItems song={song} />
+				) : (
+					<HistoryContextMenuItems song={song} />
+				)}
+			</ContextMenuContent>
+		</ContextMenu>
+	);
+}
+
+/* ---------- キュータブ用のコンテキストメニュー項目 ---------- */
+
+function QueueContextMenuItems({ song }: { song: Song }) {
+	const { skipTo } = usePlayer();
+	const setSongQueue = useSetAtom(songQueueAtom);
+
+	return (
+		<>
+			<ContextMenuItem onClick={() => skipTo(song.id)} className="gap-2">
+				<Play size={14} />
+				再生
+			</ContextMenuItem>
+			<ContextMenuItem
+				onClick={() => {
+					setSongQueue((prev) => {
+						const filtered = prev.filter((s) => s.id !== song.id);
+						return [song, ...filtered];
+					});
+				}}
+				className="gap-2"
+			>
+				<ListStart size={14} />
+				次に再生
+			</ContextMenuItem>
+			<ContextMenuSeparator />
+			<ContextMenuItem
+				onClick={() => {
+					setSongQueue((prev) => prev.filter((s) => s.id !== song.id));
+				}}
+				className="gap-2 text-red-400 focus:text-red-400"
+			>
+				<Trash2 size={14} />
+				キューから削除
+			</ContextMenuItem>
+		</>
+	);
+}
+
+/* ---------- 履歴タブ用のコンテキストメニュー項目 ---------- */
+
+function HistoryContextMenuItems({ song }: { song: Song }) {
+	const setSongQueue = useSetAtom(songQueueAtom);
+
+	return (
+		<>
+			<ContextMenuItem
+				onClick={() => {
+					setSongQueue((prev) => [song, ...prev]);
+				}}
+				className="gap-2"
+			>
+				<ListStart size={14} />
+				次に再生
+			</ContextMenuItem>
+			<ContextMenuItem
+				onClick={() => {
+					setSongQueue((prev) => [...prev, song]);
+				}}
+				className="gap-2"
+			>
+				<ListEnd size={14} />
+				キューの最後に追加
+			</ContextMenuItem>
+		</>
 	);
 }
 
@@ -157,7 +337,7 @@ function RadioQueueList() {
 }
 
 function RadioQueueCard({ station }: { station: Radio }) {
-	const selectRadio = useSelectRadio();
+	const { selectRadio } = useSelectRadio();
 
 	const name = station.name;
 	const logo = station.logo;

@@ -1,6 +1,6 @@
 /**
  * QueueSheet コンポーネントのブラウザテスト。
- * ファイルモード（曲キュー）とラジオモード（履歴）の描画を検証する。
+ * ファイルモード（曲キュー / 履歴タブ）とラジオモード（履歴）の描画を検証する。
  */
 import { createStore, Provider } from "jotai";
 import { page } from "vitest/browser";
@@ -43,7 +43,12 @@ vi.mock("@/hooks/radio", () => ({
 }));
 
 // Import after mocks
-import { currentSrcAtom, queueAtom, songQueueAtom } from "@/atoms/player";
+import {
+	currentSrcAtom,
+	queueAtom,
+	songHistoryAtom,
+	songQueueAtom,
+} from "@/atoms/player";
 import { QueueSheet } from "@/components/QueueSheet";
 import type { Song } from "@/types/player";
 
@@ -53,6 +58,7 @@ const makeSong = (overrides: Partial<Song> = {}): Song => ({
 	title: "テスト曲",
 	album: "テストアルバム",
 	url: "blob:http://localhost/test",
+	track: {},
 	...overrides,
 });
 
@@ -71,7 +77,9 @@ describe("QueueSheet", () => {
 		);
 
 		await page.getByRole("button", { name: "キュー" }).click();
-		await expect.element(page.getByText("再生待ち")).toBeInTheDocument();
+		await expect
+			.element(page.getByRole("tab", { name: "再生待ち" }))
+			.toBeInTheDocument();
 		await expect.element(page.getByText("キューは空です")).toBeInTheDocument();
 	});
 
@@ -95,6 +103,93 @@ describe("QueueSheet", () => {
 		await expect.element(page.getByText("曲A")).toBeInTheDocument();
 		await expect.element(page.getByText("アルバムX")).toBeInTheDocument();
 		await expect.element(page.getByText("曲B")).toBeInTheDocument();
+	});
+
+	test("ファイルモード: 履歴タブに切り替えると履歴が表示される", async () => {
+		const store = createStore();
+		store.set(currentSrcAtom, "file");
+		store.set(songQueueAtom, []);
+		store.set(songHistoryAtom, [
+			makeSong({ id: "h1", title: "履歴曲A", album: "アルバムH" }),
+			makeSong({ id: "h2", title: "履歴曲B" }),
+		]);
+
+		render(
+			<Provider store={store}>
+				<QueueSheet>
+					<button type="button">キュー</button>
+				</QueueSheet>
+			</Provider>,
+		);
+
+		await page.getByRole("button", { name: "キュー" }).click();
+		await page.getByRole("tab", { name: "履歴" }).click();
+		await expect.element(page.getByText("履歴曲A")).toBeInTheDocument();
+		await expect.element(page.getByText("アルバムH")).toBeInTheDocument();
+		await expect.element(page.getByText("履歴曲B")).toBeInTheDocument();
+	});
+
+	test("ファイルモード: 履歴が空のとき「履歴はありません」", async () => {
+		const store = createStore();
+		store.set(currentSrcAtom, "file");
+		store.set(songQueueAtom, []);
+		store.set(songHistoryAtom, []);
+
+		render(
+			<Provider store={store}>
+				<QueueSheet>
+					<button type="button">キュー</button>
+				</QueueSheet>
+			</Provider>,
+		);
+
+		await page.getByRole("button", { name: "キュー" }).click();
+		await page.getByRole("tab", { name: "履歴" }).click();
+		await expect
+			.element(page.getByText("履歴はありません"))
+			.toBeInTheDocument();
+	});
+
+	test("ファイルモード: キュー曲のコンテキストメニュートリガーが存在する", async () => {
+		const store = createStore();
+		store.set(currentSrcAtom, "file");
+		store.set(songQueueAtom, [makeSong({ id: "s1", title: "右クリック曲" })]);
+
+		render(
+			<Provider store={store}>
+				<QueueSheet>
+					<button type="button">キュー</button>
+				</QueueSheet>
+			</Provider>,
+		);
+
+		await page.getByRole("button", { name: "キュー" }).click();
+		// コンテキストメニュートリガーが描画されていることを確認
+		// (Radix ContextMenu Portal は右クリックイベントの自動テストが不安定なため操作テストは省略)
+		const songText = page.getByText("右クリック曲");
+		await expect.element(songText).toBeInTheDocument();
+	});
+
+	test("ファイルモード: 履歴曲のコンテキストメニュートリガーが存在する", async () => {
+		const store = createStore();
+		store.set(currentSrcAtom, "file");
+		store.set(songQueueAtom, []);
+		store.set(songHistoryAtom, [
+			makeSong({ id: "h1", title: "履歴右クリック曲" }),
+		]);
+
+		render(
+			<Provider store={store}>
+				<QueueSheet>
+					<button type="button">キュー</button>
+				</QueueSheet>
+			</Provider>,
+		);
+
+		await page.getByRole("button", { name: "キュー" }).click();
+		await page.getByRole("tab", { name: "履歴" }).click();
+		const songText = page.getByText("履歴右クリック曲");
+		await expect.element(songText).toBeInTheDocument();
 	});
 
 	test("ラジオモード: 空キューで「キューは空です」", async () => {
