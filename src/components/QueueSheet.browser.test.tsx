@@ -26,6 +26,16 @@ vi.mock("framer-motion", () => ({
 	useDragControls: () => ({ start: vi.fn() }),
 }));
 
+// virtua の VList をシンプルな div でモック (テスト環境では CSS 高さが未解決のため)
+vi.mock("virtua", () => ({
+	VList: ({
+		children,
+		...props
+	}: { children: React.ReactNode } & Record<string, unknown>) => (
+		<div {...props}>{children}</div>
+	),
+}));
+
 const mockSkipTo = vi.fn();
 vi.mock("@/hooks/player", () => ({
 	usePlayer: () => ({

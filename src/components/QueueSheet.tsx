@@ -8,7 +8,8 @@ import {
 	RadioTower,
 	Trash2,
 } from "lucide-react";
-import { type ReactNode, useRef } from "react";
+import { type ReactNode, useMemo, useRef } from "react";
+import { VList } from "virtua";
 import {
 	currentSrcAtom,
 	queueAtom,
@@ -45,7 +46,7 @@ export function QueueSheet({ children }: { children: ReactNode }) {
 			<SheetTrigger asChild>{children}</SheetTrigger>
 			<SheetContent
 				side="right"
-				className="max-w-sm sm:min-w-96 overflow-y-auto px-4"
+				className="max-w-sm sm:min-w-96 flex flex-col overflow-hidden px-4"
 			>
 				<SheetHeader>
 					<SheetTitle className="text-xl pl-2">
@@ -62,15 +63,18 @@ export function QueueSheet({ children }: { children: ReactNode }) {
 
 function SongQueueTabs() {
 	return (
-		<Tabs defaultValue="queue" className="mt-2">
-			<TabsList variant="line" className="w-full">
+		<Tabs defaultValue="queue" className="mt-2 flex-1 flex flex-col min-h-0">
+			<TabsList variant="line" className="w-full shrink-0">
 				<TabsTrigger value="queue">再生待ち</TabsTrigger>
 				<TabsTrigger value="history">履歴</TabsTrigger>
 			</TabsList>
-			<TabsContent value="queue">
+			<TabsContent value="queue" className="flex-1 min-h-0 overflow-hidden">
 				<SongQueueList />
 			</TabsContent>
-			<TabsContent value="history">
+			<TabsContent
+				value="history"
+				className="flex-1 min-h-0 overflow-hidden flex flex-col"
+			>
 				<SongHistoryList />
 			</TabsContent>
 		</Tabs>
@@ -95,7 +99,7 @@ function SongQueueList() {
 			layoutScroll
 			values={songQueue}
 			onReorder={setSongQueue}
-			className="flex flex-col gap-2 mt-4"
+			className="flex flex-col gap-2 mt-4 overflow-y-auto h-full"
 		>
 			{songQueue.map((song) => (
 				<QueueSongCard key={song.id} song={song} context="queue" />
@@ -109,6 +113,8 @@ function SongQueueList() {
 function SongHistoryList() {
 	const songHistory = useAtomValue(songHistoryAtom);
 
+	const reversed = useMemo(() => [...songHistory].reverse(), [songHistory]);
+
 	if (!songHistory.length) {
 		return (
 			<p className="text-sm text-muted-foreground pl-2 mt-4">
@@ -118,11 +124,13 @@ function SongHistoryList() {
 	}
 
 	return (
-		<div className="flex flex-col gap-2 mt-4">
-			{[...songHistory].reverse().map((song) => (
-				<QueueSongCard key={song.id} song={song} context="history" />
+		<VList className="flex-1 min-h-0 mt-4">
+			{reversed.map((song) => (
+				<div key={song.id} className="pb-2">
+					<QueueSongCard song={song} context="history" />
+				</div>
 			))}
-		</div>
+		</VList>
 	);
 }
 
@@ -321,18 +329,20 @@ function RadioQueueList() {
 	}
 
 	return (
-		<div className="flex flex-col gap-2 mt-4">
+		<VList className="flex-1 min-h-0 mt-4">
 			{radioQueue.map((station, index) => (
-				<RadioQueueCard
+				<div
 					key={
 						station.source === "radiko"
 							? `${station.id}-${index}`
 							: `${station.url}-${index}`
 					}
-					station={station}
-				/>
+					className="pb-2"
+				>
+					<RadioQueueCard station={station} />
+				</div>
 			))}
-		</div>
+		</VList>
 	);
 }
 
