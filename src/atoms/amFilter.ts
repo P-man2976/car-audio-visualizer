@@ -8,6 +8,7 @@
  * 実際の AudioNode は audio.ts で管理し、本モジュールは
  * 設定アトム・定数・純粋関数のみを提供する。
  */
+import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
 /** AM フィルタの有効/無効設定（永続化）。デフォルト: 有効 */
@@ -56,10 +57,41 @@ export const DEFAULT_AM_FILTER_SETTINGS: AmFilterSettings = {
 	speakerResonanceGain: 6,
 };
 
-/** AM フィルタ設定アトム（永続化） */
-export const amFilterSettingsAtom = atomWithStorage<AmFilterSettings>(
+/**
+ * AM フィルタ設定の永続化用 raw atom。
+ * 直接使わず、amFilterSettingsAtom を使用すること。
+ */
+const rawAmFilterSettingsAtom = atomWithStorage<Partial<AmFilterSettings>>(
 	"cav-am-filter-settings",
 	DEFAULT_AM_FILTER_SETTINGS,
+);
+
+/**
+ * AM フィルタ設定アトム（永続化 + デフォルトマージ）。
+ *
+ * localStorage に旧形式（新フィールドが欠けた）値が保存されていても、
+ * 読み取り時にデフォルト値で補完する。
+ */
+export const amFilterSettingsAtom = atom(
+	(get): AmFilterSettings => ({
+		...DEFAULT_AM_FILTER_SETTINGS,
+		...get(rawAmFilterSettingsAtom),
+	}),
+	(
+		_get,
+		set,
+		update: AmFilterSettings | ((prev: AmFilterSettings) => AmFilterSettings),
+	) => {
+		if (typeof update === "function") {
+			const prev = {
+				...DEFAULT_AM_FILTER_SETTINGS,
+				..._get(rawAmFilterSettingsAtom),
+			};
+			set(rawAmFilterSettingsAtom, update(prev));
+		} else {
+			set(rawAmFilterSettingsAtom, update);
+		}
+	},
 );
 
 /**
