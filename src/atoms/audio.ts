@@ -201,16 +201,17 @@ export function setAmFilterActive(
 	// メイクアップゲイン: デフォルト設定を基準 (0dB) として相対的に補正。
 	// 閾値を上げる（圧縮減）→ 負のゲイン（減衰）、下げる → 正のゲイン（ブースト）。
 	// AM_MAKEUP_OFFSET_DB で全体をさらに減衰させる。
+	// 無効時は 1.0 (0dB) でバイパス。
 	const AM_MAKEUP_OFFSET_DB = -10;
-	const referenceDb = calcMakeupGain(
-		DEFAULT_AM_FILTER_SETTINGS.compThreshold,
-		DEFAULT_AM_FILTER_SETTINGS.compRatio,
-	);
-	const currentDb = active
-		? calcMakeupGain(s.compThreshold, s.compRatio)
-		: referenceDb; // 無効時は基準と同じ → 0dB
-	const makeupLinear =
-		10 ** ((currentDb - referenceDb + AM_MAKEUP_OFFSET_DB) / 20);
+	let makeupLinear = 1; // バイパス
+	if (active) {
+		const referenceDb = calcMakeupGain(
+			DEFAULT_AM_FILTER_SETTINGS.compThreshold,
+			DEFAULT_AM_FILTER_SETTINGS.compRatio,
+		);
+		const currentDb = calcMakeupGain(s.compThreshold, s.compRatio);
+		makeupLinear = 10 ** ((currentDb - referenceDb + AM_MAKEUP_OFFSET_DB) / 20);
+	}
 	makeupGainNode.gain.setTargetAtTime(makeupLinear, now, smooth);
 
 	// ブラウンノイズ
