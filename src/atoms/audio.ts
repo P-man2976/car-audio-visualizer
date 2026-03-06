@@ -198,9 +198,16 @@ export function setAmFilterActive(
 	);
 	amCompressor.ratio.setTargetAtTime(active ? s.compRatio : 1, now, smooth);
 
-	// メイクアップゲイン: 圧縮で失われた音量を補正
-	const makeupDb = active ? calcMakeupGain(s.compThreshold, s.compRatio) : 0;
-	const makeupLinear = 10 ** (makeupDb / 20);
+	// メイクアップゲイン: デフォルト設定を基準 (0dB) として相対的に補正。
+	// 閾値を上げる（圧縮減）→ 負のゲイン（減衰）、下げる → 正のゲイン（ブースト）。
+	const referenceDb = calcMakeupGain(
+		DEFAULT_AM_FILTER_SETTINGS.compThreshold,
+		DEFAULT_AM_FILTER_SETTINGS.compRatio,
+	);
+	const currentDb = active
+		? calcMakeupGain(s.compThreshold, s.compRatio)
+		: referenceDb; // 無効時は基準と同じ → 0dB
+	const makeupLinear = 10 ** ((currentDb - referenceDb) / 20);
 	makeupGainNode.gain.setTargetAtTime(makeupLinear, now, smooth);
 
 	// ブラウンノイズ
