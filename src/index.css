@@ -140,7 +140,11 @@
 	}
 	html,
 	body {
-		@apply bg-[#060109] h-screen text-white overflow-hidden overscroll-none;
+		@apply bg-[#060109] h-dvh text-white overflow-hidden overscroll-none;
+		/* iOS Safari で standalone モードのときに高さが100%にならない問題への対処 */
+		@media all and (display-mode: standalone) {
+			@apply h-screen;
+		}
 	}
 	#root {
 		@apply bg-[#060109] h-full;

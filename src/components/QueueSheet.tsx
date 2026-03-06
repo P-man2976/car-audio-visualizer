@@ -39,7 +39,7 @@ import type { Radio } from "@/types/radio";
 
 export function QueueSheet({ children }: { children: ReactNode }) {
 	const currentSrc = useAtomValue(currentSrcAtom);
-	const isFile = currentSrc === "file";
+	const isRadio = currentSrc === "radio";
 
 	return (
 		<Sheet>
@@ -50,10 +50,10 @@ export function QueueSheet({ children }: { children: ReactNode }) {
 			>
 				<SheetHeader>
 					<SheetTitle className="text-xl pl-2">
-						{isFile ? "キュー" : "最近再生した局"}
+						{isRadio ? "最近再生した局" : "キュー"}
 					</SheetTitle>
 				</SheetHeader>
-				{isFile ? <SongQueueTabs /> : <RadioQueueList />}
+				{isRadio ? <RadioQueueList /> : <SongQueueTabs />}
 			</SheetContent>
 		</Sheet>
 	);

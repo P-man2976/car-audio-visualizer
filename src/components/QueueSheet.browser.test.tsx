@@ -246,4 +246,29 @@ describe("QueueSheet", () => {
 		await expect.element(page.getByText("TBSラジオ")).toBeInTheDocument();
 		await expect.element(page.getByText("90.5 MHz")).toBeInTheDocument();
 	});
+
+	test("all off モード: ファイルキュータブが表示される", async () => {
+		const store = createStore();
+		store.set(currentSrcAtom, "all off");
+		store.set(songQueueAtom, []);
+		store.set(songHistoryAtom, [
+			makeSong({ id: "h1", title: "オフ時の履歴曲" }),
+		]);
+
+		render(
+			<Provider store={store}>
+				<QueueSheet>
+					<button type="button">キュー</button>
+				</QueueSheet>
+			</Provider>,
+		);
+
+		await page.getByRole("button", { name: "キュー" }).click();
+		// all off でもファイルタブ（キュー）が表示される
+		await expect
+			.element(page.getByRole("tab", { name: "再生待ち" }))
+			.toBeInTheDocument();
+		await page.getByRole("tab", { name: "履歴" }).click();
+		await expect.element(page.getByText("オフ時の履歴曲")).toBeInTheDocument();
+	});
 });
