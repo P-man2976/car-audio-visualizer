@@ -31,7 +31,7 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 	return (
 		<Sheet>
 			<SheetTrigger asChild>{children}</SheetTrigger>
-			<SheetContent side="top" className="max-h-[80vh] overflow-y-auto">
+			<SheetContent side="top" className="max-h-[70dvh] overflow-y-auto">
 				<Tabs
 					// currentSrc が "off" のときはどのタブも選択されていない状態にする
 					value={currentSrc === "off" ? "" : currentSrc}
