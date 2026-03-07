@@ -15,6 +15,9 @@
 		"cf-typegen": "wrangler types"
 	},
 	"dependencies": {
+		"@dnd-kit/core": "^6.3.1",
+		"@dnd-kit/sortable": "^10.0.0",
+		"@dnd-kit/utilities": "^3.2.2",
 		"@pixi/react": "^8.0.5",
 		"@react-three/drei": "^10.7.7",
 		"@react-three/fiber": "^9.5.0",
@@ -29,7 +32,6 @@
 		"audiomotion-analyzer": "github:p-man2976/audioMotion-analyzer",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
-		"framer-motion": "^12.34.3",
 		"hls.js": "^1.6.15",
 		"idb-keyval": "^6.2.2",
 		"jotai": "^2.18.0",

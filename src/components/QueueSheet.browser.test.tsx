@@ -7,23 +7,33 @@ import { page } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { describe, expect, test, vi } from "vitest";
 
-// framer-motion の Reorder をシンプルな div 置換でモック
-vi.mock("framer-motion", () => ({
-	Reorder: {
-		Group: ({
-			children,
-			...props
-		}: { children: React.ReactNode } & Record<string, unknown>) => (
-			<div {...props}>{children}</div>
-		),
-		Item: ({
-			children,
-			...props
-		}: { children: React.ReactNode } & Record<string, unknown>) => (
-			<div {...props}>{children}</div>
-		),
-	},
-	useDragControls: () => ({ start: vi.fn() }),
+// dnd-kit をシンプルな div 置換でモック
+vi.mock("@dnd-kit/core", () => ({
+	DndContext: ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	),
+	closestCenter: vi.fn(),
+	useSensor: vi.fn(),
+	useSensors: vi.fn(),
+	PointerSensor: class {},
+	TouchSensor: class {},
+}));
+vi.mock("@dnd-kit/sortable", () => ({
+	SortableContext: ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	),
+	useSortable: () => ({
+		attributes: {},
+		listeners: {},
+		setNodeRef: vi.fn(),
+		transform: null,
+		transition: null,
+		isDragging: false,
+	}),
+	verticalListSortingStrategy: {},
+}));
+vi.mock("@dnd-kit/utilities", () => ({
+	CSS: { Transform: { toString: () => undefined } },
 }));
 
 // virtua の VList をシンプルな div でモック (テスト環境では CSS 高さが未解決のため)

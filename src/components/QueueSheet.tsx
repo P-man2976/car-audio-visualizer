@@ -1,4 +1,18 @@
-import { Reorder, useDragControls } from "framer-motion";
+import {
+	DndContext,
+	type DragEndEvent,
+	PointerSensor,
+	TouchSensor,
+	closestCenter,
+	useSensor,
+	useSensors,
+} from "@dnd-kit/core";
+import {
+	SortableContext,
+	useSortable,
+	verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
 	GripVertical,
@@ -10,7 +24,7 @@ import {
 	Repeat,
 	Trash2,
 } from "lucide-react";
-import { type ReactNode, useMemo, useRef } from "react";
+import { type ReactNode, useCallback, useMemo, useRef } from "react";
 import { VList } from "virtua";
 import {
 	currentSongAtom,
@@ -98,6 +112,32 @@ function SongQueueList() {
 			? (currentSong ? 1 : 0) + songQueue.length + songHistory.length
 			: 0;
 
+	const sensors = useSensors(
+		useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+		useSensor(TouchSensor, {
+			activationConstraint: { delay: 150, tolerance: 5 },
+		}),
+	);
+
+	const songIds = useMemo(() => songQueue.map((s) => s.id), [songQueue]);
+
+	const handleDragEnd = useCallback(
+		(event: DragEndEvent) => {
+			const { active, over } = event;
+			if (!over || active.id === over.id) return;
+			setSongQueue((prev) => {
+				const oldIndex = prev.findIndex((s) => s.id === active.id);
+				const newIndex = prev.findIndex((s) => s.id === over.id);
+				if (oldIndex === -1 || newIndex === -1) return prev;
+				const next = [...prev];
+				const [moved] = next.splice(oldIndex, 1);
+				next.splice(newIndex, 0, moved);
+				return next;
+			});
+		},
+		[setSongQueue],
+	);
+
 	if (!songQueue.length) {
 		return (
 			<p className="text-sm text-muted-foreground pl-2 mt-4">キューは空です</p>
@@ -105,24 +145,27 @@ function SongQueueList() {
 	}
 
 	return (
-		<Reorder.Group
-			as="div"
-			axis="y"
-			layoutScroll
-			values={songQueue}
-			onReorder={setSongQueue}
-			className="flex flex-col gap-2 mt-4 overflow-y-auto h-full"
+		<DndContext
+			sensors={sensors}
+			collisionDetection={closestCenter}
+			onDragEnd={handleDragEnd}
 		>
-			{songQueue.map((song) => (
-				<QueueSongCard key={song.id} song={song} context="queue" />
-			))}
-			{repeatCount > 0 && (
-				<div className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground">
-					<Repeat size={14} />
-					<span>{repeatCount}曲をリピート</span>
-				</div>
-			)}
-		</Reorder.Group>
+			<SortableContext items={songIds} strategy={verticalListSortingStrategy}>
+				<VList className="flex-1 min-h-0 mt-4">
+					{songQueue.map((song) => (
+						<div key={song.id} className="pb-2">
+							<QueueSongCard song={song} context="queue" />
+						</div>
+					))}
+					{repeatCount > 0 && (
+						<div className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground">
+							<Repeat size={14} />
+							<span>{repeatCount}曲をリピート</span>
+						</div>
+					)}
+				</VList>
+			</SortableContext>
+		</DndContext>
 	);
 }
 
@@ -162,7 +205,6 @@ function QueueSongCard({
 	context: "queue" | "history";
 }) {
 	const { id, filename, title, album, artwork } = song;
-	const controls = useDragControls();
 	const { skipTo } = usePlayer();
 	const setSongQueue = useSetAtom(songQueueAtom);
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -171,13 +213,30 @@ function QueueSongCard({
 
 	const isDraggable = context === "queue";
 
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({ id, disabled: !isDraggable });
+
+	const style = isDraggable
+		? {
+				transform: CSS.Transform.toString(transform),
+				transition,
+				opacity: isDragging ? 0.5 : undefined,
+			}
+		: undefined;
+
 	const cardBody = (
 		<>
 			{isDraggable && (
 				<GripVertical
 					size={20}
 					className="shrink-0 text-gray-500 hover:text-gray-300 hover:cursor-move touch-none ml-1"
-					onPointerDown={(e) => controls.start(e)}
+					{...listeners}
 				/>
 			)}
 			{artwork ? (
@@ -233,23 +292,14 @@ function QueueSongCard({
 		</>
 	);
 
-	const card = isDraggable ? (
-		<Reorder.Item
-			as="div"
-			value={song}
-			dragListener={false}
-			dragControls={controls}
+	const card = (
+		<div
+			ref={isDraggable ? setNodeRef : undefined}
+			style={style}
+			{...(isDraggable ? attributes : {})}
 			className={cn(
 				"rounded-md bg-neutral-800/50 flex items-center gap-2 pr-3 py-2 cursor-default select-none",
-				!isDraggable && "pl-3",
-			)}
-		>
-			{cardBody}
-		</Reorder.Item>
-	) : (
-		<div
-			className={cn(
-				"rounded-md bg-neutral-800/50 flex items-center gap-2 pr-3 py-2 cursor-default select-none pl-3",
+				isDraggable ? "" : "pl-3",
 			)}
 		>
 			{cardBody}
