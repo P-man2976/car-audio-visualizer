@@ -215,7 +215,11 @@ function VisualizerPane() {
 
 			<SettingRow
 				label="アニメーションモード"
-				description="ステップモードでは一定間隔でレベルを取得し、バーが上昇・下降アニメーションします"
+				description={
+					animationMode === "stepped"
+						? "一定間隔でレベルを取得し、バーが上昇・下降アニメーションします"
+						: "audioMotion-analyzer のリアルタイム値をそのまま描画します"
+				}
 				htmlFor={modeId}
 			>
 				<select
