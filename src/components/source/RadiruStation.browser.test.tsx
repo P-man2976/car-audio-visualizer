@@ -8,7 +8,7 @@ import { describe, expect, test, vi } from "vitest";
 
 const mockSelectRadio = vi.fn();
 vi.mock("@/hooks/radio", () => ({
-	useSelectRadio: () => mockSelectRadio,
+	useSelectRadio: () => ({ selectRadio: mockSelectRadio }),
 }));
 
 vi.mock("jotai", async (importOriginal) => {

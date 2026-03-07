@@ -59,7 +59,7 @@ vi.mock("@/hooks/player", () => ({
 
 const mockSelectRadio = vi.fn();
 vi.mock("@/hooks/radio", () => ({
-	useSelectRadio: () => mockSelectRadio,
+	useSelectRadio: () => ({ selectRadio: mockSelectRadio }),
 }));
 
 // Import after mocks

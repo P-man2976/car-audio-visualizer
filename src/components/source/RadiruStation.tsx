@@ -43,7 +43,7 @@ export function RadiruStation({
 function RadiruChannelCard({ areajp, type, label, name, url }: RadiruChannel) {
 	const currentRadio = useAtomValue(currentRadioAtom);
 	const currentSrc = useAtomValue(currentSrcAtom);
-	const selectRadio = useSelectRadio();
+	const { selectRadio } = useSelectRadio();
 	const isSelected =
 		currentSrc === "radio" &&
 		currentRadio?.source === "radiru" &&
