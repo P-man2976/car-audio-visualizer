@@ -121,8 +121,13 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 	const collectFileHandles = async (
 		files: SelectedFile[],
 	): Promise<FileSystemFileHandle[]> => {
+		// FileEntries と同じ順序: ディレクトリ優先（alpha）→ ファイル（alpha）
+		const sorted = [...files].sort((a, b) => {
+			if (a.kind !== b.kind) return a.kind === "directory" ? -1 : 1;
+			return a.name.localeCompare(b.name);
+		});
 		const results: FileSystemFileHandle[] = [];
-		for (const handle of files) {
+		for (const handle of sorted) {
 			if (handle.kind === "directory") {
 				const sub = await collectFromDir(handle as FileSystemDirectoryHandle);
 				results.push(...sub);
@@ -136,14 +141,25 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 	const collectFromDir = async (
 		dir: FileSystemDirectoryHandle,
 	): Promise<FileSystemFileHandle[]> => {
+		const entries: { name: string; handle: FileSystemHandle }[] = [];
+		for await (const [name, handle] of dir.entries()) {
+			entries.push({ name, handle });
+		}
+		// ディレクトリ優先（alpha）→ ファイル（alpha）で各レベルをソート
+		entries.sort((a, b) => {
+			if (a.handle.kind !== b.handle.kind) {
+				return a.handle.kind === "directory" ? -1 : 1;
+			}
+			return a.name.localeCompare(b.name);
+		});
 		const results: FileSystemFileHandle[] = [];
-		for await (const [, handle] of dir.entries()) {
-			if (handle.kind === "directory") {
+		for (const entry of entries) {
+			if (entry.handle.kind === "directory") {
 				results.push(
-					...(await collectFromDir(handle as FileSystemDirectoryHandle)),
+					...(await collectFromDir(entry.handle as FileSystemDirectoryHandle)),
 				);
 			} else {
-				results.push(handle as FileSystemFileHandle);
+				results.push(entry.handle as FileSystemFileHandle);
 			}
 		}
 		return results;
@@ -157,8 +173,6 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 		files: SelectedFile[],
 	): Promise<{ handle: FileSystemFileHandle; song: Song | undefined }[]> => {
 		const fileHandles = await collectFileHandles(files);
-		// FileEntries の表示順（アルファベット順）に合わせてソート
-		fileHandles.sort((a, b) => a.name.localeCompare(b.name));
 		return Promise.all(
 			fileHandles.map(async (handle) => ({
 				handle,
