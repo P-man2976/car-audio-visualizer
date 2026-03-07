@@ -54,8 +54,10 @@ vi.mock("@/hooks/radio", () => ({
 
 // Import after mocks
 import {
+	currentSongAtom,
 	currentSrcAtom,
 	queueAtom,
+	repeatModeAtom,
 	songHistoryAtom,
 	songQueueAtom,
 } from "@/atoms/player";
@@ -270,5 +272,50 @@ describe("QueueSheet", () => {
 			.toBeInTheDocument();
 		await page.getByRole("tab", { name: "履歴" }).click();
 		await expect.element(page.getByText("オフ時の履歴曲")).toBeInTheDocument();
+	});
+
+	test("全曲リピート: キュー末尾に「x曲をリピート」が表示される", async () => {
+		const store = createStore();
+		store.set(currentSrcAtom, "file");
+		store.set(repeatModeAtom, "all");
+		store.set(currentSongAtom, makeSong({ id: "current", title: "再生中" }));
+		store.set(songQueueAtom, [
+			makeSong({ id: "q1", title: "キュー曲1" }),
+			makeSong({ id: "q2", title: "キュー曲2" }),
+		]);
+		store.set(songHistoryAtom, [makeSong({ id: "h1", title: "履歴曲" })]);
+
+		render(
+			<Provider store={store}>
+				<QueueSheet>
+					<button type="button">キュー</button>
+				</QueueSheet>
+			</Provider>,
+		);
+
+		await page.getByRole("button", { name: "キュー" }).click();
+		// 1(currentSong) + 2(queue) + 1(history) = 4曲
+		await expect.element(page.getByText("4曲をリピート")).toBeInTheDocument();
+	});
+
+	test("リピートoff: 「x曲をリピート」が表示されない", async () => {
+		const store = createStore();
+		store.set(currentSrcAtom, "file");
+		store.set(repeatModeAtom, "off");
+		store.set(songQueueAtom, [makeSong({ id: "q1", title: "キュー曲" })]);
+
+		render(
+			<Provider store={store}>
+				<QueueSheet>
+					<button type="button">キュー</button>
+				</QueueSheet>
+			</Provider>,
+		);
+
+		await page.getByRole("button", { name: "キュー" }).click();
+		await expect.element(page.getByText("キュー曲")).toBeInTheDocument();
+		// リピート表示がないことを確認
+		const repeatText = page.getByText(/曲をリピート/);
+		await expect.element(repeatText).not.toBeInTheDocument();
 	});
 });

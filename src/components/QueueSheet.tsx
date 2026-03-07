@@ -6,13 +6,16 @@ import {
 	ListStart,
 	Play,
 	RadioTower,
+	Repeat,
 	Trash2,
 } from "lucide-react";
 import { type ReactNode, useMemo, useRef } from "react";
 import { VList } from "virtua";
 import {
+	currentSongAtom,
 	currentSrcAtom,
 	queueAtom,
+	repeatModeAtom,
 	songHistoryAtom,
 	songQueueAtom,
 } from "@/atoms/player";
@@ -85,6 +88,14 @@ function SongQueueTabs() {
 
 function SongQueueList() {
 	const [songQueue, setSongQueue] = useAtom(songQueueAtom);
+	const repeatMode = useAtomValue(repeatModeAtom);
+	const currentSong = useAtomValue(currentSongAtom);
+	const songHistory = useAtomValue(songHistoryAtom);
+
+	const repeatCount =
+		repeatMode === "all"
+			? (currentSong ? 1 : 0) + songQueue.length + songHistory.length
+			: 0;
 
 	if (!songQueue.length) {
 		return (
@@ -104,6 +115,12 @@ function SongQueueList() {
 			{songQueue.map((song) => (
 				<QueueSongCard key={song.id} song={song} context="queue" />
 			))}
+			{repeatCount > 0 && (
+				<div className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground">
+					<Repeat size={14} />
+					<span>{repeatCount}曲をリピート</span>
+				</div>
+			)}
 		</Reorder.Group>
 	);
 }

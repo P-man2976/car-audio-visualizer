@@ -110,6 +110,13 @@ vi.mock("@/hooks/restore", () => ({
 vi.mock("@/hooks/usePinchZoom", () => ({
 	usePinchZoom: () => ({ current: null }),
 }));
+const mockToggleShuffle = vi.fn();
+vi.mock("@/hooks/shuffle", () => ({
+	useShuffleToggle: () => ({
+		shuffle: false,
+		toggle: mockToggleShuffle,
+	}),
+}));
 
 // @/atoms/audio はモジュールスコープで AudioContext を生成するためモック
 vi.mock("@/atoms/audio", async () => {

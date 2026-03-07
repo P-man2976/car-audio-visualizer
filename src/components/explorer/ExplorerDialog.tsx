@@ -157,6 +157,8 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 		files: SelectedFile[],
 	): Promise<{ handle: FileSystemFileHandle; song: Song | undefined }[]> => {
 		const fileHandles = await collectFileHandles(files);
+		// FileEntries の表示順（アルファベット順）に合わせてソート
+		fileHandles.sort((a, b) => a.name.localeCompare(b.name));
 		return Promise.all(
 			fileHandles.map(async (handle) => ({
 				handle,
@@ -210,6 +212,7 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 			}
 
 			setSelected([]);
+			setIsOpen(false);
 		},
 	});
 

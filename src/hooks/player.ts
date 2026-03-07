@@ -5,11 +5,13 @@ import {
 	currentSongAtom,
 	currentSrcAtom,
 	isPlayingAtom,
+	preShuffleQueueAtom,
 	repeatModeAtom,
 	shuffleAtom,
 	songHistoryAtom,
 	songQueueAtom,
 } from "@/atoms/player";
+import { shuffleArray } from "@/lib/shuffle";
 
 export const usePlayer = () => {
 	const [, setCurrentSrc] = useAtom(currentSrcAtom);
@@ -21,6 +23,7 @@ export const usePlayer = () => {
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 	const shuffle = useAtomValue(shuffleAtom);
 	const repeat = useAtomValue(repeatModeAtom);
+	const setPreShuffleQueue = useSetAtom(preShuffleQueueAtom);
 
 	const play = useCallback(
 		async (pos?: number) => {
@@ -47,16 +50,8 @@ export const usePlayer = () => {
 	}, [audioElement, setIsPlaying, setCurrentSrc]);
 
 	const next = useCallback(() => {
-		// shuffle 時はキューからランダムに選択
-		let nextSong: (typeof songQueue)[number] | undefined;
-		let newQueue: typeof songQueue;
-		if (shuffle && songQueue.length > 0) {
-			const randomIndex = Math.floor(Math.random() * songQueue.length);
-			nextSong = songQueue[randomIndex];
-			newQueue = songQueue.filter((_, i) => i !== randomIndex);
-		} else {
-			[nextSong, ...newQueue] = songQueue;
-		}
+		// キューは既にシャッフル済み（shuffleAtom ON 時）なので常に先頭から取得
+		const [nextSong, ...newQueue] = songQueue;
 
 		const newHistory = currentSong
 			? [...songHistory, currentSong]
@@ -65,15 +60,17 @@ export const usePlayer = () => {
 		if (!nextSong) {
 			// repeat all: 履歴全曲をキューに戻して再開
 			if (repeat === "all" && newHistory.length > 0) {
-				const allSongs = shuffle
-					? [...newHistory].sort(() => Math.random() - 0.5)
-					: [...newHistory];
+				const allSongs = shuffle ? shuffleArray(newHistory) : [...newHistory];
 				const [first, ...rest] = allSongs;
 				setSongHistory([]);
 				setCurrentSong(first);
 				setSongQueue(rest);
+				// repeat-all でキューが再構成されるため preShuffleQueue は無効化
+				setPreShuffleQueue(null);
 			} else {
+				// 全曲再生完了: currentSong をクリアして停止
 				setSongHistory(newHistory);
+				setCurrentSong(null);
 				stop();
 			}
 			return;
@@ -90,6 +87,7 @@ export const usePlayer = () => {
 		setSongHistory,
 		setCurrentSong,
 		setSongQueue,
+		setPreShuffleQueue,
 		stop,
 	]);
 

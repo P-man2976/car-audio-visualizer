@@ -28,7 +28,6 @@ import {
 	currentSrcAtom,
 	type RepeatMode,
 	repeatModeAtom,
-	shuffleAtom,
 } from "@/atoms/player";
 import { currentRadioAtom, tuningFreqAtom } from "@/atoms/radio";
 import { Button } from "@/components/ui/button";
@@ -40,6 +39,7 @@ import { usePiP } from "@/hooks/pip";
 import { usePlayer } from "@/hooks/player";
 import { useBandToggle, useRadioPlayer } from "@/hooks/radio";
 import { useRestoreState } from "@/hooks/restore";
+import { useShuffleToggle } from "@/hooks/shuffle";
 import { usePinchZoom } from "@/hooks/usePinchZoom";
 import { MenuSheet } from "./MenuSheet";
 import { ProgressSlider } from "./player/ProgressSlider";
@@ -57,7 +57,7 @@ export function ControlsOverlay() {
 	const displaySong = currentSong;
 	const tuningFreq = useAtomValue(tuningFreqAtom);
 
-	const [shuffle, setShuffle] = useAtom(shuffleAtom);
+	const { shuffle, toggle: toggleShuffle } = useShuffleToggle();
 	const [repeat, setRepeat] = useAtom(repeatModeAtom);
 
 	const { isPlaying, play, pause, next, prev } = usePlayer();
@@ -217,7 +217,7 @@ export function ControlsOverlay() {
 									size="icon-lg"
 									variant="ghost"
 									className={`p-2 transition-opacity ${shuffle ? "" : "opacity-30"}`}
-									onClick={() => setShuffle((v) => !v)}
+									onClick={toggleShuffle}
 								>
 									<Shuffle />
 								</Button>

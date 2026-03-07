@@ -43,6 +43,9 @@ export type RepeatMode = "off" | "one" | "all";
 export const shuffleAtom = atom(false);
 export const repeatModeAtom = atom<RepeatMode>("off");
 
+/** シャッフル前のキュー順序。シャッフル解除時に復元するために保持（ランタイムのみ） */
+export const preShuffleQueueAtom = atom<Song[] | null>(null);
+
 /** Radio recently-played stations */
 export const queueAtom = atom<Radio[]>([]);
 
