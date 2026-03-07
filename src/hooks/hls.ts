@@ -31,8 +31,18 @@ export function useHLS() {
 				// Safari MECSN バグ回避: fMP4 セグメントを横取りしてアナライザーに流す
 				safariVizBridge?.attach(newHls);
 
+				// Safari: play() が実際の音声到着前に resolve することがあるため、
+				// audioMotionAnalyzer.start() は playing イベントまで遅延させる
+				const handlePlaying = () => {
+					audioMotionAnalyzer.start();
+					setIsPlaying(true);
+				};
+
 				// attach 完了後に自動再生（resume は load() 先頭で既に呼んでいる）
 				newHls.on(Hls.Events.MEDIA_ATTACHED, () => {
+					audioElement.addEventListener("playing", handlePlaying, {
+						once: true,
+					});
 					void audioElement
 						.play()
 						.then(async () => {
@@ -43,10 +53,9 @@ export function useHLS() {
 								await audioMotionAnalyzer.audioCtx.resume();
 							}
 							connectAudioSource();
-							audioMotionAnalyzer.start();
-							setIsPlaying(true);
 						})
 						.catch((err: unknown) => {
+							audioElement.removeEventListener("playing", handlePlaying);
 							console.warn("[hls] HLS.js play() failed:", err);
 						});
 				});
@@ -61,6 +70,16 @@ export function useHLS() {
 			// 発火したタイミングで AudioContext がまだ suspended の場合がある。
 			// Hls.js パスと同様に state を再確認して start() する。
 			audioElement.src = source;
+
+			// Safari: play() が resolve するタイミングと実際の音声出力開始にズレがあるため
+			// playing イベントで start() を呼ぶ
+			const handleNativePlaying = () => {
+				audioMotionAnalyzer.start();
+				setIsPlaying(true);
+			};
+			audioElement.addEventListener("playing", handleNativePlaying, {
+				once: true,
+			});
 			void audioElement
 				.play()
 				.then(async () => {
@@ -68,10 +87,9 @@ export function useHLS() {
 						await audioMotionAnalyzer.audioCtx.resume();
 					}
 					connectAudioSource();
-					audioMotionAnalyzer.start();
-					setIsPlaying(true);
 				})
 				.catch((err: unknown) => {
+					audioElement.removeEventListener("playing", handleNativePlaying);
 					// Safari で autoplay policy や interruption により再生が拒否された場合
 					// ここに来る。サイレントに握り潰さずコンソールに出力する。
 					console.warn("[hls] Safari native HLS play failed:", err);
