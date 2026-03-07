@@ -10,11 +10,11 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { DevTools as JotaiDevTools } from "jotai-devtools";
+import jotaiDevtoolsCss from "jotai-devtools/styles.css?inline";
 import type { ReactNode } from "react";
 import { FileRestore } from "@/components/FileRestore";
 import { Toaster } from "@/components/ui/sonner";
 import indexCss from "../index.css?url";
-import "jotai-devtools/styles.css";
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -57,6 +57,7 @@ export const Route = createRootRoute({
 		],
 	}),
 	component: RootComponent,
+	notFoundComponent: () => <p>ページが見つかりません</p>,
 	shellComponent: RootDocument,
 });
 
@@ -80,7 +81,12 @@ function RootComponent() {
 			<Outlet />
 			<FileRestore />
 			<Toaster />
-			<JotaiDevTools position="bottom-left" />
+			{import.meta.env.DEV && (
+				<>
+					<style>{jotaiDevtoolsCss}</style>
+					<JotaiDevTools position="bottom-left" />
+				</>
+			)}
 			<ReactQueryDevtools
 				initialIsOpen={false}
 				buttonPosition="bottom-right"
