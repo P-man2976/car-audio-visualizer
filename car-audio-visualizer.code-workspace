@@ -20,9 +20,6 @@
 			"npx tsc": true,
 			"npx tsr": true,
 			"npx tsx": true,
-			"/^.*$/": {
-				"approve": true
-			},
 			"playwright-cli": true,
 			"npx playwright": true,
 			"agent-browser": true,

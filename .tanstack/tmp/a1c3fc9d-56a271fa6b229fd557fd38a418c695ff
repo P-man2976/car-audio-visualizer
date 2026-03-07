@@ -1,9 +1,0 @@
-import { createFileRoute } from "@tanstack/react-router";
-
-export const Route = createFileRoute("/api/radiko/_shared")({
-  component: RouteComponent,
-});
-
-function RouteComponent() {
-  return <div>Hello "/api/radiko/_shared"!</div>;
-}
