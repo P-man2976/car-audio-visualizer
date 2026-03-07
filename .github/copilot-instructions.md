@@ -71,8 +71,8 @@ npx biome format --write src/   # 実際に書き込み
 
 | 種別 | コマンド | 設定ファイル | パターン | 環境 |
 |------|---------|-------------|---------|------|
-| ユニットテスト | `npm run test` | `vitest.config.ts` | `src/**/*.test.ts` | Node |
-| ブラウザテスト | `npm run test:browser` | `vitest.browser.config.ts` | `src/**/*.browser.test.tsx` | Chromium (Playwright) |
+| ユニットテスト | `npm run test` | `vitest.config.ts` (project: unit) | `src/**/*.test.ts` | Node |
+| ブラウザテスト | `npm run test:browser` | `vitest.config.ts` (project: browser) | `src/**/*.browser.test.tsx` | Chromium (Playwright) |
 
 ### ユニットテスト (`*.test.ts`)
 
