@@ -52,9 +52,9 @@ export class SteppedAnalyzer {
 
 	constructor(
 		interval = 200,
-		fallSpeed = 2.0,
+		fallSpeed = 1.0,
 		peakHoldTime = 500,
-		peakFallSpeed = 1.0,
+		peakFallSpeed = 0.3,
 	) {
 		this.interval = interval;
 		this.fallSpeed = fallSpeed;

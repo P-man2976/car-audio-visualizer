@@ -17,7 +17,7 @@ export const steppedIntervalAtom = atomWithStorage<number>(
 /** ステップモードの下降速度 (レベル/秒)。1.0 = フルスケールから 1 秒で 0 */
 export const steppedFallSpeedAtom = atomWithStorage<number>(
 	"cav-stepped-fall-speed-v1",
-	2.0,
+	1.0,
 );
 
 /** ステップモードのピークホールド時間 (ms) */
@@ -29,5 +29,5 @@ export const steppedPeakHoldTimeAtom = atomWithStorage<number>(
 /** ステップモードのピーク下降速度 (レベル/秒) */
 export const steppedPeakFallSpeedAtom = atomWithStorage<number>(
 	"cav-stepped-peak-fall-speed-v1",
-	1.0,
+	0.3,
 );

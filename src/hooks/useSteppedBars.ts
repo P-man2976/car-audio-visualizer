@@ -30,7 +30,12 @@ export function useSteppedBars(): (
 	): AnalyzerBarData[] | null {
 		if (animationMode === "stepped") {
 			if (!steppedRef.current) {
-				steppedRef.current = new SteppedAnalyzer(steppedInterval);
+				steppedRef.current = new SteppedAnalyzer(
+					steppedInterval,
+					1.0,
+					500,
+					0.3,
+				);
 			}
 			steppedRef.current.interval = steppedInterval;
 			steppedRef.current.fallSpeed = steppedFallSpeed;
