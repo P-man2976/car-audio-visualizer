@@ -4,6 +4,7 @@ import {
 	GripVertical,
 	ListEnd,
 	ListStart,
+	Music2,
 	Play,
 	RadioTower,
 	Repeat,
@@ -186,7 +187,9 @@ function QueueSongCard({
 					className="h-10 w-10 rounded-sm object-cover shrink-0"
 				/>
 			) : (
-				<div className="h-10 w-10 rounded-sm bg-neutral-700/60 shrink-0" />
+				<div className="h-10 w-10 rounded-sm bg-neutral-700/60 shrink-0 grid place-content-center">
+					<Music2 size={16} className="text-neutral-400" />
+				</div>
 			)}
 			<div
 				ref={containerRef}

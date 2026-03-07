@@ -16,8 +16,14 @@ import {
 import { useAddress } from "@/hooks/explorer";
 import type { SelectedFile } from "@/types/explorer";
 import type { Song } from "@/types/player";
+import { VisuallyHidden } from "radix-ui";
 import { Button } from "../ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import {
+	Dialog,
+	DialogContent,
+	DialogTitle,
+	DialogTrigger,
+} from "../ui/dialog";
 import { Address } from "./Address";
 import { FileEntries } from "./FileEntries";
 
@@ -255,6 +261,9 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogTrigger asChild>{children}</DialogTrigger>
 			<DialogContent className="flex flex-col h-[calc(100dvh-8rem)] sm:max-w-4xl">
+				<VisuallyHidden.Root>
+					<DialogTitle>ファイルエクスプローラー</DialogTitle>
+				</VisuallyHidden.Root>
 				<Address />
 				<div className="flex gap-1 overflow-auto h-full">
 					{/* Sidebar */}

@@ -2,7 +2,12 @@ import { useAtom, useSetAtom } from "jotai";
 import { Settings, Volume2 } from "lucide-react";
 import { type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+	Sheet,
+	SheetContent,
+	SheetTitle,
+	SheetTrigger,
+} from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
 import { settingsOpenAtom } from "../atoms/hotkeys";
 import { volumeAtom } from "../atoms/player";
@@ -15,6 +20,7 @@ export function MenuSheet({ children }: { children: ReactNode }) {
 		<Sheet>
 			<SheetTrigger asChild>{children}</SheetTrigger>
 			<SheetContent side="left" className="w-fit">
+				<SheetTitle className="sr-only">メニュー</SheetTitle>
 				<div className="h-full flex items-center">
 					<div className="flex flex-col items-center h-4/5 gap-4">
 						<Slider

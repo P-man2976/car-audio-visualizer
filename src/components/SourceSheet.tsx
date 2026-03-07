@@ -6,7 +6,12 @@ import { currentSrcAtom } from "@/atoms/player";
 import { radioStationSizeAtom } from "@/atoms/radio";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+	Sheet,
+	SheetContent,
+	SheetTitle,
+	SheetTrigger,
+} from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMediaStream } from "@/hooks/mediastream";
 import { cn } from "@/lib/utils";
@@ -32,6 +37,7 @@ export function SourceSheet({ children }: { children: ReactNode }) {
 		<Sheet>
 			<SheetTrigger asChild>{children}</SheetTrigger>
 			<SheetContent side="top" className="max-h-[70dvh] overflow-y-auto">
+				<SheetTitle className="sr-only">ソース選択</SheetTitle>
 				<Tabs
 					// currentSrc が "off" のときはどのタブも選択されていない状態にする
 					value={currentSrc === "off" ? "" : currentSrc}
