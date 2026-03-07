@@ -4,14 +4,7 @@ import { useAtomValue } from "jotai";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
-import {
-	animationModeAtom,
-	steppedFallSpeedAtom,
-	steppedIntervalAtom,
-	steppedPeakFallSpeedAtom,
-	steppedPeakHoldTimeAtom,
-} from "@/atoms/visualizerAnimation";
-import { SteppedAnalyzer } from "@/lib/steppedAnalyzer";
+import { useSteppedBars } from "@/hooks/useSteppedBars";
 import {
 	createPerspParams,
 	fillQuadColor,
@@ -71,38 +64,16 @@ const COLOR_SIDE_OFF = new THREE.Color("#91daff");
 // ─── Root component ───────────────────────────────────────────────────────────
 export function VisualizerKenwood() {
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
-	const animationMode = useAtomValue(animationModeAtom);
-	const steppedInterval = useAtomValue(steppedIntervalAtom);
-	const steppedFallSpeed = useAtomValue(steppedFallSpeedAtom);
-	const steppedPeakHoldTime = useAtomValue(steppedPeakHoldTimeAtom);
-	const steppedPeakFallSpeed = useAtomValue(steppedPeakFallSpeedAtom);
-
-	const steppedRef = useRef<SteppedAnalyzer | null>(null);
+	const processBars = useSteppedBars();
 
 	useFrame(() => {
 		// Safari/WebKit: isOn=false 時（start() 未呼び出し）はスキップ
 		if (!audioMotionAnalyzer.isOn) return;
 
-		if (animationMode === "stepped") {
-			if (!steppedRef.current) {
-				steppedRef.current = new SteppedAnalyzer(steppedInterval);
-			}
-			steppedRef.current.interval = steppedInterval;
-			steppedRef.current.fallSpeed = steppedFallSpeed;
-			steppedRef.current.peakHoldTime = steppedPeakHoldTime;
-			steppedRef.current.peakFallSpeed = steppedPeakFallSpeed;
-			const bars = steppedRef.current.update(
-				() => audioMotionAnalyzer.getBars() as AnalyzerBarData[],
-				performance.now(),
-			);
-			if (bars) store.set(spectrogramAtom, bars);
-		} else {
-			steppedRef.current = null;
-			store.set(
-				spectrogramAtom,
-				audioMotionAnalyzer.getBars() as AnalyzerBarData[],
-			);
-		}
+		const bars = processBars(
+			() => audioMotionAnalyzer.getBars() as AnalyzerBarData[],
+		);
+		if (bars) store.set(spectrogramAtom, bars);
 	});
 
 	const SCALE = 1.6;
