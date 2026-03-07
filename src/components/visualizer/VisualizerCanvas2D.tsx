@@ -20,6 +20,8 @@ import {
 	animationModeAtom,
 	steppedFallSpeedAtom,
 	steppedIntervalAtom,
+	steppedPeakFallSpeedAtom,
+	steppedPeakHoldTimeAtom,
 } from "@/atoms/visualizerAnimation";
 import { pinchZoomAtom } from "@/atoms/visualizerZoom";
 import { FONT_5X7 } from "@/lib/dotmatrix-font";
@@ -231,6 +233,8 @@ function VisualizerScene() {
 	const animationMode = useAtomValue(animationModeAtom);
 	const steppedInterval = useAtomValue(steppedIntervalAtom);
 	const steppedFallSpeed = useAtomValue(steppedFallSpeedAtom);
+	const steppedPeakHoldTime = useAtomValue(steppedPeakHoldTimeAtom);
+	const steppedPeakFallSpeed = useAtomValue(steppedPeakFallSpeedAtom);
 	const displayRef = useRef(displayString);
 	displayRef.current = displayString;
 
@@ -281,6 +285,8 @@ function VisualizerScene() {
 				}
 				steppedRef.current.interval = steppedInterval;
 				steppedRef.current.fallSpeed = steppedFallSpeed;
+				steppedRef.current.peakHoldTime = steppedPeakHoldTime;
+				steppedRef.current.peakFallSpeed = steppedPeakFallSpeed;
 				const bars = steppedRef.current.update(
 					() => audioMotion.getBars() as AnalyzerBarData[],
 					performance.now(),

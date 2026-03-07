@@ -52,6 +52,8 @@ import {
 	animationModeAtom,
 	steppedFallSpeedAtom,
 	steppedIntervalAtom,
+	steppedPeakFallSpeedAtom,
+	steppedPeakHoldTimeAtom,
 } from "@/atoms/visualizerAnimation";
 import { Button } from "@/components/ui/button";
 import {
@@ -155,9 +157,17 @@ function VisualizerPane() {
 	const [animationMode, setAnimationMode] = useAtom(animationModeAtom);
 	const [steppedInterval, setSteppedInterval] = useAtom(steppedIntervalAtom);
 	const [steppedFallSpeed, setSteppedFallSpeed] = useAtom(steppedFallSpeedAtom);
+	const [steppedPeakHoldTime, setSteppedPeakHoldTime] = useAtom(
+		steppedPeakHoldTimeAtom,
+	);
+	const [steppedPeakFallSpeed, setSteppedPeakFallSpeed] = useAtom(
+		steppedPeakFallSpeedAtom,
+	);
 	const modeId = useId();
 	const intervalId = useId();
 	const fallSpeedId = useId();
+	const peakHoldId = useId();
+	const peakFallId = useId();
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -247,9 +257,45 @@ function VisualizerPane() {
 						id={fallSpeedId}
 						min={0.5}
 						max={10}
-						step={0.5}
+						step={0.1}
 						value={[steppedFallSpeed]}
 						onValueChange={([v]) => setSteppedFallSpeed(v)}
+						className="w-full sm:w-44"
+					/>
+				</SettingRow>
+			)}
+
+			{animationMode === "stepped" && (
+				<SettingRow
+					label={`ピークホールド: ${steppedPeakHoldTime}ms`}
+					description="ピークバーが保持される時間。ホールド後に下降を開始します"
+					htmlFor={peakHoldId}
+				>
+					<Slider
+						id={peakHoldId}
+						min={0}
+						max={2000}
+						step={50}
+						value={[steppedPeakHoldTime]}
+						onValueChange={([v]) => setSteppedPeakHoldTime(v)}
+						className="w-full sm:w-44"
+					/>
+				</SettingRow>
+			)}
+
+			{animationMode === "stepped" && (
+				<SettingRow
+					label={`ピーク下降速度: ${steppedPeakFallSpeed.toFixed(1)}/s`}
+					description="ピークバーの下降速度（レベル/秒）"
+					htmlFor={peakFallId}
+				>
+					<Slider
+						id={peakFallId}
+						min={0.1}
+						max={5}
+						step={0.1}
+						value={[steppedPeakFallSpeed]}
+						onValueChange={([v]) => setSteppedPeakFallSpeed(v)}
 						className="w-full sm:w-44"
 					/>
 				</SettingRow>

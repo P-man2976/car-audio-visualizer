@@ -19,3 +19,15 @@ export const steppedFallSpeedAtom = atomWithStorage<number>(
 	"cav-stepped-fall-speed-v1",
 	2.0,
 );
+
+/** ステップモードのピークホールド時間 (ms) */
+export const steppedPeakHoldTimeAtom = atomWithStorage<number>(
+	"cav-stepped-peak-hold-v1",
+	500,
+);
+
+/** ステップモードのピーク下降速度 (レベル/秒) */
+export const steppedPeakFallSpeedAtom = atomWithStorage<number>(
+	"cav-stepped-peak-fall-speed-v1",
+	1.0,
+);

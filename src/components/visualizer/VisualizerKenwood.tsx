@@ -8,6 +8,8 @@ import {
 	animationModeAtom,
 	steppedFallSpeedAtom,
 	steppedIntervalAtom,
+	steppedPeakFallSpeedAtom,
+	steppedPeakHoldTimeAtom,
 } from "@/atoms/visualizerAnimation";
 import { SteppedAnalyzer } from "@/lib/steppedAnalyzer";
 import {
@@ -72,6 +74,8 @@ export function VisualizerKenwood() {
 	const animationMode = useAtomValue(animationModeAtom);
 	const steppedInterval = useAtomValue(steppedIntervalAtom);
 	const steppedFallSpeed = useAtomValue(steppedFallSpeedAtom);
+	const steppedPeakHoldTime = useAtomValue(steppedPeakHoldTimeAtom);
+	const steppedPeakFallSpeed = useAtomValue(steppedPeakFallSpeedAtom);
 
 	const steppedRef = useRef<SteppedAnalyzer | null>(null);
 
@@ -85,6 +89,8 @@ export function VisualizerKenwood() {
 			}
 			steppedRef.current.interval = steppedInterval;
 			steppedRef.current.fallSpeed = steppedFallSpeed;
+			steppedRef.current.peakHoldTime = steppedPeakHoldTime;
+			steppedRef.current.peakFallSpeed = steppedPeakFallSpeed;
 			const bars = steppedRef.current.update(
 				() => audioMotionAnalyzer.getBars() as AnalyzerBarData[],
 				performance.now(),
