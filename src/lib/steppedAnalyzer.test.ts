@@ -164,13 +164,12 @@ describe("SteppedAnalyzer", () => {
 	});
 
 	test("ピーク下降後に 0 以下にならない", () => {
-		const sa = new SteppedAnalyzer(1000, 2.0, 0, 10.0);
-		// peakHoldTime=0, peakFallSpeed=10.0
+		// fallSpeed も peakFallSpeed も大きく、value と peak が同時に 0 に達するケース
+		const sa = new SteppedAnalyzer(1000, 10.0, 0, 10.0);
 		sa.update(() => makeBars([0.5]), 0);
 		// t=400ms: peak = 0.5, peakSetTime = 400
 		sa.update(() => makeBars([0.5]), 400);
-		// t=500ms: holdElapsed = 100, fallElapsed = 100/1000 = 0.1
-		// peak = 0.5 - 10.0 * 0.1 = -0.5 → clamped to 0
+		// t=500ms: 100ms into fall → both -0.5 → clamped to 0
 		const result = sa.update(() => makeBars([0.5]), 500);
 		expect(result![0].peak[0]).toBe(0);
 	});
@@ -207,5 +206,18 @@ describe("SteppedAnalyzer", () => {
 		// t=280ms: rise complete → value reaches 0.9 → peak updates to 0.9
 		const result = sa.update(() => makeBars([0.9]), 280);
 		expect(result![0].peak[0]).toBeCloseTo(0.9, 5);
+	});
+
+	test("下降中のピークが value より低い場合は value に追従する", () => {
+		// peakFallSpeed が速いので peak が先に落ちる
+		const sa = new SteppedAnalyzer(1000, 0.5, 0, 2.0);
+		// riseDuration = 400ms
+		sa.update(() => makeBars([0.8]), 0);
+		// t=400ms: value=0.8, peak=0.8
+		sa.update(() => makeBars([0.8]), 400);
+		// t=600ms: value = 0.8 - 0.5*0.2 = 0.7, displayedPeak = 0.8 - 2.0*0.2 = 0.4
+		// value(0.7) > displayedPeak(0.4) → peak updates to 0.7
+		const result = sa.update(() => makeBars([0.8]), 600);
+		expect(result![0].peak[0]).toBeCloseTo(0.7, 5);
 	});
 });

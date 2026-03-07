@@ -92,8 +92,9 @@ export class SteppedAnalyzer {
 
 		const currentValues = this.computeCurrentValues(now);
 
-		// ピーク更新
-		this.updatePeaks(currentValues, now);
+		// ピーク更新: 表示中ピーク（ホールド+下降適用済み）と比較して追従
+		const displayedPeaks = this.computeCurrentPeaks(now);
+		this.updatePeaks(currentValues, displayedPeaks, now);
 		const currentPeaks = this.computeCurrentPeaks(now);
 
 		return currentBars.map((bar, i) => ({
@@ -103,8 +104,12 @@ export class SteppedAnalyzer {
 		}));
 	}
 
-	/** 補間済み value からピークを更新 */
-	private updatePeaks(currentValues: [number, number][], now: number): void {
+	/** 補間済み value と表示中ピークを比較し、value が上回ればピークを更新 */
+	private updatePeaks(
+		currentValues: [number, number][],
+		displayedPeaks: [number, number][],
+		now: number,
+	): void {
 		// 初期化
 		while (this.peakLevels.length < currentValues.length) {
 			this.peakLevels.push([0, 0]);
@@ -113,11 +118,11 @@ export class SteppedAnalyzer {
 
 		for (let i = 0; i < currentValues.length; i++) {
 			const [v0, v1] = currentValues[i];
-			const [p0, p1] = this.peakLevels[i];
+			const dp = displayedPeaks[i] ?? ([0, 0] as [number, number]);
 
-			// 現在の value がピークを超えたら更新
-			if (v0 >= p0 || v1 >= p1) {
-				this.peakLevels[i] = [Math.max(v0, p0), Math.max(v1, p1)];
+			// 現在の value が表示中ピークを超えたら追従
+			if (v0 >= dp[0] || v1 >= dp[1]) {
+				this.peakLevels[i] = [Math.max(v0, dp[0]), Math.max(v1, dp[1])];
 				this.peakSetTimes[i] = now;
 			}
 		}
