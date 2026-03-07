@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
 import {
 	animationModeAtom,
+	steppedFallSpeedAtom,
 	steppedIntervalAtom,
 } from "@/atoms/visualizerAnimation";
 import { SteppedAnalyzer } from "@/lib/steppedAnalyzer";
@@ -70,6 +71,7 @@ export function VisualizerKenwood() {
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 	const animationMode = useAtomValue(animationModeAtom);
 	const steppedInterval = useAtomValue(steppedIntervalAtom);
+	const steppedFallSpeed = useAtomValue(steppedFallSpeedAtom);
 
 	const steppedRef = useRef<SteppedAnalyzer | null>(null);
 
@@ -82,6 +84,7 @@ export function VisualizerKenwood() {
 				steppedRef.current = new SteppedAnalyzer(steppedInterval);
 			}
 			steppedRef.current.interval = steppedInterval;
+			steppedRef.current.fallSpeed = steppedFallSpeed;
 			const bars = steppedRef.current.update(
 				() => audioMotionAnalyzer.getBars() as AnalyzerBarData[],
 				performance.now(),

@@ -9,6 +9,7 @@ import { Font, FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
 import {
 	animationModeAtom,
+	steppedFallSpeedAtom,
 	steppedIntervalAtom,
 } from "@/atoms/visualizerAnimation";
 import { SteppedAnalyzer } from "@/lib/steppedAnalyzer";
@@ -77,6 +78,7 @@ export function VisualizerStandard() {
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 	const animationMode = useAtomValue(animationModeAtom);
 	const steppedInterval = useAtomValue(steppedIntervalAtom);
+	const steppedFallSpeed = useAtomValue(steppedFallSpeedAtom);
 
 	const steppedRef = useRef<SteppedAnalyzer | null>(null);
 
@@ -88,6 +90,7 @@ export function VisualizerStandard() {
 				steppedRef.current = new SteppedAnalyzer(steppedInterval);
 			}
 			steppedRef.current.interval = steppedInterval;
+			steppedRef.current.fallSpeed = steppedFallSpeed;
 			const bars = steppedRef.current.update(
 				() => audioMotionAnalyzer.getBars() as AnalyzerBarData[],
 				performance.now(),

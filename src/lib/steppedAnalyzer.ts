@@ -1,9 +1,11 @@
 /**
  * ステップモード用アナライザー
  *
- * 一定間隔(interval ms)ごとに周波数データをサンプリングし、
+ * 一定間隔(interval ms)ごとに周波数 value をサンプリングし、
  * 前半(interval/2)で現在の表示値からサンプル値に上昇、
- * 後半(interval/2)でサンプル値から 0 に向けて下降する補間を行う。
+ * 後半は設定可能な一定速度(fallSpeed)で下降する。
+ *
+ * peak は audioMotion の値をそのまま利用（毎フレーム getBars() から取得）。
  */
 import type { AnalyzerBarData } from "audiomotion-analyzer";
 
@@ -23,30 +25,26 @@ export class SteppedAnalyzer {
 	/** サンプリング間隔 (ms) */
 	interval: number;
 
-	/** 最新サンプルのバーデータ（テンプレート — freq, hold 等をコピーするため保持）*/
-	private bars: AnalyzerBarData[] = [];
+	/** 下降速度 (レベル/秒)。1.0 = フルスケールから 1 秒で 0 に到達 */
+	fallSpeed: number;
 
 	/** 各バンドのサンプル時点の目標 value */
 	private targetValues: [number, number][] = [];
 
-	/** 各バンドのサンプル時点の目標 peak */
-	private targetPeaks: [number, number][] = [];
-
 	/** サンプル取得時点での表示中の value（上昇開始点）*/
 	private riseStartValues: [number, number][] = [];
-
-	/** サンプル取得時点での表示中の peak */
-	private riseStartPeaks: [number, number][] = [];
 
 	/** 最後にサンプルを取得した時刻 (ms) */
 	private sampleTime = 0;
 
-	constructor(interval = 200) {
+	constructor(interval = 200, fallSpeed = 2.0) {
 		this.interval = interval;
+		this.fallSpeed = fallSpeed;
 	}
 
 	/**
-	 * 毎フレーム呼び出す。必要に応じて getBars() を呼び、補間済みデータを返す。
+	 * 毎フレーム呼び出す。
+	 * value は interval ごとのサンプルを補間、peak は毎フレーム最新値を使用。
 	 *
 	 * @param getBars - audioMotionAnalyzer.getBars() を返す関数
 	 * @param now  - performance.now() のタイムスタンプ
@@ -55,40 +53,34 @@ export class SteppedAnalyzer {
 		getBars: () => AnalyzerBarData[],
 		now: number,
 	): AnalyzerBarData[] | null {
+		// 毎フレーム getBars() を呼んで最新の peak / テンプレートを取得
+		const currentBars = getBars();
+		if (currentBars.length === 0) return null;
+
 		const elapsed = now - this.sampleTime;
 
-		// 新しいサンプルを取得するタイミング
-		if (elapsed >= this.interval || this.bars.length === 0) {
+		// 新しいサンプルを取得するタイミング（value のみサンプル）
+		if (elapsed >= this.interval || this.targetValues.length === 0) {
 			// 現在の表示値を上昇開始点として保存
 			if (this.targetValues.length > 0) {
 				this.riseStartValues = this.computeCurrentValues(now);
-				this.riseStartPeaks = this.computeCurrentPeaks(now);
+			} else {
+				this.riseStartValues = currentBars.map(() => [0, 0]);
 			}
 
-			this.bars = getBars();
-			this.targetValues = this.bars.map(
+			this.targetValues = currentBars.map(
 				(b) => [...b.value] as [number, number],
 			);
-			this.targetPeaks = this.bars.map((b) => [...b.peak] as [number, number]);
-
-			// 初回はゼロからスタート
-			if (this.riseStartValues.length === 0) {
-				this.riseStartValues = this.bars.map(() => [0, 0]);
-				this.riseStartPeaks = this.bars.map(() => [0, 0]);
-			}
 
 			this.sampleTime = now;
 		}
 
-		if (this.bars.length === 0) return null;
-
 		const currentValues = this.computeCurrentValues(now);
-		const currentPeaks = this.computeCurrentPeaks(now);
 
-		return this.bars.map((bar, i) => ({
+		// value は補間済み、peak / hold は audioMotion のリアルタイム値をそのまま使用
+		return currentBars.map((bar, i) => ({
 			...bar,
-			value: currentValues[i],
-			peak: currentPeaks[i],
+			value: currentValues[i] ?? bar.value,
 		}));
 	}
 
@@ -101,30 +93,16 @@ export class SteppedAnalyzer {
 			const start = this.riseStartValues[i] ?? ([0, 0] as [number, number]);
 
 			if (elapsed <= half) {
-				// 上昇フェーズ: start → target
+				// 上昇フェーズ: start → target (線形補間)
 				const t = Math.min(elapsed / half, 1);
 				return lerpPair(start, target, t);
 			}
-			// 下降フェーズ: target → 0
-			const t = Math.min((elapsed - half) / half, 1);
-			return lerpPair(target, [0, 0], t);
-		});
-	}
-
-	/** 現在の progress に応じた補間 peak を計算 */
-	private computeCurrentPeaks(now: number): [number, number][] {
-		const elapsed = now - this.sampleTime;
-		const half = this.interval / 2;
-
-		return this.targetPeaks.map((target, i) => {
-			const start = this.riseStartPeaks[i] ?? ([0, 0] as [number, number]);
-
-			if (elapsed <= half) {
-				const t = Math.min(elapsed / half, 1);
-				return lerpPair(start, target, t);
-			}
-			const t = Math.min((elapsed - half) / half, 1);
-			return lerpPair(target, [0, 0], t);
+			// 下降フェーズ: target から一定速度で減衰
+			const fallElapsed = (elapsed - half) / 1000; // 秒に変換
+			return [
+				Math.max(0, target[0] - this.fallSpeed * fallElapsed),
+				Math.max(0, target[1] - this.fallSpeed * fallElapsed),
+			] as [number, number];
 		});
 	}
 }

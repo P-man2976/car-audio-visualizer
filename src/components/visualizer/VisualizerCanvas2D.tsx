@@ -18,6 +18,7 @@ import { audioMotionAnalyzerAtom } from "@/atoms/audio";
 import { displayStringAtom } from "@/atoms/display";
 import {
 	animationModeAtom,
+	steppedFallSpeedAtom,
 	steppedIntervalAtom,
 } from "@/atoms/visualizerAnimation";
 import { pinchZoomAtom } from "@/atoms/visualizerZoom";
@@ -229,6 +230,7 @@ function VisualizerScene() {
 	const pinchZoom = useAtomValue(pinchZoomAtom);
 	const animationMode = useAtomValue(animationModeAtom);
 	const steppedInterval = useAtomValue(steppedIntervalAtom);
+	const steppedFallSpeed = useAtomValue(steppedFallSpeedAtom);
 	const displayRef = useRef(displayString);
 	displayRef.current = displayString;
 
@@ -278,6 +280,7 @@ function VisualizerScene() {
 					steppedRef.current = new SteppedAnalyzer(steppedInterval);
 				}
 				steppedRef.current.interval = steppedInterval;
+				steppedRef.current.fallSpeed = steppedFallSpeed;
 				const bars = steppedRef.current.update(
 					() => audioMotion.getBars() as AnalyzerBarData[],
 					performance.now(),

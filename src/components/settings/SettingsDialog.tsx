@@ -50,6 +50,7 @@ import { type VisualizerStyle, visualizerStyleAtom } from "@/atoms/visualizer";
 import {
 	type AnimationMode,
 	animationModeAtom,
+	steppedFallSpeedAtom,
 	steppedIntervalAtom,
 } from "@/atoms/visualizerAnimation";
 import { Button } from "@/components/ui/button";
@@ -153,8 +154,10 @@ function VisualizerPane() {
 	const [style, setStyle] = useAtom(visualizerStyleAtom);
 	const [animationMode, setAnimationMode] = useAtom(animationModeAtom);
 	const [steppedInterval, setSteppedInterval] = useAtom(steppedIntervalAtom);
+	const [steppedFallSpeed, setSteppedFallSpeed] = useAtom(steppedFallSpeedAtom);
 	const modeId = useId();
 	const intervalId = useId();
+	const fallSpeedId = useId();
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -233,6 +236,24 @@ function VisualizerPane() {
 						step={10}
 						value={[steppedInterval]}
 						onValueChange={([v]) => setSteppedInterval(v)}
+						className="w-full sm:w-44"
+					/>
+				</SettingRow>
+			)}
+
+			{animationMode === "stepped" && (
+				<SettingRow
+					label={`下降速度: ${steppedFallSpeed.toFixed(1)}/s`}
+					description="上昇後にバーが下降する速度（レベル/秒）。大きいほど速く下がります"
+					htmlFor={fallSpeedId}
+				>
+					<Slider
+						id={fallSpeedId}
+						min={0.5}
+						max={10}
+						step={0.5}
+						value={[steppedFallSpeed]}
+						onValueChange={([v]) => setSteppedFallSpeed(v)}
 						className="w-full sm:w-44"
 					/>
 				</SettingRow>
