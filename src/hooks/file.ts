@@ -4,6 +4,7 @@ import {
 	audioElementAtom,
 	connectAudioSource,
 	safariVizBridge,
+	setOutputVolume,
 } from "@/atoms/audio";
 import {
 	currentSongAtom,
@@ -43,10 +44,12 @@ export function useFilePlayer() {
 	const autoPlayNextRef = useRef(false);
 
 	// 音量・ミュートを audioElement に同期
+	// audioElement.volume ではなく GainNode で音量を制御する。
+	// audioElement.volume を変えると MECSN 経由でビジュアライザーの
+	// レベルまで変わってしまうため。
 	useEffect(() => {
-		audioElement.volume = volume / 100;
-		audioElement.muted = mute;
-	}, [audioElement, volume, mute]);
+		setOutputVolume(volume, mute);
+	}, [volume, mute]);
 
 	// ファイルモード: 楽曲変更時に src を差し替え、必要なら自動再生
 	// isPlayingRef を使うことで「再生中にスキップ」した場合も確実に自動再生する

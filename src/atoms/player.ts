@@ -34,7 +34,7 @@ export const currentSrcAtom = atom(
 );
 export const isPlayingAtom = atom(false);
 export const progressAtom = atom(0);
-export const volumeAtom = atom(70);
+export const volumeAtom = atom(100);
 /** ミュート状態。true のとき audioElement.muted を true にする */
 export const muteAtom = atom(false);
 

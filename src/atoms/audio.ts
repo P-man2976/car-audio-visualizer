@@ -35,7 +35,17 @@ const analyzerInstance = new AudioMotionAnalyzer(undefined, {
 	fftSize: 8192,
 	weightingFilter: "A",
 	peakFallSpeed: 0.005,
+	connectSpeakers: false,
 });
+
+// ─── 出力音量制御 (ビジュアライザーの後段) ─────────────────────────────────────
+// audioElement.volume で音量を制御すると MECSN 経由でビジュアライザーにも
+// 減衰した信号が届いてしまうため、Analyzer の出力段に GainNode を挿入し
+// ここでのみ音量を制御する。これによりビジュアライザーは常にフルレベルの
+// 信号を読み取れる。
+const volumeGainNode = analyzerInstance.audioCtx.createGain();
+analyzerInstance.connectOutput(volumeGainNode);
+volumeGainNode.connect(analyzerInstance.audioCtx.destination);
 
 // ─── AM ラジオフィルタチェーン ────────────────────────────────────────────────
 //
@@ -241,7 +251,7 @@ export function setAmFilterActive(
  * 呼ぶと MediaElementAudioSourceNode が無音になる。
  * play() 成功後（ソース確定済み）に一度だけ呼ぶことで回避する。
  *
- * audio → MECSN → HPF → LPF → speaker → distortion → compressor → makeupGain → monoNode → analyzer（→ destination）
+ * audio → MECSN → HPF → LPF → speaker → distortion → compressor → makeupGain → monoNode → analyzer → volumeGain → destination
  */
 let _audioSourceConnected = false;
 export function connectAudioSource(): void {
@@ -251,6 +261,14 @@ export function connectAudioSource(): void {
 	const mecsn = _audioCtx.createMediaElementSource(sharedAudioElement);
 	mecsn.connect(amHighpassFilter);
 	analyzerInstance.connectInput(monoNode);
+}
+
+/**
+ * 出力音量とミュートを一括で設定する。
+ * volumeGainNode の gain を制御し、audioElement.volume は常に 1 のまま。
+ */
+export function setOutputVolume(volume: number, mute: boolean): void {
+	volumeGainNode.gain.value = mute ? 0 : volume / 100;
 }
 
 export const audioElementAtom = atom(sharedAudioElement);

@@ -8,6 +8,7 @@ import {
 	shuffleAtom,
 	songHistoryAtom,
 	songQueueAtom,
+	volumeAtom,
 } from "@/atoms/player";
 import type { Song } from "@/types/player";
 
@@ -41,6 +42,11 @@ describe("player atoms", () => {
 		const store = createStore();
 		expect(store.get(shuffleAtom)).toBe(false);
 		expect(store.get(repeatModeAtom)).toBe("off");
+	});
+
+	test("volumeAtom の初期値は 100", () => {
+		const store = createStore();
+		expect(store.get(volumeAtom)).toBe(100);
 	});
 
 	test("currentSrcAtom off → file → off のライフサイクル", () => {

@@ -1,4 +1,4 @@
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
 	ChevronDown,
 	ChevronFirst,
@@ -29,6 +29,7 @@ import {
 	type RepeatMode,
 	repeatModeAtom,
 } from "@/atoms/player";
+import { settingsOpenAtom } from "@/atoms/hotkeys";
 import { currentRadioAtom, tuningFreqAtom } from "@/atoms/radio";
 import { Button } from "@/components/ui/button";
 import { useFilePlayer } from "@/hooks/file";
@@ -59,6 +60,7 @@ export function ControlsOverlay() {
 
 	const { shuffle, toggle: toggleShuffle } = useShuffleToggle();
 	const [repeat, setRepeat] = useAtom(repeatModeAtom);
+	const setSettingsOpen = useSetAtom(settingsOpenAtom);
 
 	const { isPlaying, play, pause, next, prev } = usePlayer();
 	const { playRadio, stopRadio, tune, isRadikoLoading } = useRadioPlayer();
@@ -319,11 +321,14 @@ export function ControlsOverlay() {
 					</div>
 					{/* Mobile: Sheet toggle buttons */}
 					<div className="flex justify-evenly sm:hidden">
-						<MenuSheet>
-							<Button size="icon-lg" variant="ghost" className="p-2">
-								<Settings />
-							</Button>
-						</MenuSheet>
+						<Button
+							size="icon-lg"
+							variant="ghost"
+							className="p-2"
+							onClick={() => setSettingsOpen(true)}
+						>
+							<Settings />
+						</Button>
 						<SourceSheet>
 							<Button size="icon-lg" variant="ghost" className="p-2">
 								<Disc3 />
