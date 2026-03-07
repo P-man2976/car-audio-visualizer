@@ -87,7 +87,7 @@ export class SteppedAnalyzer {
 	/** 現在の progress に応じた補間 value を計算 */
 	private computeCurrentValues(now: number): [number, number][] {
 		const elapsed = now - this.sampleTime;
-		const riseDuration = this.interval * 0.25;
+		const riseDuration = this.interval * 0.40;
 
 		return this.targetValues.map((target, i) => {
 			const start = this.riseStartValues[i] ?? ([0, 0] as [number, number]);

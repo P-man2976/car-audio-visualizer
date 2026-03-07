@@ -161,10 +161,6 @@ function VisualizerPane() {
 
 	return (
 		<div className="flex flex-col gap-4">
-			<p className="text-xs text-neutral-400 leading-relaxed">
-				カードをクリックしてビジュアライザーのスタイルを選択してください。
-				変更は即時反映されます。
-			</p>
 			<div className="flex flex-col gap-3">
 				{VISUALIZER_ITEMS.map(({ value, label, description }) => {
 					const isActive = style === value;
@@ -183,7 +179,7 @@ function VisualizerPane() {
 							`}
 							aria-pressed={isActive}
 						>
-							<div className="w-20 sm:w-28 shrink-0 rounded overflow-hidden border border-neutral-700">
+							<div className="w-14 sm:w-20 shrink-0 rounded overflow-hidden border border-neutral-700">
 								<img
 									src={VISUALIZER_PREVIEW_IMAGES[value]}
 									alt={label}
