@@ -5,6 +5,11 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
 import {
+	animationModeAtom,
+	steppedIntervalAtom,
+} from "@/atoms/visualizerAnimation";
+import { SteppedAnalyzer } from "@/lib/steppedAnalyzer";
+import {
 	createPerspParams,
 	fillQuadColor,
 	projectedCenterY,
@@ -63,14 +68,32 @@ const COLOR_SIDE_OFF = new THREE.Color("#91daff");
 // ─── Root component ───────────────────────────────────────────────────────────
 export function VisualizerKenwood() {
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
+	const animationMode = useAtomValue(animationModeAtom);
+	const steppedInterval = useAtomValue(steppedIntervalAtom);
+
+	const steppedRef = useRef<SteppedAnalyzer | null>(null);
 
 	useFrame(() => {
 		// Safari/WebKit: isOn=false 時（start() 未呼び出し）はスキップ
 		if (!audioMotionAnalyzer.isOn) return;
-		store.set(
-			spectrogramAtom,
-			audioMotionAnalyzer.getBars() as AnalyzerBarData[],
-		);
+
+		if (animationMode === "stepped") {
+			if (!steppedRef.current) {
+				steppedRef.current = new SteppedAnalyzer(steppedInterval);
+			}
+			steppedRef.current.interval = steppedInterval;
+			const bars = steppedRef.current.update(
+				() => audioMotionAnalyzer.getBars() as AnalyzerBarData[],
+				performance.now(),
+			);
+			if (bars) store.set(spectrogramAtom, bars);
+		} else {
+			steppedRef.current = null;
+			store.set(
+				spectrogramAtom,
+				audioMotionAnalyzer.getBars() as AnalyzerBarData[],
+			);
+		}
 	});
 
 	const SCALE = 1.6;

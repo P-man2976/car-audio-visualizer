@@ -8,6 +8,11 @@ import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { Font, FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
 import {
+	animationModeAtom,
+	steppedIntervalAtom,
+} from "@/atoms/visualizerAnimation";
+import { SteppedAnalyzer } from "@/lib/steppedAnalyzer";
+import {
 	createPerspParams,
 	fillQuadColor,
 	perspProject,
@@ -70,13 +75,31 @@ const COLOR_PEAK = new THREE.Color("#3b82f6");
 // ─── Root component ───────────────────────────────────────────────────────────
 export function VisualizerStandard() {
 	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
+	const animationMode = useAtomValue(animationModeAtom);
+	const steppedInterval = useAtomValue(steppedIntervalAtom);
+
+	const steppedRef = useRef<SteppedAnalyzer | null>(null);
 
 	useFrame(() => {
 		if (!audioMotionAnalyzer.isOn) return;
-		store.set(
-			spectrogramAtom,
-			audioMotionAnalyzer.getBars() as AnalyzerBarData[],
-		);
+
+		if (animationMode === "stepped") {
+			if (!steppedRef.current) {
+				steppedRef.current = new SteppedAnalyzer(steppedInterval);
+			}
+			steppedRef.current.interval = steppedInterval;
+			const bars = steppedRef.current.update(
+				() => audioMotionAnalyzer.getBars() as AnalyzerBarData[],
+				performance.now(),
+			);
+			if (bars) store.set(spectrogramAtom, bars);
+		} else {
+			steppedRef.current = null;
+			store.set(
+				spectrogramAtom,
+				audioMotionAnalyzer.getBars() as AnalyzerBarData[],
+			);
+		}
 	});
 
 	return (

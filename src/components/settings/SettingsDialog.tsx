@@ -47,6 +47,11 @@ import {
 } from "@/atoms/hotkeys";
 import { lastfmSessionAtom } from "@/atoms/lastfm";
 import { type VisualizerStyle, visualizerStyleAtom } from "@/atoms/visualizer";
+import {
+	type AnimationMode,
+	animationModeAtom,
+	steppedIntervalAtom,
+} from "@/atoms/visualizerAnimation";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -146,6 +151,10 @@ function SectionHeader({ title }: { title: string }) {
 
 function VisualizerPane() {
 	const [style, setStyle] = useAtom(visualizerStyleAtom);
+	const [animationMode, setAnimationMode] = useAtom(animationModeAtom);
+	const [steppedInterval, setSteppedInterval] = useAtom(steppedIntervalAtom);
+	const modeId = useId();
+	const intervalId = useId();
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -192,6 +201,42 @@ function VisualizerPane() {
 					);
 				})}
 			</div>
+
+			<Separator />
+
+			<SettingRow
+				label="アニメーションモード"
+				description="ステップモードでは一定間隔でレベルを取得し、バーが上昇・下降アニメーションします"
+				htmlFor={modeId}
+			>
+				<select
+					id={modeId}
+					value={animationMode}
+					onChange={(e) => setAnimationMode(e.target.value as AnimationMode)}
+					className="h-9 w-full sm:w-44 rounded-md border border-neutral-700 bg-neutral-900 px-3 text-sm text-neutral-200"
+				>
+					<option value="realtime">リアルタイム</option>
+					<option value="stepped">ステップ</option>
+				</select>
+			</SettingRow>
+
+			{animationMode === "stepped" && (
+				<SettingRow
+					label={`サンプリング間隔: ${steppedInterval}ms`}
+					description="周波数データの取得間隔。前半で上昇、後半で下降します"
+					htmlFor={intervalId}
+				>
+					<Slider
+						id={intervalId}
+						min={50}
+						max={500}
+						step={10}
+						value={[steppedInterval]}
+						onValueChange={([v]) => setSteppedInterval(v)}
+						className="w-full sm:w-44"
+					/>
+				</SettingRow>
+			)}
 		</div>
 	);
 }

@@ -16,8 +16,13 @@ import { Container, Graphics, Text, TextStyle } from "pixi.js";
 import { useEffect, useRef } from "react";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
 import { displayStringAtom } from "@/atoms/display";
+import {
+	animationModeAtom,
+	steppedIntervalAtom,
+} from "@/atoms/visualizerAnimation";
 import { pinchZoomAtom } from "@/atoms/visualizerZoom";
 import { FONT_5X7 } from "@/lib/dotmatrix-font";
+import { SteppedAnalyzer } from "@/lib/steppedAnalyzer";
 
 // ─── PixiJS extend ──────────────────────────────────────────────────────────
 extend({ Container, Graphics, Text });
@@ -222,11 +227,14 @@ function VisualizerScene() {
 	const audioMotion = useAtomValue(audioMotionAnalyzerAtom);
 	const displayString = useAtomValue(displayStringAtom);
 	const pinchZoom = useAtomValue(pinchZoomAtom);
+	const animationMode = useAtomValue(animationModeAtom);
+	const steppedInterval = useAtomValue(steppedIntervalAtom);
 	const displayRef = useRef(displayString);
 	displayRef.current = displayString;
 
 	const { app } = useApplication();
 	const barsRef = useRef<AnalyzerBarData[]>([]);
+	const steppedRef = useRef<SteppedAnalyzer | null>(null);
 	const gRef = useRef<Graphics | null>(null);
 	const labelContainerRef = useRef<Container | null>(null);
 	const labelsRef = useRef<Text[]>([]);
@@ -265,7 +273,20 @@ function VisualizerScene() {
 	// 毎 tick でオーディオデータを取得し描画を更新
 	useTick(() => {
 		if (audioMotion.isOn) {
-			barsRef.current = audioMotion.getBars() as AnalyzerBarData[];
+			if (animationMode === "stepped") {
+				if (!steppedRef.current) {
+					steppedRef.current = new SteppedAnalyzer(steppedInterval);
+				}
+				steppedRef.current.interval = steppedInterval;
+				const bars = steppedRef.current.update(
+					() => audioMotion.getBars() as AnalyzerBarData[],
+					performance.now(),
+				);
+				if (bars) barsRef.current = bars;
+			} else {
+				steppedRef.current = null;
+				barsRef.current = audioMotion.getBars() as AnalyzerBarData[];
+			}
 		}
 
 		const g = gRef.current;
