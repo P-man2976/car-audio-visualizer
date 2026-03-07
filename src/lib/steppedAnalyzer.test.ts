@@ -33,37 +33,38 @@ describe("SteppedAnalyzer", () => {
 		expect(result).toHaveLength(2);
 	});
 
-	test("上昇フェーズ: 半分の時間で 0 → target に補間", () => {
+	test("上昇フェーズ: 25%の時間で 0 → target に補間", () => {
 		const sa = new SteppedAnalyzer(200);
-		// t=0: サンプル取得
+		// t=0: サンプル取得, riseDuration = 200*0.25 = 50ms
 		sa.update(() => makeBars([1.0]), 0);
-		// t=50ms: 上昇の半分 (50/100 = 0.5)
-		const mid = sa.update(() => makeBars([1.0]), 50);
+		// t=25ms: 上昇の半分 (25/50 = 0.5)
+		const mid = sa.update(() => makeBars([1.0]), 25);
 		expect(mid![0].value[0]).toBeCloseTo(0.5, 1);
 	});
 
-	test("ピーク到達: half interval で target に到達", () => {
+	test("ピーク到達: interval×25% で target に到達", () => {
 		const sa = new SteppedAnalyzer(200);
 		sa.update(() => makeBars([0.8]), 0);
-		const peak = sa.update(() => makeBars([0.8]), 100);
+		// riseDuration = 50ms
+		const peak = sa.update(() => makeBars([0.8]), 50);
 		expect(peak![0].value[0]).toBeCloseTo(0.8, 1);
 	});
 
 	test("下降フェーズ: 定速で減衰する", () => {
-		// fallSpeed=2.0/s — half=100ms 以降、毎秒 2.0 ずつ減衰
+		// fallSpeed=2.0/s, riseDuration=50ms
 		const sa = new SteppedAnalyzer(200, 2.0);
 		sa.update(() => makeBars([1.0]), 0);
-		// t=150ms: 50ms into fall → 2.0 * 0.05 = 0.1 減衰 → 1.0 - 0.1 = 0.9
-		const falling = sa.update(() => makeBars([1.0]), 150);
+		// t=100ms: 50ms into fall → 2.0 * 0.05 = 0.1 減衰 → 1.0 - 0.1 = 0.9
+		const falling = sa.update(() => makeBars([1.0]), 100);
 		expect(falling![0].value[0]).toBeCloseTo(0.9, 5);
 	});
 
 	test("下降フェーズ: 0 以下にはならない", () => {
-		// fallSpeed=10.0/s → 100ms で 1.0 減衰 → target 0.5 から即 0
+		// fallSpeed=10.0/s, riseDuration=50ms
 		const sa = new SteppedAnalyzer(200, 10.0);
 		sa.update(() => makeBars([0.5]), 0);
-		// t=150ms: 50ms into fall → 10.0 * 0.05 = 0.5 減衰 → 0.5 - 0.5 = 0 (clamped)
-		const result = sa.update(() => makeBars([0.5]), 150);
+		// t=100ms: 50ms into fall → 10.0 * 0.05 = 0.5 減衰 → 0.5 - 0.5 = 0 (clamped)
+		const result = sa.update(() => makeBars([0.5]), 100);
 		expect(result![0].value[0]).toBe(0);
 	});
 
@@ -71,8 +72,8 @@ describe("SteppedAnalyzer", () => {
 		const sa = new SteppedAnalyzer(200, 2.0);
 		sa.update(() => makeBars([1.0]), 0);
 		sa.fallSpeed = 4.0;
-		// t=150ms: 50ms into fall → 4.0 * 0.05 = 0.2 減衰 → 1.0 - 0.2 = 0.8
-		const result = sa.update(() => makeBars([1.0]), 150);
+		// t=100ms: 50ms into fall → 4.0 * 0.05 = 0.2 減衰 → 1.0 - 0.2 = 0.8
+		const result = sa.update(() => makeBars([1.0]), 100);
 		expect(result![0].value[0]).toBeCloseTo(0.8, 5);
 	});
 
@@ -88,23 +89,23 @@ describe("SteppedAnalyzer", () => {
 		const sa = new SteppedAnalyzer(200);
 		sa.update(() => makeBars([1.0]), 0);
 		sa.interval = 400;
-		// half = 200ms, t=100 → rise progress = 100/200 = 0.5
-		const result = sa.update(() => makeBars([1.0]), 100);
+		// riseDuration = 400*0.25 = 100ms, t=50 → rise progress = 50/100 = 0.5
+		const result = sa.update(() => makeBars([1.0]), 50);
 		expect(result![0].value[0]).toBeCloseTo(0.5, 1);
 	});
 
 	test("新サンプルで上昇開始値が前の表示値から始まる", () => {
 		const sa = new SteppedAnalyzer(200, 2.0);
-		// Cycle 1: target = 1.0
+		// Cycle 1: target = 1.0, riseDuration = 50ms
 		sa.update(() => makeBars([1.0]), 0);
-		// t=100ms: peak at 1.0
-		sa.update(() => makeBars([1.0]), 100);
-		// t=150ms: 50ms into fall → 2.0*0.05 = 0.1 → display = 0.9
-		const falling = sa.update(() => makeBars([1.0]), 150);
+		// t=50ms: target に到達
+		sa.update(() => makeBars([1.0]), 50);
+		// t=100ms: 50ms into fall → 2.0*0.05 = 0.1 → display = 0.9
+		const falling = sa.update(() => makeBars([1.0]), 100);
 		expect(falling![0].value[0]).toBeCloseTo(0.9, 5);
 
 		// t=200ms: new sample — riseStart should be the value at fall end
-		// 100ms into fall → 2.0*0.1 = 0.2 → display = 0.8
+		// 150ms into fall → 2.0*0.15 = 0.3 → display = 0.7
 		const result = sa.update(() => makeBars([0.6]), 200);
 		expect(result).not.toBeNull();
 	});

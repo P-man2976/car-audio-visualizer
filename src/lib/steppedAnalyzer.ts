@@ -2,8 +2,8 @@
  * ステップモード用アナライザー
  *
  * 一定間隔(interval ms)ごとに周波数 value をサンプリングし、
- * 前半(interval/2)で現在の表示値からサンプル値に上昇、
- * 後半は設定可能な一定速度(fallSpeed)で下降する。
+ * 前半(interval×25%)で現在の表示値からサンプル値に上昇、
+ * 後半(interval×75%)は設定可能な一定速度(fallSpeed)で下降する。
  *
  * peak は audioMotion の値をそのまま利用（毎フレーム getBars() から取得）。
  */
@@ -87,18 +87,18 @@ export class SteppedAnalyzer {
 	/** 現在の progress に応じた補間 value を計算 */
 	private computeCurrentValues(now: number): [number, number][] {
 		const elapsed = now - this.sampleTime;
-		const half = this.interval / 2;
+		const riseDuration = this.interval * 0.25;
 
 		return this.targetValues.map((target, i) => {
 			const start = this.riseStartValues[i] ?? ([0, 0] as [number, number]);
 
-			if (elapsed <= half) {
-				// 上昇フェーズ: start → target (線形補間)
-				const t = Math.min(elapsed / half, 1);
+			if (elapsed <= riseDuration) {
+				// 上昇フェーズ (25%): start → target (線形補間)
+				const t = Math.min(elapsed / riseDuration, 1);
 				return lerpPair(start, target, t);
 			}
-			// 下降フェーズ: target から一定速度で減衰
-			const fallElapsed = (elapsed - half) / 1000; // 秒に変換
+			// 下降フェーズ (75%): target から一定速度で減衰
+			const fallElapsed = (elapsed - riseDuration) / 1000; // 秒に変換
 			return [
 				Math.max(0, target[0] - this.fallSpeed * fallElapsed),
 				Math.max(0, target[1] - this.fallSpeed * fallElapsed),

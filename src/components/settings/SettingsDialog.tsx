@@ -226,7 +226,7 @@ function VisualizerPane() {
 			{animationMode === "stepped" && (
 				<SettingRow
 					label={`サンプリング間隔: ${steppedInterval}ms`}
-					description="周波数データの取得間隔。前半で上昇、後半で下降します"
+					description="周波数データの取得間隔。25%で上昇、75%で下降します"
 					htmlFor={intervalId}
 				>
 					<Slider
