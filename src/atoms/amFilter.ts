@@ -115,16 +115,18 @@ export function calcMakeupGain(threshold: number, ratio: number): number {
  *
  * @param amount - 歪みの強さ（1.0 = ほぼリニア、大きいほど歪む）
  * @param samples - カーブの解像度（サンプル数）
- * @returns -1.0〜+1.0 の範囲のソフトクリッピングカーブ
+ * @returns -1.0〜+1.0 の範囲のソフトクリッピングカーブ（ピーク正規化済み）
  */
 export function makeDistortionCurve(
 	amount: number,
 	samples = 8192,
 ): Float32Array {
 	const curve = new Float32Array(samples);
+	// tanh(amount) で正規化し、amount を変えてもピークレベルを ±1.0 に保つ
+	const norm = amount > 0 ? Math.tanh(amount) : 1;
 	for (let i = 0; i < samples; i++) {
 		const x = (2 * i) / (samples - 1) - 1; // -1.0 〜 +1.0
-		curve[i] = Math.tanh(amount * x);
+		curve[i] = Math.tanh(amount * x) / norm;
 	}
 	return curve;
 }

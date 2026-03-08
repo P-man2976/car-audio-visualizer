@@ -132,11 +132,17 @@ describe("makeDistortionCurve", () => {
 		expect(Math.abs(curve[mid])).toBeLessThan(0.001);
 	});
 
-	it("amount=1 はほぼリニア（tanh(x)≈x for small x）", () => {
+	it("amount=1 のピーク正規化: x=0.5 → tanh(0.5)/tanh(1)", () => {
 		const curve = makeDistortionCurve(1, 1024);
-		// x=0.5 → tanh(0.5) ≈ 0.4621
 		const idx = Math.floor(((0.5 + 1) / 2) * (1024 - 1));
-		expect(curve[idx]).toBeCloseTo(Math.tanh(0.5), 2);
+		expect(curve[idx]).toBeCloseTo(Math.tanh(0.5) / Math.tanh(1), 2);
+	});
+
+	it("ピーク正規化: 末尾が 1.0 に近い（amount によらず）", () => {
+		for (const amount of [0.5, 1, 2.5, 5]) {
+			const curve = makeDistortionCurve(amount, 512);
+			expect(curve[curve.length - 1]).toBeCloseTo(1.0, 2);
+		}
 	});
 
 	it("amount が大きいほどサチュレーションが強い", () => {
