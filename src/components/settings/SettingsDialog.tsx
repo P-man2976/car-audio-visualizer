@@ -329,7 +329,6 @@ function AudioPane() {
 	const amNoiseId = useId();
 	const amSpkFreqId = useId();
 	const amSpkGainId = useId();
-	const amDownsampleId = useId();
 
 	const update = useCallback(
 		<K extends keyof AudioMotionSettings>(
@@ -530,22 +529,6 @@ function AudioPane() {
 								step={1}
 								value={[amSettings.speakerResonanceGain]}
 								onValueChange={([v]) => updateAm("speakerResonanceGain", v)}
-							/>
-						</SettingRow>
-
-						<SettingRow
-							htmlFor={amDownsampleId}
-							label={`サンプリングレート: ${amSettings.downsampleRate === 0 ? "OFF" : `${(amSettings.downsampleRate / 1000).toFixed(1)} kHz`}`}
-							description="サンプル＆ホールドによるダウンサンプリング。低いほどレトロな音質になります。0 で無効。"
-						>
-							<Slider
-								id={amDownsampleId}
-								className="w-full sm:w-28"
-								min={0}
-								max={22000}
-								step={1000}
-								value={[amSettings.downsampleRate]}
-								onValueChange={([v]) => updateAm("downsampleRate", v)}
 							/>
 						</SettingRow>
 					</>
