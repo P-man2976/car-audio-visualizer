@@ -102,12 +102,12 @@ amSpeakerResonance.gain.value = 0; // 初期: バイパス
 /** 最後に適用した distortion amount（同じ値の再生成を避ける） */
 let _lastDistortionAmount = -1;
 /** 現在のキャッシュ済み curve */
-let _cachedDistortionCurve: Float32Array | null = null;
+let _cachedDistortionCurve: Float32Array<ArrayBuffer> | null = null;
 
 /**
  * 指定 amount の歪みカーブを取得する。同じ値なら前回のキャッシュを返す。
  */
-function getDistortionCurve(amount: number): Float32Array {
+function getDistortionCurve(amount: number): Float32Array<ArrayBuffer> {
 	if (amount !== _lastDistortionAmount || _cachedDistortionCurve === null) {
 		_cachedDistortionCurve = makeDistortionCurve(amount);
 		_lastDistortionAmount = amount;
@@ -226,7 +226,7 @@ export function setAmFilterActive(
 	// 閾値を上げる（圧縮減）→ 負のゲイン（減衰）、下げる → 正のゲイン（ブースト）。
 	// AM_MAKEUP_OFFSET_DB で全体をさらに減衰させる。
 	// 無効時は 1.0 (0dB) でバイパス。
-	const AM_MAKEUP_OFFSET_DB = -8;
+	const AM_MAKEUP_OFFSET_DB = -6;
 	let makeupLinear = 1; // バイパス
 	if (active) {
 		const referenceDb = calcMakeupGain(

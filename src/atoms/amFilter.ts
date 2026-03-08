@@ -49,7 +49,7 @@ export interface AmFilterSettings {
 export const DEFAULT_AM_FILTER_SETTINGS: AmFilterSettings = {
 	lpfFreq: 4000,
 	hpfFreq: 100,
-	distortionAmount: 2.5,
+	distortionAmount: 0.5,
 	compThreshold: -24,
 	compRatio: 8,
 	noiseLevel: 0.005,
@@ -120,7 +120,7 @@ export function calcMakeupGain(threshold: number, ratio: number): number {
 export function makeDistortionCurve(
 	amount: number,
 	samples = 8192,
-): Float32Array {
+): Float32Array<ArrayBuffer> {
 	const curve = new Float32Array(samples);
 	// tanh(amount) で正規化し、amount を変えてもピークレベルを ±1.0 に保つ
 	const norm = amount > 0 ? Math.tanh(amount) : 1;
