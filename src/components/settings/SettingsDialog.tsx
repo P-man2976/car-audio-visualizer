@@ -62,6 +62,13 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -163,7 +170,6 @@ function VisualizerPane() {
 	const [steppedPeakFallSpeed, setSteppedPeakFallSpeed] = useAtom(
 		steppedPeakFallSpeedAtom,
 	);
-	const modeId = useId();
 	const intervalId = useId();
 	const fallSpeedId = useId();
 	const peakHoldId = useId();
@@ -220,17 +226,19 @@ function VisualizerPane() {
 						? "一定間隔でレベルを取得し、バーが上昇・下降アニメーションします"
 						: "audioMotion-analyzer のリアルタイム値をそのまま描画します"
 				}
-				htmlFor={modeId}
 			>
-				<select
-					id={modeId}
+				<Select
 					value={animationMode}
-					onChange={(e) => setAnimationMode(e.target.value as AnimationMode)}
-					className="h-9 w-full sm:w-44 rounded-md border border-neutral-700 bg-neutral-900 px-3 text-sm text-neutral-200"
+					onValueChange={(v) => setAnimationMode(v as AnimationMode)}
 				>
-					<option value="realtime">リアルタイム</option>
-					<option value="stepped">ステップ</option>
-				</select>
+					<SelectTrigger className="w-full sm:w-44">
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="realtime">リアルタイム</SelectItem>
+						<SelectItem value="stepped">ステップ</SelectItem>
+					</SelectContent>
+				</Select>
 			</SettingRow>
 
 			{animationMode === "stepped" && (
@@ -314,8 +322,6 @@ function AudioPane() {
 	const [settings, setSettings] = useAtom(audioMotionSettingsAtom);
 	const [amFilterEnabled, setAmFilterEnabled] = useAtom(amFilterEnabledAtom);
 	const [amSettings, setAmSettings] = useAtom(amFilterSettingsAtom);
-	const fftId = useId();
-	const weightId = useId();
 	const smoothingId = useId();
 	const peakId = useId();
 	const minDbId = useId();
@@ -540,24 +546,24 @@ function AudioPane() {
 				<SectionHeader title="FFT / スムージング" />
 
 				<SettingRow
-					htmlFor={fftId}
 					label="FFT サイズ"
 					description="周波数解像度を決定します。大きいほど細かい分析ができますが CPU 負荷が増加します。"
 				>
-					<select
-						id={fftId}
-						className="w-full sm:w-auto rounded border border-neutral-700 bg-neutral-900/50 px-2 py-1 text-xs text-neutral-200 focus:border-neutral-500 focus:outline-none"
-						value={settings.fftSize}
-						onChange={(e) =>
-							update("fftSize", Number(e.target.value) as FftSize)
-						}
+					<Select
+						value={String(settings.fftSize)}
+						onValueChange={(v) => update("fftSize", Number(v) as FftSize)}
 					>
-						{FFT_SIZE_OPTIONS.map((s) => (
-							<option key={s} value={s}>
-								{s.toLocaleString()}
-							</option>
-						))}
-					</select>
+						<SelectTrigger className="w-full sm:w-auto">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							{FFT_SIZE_OPTIONS.map((s) => (
+								<SelectItem key={s} value={String(s)}>
+									{s.toLocaleString()}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 				</SettingRow>
 
 				<SettingRow
@@ -627,26 +633,31 @@ function AudioPane() {
 				<SectionHeader title="重み付けフィルター" />
 
 				<SettingRow
-					htmlFor={weightId}
 					label="フィルター"
 					description="周波数ごとに重みを付けてデシベル値を補正します。A 特性が聴覚特性に最も近い。"
 				>
-					<select
-						id={weightId}
-						className="w-full sm:w-auto sm:max-w-[200px] rounded border border-neutral-700 bg-neutral-900/50 px-2 py-1 text-xs text-neutral-200 focus:border-neutral-500 focus:outline-none"
-						value={settings.weightingFilter}
-						onChange={(e) =>
-							update("weightingFilter", e.target.value as WeightingFilter)
+					<Select
+						value={settings.weightingFilter || "none"}
+						onValueChange={(v) =>
+							update(
+								"weightingFilter",
+								(v === "none" ? "" : v) as WeightingFilter,
+							)
 						}
 					>
-						{(Object.keys(WEIGHTING_FILTER_LABELS) as WeightingFilter[]).map(
-							(f) => (
-								<option key={f} value={f}>
-									{WEIGHTING_FILTER_LABELS[f]}
-								</option>
-							),
-						)}
-					</select>
+						<SelectTrigger className="w-full sm:w-auto sm:max-w-[200px]">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							{(Object.keys(WEIGHTING_FILTER_LABELS) as WeightingFilter[]).map(
+								(f) => (
+									<SelectItem key={f || "none"} value={f || "none"}>
+										{WEIGHTING_FILTER_LABELS[f]}
+									</SelectItem>
+								),
+							)}
+						</SelectContent>
+					</Select>
 				</SettingRow>
 			</div>
 
