@@ -25,6 +25,7 @@ import {
 	amFilterSettingsAtom,
 	DEFAULT_AM_FILTER_SETTINGS,
 } from "@/atoms/amFilter";
+import { isMECSNBroken } from "@/lib/safari-viz-bridge";
 import {
 	type AudioMotionSettings,
 	audioMotionSettingsAtom,
@@ -382,161 +383,170 @@ function AudioPane() {
 			<div className="flex flex-col gap-3">
 				<SectionHeader title="AM ラジオフィルタ" />
 
-				<SettingRow
-					htmlFor={amFilterId}
-					label="AM 帯域制限"
-					description="AM ラジオ再生時にフィルタを適用し、AM 放送風の音質にします。"
-				>
-					<Switch
-						id={amFilterId}
-						checked={amFilterEnabled}
-						onCheckedChange={setAmFilterEnabled}
-					/>
-				</SettingRow>
-
-				{amFilterEnabled && (
+				{isMECSNBroken() ? (
+					<p className="text-xs text-neutral-500">
+						Safari では AM フィルタを利用できません。Chrome / Firefox
+						をご利用ください。
+					</p>
+				) : (
 					<>
-						<div className="flex items-center justify-between pt-1">
-							<span className="text-[10px] text-neutral-500">
-								AM フィルタ詳細設定
-							</span>
-							<button
-								type="button"
-								className="flex items-center gap-1 text-[10px] text-neutral-500 hover:text-neutral-300 transition-colors"
-								onClick={resetAm}
-							>
-								<RotateCcw className="size-2.5" />
-								リセット
-							</button>
-						</div>
-
 						<SettingRow
-							htmlFor={amLpfId}
-							label={`LPF: ${amSettings.lpfFreq.toLocaleString()} Hz`}
-							description="ローパスフィルタのカットオフ。AM 帯域上限を制限します。"
+							htmlFor={amFilterId}
+							label="AM 帯域制限"
+							description="AM ラジオ再生時にフィルタを適用し、AM 放送風の音質にします。"
 						>
-							<Slider
-								id={amLpfId}
-								className="w-full sm:w-28"
-								min={1000}
-								max={8000}
-								step={100}
-								value={[amSettings.lpfFreq]}
-								onValueChange={([v]) => updateAm("lpfFreq", v)}
+							<Switch
+								id={amFilterId}
+								checked={amFilterEnabled}
+								onCheckedChange={setAmFilterEnabled}
 							/>
 						</SettingRow>
 
-						<SettingRow
-							htmlFor={amHpfId}
-							label={`HPF: ${amSettings.hpfFreq} Hz`}
-							description="ハイパスフィルタのカットオフ。超低域をカットします。"
-						>
-							<Slider
-								id={amHpfId}
-								className="w-full sm:w-28"
-								min={10}
-								max={200}
-								step={5}
-								value={[amSettings.hpfFreq]}
-								onValueChange={([v]) => updateAm("hpfFreq", v)}
-							/>
-						</SettingRow>
+						{amFilterEnabled && (
+							<>
+								<div className="flex items-center justify-between pt-1">
+									<span className="text-[10px] text-neutral-500">
+										AM フィルタ詳細設定
+									</span>
+									<button
+										type="button"
+										className="flex items-center gap-1 text-[10px] text-neutral-500 hover:text-neutral-300 transition-colors"
+										onClick={resetAm}
+									>
+										<RotateCcw className="size-2.5" />
+										リセット
+									</button>
+								</div>
 
-						<SettingRow
-							htmlFor={amDistId}
-							label={`歪み: ${amSettings.distortionAmount.toFixed(1)}`}
-							description="ソフトクリッピングの強度。AM 放送特有の倍音歪みを再現します。"
-						>
-							<Slider
-								id={amDistId}
-								className="w-full sm:w-28"
-								min={0}
-								max={5}
-								step={0.1}
-								value={[amSettings.distortionAmount]}
-								onValueChange={([v]) => updateAm("distortionAmount", v)}
-							/>
-						</SettingRow>
+								<SettingRow
+									htmlFor={amLpfId}
+									label={`LPF: ${amSettings.lpfFreq.toLocaleString()} Hz`}
+									description="ローパスフィルタのカットオフ。AM 帯域上限を制限します。"
+								>
+									<Slider
+										id={amLpfId}
+										className="w-full sm:w-28"
+										min={1000}
+										max={8000}
+										step={100}
+										value={[amSettings.lpfFreq]}
+										onValueChange={([v]) => updateAm("lpfFreq", v)}
+									/>
+								</SettingRow>
 
-						<SettingRow
-							htmlFor={amThreshId}
-							label={`AGC 閾値: ${amSettings.compThreshold} dB`}
-							description="コンプレッサーの閾値。ダイナミックレンジ圧縮の開始点です。"
-						>
-							<Slider
-								id={amThreshId}
-								className="w-full sm:w-28"
-								min={-60}
-								max={0}
-								step={1}
-								value={[amSettings.compThreshold]}
-								onValueChange={([v]) => updateAm("compThreshold", v)}
-							/>
-						</SettingRow>
+								<SettingRow
+									htmlFor={amHpfId}
+									label={`HPF: ${amSettings.hpfFreq} Hz`}
+									description="ハイパスフィルタのカットオフ。超低域をカットします。"
+								>
+									<Slider
+										id={amHpfId}
+										className="w-full sm:w-28"
+										min={10}
+										max={200}
+										step={5}
+										value={[amSettings.hpfFreq]}
+										onValueChange={([v]) => updateAm("hpfFreq", v)}
+									/>
+								</SettingRow>
 
-						<SettingRow
-							htmlFor={amRatioId}
-							label={`AGC レシオ: ${amSettings.compRatio}:1`}
-							description="コンプレッサーの圧縮比。大きいほどダイナミックレンジが狭くなります。"
-						>
-							<Slider
-								id={amRatioId}
-								className="w-full sm:w-28"
-								min={1}
-								max={20}
-								step={0.5}
-								value={[amSettings.compRatio]}
-								onValueChange={([v]) => updateAm("compRatio", v)}
-							/>
-						</SettingRow>
+								<SettingRow
+									htmlFor={amDistId}
+									label={`歪み: ${amSettings.distortionAmount.toFixed(1)}`}
+									description="ソフトクリッピングの強度。AM 放送特有の倍音歪みを再現します。"
+								>
+									<Slider
+										id={amDistId}
+										className="w-full sm:w-28"
+										min={0}
+										max={5}
+										step={0.1}
+										value={[amSettings.distortionAmount]}
+										onValueChange={([v]) => updateAm("distortionAmount", v)}
+									/>
+								</SettingRow>
 
-						<SettingRow
-							htmlFor={amNoiseId}
-							label={`ノイズ: ${(amSettings.noiseLevel * 100).toFixed(1)}%`}
-							description="ブラウンノイズの混合量。AM 受信時の大気ノイズを再現します。"
-						>
-							<Slider
-								id={amNoiseId}
-								className="w-full sm:w-28"
-								min={0}
-								max={0.05}
-								step={0.005}
-								value={[amSettings.noiseLevel]}
-								onValueChange={([v]) => updateAm("noiseLevel", v)}
-							/>
-						</SettingRow>
+								<SettingRow
+									htmlFor={amThreshId}
+									label={`AGC 閾値: ${amSettings.compThreshold} dB`}
+									description="コンプレッサーの閾値。ダイナミックレンジ圧縮の開始点です。"
+								>
+									<Slider
+										id={amThreshId}
+										className="w-full sm:w-28"
+										min={-60}
+										max={0}
+										step={1}
+										value={[amSettings.compThreshold]}
+										onValueChange={([v]) => updateAm("compThreshold", v)}
+									/>
+								</SettingRow>
 
-						<SettingRow
-							htmlFor={amSpkFreqId}
-							label={`SP 共振: ${amSettings.speakerResonanceFreq.toLocaleString()} Hz`}
-							description="スピーカー共振周波数。AM ラジオの小型スピーカーの箱鳴りを再現します。"
-						>
-							<Slider
-								id={amSpkFreqId}
-								className="w-full sm:w-28"
-								min={500}
-								max={3000}
-								step={50}
-								value={[amSettings.speakerResonanceFreq]}
-								onValueChange={([v]) => updateAm("speakerResonanceFreq", v)}
-							/>
-						</SettingRow>
+								<SettingRow
+									htmlFor={amRatioId}
+									label={`AGC レシオ: ${amSettings.compRatio}:1`}
+									description="コンプレッサーの圧縮比。大きいほどダイナミックレンジが狭くなります。"
+								>
+									<Slider
+										id={amRatioId}
+										className="w-full sm:w-28"
+										min={1}
+										max={20}
+										step={0.5}
+										value={[amSettings.compRatio]}
+										onValueChange={([v]) => updateAm("compRatio", v)}
+									/>
+								</SettingRow>
 
-						<SettingRow
-							htmlFor={amSpkGainId}
-							label={`SP ゲイン: ${amSettings.speakerResonanceGain} dB`}
-							description="共振ピークの強さ。0 dB でバイパス。大きいほど箱鳴り感が強くなります。"
-						>
-							<Slider
-								id={amSpkGainId}
-								className="w-full sm:w-28"
-								min={0}
-								max={15}
-								step={1}
-								value={[amSettings.speakerResonanceGain]}
-								onValueChange={([v]) => updateAm("speakerResonanceGain", v)}
-							/>
-						</SettingRow>
+								<SettingRow
+									htmlFor={amNoiseId}
+									label={`ノイズ: ${(amSettings.noiseLevel * 100).toFixed(1)}%`}
+									description="ブラウンノイズの混合量。AM 受信時の大気ノイズを再現します。"
+								>
+									<Slider
+										id={amNoiseId}
+										className="w-full sm:w-28"
+										min={0}
+										max={0.05}
+										step={0.005}
+										value={[amSettings.noiseLevel]}
+										onValueChange={([v]) => updateAm("noiseLevel", v)}
+									/>
+								</SettingRow>
+
+								<SettingRow
+									htmlFor={amSpkFreqId}
+									label={`SP 共振: ${amSettings.speakerResonanceFreq.toLocaleString()} Hz`}
+									description="スピーカー共振周波数。AM ラジオの小型スピーカーの箱鳴りを再現します。"
+								>
+									<Slider
+										id={amSpkFreqId}
+										className="w-full sm:w-28"
+										min={500}
+										max={3000}
+										step={50}
+										value={[amSettings.speakerResonanceFreq]}
+										onValueChange={([v]) => updateAm("speakerResonanceFreq", v)}
+									/>
+								</SettingRow>
+
+								<SettingRow
+									htmlFor={amSpkGainId}
+									label={`SP ゲイン: ${amSettings.speakerResonanceGain} dB`}
+									description="共振ピークの強さ。0 dB でバイパス。大きいほど箱鳴り感が強くなります。"
+								>
+									<Slider
+										id={amSpkGainId}
+										className="w-full sm:w-28"
+										min={0}
+										max={15}
+										step={1}
+										value={[amSettings.speakerResonanceGain]}
+										onValueChange={([v]) => updateAm("speakerResonanceGain", v)}
+									/>
+								</SettingRow>
+							</>
+						)}
 					</>
 				)}
 			</div>
