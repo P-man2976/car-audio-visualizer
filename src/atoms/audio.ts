@@ -65,16 +65,10 @@ amHighpassFilter.frequency.value = 1; // 初期: バイパス（1Hz = 全帯域�
 amHighpassFilter.Q.value = 0.707;
 
 // ── LPF (ローパスフィルタ): AM 帯域上限カット ──
-// 2 段カスケード（4 次バターワース相当 = -24dB/oct）で急峻にカットする。
 const amLowpassFilter = _audioCtx.createBiquadFilter();
 amLowpassFilter.type = "lowpass";
 amLowpassFilter.frequency.value = _audioCtx.sampleRate / 2; // 初期: バイパス
 amLowpassFilter.Q.value = 0.707;
-
-const amLowpassFilter2 = _audioCtx.createBiquadFilter();
-amLowpassFilter2.type = "lowpass";
-amLowpassFilter2.frequency.value = _audioCtx.sampleRate / 2; // 初期: バイパス
-amLowpassFilter2.Q.value = 0.707;
 
 // ── 歪み (WaveShaper): AM 放送のソフトクリッピングを再現 ──
 
@@ -164,20 +158,97 @@ noiseGain.gain.value = 0; // 初期: 無音
 noiseSource.connect(noiseGain);
 noiseGain.connect(amHighpassFilter); // HPF の前段に接続
 
-// チェーン接続: HPF → LPF1 → LPF2 → speaker → distortion → compressor → makeupGain → mono
-// LPF を 2 段カスケードにすることで -24dB/oct の急峻なロールオフを実現し、
-// AM 放送帯域外の成分をより強力にカットする。
+// チェーン接続: HPF → LPF → speaker → distortion → compressor → makeupGain → mono
 amHighpassFilter.connect(amLowpassFilter);
-amLowpassFilter.connect(amLowpassFilter2);
-amLowpassFilter2.connect(amSpeakerResonance);
+amLowpassFilter.connect(amSpeakerResonance);
 amSpeakerResonance.connect(amDistortion);
 amDistortion.connect(amCompressor);
 amCompressor.connect(makeupGainNode);
 makeupGainNode.connect(monoNode);
 
+// ─── ダウンサンプリング (AudioWorklet) ──────────────────────────────────────
+//
+// AM ラジオの低サンプリングレート感を再現する zero-order hold (サンプル＆ホールド)。
+// AudioWorklet は非同期でしかロードできないため、ロード完了後にチェーンを再接続する。
+// ロード前は makeupGain → mono が直結されており、ダウンサンプリングなしで動作する。
+
+const DOWNSAMPLE_PROCESSOR_CODE = /* js */ `
+class DownsampleProcessor extends AudioWorkletProcessor {
+  constructor(options) {
+    super();
+    this._step = options.processorOptions?.step || 1;
+    this._held = [];
+    this._counter = 0;
+    this.port.onmessage = (e) => {
+      if (e.data.step !== undefined) {
+        this._step = Math.max(1, Math.round(e.data.step));
+        this._counter = 0;
+      }
+    };
+  }
+
+  process(inputs, outputs) {
+    const input = inputs[0];
+    const output = outputs[0];
+    if (!input || !input.length) return true;
+
+    const step = this._step;
+    if (step <= 1) {
+      for (let ch = 0; ch < Math.min(input.length, output.length); ch++) {
+        output[ch].set(input[ch]);
+      }
+      return true;
+    }
+
+    for (let i = 0; i < input[0].length; i++) {
+      if (this._counter === 0) {
+        for (let ch = 0; ch < input.length; ch++) {
+          this._held[ch] = input[ch][i];
+        }
+      }
+      for (let ch = 0; ch < output.length; ch++) {
+        output[ch][i] = this._held[ch] ?? 0;
+      }
+      this._counter = (this._counter + 1) % step;
+    }
+    return true;
+  }
+}
+registerProcessor("downsample-processor", DownsampleProcessor);
+`;
+
+let _downsampleNode: AudioWorkletNode | null = null;
+
+/**
+ * AudioWorklet をロードし、ダウンサンプリングノードをチェーンに挿入する。
+ * 既にロード済みの場合は何もしない。失敗時はログを出力してスキップ。
+ */
+async function loadDownsampleWorklet(): Promise<void> {
+	try {
+		const blob = new Blob([DOWNSAMPLE_PROCESSOR_CODE], {
+			type: "application/javascript",
+		});
+		const url = URL.createObjectURL(blob);
+		await _audioCtx.audioWorklet.addModule(url);
+		URL.revokeObjectURL(url);
+
+		_downsampleNode = new AudioWorkletNode(_audioCtx, "downsample-processor", {
+			processorOptions: { step: 1 },
+		});
+
+		// makeupGain → [downsampleNode] → mono に再接続
+		makeupGainNode.disconnect(monoNode);
+		makeupGainNode.connect(_downsampleNode);
+		_downsampleNode.connect(monoNode);
+	} catch (err) {
+		console.warn("[audio] AudioWorklet downsample load failed:", err);
+	}
+}
+void loadDownsampleWorklet();
+
 /**
  * AM フィルタの有効/無効を切り替える。
- * HPF + LPF (2段カスケード) + 歪み + コンプレッサー + モノラル化 + ノイズを同時に制御する。
+ * HPF + LPF + 歪み + コンプレッサー + モノラル化 + ノイズを同時に制御する。
  *
  * @param active - true: AM 帯域制限 + 歪み + AGC + モノラル + ブラウンノイズ、false: 全バイパス + ステレオ
  * @param settings - AM フィルタの各パラメーター（デフォルト値使用可）
@@ -199,10 +270,12 @@ export function setAmFilterActive(
 		smooth,
 	);
 
-	// ローパスフィルタ（2 段カスケード: 両方同じカットオフ）
-	const lpfTarget = active ? s.lpfFreq : _audioCtx.sampleRate / 2;
-	amLowpassFilter.frequency.setTargetAtTime(lpfTarget, now, smooth);
-	amLowpassFilter2.frequency.setTargetAtTime(lpfTarget, now, smooth);
+	// ローパスフィルタ
+	amLowpassFilter.frequency.setTargetAtTime(
+		active ? s.lpfFreq : _audioCtx.sampleRate / 2,
+		now,
+		smooth,
+	);
 
 	// 歪み
 	amDistortion.curve = active ? getDistortionCurve(s.distortionAmount) : null;
@@ -249,6 +322,16 @@ export function setAmFilterActive(
 	// モノラル化
 	monoNode.channelCount = active ? 1 : 2;
 	monoNode.channelCountMode = active ? "explicit" : "max";
+
+	// ダウンサンプリング (AudioWorklet)
+	// step=1 でバイパス、step>1 で zero-order hold
+	if (_downsampleNode) {
+		const step =
+			active && s.downsampleRate > 0
+				? Math.max(1, Math.round(_audioCtx.sampleRate / s.downsampleRate))
+				: 1;
+		_downsampleNode.port.postMessage({ step });
+	}
 }
 
 /**
@@ -258,7 +341,7 @@ export function setAmFilterActive(
  * 呼ぶと MediaElementAudioSourceNode が無音になる。
  * play() 成功後（ソース確定済み）に一度だけ呼ぶことで回避する。
  *
- * audio → MECSN → HPF → LPF1 → LPF2 → speaker → distortion → compressor → makeupGain → monoNode → analyzer → volumeGain → destination
+ * audio → MECSN → HPF → LPF → speaker → distortion → compressor → makeupGain → downsample → monoNode → analyzer → volumeGain → destination
  */
 let _audioSourceConnected = false;
 export function connectAudioSource(): void {

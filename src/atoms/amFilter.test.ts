@@ -81,6 +81,10 @@ describe("DEFAULT_AM_FILTER_SETTINGS", () => {
 		).toBeGreaterThanOrEqual(0);
 	});
 
+	it("ダウンサンプリングレートが正の値である", () => {
+		expect(DEFAULT_AM_FILTER_SETTINGS.downsampleRate).toBeGreaterThan(0);
+	});
+
 	it("全プロパティが定義されている", () => {
 		const keys: (keyof typeof DEFAULT_AM_FILTER_SETTINGS)[] = [
 			"lpfFreq",
@@ -91,6 +95,7 @@ describe("DEFAULT_AM_FILTER_SETTINGS", () => {
 			"noiseLevel",
 			"speakerResonanceFreq",
 			"speakerResonanceGain",
+			"downsampleRate",
 		];
 		for (const key of keys) {
 			expect(DEFAULT_AM_FILTER_SETTINGS).toHaveProperty(key);

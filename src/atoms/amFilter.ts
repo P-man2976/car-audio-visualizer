@@ -43,6 +43,8 @@ export interface AmFilterSettings {
 	speakerResonanceFreq: number;
 	/** スピーカー共振ゲイン [dB]。0 = バイパス */
 	speakerResonanceGain: number;
+	/** ダウンサンプリング目標レート [Hz]。0 = 無効（バイパス） */
+	downsampleRate: number;
 }
 
 /** デフォルトの AM フィルタ設定 */
@@ -55,6 +57,7 @@ export const DEFAULT_AM_FILTER_SETTINGS: AmFilterSettings = {
 	noiseLevel: 0.005,
 	speakerResonanceFreq: 1200,
 	speakerResonanceGain: 2,
+	downsampleRate: 8000,
 };
 
 /**
