@@ -135,10 +135,8 @@ monoNode.channelCountMode = "max";
 monoNode.channelInterpretation = "speakers";
 monoNode.gain.value = 1;
 
-// ── ブラウンノイズ: AM 受信ノイズを再現 ──
-// ループ再生される 2 秒間のブラウンノイズバッファ。
-// 白色雑音をリーキー積分器（1 極 IIR）で低域偏重にし、
-// AM ラジオの大気ノイズに近い音色にする。
+// ── ホワイトノイズ: AM 受信ノイズを再現 ──
+// ループ再生される 2 秒間のホワイトノイズバッファ。
 // GainNode で音量を制御し、HPF の前段にミックスすることで
 // 帯域フィルタを通過したバンドリミテッドノイズになる。
 const _noiseBuffer = _audioCtx.createBuffer(
@@ -147,13 +145,8 @@ const _noiseBuffer = _audioCtx.createBuffer(
 	_audioCtx.sampleRate,
 );
 const _noiseData = _noiseBuffer.getChannelData(0);
-{
-	let lastOut = 0;
-	for (let i = 0; i < _noiseData.length; i++) {
-		const white = Math.random() * 2 - 1;
-		lastOut = (lastOut + 0.02 * white) / 1.02;
-		_noiseData[i] = lastOut * 3.5; // ゲイン補正
-	}
+for (let i = 0; i < _noiseData.length; i++) {
+	_noiseData[i] = Math.random() * 2 - 1;
 }
 const noiseSource = _audioCtx.createBufferSource();
 noiseSource.buffer = _noiseBuffer;
