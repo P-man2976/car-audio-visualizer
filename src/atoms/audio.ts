@@ -49,20 +49,27 @@ volumeGainNode.connect(analyzerInstance.audioCtx.destination);
 
 // ─── AM ラジオフィルタチェーン ────────────────────────────────────────────────
 //
-// 有効時: MECSN → HPF → LPF → speaker → distortion → compressor → makeupGain → mono → analyzer
+// 有効時: MECSN → HPF×4 → LPF×4 → speaker → distortion → compressor → makeupGain → mono → analyzer
 //         noise ↗
 // 無効時: 全ノードがバイパス状態で全帯域ステレオパススルー。
 //
 // フィルタは常にチェーンに挿入され、無効時は HPF=1Hz / LPF=Nyquist /
-// distortion=リニア / compressor threshold=0dB に設定してバイパスする。
+// distortion=null / compressor threshold=0dB に設定してバイパスする。
 
 const _audioCtx = analyzerInstance.audioCtx;
 
 // ── HPF (ハイパスフィルタ): 超低域カット ──
-const amHighpassFilter = _audioCtx.createBiquadFilter();
-amHighpassFilter.type = "highpass";
-amHighpassFilter.frequency.value = 1; // 初期: バイパス（1Hz = 全帯域通過）
-amHighpassFilter.Q.value = 0.707;
+// 4 段カスケード（8 次 = -48dB/oct）で帯域外を急峻にカットする。
+// 各段 Q=0.707 (Butterworth) でフラットなパスバンドを維持。
+const AM_HPF_STAGES = 4;
+const amHighpassFilters: BiquadFilterNode[] = [];
+for (let i = 0; i < AM_HPF_STAGES; i++) {
+	const f = _audioCtx.createBiquadFilter();
+	f.type = "highpass";
+	f.frequency.value = 1; // 初期: バイパス（1Hz = 全帯域通過）
+	f.Q.value = 0.707;
+	amHighpassFilters.push(f);
+}
 
 // ── LPF (ローパスフィルタ): AM 帯域上限カット ──
 // 4 段カスケード（8 次 = -48dB/oct）で帯域外を急峻にカットする。
@@ -156,10 +163,13 @@ noiseSource.start();
 const noiseGain = _audioCtx.createGain();
 noiseGain.gain.value = 0; // 初期: 無音
 noiseSource.connect(noiseGain);
-noiseGain.connect(amHighpassFilter); // HPF の前段に接続
+noiseGain.connect(amHighpassFilters[0]); // HPF の前段に接続
 
-// チェーン接続: HPF → LPF×4 → speaker → distortion → compressor → makeupGain → mono
-amHighpassFilter.connect(amLowpassFilters[0]);
+// チェーン接続: HPF×4 → LPF×4 → speaker → distortion → compressor → makeupGain → mono
+for (let i = 0; i < amHighpassFilters.length - 1; i++) {
+	amHighpassFilters[i].connect(amHighpassFilters[i + 1]);
+}
+amHighpassFilters[amHighpassFilters.length - 1].connect(amLowpassFilters[0]);
 for (let i = 0; i < amLowpassFilters.length - 1; i++) {
 	amLowpassFilters[i].connect(amLowpassFilters[i + 1]);
 }
@@ -186,12 +196,11 @@ export function setAmFilterActive(
 	const now = _audioCtx.currentTime;
 	const smooth = 0.02; // 20ms スムーズ遷移
 
-	// ハイパスフィルタ
-	amHighpassFilter.frequency.setTargetAtTime(
-		active ? s.hpfFreq : 1,
-		now,
-		smooth,
-	);
+	// ハイパスフィルタ（4 段カスケード: 全段同一カットオフ）
+	const hpfTarget = active ? s.hpfFreq : 1;
+	for (const hpf of amHighpassFilters) {
+		hpf.frequency.setTargetAtTime(hpfTarget, now, smooth);
+	}
 
 	// ローパスフィルタ（4 段カスケード: 全段同一カットオフ）
 	const lpfTarget = active ? s.lpfFreq : _audioCtx.sampleRate / 2;
@@ -199,8 +208,11 @@ export function setAmFilterActive(
 		lpf.frequency.setTargetAtTime(lpfTarget, now, smooth);
 	}
 
-	// 歪み
-	amDistortion.curve = active ? getDistortionCurve(s.distortionAmount) : null;
+	// 歪み（amount=0 はバイパス）
+	amDistortion.curve =
+		active && s.distortionAmount > 0
+			? getDistortionCurve(s.distortionAmount)
+			: null;
 
 	// コンプレッサー (AGC)
 	amCompressor.threshold.setTargetAtTime(
@@ -253,7 +265,7 @@ export function setAmFilterActive(
  * 呼ぶと MediaElementAudioSourceNode が無音になる。
  * play() 成功後（ソース確定済み）に一度だけ呼ぶことで回避する。
  *
- * audio → MECSN → HPF → LPF×4 → speaker → distortion → compressor → makeupGain → monoNode → analyzer → volumeGain → destination
+ * audio → MECSN → HPF×4 → LPF×4 → speaker → distortion → compressor → makeupGain → monoNode → analyzer → volumeGain → destination
  */
 let _audioSourceConnected = false;
 export function connectAudioSource(): void {
@@ -261,7 +273,7 @@ export function connectAudioSource(): void {
 	_audioSourceConnected = true;
 
 	const mecsn = _audioCtx.createMediaElementSource(sharedAudioElement);
-	mecsn.connect(amHighpassFilter);
+	mecsn.connect(amHighpassFilters[0]);
 	analyzerInstance.connectInput(monoNode);
 }
 

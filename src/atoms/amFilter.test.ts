@@ -145,6 +145,13 @@ describe("makeDistortionCurve", () => {
 		}
 	});
 
+	it("amount=0 は全サンプル 0（WaveShaper は curve=null でバイパスすべき）", () => {
+		const curve = makeDistortionCurve(0, 64);
+		for (let i = 0; i < curve.length; i++) {
+			expect(Math.abs(curve[i])).toBe(0);
+		}
+	});
+
 	it("amount が大きいほどサチュレーションが強い", () => {
 		const curveLow = makeDistortionCurve(1, 512);
 		const curveHigh = makeDistortionCurve(5, 512);
