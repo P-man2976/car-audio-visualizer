@@ -27,7 +27,7 @@ export function useMediaSession({
 	const progress = useAtomValue(progressAtom);
 	const currentSrc = useAtomValue(currentSrcAtom);
 	const { play, pause, next, prev } = usePlayer();
-	const { playRadio, stopRadio } = useRadioPlayer();
+	const { playRadio, stopRadio, tune } = useRadioPlayer();
 
 	// ファイル再生時のみ position state を更新
 	useEffect(() => {
@@ -62,8 +62,8 @@ export function useMediaSession({
 			navigator.mediaSession.setActionHandler("pause", () => {
 				stopRadio();
 			});
-			navigator.mediaSession.setActionHandler("nexttrack", null);
-			navigator.mediaSession.setActionHandler("previoustrack", null);
+			navigator.mediaSession.setActionHandler("nexttrack", () => tune(1));
+			navigator.mediaSession.setActionHandler("previoustrack", () => tune(-1));
 		} else {
 			navigator.mediaSession.setActionHandler("play", null);
 			navigator.mediaSession.setActionHandler("pause", null);
@@ -78,7 +78,7 @@ export function useMediaSession({
 			navigator.mediaSession.setActionHandler("nexttrack", null);
 			navigator.mediaSession.setActionHandler("previoustrack", null);
 		};
-	}, [currentSrc, play, pause, next, prev, playRadio, stopRadio]);
+	}, [currentSrc, play, pause, next, prev, playRadio, stopRadio, tune]);
 
 	// 再生状態を同期
 	useEffect(() => {
