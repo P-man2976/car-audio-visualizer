@@ -320,6 +320,7 @@ export const safariVizBridge: SafariVizBridge | null = isMECSNBroken()
 let _wasInterrupted = false;
 let _analyzerWasOn = false;
 
+// NOTE: モジュールスコープのリスナーはアプリ寿命と同一のため意図的にクリーンアップしない
 _audioCtx.addEventListener("statechange", () => {
 	const state = _audioCtx.state as string;
 	if (state === "interrupted") {

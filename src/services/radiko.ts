@@ -1,6 +1,39 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { RadikoStation } from "@/types/radio";
 
+/** Radiko 局リスト XML をパースして RadikoStation 配列を返す */
+export function parseRadikoStationXml(xml: string): RadikoStation[] {
+	const doc = new DOMParser().parseFromString(xml, "application/xml");
+	const stationNodes = Array.from(doc.querySelectorAll("station"));
+
+	return stationNodes.map((node) => {
+		const logo = Array.from(node.querySelectorAll("logo")).map(
+			(logoNode) => logoNode.textContent ?? "",
+		);
+		return {
+			id: node.querySelector("id")?.textContent ?? "",
+			name: node.querySelector("name")?.textContent ?? "",
+			ascii_name: node.querySelector("ascii_name")?.textContent ?? "",
+			ruby: node.querySelector("ruby")?.textContent ?? "",
+			areafree: Number(node.querySelector("areafree")?.textContent ?? "0") as
+				| 0
+				| 1,
+			timefree: Number(node.querySelector("timefree")?.textContent ?? "0") as
+				| 0
+				| 1,
+			logo,
+			banner: node.querySelector("banner")?.textContent ?? "",
+			href: node.querySelector("href")?.textContent ?? "",
+			simul_max_delay: Number(
+				node.querySelector("simul_max_delay")?.textContent ?? "0",
+			),
+			tf_max_delay: Number(
+				node.querySelector("tf_max_delay")?.textContent ?? "0",
+			),
+		} satisfies RadikoStation;
+	});
+}
+
 export function useRadikoToken() {
 	return useQuery({
 		queryKey: ["radio", "radiko", "token"],
@@ -31,35 +64,7 @@ export function useRadikoStationList(areaId?: string) {
 		queryFn: async () => {
 			const res = await fetch(`/api/radiko/v3/station/list/${resolved}.xml`);
 			const xml = await res.text();
-			const doc = new DOMParser().parseFromString(xml, "application/xml");
-			const stationNodes = Array.from(doc.querySelectorAll("station"));
-
-			return stationNodes.map((node) => {
-				const logo = Array.from(node.querySelectorAll("logo")).map(
-					(logoNode) => logoNode.textContent ?? "",
-				);
-				return {
-					id: node.querySelector("id")?.textContent ?? "",
-					name: node.querySelector("name")?.textContent ?? "",
-					ascii_name: node.querySelector("ascii_name")?.textContent ?? "",
-					ruby: node.querySelector("ruby")?.textContent ?? "",
-					areafree: Number(
-						node.querySelector("areafree")?.textContent ?? "0",
-					) as 0 | 1,
-					timefree: Number(
-						node.querySelector("timefree")?.textContent ?? "0",
-					) as 0 | 1,
-					logo,
-					banner: node.querySelector("banner")?.textContent ?? "",
-					href: node.querySelector("href")?.textContent ?? "",
-					simul_max_delay: Number(
-						node.querySelector("simul_max_delay")?.textContent ?? "0",
-					),
-					tf_max_delay: Number(
-						node.querySelector("tf_max_delay")?.textContent ?? "0",
-					),
-				} satisfies RadikoStation;
-			});
+			return parseRadikoStationXml(xml);
 		},
 		enabled: Boolean(resolved),
 	});

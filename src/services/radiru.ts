@@ -1,6 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
 import type { RadiruStation } from "@/types/radio";
 
+/** らじる★らじる設定 XML をパースして RadiruStation 配列を返す */
+export function parseRadiruStationXml(xml: string): RadiruStation[] {
+	const doc = new DOMParser().parseFromString(xml, "application/xml");
+	const dataNodes = Array.from(doc.querySelectorAll("stream_url > data"));
+
+	return dataNodes.map(
+		(node) =>
+			({
+				areajp: node.querySelector("areajp")?.textContent ?? "",
+				area: node.querySelector("area")?.textContent ?? "",
+				apikey: Number(node.querySelector("apikey")?.textContent ?? "0"),
+				areakey: Number(node.querySelector("areakey")?.textContent ?? "0"),
+				r1hls: node.querySelector("r1hls")?.textContent ?? "",
+				r2hls: node.querySelector("r2hls")?.textContent ?? "",
+				fmhls: node.querySelector("fmhls")?.textContent ?? "",
+			}) satisfies RadiruStation,
+	);
+}
+
 export function useRadiruStationList() {
 	return useQuery({
 		queryKey: ["radio", "radiru", "stations"],
@@ -9,21 +28,7 @@ export function useRadiruStationList() {
 				"https://www.nhk.or.jp/radio/config/config_web.xml",
 			);
 			const xml = await res.text();
-			const doc = new DOMParser().parseFromString(xml, "application/xml");
-			const dataNodes = Array.from(doc.querySelectorAll("stream_url > data"));
-
-			return dataNodes.map(
-				(node) =>
-					({
-						areajp: node.querySelector("areajp")?.textContent ?? "",
-						area: node.querySelector("area")?.textContent ?? "",
-						apikey: Number(node.querySelector("apikey")?.textContent ?? "0"),
-						areakey: Number(node.querySelector("areakey")?.textContent ?? "0"),
-						r1hls: node.querySelector("r1hls")?.textContent ?? "",
-						r2hls: node.querySelector("r2hls")?.textContent ?? "",
-						fmhls: node.querySelector("fmhls")?.textContent ?? "",
-					}) satisfies RadiruStation,
-			);
+			return parseRadiruStationXml(xml);
 		},
 	});
 }

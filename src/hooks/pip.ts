@@ -23,6 +23,7 @@ export function usePiP() {
 	const pipWindowRef = useRef<Window | null>(null);
 	const placeholderRef = useRef<HTMLDivElement | null>(null);
 	const savedStyleRef = useRef<{ width: string; height: string } | null>(null);
+	const pagehideHandlerRef = useRef<(() => void) | null>(null);
 
 	/** PiP を開始する */
 	const enterPiP = useCallback(async () => {
@@ -65,7 +66,7 @@ export function usePiP() {
 		setIsPiP(true);
 
 		// PiP が閉じられたら canvas を元の場所に戻す
-		pip.addEventListener("pagehide", () => {
+		const handlePageHide = () => {
 			const ph = placeholderRef.current;
 			if (ph) {
 				ph.parentElement?.insertBefore(canvas, ph);
@@ -80,12 +81,19 @@ export function usePiP() {
 			}
 			setIsPiP(false);
 			pipWindowRef.current = null;
-		});
+			pagehideHandlerRef.current = null;
+		};
+		pagehideHandlerRef.current = handlePageHide;
+		pip.addEventListener("pagehide", handlePageHide);
 	}, []);
 
 	/** PiP を終了する */
 	const exitPiP = useCallback(() => {
-		pipWindowRef.current?.close();
+		const pip = pipWindowRef.current;
+		if (pip && pagehideHandlerRef.current) {
+			pip.removeEventListener("pagehide", pagehideHandlerRef.current);
+		}
+		pip?.close();
 	}, []);
 
 	const isSupported =
