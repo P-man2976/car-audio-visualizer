@@ -20,6 +20,10 @@ export const Route = createFileRoute("/api/radiko/stream")({
 				if (!stationId) {
 					return errorResponse("Missing station_id query parameter", 400);
 				}
+				// station_id は英数字とアンダースコアのみ許可（例: TBS, ABC, NACK5）
+				if (!/^[A-Za-z0-9_-]+$/.test(stationId)) {
+					return errorResponse("Invalid station_id format", 400);
+				}
 
 				try {
 					const { authToken } = await performRadikoAuth();
@@ -53,6 +57,19 @@ export const Route = createFileRoute("/api/radiko/stream")({
 
 					if (!streamUri) {
 						return errorResponse("Stream URI not found in playlist", 502);
+					}
+
+					// SSRF 防止: HTTPS URL かつ既知の Radiko CDN ドメインのみ許可
+					try {
+						const parsed = new URL(streamUri);
+						if (
+							parsed.protocol !== "https:" ||
+							!parsed.hostname.endsWith(".smartstream.ne.jp")
+						) {
+							return errorResponse("Unexpected stream URI origin", 502);
+						}
+					} catch {
+						return errorResponse("Invalid stream URI format", 502);
 					}
 
 					return jsonResponse({ streamUri });

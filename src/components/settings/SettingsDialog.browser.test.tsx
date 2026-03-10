@@ -4,9 +4,9 @@
  * LastfmPane の連携状態表示を検証する。
  */
 import { createStore, Provider } from "jotai";
+import { describe, expect, test, vi } from "vitest";
 import { page } from "vitest/browser";
 import { render } from "vitest-browser-react";
-import { describe, expect, test, vi } from "vitest";
 
 // useMediaQuery をモック — デスクトップ幅に固定
 vi.mock("@/hooks/useMediaQuery", () => ({
@@ -72,20 +72,32 @@ describe("SettingsDialog", () => {
 			.element(page.getByRole("button", { name: /スタンダード（3D）/ }))
 			.toBeInTheDocument();
 		await expect
-			.element(page.getByRole("button", { name: /DPX-5021M/ }))
+			.element(page.getByRole("button", { name: /DPX-5021M（Kenwood）/ }))
 			.toBeInTheDocument();
 		await expect
 			.element(page.getByRole("button", { name: /スタンダード（2D）/ }))
+			.toBeInTheDocument();
+		await expect
+			.element(page.getByRole("button", { name: /DPX-5021M（2D）/ }))
 			.toBeInTheDocument();
 	});
 
 	test("ビジュアライザーのカードをクリックでスタイルが変更される", async () => {
 		const { store } = renderDialog();
 
-		// DPX-5021M カードを選択
-		await page.getByRole("button", { name: /DPX-5021M/ }).click();
+		// DPX-5021M（Kenwood）カードを選択
+		await page.getByRole("button", { name: /DPX-5021M（Kenwood）/ }).click();
 
 		expect(store.get(visualizerStyleAtom)).toBe("dpx5021m");
+	});
+
+	test("DPX-5021M（2D）カードをクリックでスタイルが変更される", async () => {
+		const { store } = renderDialog();
+
+		// DPX-5021M（2D）カードを選択
+		await page.getByRole("button", { name: /DPX-5021M（2D）/ }).click();
+
+		expect(store.get(visualizerStyleAtom)).toBe("dpx5021m-2d");
 	});
 
 	test("オーディオ解析タブに切り替えると FFT サイズ等の設定が表示される", async () => {

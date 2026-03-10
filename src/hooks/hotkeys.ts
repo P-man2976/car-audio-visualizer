@@ -269,9 +269,13 @@ export function useAppHotkeys(opts: AppHotkeysOptions = {}) {
 		bindings.toggleFullscreen,
 		() => {
 			if (!document.fullscreenElement) {
-				document.documentElement.requestFullscreen().catch(console.error);
+				document.documentElement
+					.requestFullscreen()
+					.catch((e) => console.warn("[hotkeys] Enter fullscreen failed:", e));
 			} else {
-				document.exitFullscreen().catch(console.error);
+				document
+					.exitFullscreen()
+					.catch((e) => console.warn("[hotkeys] Exit fullscreen failed:", e));
 			}
 		},
 		{ preventDefault: true, enabled },
@@ -307,7 +311,7 @@ export function useAppHotkeys(opts: AppHotkeysOptions = {}) {
 			navigator.mediaDevices
 				.getDisplayMedia(getDisplayMediaConstraints())
 				.then((stream) => connect(stream))
-				.catch(console.error);
+				.catch((e) => console.warn("[hotkeys] Screen capture failed:", e));
 		},
 		{ preventDefault: true, enabled },
 		[bindings.modeScreen, connect, enabled],
@@ -320,7 +324,7 @@ export function useAppHotkeys(opts: AppHotkeysOptions = {}) {
 			navigator.mediaDevices
 				.getUserMedia({ audio: true, video: false })
 				.then((stream) => connect(stream))
-				.catch(console.error);
+				.catch((e) => console.warn("[hotkeys] Mic/AUX capture failed:", e));
 		},
 		{ preventDefault: true, enabled },
 		[bindings.modeAux, connect, enabled],

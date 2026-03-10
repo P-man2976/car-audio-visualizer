@@ -65,11 +65,11 @@ export function useFilePlayer() {
 		// Safari MECSN バグ回避: ブリッジ経由でビジュアライザーにデータを供給
 		safariVizBridge
 			?.attachFile(currentSong.url, audioElement)
-			.catch(console.error);
+			.catch((e) => console.warn("[file] Safari viz bridge attach failed:", e));
 		// ended 由来フラグ OR 再生中のスキップ どちらでも自動再生
 		if (autoPlayNextRef.current || isPlayingRef.current) {
 			autoPlayNextRef.current = false;
-			play().catch(console.error);
+			play().catch((e) => console.warn("[file] Auto-play failed:", e));
 		}
 	}, [audioElement, currentSrc, currentSong, play]); // isPlayingRef は ref なので deps 不要
 
@@ -80,7 +80,9 @@ export function useFilePlayer() {
 			if (repeatRef.current === "one") {
 				// 1曲リピート: src を再セットせず先頭に戻して即再生
 				audioElement.currentTime = 0;
-				play().catch(console.error);
+				play().catch((e) =>
+					console.warn("[file] Repeat-one replay failed:", e),
+				);
 				return;
 			}
 			autoPlayNextRef.current = true;

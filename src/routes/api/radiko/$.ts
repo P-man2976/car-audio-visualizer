@@ -13,6 +13,12 @@ export const Route = createFileRoute("/api/radiko/$")({
 					return new Response("Not proxied", { status: 404 });
 				}
 
+				// 許可するパスプレフィックス（Radiko の公開 API のみ通す）
+				const ALLOWED_PREFIXES = ["v3/station/", "v3/program/", "v2/station/"];
+				if (!ALLOWED_PREFIXES.some((prefix) => splat.startsWith(prefix))) {
+					return new Response("Forbidden path", { status: 403 });
+				}
+
 				const upstreamUrl = new URL(`${RADIKO_BASE}/${splat}`);
 
 				// Forward query params

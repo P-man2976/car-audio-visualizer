@@ -24,6 +24,11 @@ import {
 	Events,
 } from "hls.js";
 
+/** audiomotion-analyzer の非公開プロパティへの型付きアクセス */
+interface AudioMotionInternals {
+	_analyzer: AnalyserNode[];
+}
+
 /**
  * Safari の MECSN バグが存在するかを判定する。
  * WebKit ベースかつ Chrome/Chromium でないブラウザ (= Safari) で true を返す。
@@ -72,8 +77,7 @@ export class SafariVizBridge {
 		this.audioCtx = analyzer.audioCtx;
 
 		// audiomotion-analyzer の内部 AnalyserNode を取得
-		// biome-ignore lint/suspicious/noExplicitAny: private API access
-		const inst = analyzer as any;
+		const inst = analyzer as unknown as AudioMotionInternals;
 		const origAnalyser: AnalyserNode = inst._analyzer[0];
 		this.originalAnalyser = origAnalyser;
 
@@ -236,8 +240,7 @@ export class SafariVizBridge {
 		this.detach();
 		this.detachFile();
 		this.vizGain.disconnect();
-		// biome-ignore lint/suspicious/noExplicitAny: private API access
-		const inst = this.analyzer as any;
+		const inst = this.analyzer as unknown as AudioMotionInternals;
 		inst._analyzer[0] = this.originalAnalyser;
 	}
 

@@ -48,7 +48,7 @@ export function useLastfmScrobble() {
 			artist,
 			album: currentSong.album,
 			duration: currentSong.duration,
-		}).catch(console.error);
+		}).catch((e) => console.warn("[lastfm] NowPlaying update failed:", e));
 
 		// スクロブルタイマーを設定（30秒 or 曲の 50%、最大 4 分）
 		const scrobbleAfterMs = (() => {
