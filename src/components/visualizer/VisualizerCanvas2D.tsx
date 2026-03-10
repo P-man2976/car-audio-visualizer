@@ -159,20 +159,26 @@ function bandColX(layout: BarLayout, fi: number, col: number): number {
 
 // ─── Perspective Projection ─────────────────────────────────────────────────
 
-/** フラット座標 (x,y) をパースペクティブ射影でスクリーン座標に変換 */
-function project(
+/** 再利用バッファ — projectTo 1回で 2 要素書き込み */
+const _polyBuf = new Float64Array(8);
+
+/** フラット座標 (x,y) をパースペクティブ射影してバッファに書き込む */
+function projectTo(
+	out: Float64Array,
+	offset: number,
 	x: number,
 	y: number,
 	sw: number,
 	sh: number,
 	perspDist: number,
-): [number, number] {
+): void {
 	const cx = sw / 2;
 	const cy = sh / 2;
 	const dy = y - cy;
 	const z = -dy * TILT_SIN;
 	const s = perspDist / (perspDist + z);
-	return [cx + (x - cx) * s, cy + dy * TILT_COS * s];
+	out[offset] = cx + (x - cx) * s;
+	out[offset + 1] = cy + dy * TILT_COS * s;
 }
 
 /** フラット矩形を台形としてパースペクティブ描画 */
@@ -187,11 +193,15 @@ function drawPerspRect(
 	perspDist: number,
 	color: number,
 ): void {
-	const [tlx, tly] = project(x, y, sw, sh, perspDist);
-	const [trx, _try] = project(x + w, y, sw, sh, perspDist);
-	const [brx, bry] = project(x + w, y + h, sw, sh, perspDist);
-	const [blx, bly] = project(x, y + h, sw, sh, perspDist);
-	g.poly([tlx, tly, trx, _try, brx, bry, blx, bly]);
+	projectTo(_polyBuf, 0, x, y, sw, sh, perspDist);
+	projectTo(_polyBuf, 2, x + w, y, sw, sh, perspDist);
+	projectTo(_polyBuf, 4, x + w, y + h, sw, sh, perspDist);
+	projectTo(_polyBuf, 6, x, y + h, sw, sh, perspDist);
+	g.moveTo(_polyBuf[0], _polyBuf[1]);
+	g.lineTo(_polyBuf[2], _polyBuf[3]);
+	g.lineTo(_polyBuf[4], _polyBuf[5]);
+	g.lineTo(_polyBuf[6], _polyBuf[7]);
+	g.closePath();
 	g.fill(color);
 }
 
@@ -363,9 +373,9 @@ function VisualizerScene() {
 				const centerX = (xLeft + xRight + layout.cellW) / 2;
 
 				// パースペクティブ射影でスクリーン座標を取得
-				const [px, py] = project(centerX, labelY, w, h, pd);
-				label.x = px;
-				label.y = py;
+				projectTo(_polyBuf, 0, centerX, labelY, w, h, pd);
+				label.x = _polyBuf[0];
+				label.y = _polyBuf[1];
 				label.style.fontSize = labelFontSize;
 			}
 		}

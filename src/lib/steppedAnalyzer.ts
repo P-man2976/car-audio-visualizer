@@ -14,12 +14,14 @@ function lerp(a: number, b: number, t: number): number {
 	return a + (b - a) * t;
 }
 
-function lerpPair(
+function lerpPairTo(
+	out: [number, number],
 	a: [number, number],
 	b: [number, number],
 	t: number,
-): [number, number] {
-	return [lerp(a[0], b[0], t), lerp(a[1], b[1], t)];
+): void {
+	out[0] = lerp(a[0], b[0], t);
+	out[1] = lerp(a[1], b[1], t);
 }
 
 export class SteppedAnalyzer {
@@ -153,7 +155,9 @@ export class SteppedAnalyzer {
 
 			if (elapsed <= riseDuration) {
 				const t = Math.min(elapsed / riseDuration, 1);
-				return lerpPair(start, target, t);
+				const out: [number, number] = [0, 0];
+				lerpPairTo(out, start, target, t);
+				return out;
 			}
 			const fallElapsed = (elapsed - riseDuration) / 1000;
 			return [

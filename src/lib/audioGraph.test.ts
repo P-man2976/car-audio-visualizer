@@ -143,6 +143,7 @@ const { setOutputVolume, setAmFilterActive, connectAudioSource } = await import(
 const volumeGain = () => gainNodes[0];
 const makeupGain = () => gainNodes[1];
 const monoNode = () => gainNodes[2];
+const noiseGain = () => gainNodes[3];
 const hpfNodes = () => biquadNodes.slice(0, 4);
 const lpfNodes = () => biquadNodes.slice(4, 8);
 const speakerNode = () => biquadNodes[8];
@@ -294,6 +295,10 @@ describe("setAmFilterActive", () => {
 			expect.any(Number),
 			expect.any(Number),
 		);
+
+		// ノイズソースが遅延生成される
+		expect(mockAudioCtx.createBuffer).toHaveBeenCalledTimes(1);
+		expect(mockAudioCtx.createBufferSource).toHaveBeenCalledTimes(1);
 	});
 
 	test("distortionAmount=0 → curve は null (バイパス)", () => {
@@ -322,5 +327,28 @@ describe("connectAudioSource", () => {
 		connectAudioSource();
 		// _audioSourceConnected フラグにより 2 回目は何もしない
 		expect(mockAudioCtx.createMediaElementSource).not.toHaveBeenCalled();
+	});
+});
+
+describe("ノイズバッファ遅延生成", () => {
+	test("noiseGain は初期値 0 で作成済み", () => {
+		expect(noiseGain().gain.value).toBe(0);
+	});
+
+	test("追加の AM 有効化ではノイズソースは再生成されない", () => {
+		mockAudioCtx.createBuffer.mockClear();
+		mockAudioCtx.createBufferSource.mockClear();
+		setAmFilterActive(true, {
+			lpfFreq: 4000,
+			hpfFreq: 100,
+			distortionAmount: 0,
+			compThreshold: -30,
+			compRatio: 8,
+			noiseLevel: 0.02,
+			speakerResonanceFreq: 1200,
+			speakerResonanceGain: 0,
+		});
+		expect(mockAudioCtx.createBuffer).not.toHaveBeenCalled();
+		expect(mockAudioCtx.createBufferSource).not.toHaveBeenCalled();
 	});
 });

@@ -150,27 +150,31 @@ monoNode.channelInterpretation = "speakers";
 monoNode.gain.value = 1;
 
 // ── ホワイトノイズ: AM 受信ノイズを再現 ──
-// ループ再生される 2 秒間のホワイトノイズバッファ。
-// GainNode で音量を制御し、HPF の前段にミックスすることで
-// 帯域フィルタを通過したバンドリミテッドノイズになる。
-const _noiseBuffer = _audioCtx.createBuffer(
-	1,
-	_audioCtx.sampleRate * 2,
-	_audioCtx.sampleRate,
-);
-const _noiseData = _noiseBuffer.getChannelData(0);
-for (let i = 0; i < _noiseData.length; i++) {
-	_noiseData[i] = Math.random() * 2 - 1;
-}
-const noiseSource = _audioCtx.createBufferSource();
-noiseSource.buffer = _noiseBuffer;
-noiseSource.loop = true;
-noiseSource.start();
-
+// GainNode はグラフ接続のため即時作成。バッファソースは AM 有効化時に遅延生成。
 const noiseGain = _audioCtx.createGain();
 noiseGain.gain.value = 0; // 初期: 無音
-noiseSource.connect(noiseGain);
 noiseGain.connect(amHighpassFilters[0]); // HPF の前段に接続
+
+let _noiseLaunched = false;
+/** AM 有効化時に一度だけ呼ぶ。ノイズバッファ生成 + 再生開始。 */
+function ensureNoiseSource(): void {
+	if (_noiseLaunched) return;
+	_noiseLaunched = true;
+	const buf = _audioCtx.createBuffer(
+		1,
+		_audioCtx.sampleRate * 2,
+		_audioCtx.sampleRate,
+	);
+	const data = buf.getChannelData(0);
+	for (let i = 0; i < data.length; i++) {
+		data[i] = Math.random() * 2 - 1;
+	}
+	const src = _audioCtx.createBufferSource();
+	src.buffer = buf;
+	src.loop = true;
+	src.start();
+	src.connect(noiseGain);
+}
 
 // チェーン接続: HPF×4 → LPF×4 → speaker → distortion → compressor → makeupGain → mono
 for (let i = 0; i < amHighpassFilters.length - 1; i++) {
@@ -246,6 +250,7 @@ export function setAmFilterActive(
 	makeupGainNode.gain.setTargetAtTime(makeupLinear, now, smooth);
 
 	// ブラウンノイズ
+	if (active) ensureNoiseSource();
 	noiseGain.gain.setTargetAtTime(active ? s.noiseLevel : 0, now, smooth);
 
 	// スピーカーシミュレーション（ピーキング EQ）

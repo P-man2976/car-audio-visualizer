@@ -215,8 +215,13 @@ function computeKenwoodLayout(
 // Perspective projection helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Project a point with given tilt parameters relative to a section center */
-function projectSection(
+/** 再利用バッファ — drawPerspRectSection 1回で 8 要素使用 */
+const _polyBuf = new Float64Array(8);
+
+/** Project a point with given tilt parameters, writing to output buffer */
+function projectSectionTo(
+	out: Float64Array,
+	offset: number,
 	x: number,
 	y: number,
 	cx: number,
@@ -224,11 +229,12 @@ function projectSection(
 	tiltSin: number,
 	tiltCos: number,
 	perspDist: number,
-): [number, number] {
+): void {
 	const dy = y - cy;
 	const z = -dy * tiltSin;
 	const sc = perspDist / (perspDist + z);
-	return [cx + (x - cx) * sc, cy + dy * tiltCos * sc];
+	out[offset] = cx + (x - cx) * sc;
+	out[offset + 1] = cy + dy * tiltCos * sc;
 }
 
 /** Draw a perspective-projected quad */
@@ -245,17 +251,11 @@ function drawPerspRectSection(
 	perspDist: number,
 	color: number,
 ): void {
-	const [tlx, tly] = projectSection(x, y, cx, cy, tiltSin, tiltCos, perspDist);
-	const [trx, _try] = projectSection(
-		x + w,
-		y,
-		cx,
-		cy,
-		tiltSin,
-		tiltCos,
-		perspDist,
-	);
-	const [brx, bry] = projectSection(
+	projectSectionTo(_polyBuf, 0, x, y, cx, cy, tiltSin, tiltCos, perspDist);
+	projectSectionTo(_polyBuf, 2, x + w, y, cx, cy, tiltSin, tiltCos, perspDist);
+	projectSectionTo(
+		_polyBuf,
+		4,
 		x + w,
 		y + h,
 		cx,
@@ -264,16 +264,12 @@ function drawPerspRectSection(
 		tiltCos,
 		perspDist,
 	);
-	const [blx, bly] = projectSection(
-		x,
-		y + h,
-		cx,
-		cy,
-		tiltSin,
-		tiltCos,
-		perspDist,
-	);
-	g.poly([tlx, tly, trx, _try, brx, bry, blx, bly]);
+	projectSectionTo(_polyBuf, 6, x, y + h, cx, cy, tiltSin, tiltCos, perspDist);
+	g.moveTo(_polyBuf[0], _polyBuf[1]);
+	g.lineTo(_polyBuf[2], _polyBuf[3]);
+	g.lineTo(_polyBuf[4], _polyBuf[5]);
+	g.lineTo(_polyBuf[6], _polyBuf[7]);
+	g.closePath();
 	g.fill(color);
 }
 
