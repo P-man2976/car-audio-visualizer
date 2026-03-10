@@ -240,7 +240,6 @@ describe("QueueSheet", () => {
 				type: "FM",
 				source: "radiko",
 				id: "TBS",
-				url: "https://example.com/tbs",
 				name: "TBSラジオ",
 				frequency: 90.5,
 			},
@@ -261,7 +260,7 @@ describe("QueueSheet", () => {
 
 	test("all off モード: ファイルキュータブが表示される", async () => {
 		const store = createStore();
-		store.set(currentSrcAtom, "all off");
+		store.set(currentSrcAtom, "off");
 		store.set(songQueueAtom, []);
 		store.set(songHistoryAtom, [
 			makeSong({ id: "h1", title: "オフ時の履歴曲" }),

@@ -23,7 +23,7 @@ export function useAudioMotionSettings(): void {
 			mode: settings.mode,
 			weightingFilter: settings.weightingFilter,
 			peakFallSpeed: settings.peakFallSpeed,
-			smoothingTimeConstant: settings.smoothingTimeConstant,
+			smoothing: settings.smoothingTimeConstant,
 			ansiBands: settings.ansiBands,
 		});
 	}, [

@@ -136,6 +136,7 @@ import {
 } from "@/atoms/player";
 import { currentRadioAtom, tuningFreqAtom } from "@/atoms/radio";
 import { ControlsOverlay } from "@/components/ControlsOverlay";
+import type { Song } from "@/types/player";
 
 function renderOverlay(
 	overrides?: (store: ReturnType<typeof createStore>) => void,
@@ -178,7 +179,8 @@ describe("ControlsOverlay", () => {
 				title: "テスト曲",
 				artists: ["テストアーティスト"],
 				album: "テストアルバム",
-			} as Parameters<typeof store.set<typeof currentSongAtom>>[1]);
+				track: {},
+			} as Song);
 		});
 
 		await expect

@@ -17,8 +17,8 @@ import { useEffect, useRef } from "react";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
 import { displayStringAtom } from "@/atoms/display";
 import { pinchZoomAtom } from "@/atoms/visualizerZoom";
-import { FONT_5X7 } from "@/lib/dotmatrix-font";
 import { useSteppedBars } from "@/hooks/useSteppedBars";
+import { FONT_5X7 } from "@/lib/dotmatrix-font";
 
 // ─── PixiJS extend ──────────────────────────────────────────────────────────
 extend({ Container, Graphics, Text });
@@ -51,10 +51,10 @@ const COLS_PER_BAND = 2;
 const BAND_INDICES = [4, 7, 10, 13, 16, 19, 22, 25, 28] as const;
 
 // ── セル・ギャップ（固定 px） ──────────────────────────────────────────
-const CELL_ASPECT = 5;
+const CELL_ASPECT = 6;
 const CELL_GAP_V = 0.6;
-const COL_GAP_H = 1.5;
-const BAND_GAP_H = 1.5;
+const COL_GAP_H = 2;
+const BAND_GAP_H = 2;
 
 // ── レイアウト比率 ──────────────────────────────────────────────────────
 const BAR_FRAC = 0.76;
@@ -64,7 +64,7 @@ const PADDING_FRAC = 0.08;
 
 // ── パースペクティブ ────────────────────────────────────────────────────
 const PERSPECTIVE_DIST = 50;
-const TILT_DEG = 30;
+const TILT_DEG = 24;
 
 // ── DotMatrix ───────────────────────────────────────────────────────────
 const DOT_COLS = 5;
@@ -403,7 +403,12 @@ function VisualizerScene() {
 
 	return (
 		<pixiContainer>
-			<pixiGraphics ref={gRef} />
+			<pixiGraphics
+				ref={gRef}
+				draw={() => {
+					/* imperative drawing in useTick */
+				}}
+			/>
 			<pixiContainer ref={labelContainerRef} />
 		</pixiContainer>
 	);

@@ -1,13 +1,10 @@
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, test } from "vitest";
 import { createStore } from "jotai";
 import {
-	currentSongAtom,
 	currentSrcAtom,
 	preShuffleQueueAtom,
 	repeatModeAtom,
 	shuffleAtom,
-	songHistoryAtom,
-	songQueueAtom,
 	volumeAtom,
 } from "@/atoms/player";
 import type { Song } from "@/types/player";

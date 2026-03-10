@@ -6,6 +6,7 @@ import { Container } from "../components/Container";
 import { ControlsOverlay } from "../components/ControlsOverlay";
 import { VisualizerSwitch } from "../components/Visualizer";
 import { VisualizerCanvas2D } from "../components/visualizer/VisualizerCanvas2D";
+import { VisualizerCanvas2DKenwood } from "../components/visualizer/VisualizerCanvas2DKenwood";
 
 export function HomePage() {
 	const style = useAtomValue(visualizerStyleAtom);
@@ -18,6 +19,8 @@ export function HomePage() {
 		<div className="relative h-full overflow-hidden bg-black/90">
 			{style === "standard-2d" ? (
 				<VisualizerCanvas2D />
+			) : style === "dpx5021m-2d" ? (
+				<VisualizerCanvas2DKenwood />
 			) : (
 				<Container>
 					<VisualizerSwitch />

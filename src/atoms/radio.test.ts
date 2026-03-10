@@ -55,7 +55,7 @@ describe("radio atoms", () => {
 				fm: {
 					1: {
 						freq: 80.0,
-						type: "fm" as const,
+						type: "FM" as const,
 						stationId: "TFM",
 						stationName: "TOKYO FM",
 					},

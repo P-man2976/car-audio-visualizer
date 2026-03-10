@@ -17,7 +17,6 @@ describe("lastfm atoms", () => {
 		const session: LastfmSession = {
 			name: "testuser",
 			key: "abc123",
-			subscriber: 0,
 		};
 		store.set(lastfmSessionAtom, session);
 		expect(store.get(lastfmSessionAtom)).toEqual(session);

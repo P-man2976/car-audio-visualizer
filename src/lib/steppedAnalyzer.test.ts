@@ -4,6 +4,7 @@ import { SteppedAnalyzer } from "./steppedAnalyzer";
 /** AnalyzerBarData のミニマルなモック */
 function makeBars(values: number[]) {
 	return values.map((v) => ({
+		posX: 0,
 		value: [v, v] as [number, number],
 		peak: [v, v] as [number, number],
 		hold: [0, 0] as [number, number],

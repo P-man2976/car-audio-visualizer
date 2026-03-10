@@ -23,6 +23,9 @@ import { RadiruStation } from "@/components/source/RadiruStation";
 
 const props = {
 	areajp: "東京",
+	area: "tokyo",
+	apikey: 1,
+	areakey: 130,
 	r1hls: "https://example.com/r1.m3u8",
 	r2hls: "https://example.com/r2.m3u8",
 	fmhls: "https://example.com/fm.m3u8",

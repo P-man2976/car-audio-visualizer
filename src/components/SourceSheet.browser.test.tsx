@@ -4,7 +4,7 @@
  * Sheet の表示、3 タブの切り替え、currentSrc 変更ロジックを検証する。
  */
 import { createStore, Provider } from "jotai";
-import { page, userEvent } from "vitest/browser";
+import { page } from "vitest/browser";
 import { render } from "vitest-browser-react";
 import { describe, expect, test, vi } from "vitest";
 
