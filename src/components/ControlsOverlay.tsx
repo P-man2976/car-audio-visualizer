@@ -224,7 +224,7 @@ export function ControlsOverlay() {
 					<ProgressSlider />
 					{/* Channel presets — mobile: above controls row */}
 					{currentSrc === "radio" && (
-						<div className="flex justify-center sm:hidden">
+						<div className="flex w-full justify-evenly sm:hidden">
 							<ChannelPresets />
 						</div>
 					)}
@@ -277,7 +277,7 @@ export function ControlsOverlay() {
 								<Button
 									size="icon-lg"
 									variant="ghost"
-									className="p-2 w-12 font-mono text-xs font-bold tracking-wider"
+									className="p-2 w-12 font-mono text-sm font-bold tracking-wider sm:text-base md:text-lg"
 									onClick={toggleBand}
 									aria-label="FM/AM バンド切り替え"
 								>

@@ -80,7 +80,7 @@ export function ChannelPresets() {
 	};
 
 	return (
-		<div className="flex gap-1">
+		<div className="flex gap-1 sm:gap-1.5">
 			{CHANNELS.map((ch) => {
 				const preset = presets[ch];
 				const isActive = activeChannel === ch;
@@ -89,10 +89,10 @@ export function ChannelPresets() {
 						<TooltipTrigger asChild>
 							<Button
 								variant="ghost"
-								className={`h-8 w-8 p-0 font-mono text-sm font-bold ${
+								className={`h-8 w-8 p-0 font-mono text-sm font-bold sm:size-10 sm:text-base md:size-12 md:text-lg ${
 									preset
 										? isActive
-											? "ring-1 ring-neutral-400"
+											? "bg-gray-500/30 border"
 											: ""
 										: "opacity-30"
 								}`}

@@ -144,7 +144,7 @@ describe("ChannelPresets", () => {
 
 		const btn = page.getByRole("button", { name: /CH2/ });
 		await expect.element(btn).toBeInTheDocument();
-		expect(btn.element().className).toContain("ring-1");
-		expect(btn.element().className).toContain("ring-neutral-400");
+		expect(btn.element().className).toContain("bg-gray-500/30");
+		expect(btn.element().className).toContain("border");
 	});
 });
