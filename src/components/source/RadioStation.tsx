@@ -9,23 +9,14 @@ import {
 	radioStationSizeAtom,
 } from "@/atoms/radio";
 import { Button } from "@/components/ui/button";
-import {
-	ContextMenu,
-	ContextMenuContent,
-	ContextMenuItem,
-	ContextMenuRadioGroup,
-	ContextMenuRadioItem,
-	ContextMenuSeparator,
-	ContextMenuSub,
-	ContextMenuSubContent,
-	ContextMenuSubTrigger,
-	ContextMenuTrigger,
-} from "@/components/ui/context-menu";
+import { ContextMenu, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { useSelectRadio } from "@/hooks/radio";
+import { assignChannelPreset, CHANNEL_NUMS } from "@/lib/radio-presets";
 import { cn } from "@/lib/utils";
 import { useRadikoArea } from "@/services/radiko";
 import { useRadioFrequencies } from "@/services/radio";
 import type { RadikoStation, RadioType } from "@/types/radio";
+import { RadioStationContextMenuContent } from "./RadioStationContextMenuContent";
 
 export function RadioStation({ name, id, logo }: RadikoStation) {
 	const [currentRadio, setCurrentRadio] = useAtom(currentRadioAtom);
@@ -54,17 +45,14 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 		currentRadio?.source === "radiko" &&
 		currentRadio.id === id;
 
-	// Which channels (FM/AM) this station is assigned to
 	const stationChannels = useMemo(() => {
 		if (!areaId) return [];
 		const areaChans = channelsByArea[areaId];
 		if (!areaChans) return [];
 		const result: { band: string; ch: number }[] = [];
-		for (let i = 1; i <= 6; i++) {
-			if (areaChans.fm[i as ChannelNum]?.stationId === id)
-				result.push({ band: "F", ch: i });
-			if (areaChans.am[i as ChannelNum]?.stationId === id)
-				result.push({ band: "A", ch: i });
+		for (const ch of CHANNEL_NUMS) {
+			if (areaChans.fm[ch]?.stationId === id) result.push({ band: "F", ch });
+			if (areaChans.am[ch]?.stationId === id) result.push({ band: "A", ch });
 		}
 		return result;
 	}, [areaId, channelsByArea, id]);
@@ -76,13 +64,12 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 			const bandKey = type === "AM" ? "am" : "fm";
 			return {
 				...prev,
-				[areaId]: {
-					...area,
-					[bandKey]: {
-						...area[bandKey],
-						[ch]: { freq: frequency, type, stationId: id, stationName: name },
-					},
-				},
+				[areaId]: assignChannelPreset(area, bandKey, ch, {
+					freq: frequency,
+					type,
+					stationId: id,
+					stationName: name,
+				}),
 			};
 		});
 	};
@@ -150,81 +137,30 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 					) : null}
 				</Button>
 			</ContextMenuTrigger>
-			<ContextMenuContent className="min-w-48">
-				<ContextMenuSub>
-					<ContextMenuSubTrigger>周波数</ContextMenuSubTrigger>
-					<ContextMenuSubContent>
-						<ContextMenuRadioGroup
-							value={`${type}-${frequency}`}
-							onValueChange={(area) => {
-								const [newType, freq] = area.split("-") as [RadioType, string];
-								setCustomFreqList((stations) =>
-									stations.find((s) => s.id === id)
-										? [
-												...stations.filter((s) => s.id !== id),
-												{ id, type: newType, freq: Number(freq) },
-											]
-										: [...stations, { id, type: newType, freq: Number(freq) }],
-								);
-								if (isSelected) {
-									setCurrentRadio((prev) =>
-										prev
-											? { ...prev, type: newType, frequency: Number(freq) }
-											: prev,
-									);
-								}
-							}}
-						>
-							{station?.frequencies_fm?.map((area) => (
-								<ContextMenuRadioItem
-									key={area.area.toString()}
-									value={`FM-${area.frequency}`}
-								>
-									{area.frequency.toFixed(1)}MHz ({area.area.join(", ")})
-								</ContextMenuRadioItem>
-							))}
-							{station?.frequencies_am?.map((area) => (
-								<ContextMenuRadioItem
-									key={area.area.toString()}
-									value={`AM-${area.frequency}`}
-								>
-									{area.frequency}kHz ({area.area.join(", ")})
-								</ContextMenuRadioItem>
-							))}
-						</ContextMenuRadioGroup>
-					</ContextMenuSubContent>
-				</ContextMenuSub>
-				<ContextMenuSeparator />
-				<ContextMenuSub>
-					<ContextMenuSubTrigger>チャンネル設定</ContextMenuSubTrigger>
-					<ContextMenuSubContent>
-						{([1, 2, 3, 4, 5, 6] as ChannelNum[]).map((ch) => {
-							const bandKey = type === "AM" ? "am" : "fm";
-							const existing = areaId
-								? channelsByArea[areaId]?.[bandKey]?.[ch]
-								: undefined;
-							const isSelf = existing?.stationId === id;
-							return (
-								<ContextMenuItem key={ch} onClick={() => assignChannel(ch)}>
-									<span
-										className={isSelf ? "text-neutral-100 font-semibold" : ""}
-									>
-										CH{ch}
-									</span>
-									{existing && !isSelf && (
-										<span className="ml-auto text-xs text-muted-foreground truncate max-w-24">
-											{existing.stationName}
-										</span>
-									)}
-									{isSelf && (
-										<span className="ml-auto text-xs text-neutral-400">✓</span>
-									)}
-								</ContextMenuItem>
-							);
-						})}
-					</ContextMenuSubContent>
-				</ContextMenuSub>
-			</ContextMenuContent>
+			<RadioStationContextMenuContent
+				stationId={id}
+				type={type}
+				frequency={frequency}
+				areaId={areaId}
+				channelsByArea={channelsByArea}
+				station={station}
+				onFrequencyChange={(newType, freq) => {
+					setCustomFreqList((stations) =>
+						stations.find((s) => s.id === id)
+							? [
+									...stations.filter((s) => s.id !== id),
+									{ id, type: newType, freq },
+								]
+							: [...stations, { id, type: newType, freq }],
+					);
+					if (isSelected) {
+						setCurrentRadio((prev) =>
+							prev ? { ...prev, type: newType, frequency: freq } : prev,
+						);
+					}
+				}}
+				onAssignChannel={assignChannel}
+			/>
 		</ContextMenu>
 	);
 }

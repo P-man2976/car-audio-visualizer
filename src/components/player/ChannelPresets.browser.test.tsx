@@ -15,6 +15,18 @@ vi.mock("@/hooks/radio", () => ({
 vi.mock("@/services/radiko", () => ({
 	useRadikoArea: () => "JP13",
 }));
+vi.mock("@/services/radio", () => ({
+	useRadioFrequencies: () => ({
+		data: {
+			TBS: {
+				type: "FM" as const,
+				name: "TBSラジオ",
+				area: ["東京"],
+				frequencies_fm: [{ area: ["東京"], frequency: 90.5, primary: true }],
+			},
+		},
+	}),
+}));
 
 // @/atoms/audio はモジュールスコープで AudioContext を生成するためモック
 vi.mock("@/atoms/audio", async () => {
