@@ -48,6 +48,7 @@ import { useRestoreState } from "@/hooks/restore";
 import { useShuffleToggle } from "@/hooks/shuffle";
 import { usePinchZoom } from "@/hooks/usePinchZoom";
 import { MenuSheet } from "./MenuSheet";
+import { ChannelPresets } from "./player/ChannelPresets";
 import { ProgressSlider } from "./player/ProgressSlider";
 import { SongInfo } from "./player/SongInfo";
 import { QueueSheet } from "./QueueSheet";
@@ -245,6 +246,12 @@ export function ControlsOverlay() {
 								badge={badge}
 							/>
 						</div>
+						{/* Channel presets — radio mode only */}
+						{currentSrc === "radio" && (
+							<div className="shrink-0">
+								<ChannelPresets />
+							</div>
+						)}
 						{/* Control buttons — full-width evenly spaced on mobile, right-aligned on desktop */}
 						<div className="flex w-full shrink-0 justify-evenly sm:ml-auto sm:w-auto sm:justify-start sm:gap-2">
 							{/* シャッフル (ファイルのみ) */}

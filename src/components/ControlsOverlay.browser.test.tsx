@@ -30,6 +30,9 @@ vi.mock("@/components/SourceSheet", () => ({
 vi.mock("@/components/player/ProgressSlider", () => ({
 	ProgressSlider: () => <div data-testid="progress-slider" />,
 }));
+vi.mock("@/components/player/ChannelPresets", () => ({
+	ChannelPresets: () => <div data-testid="channel-presets" />,
+}));
 vi.mock("@/components/player/SongInfo", () => ({
 	SongInfo: ({
 		title,

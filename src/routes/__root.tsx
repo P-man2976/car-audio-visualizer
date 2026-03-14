@@ -14,6 +14,7 @@ import jotaiDevtoolsCss from "jotai-devtools/styles.css?inline";
 import type { ReactNode } from "react";
 import { FileRestore } from "@/components/FileRestore";
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import indexCss from "../index.css?url";
 
 const queryClient = new QueryClient({
@@ -78,9 +79,11 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
 function RootComponent() {
 	return (
 		<QueryClientProvider client={queryClient}>
-			<Outlet />
-			<FileRestore />
-			<Toaster />
+			<TooltipProvider>
+				<Outlet />
+				<FileRestore />
+				<Toaster />
+			</TooltipProvider>
 			{import.meta.env.DEV && (
 				<>
 					<style>{jotaiDevtoolsCss}</style>
