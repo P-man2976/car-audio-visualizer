@@ -89,8 +89,12 @@ export function ChannelPresets() {
 						<TooltipTrigger asChild>
 							<Button
 								variant="ghost"
-								className={`h-8 w-8 p-0 font-mono text-sm font-bold transition-opacity ${
-									preset ? (isActive ? "bg-neutral-500/50" : "") : "opacity-30"
+								className={`h-8 w-8 p-0 font-mono text-sm font-bold ${
+									preset
+										? isActive
+											? "ring-1 ring-neutral-400"
+											: ""
+										: "opacity-30"
 								}`}
 								onClick={() => handleClick(ch)}
 								aria-label={

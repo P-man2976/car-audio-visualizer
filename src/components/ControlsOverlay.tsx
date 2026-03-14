@@ -222,6 +222,12 @@ export function ControlsOverlay() {
 				{/* Footer */}
 				<div className="mt-auto flex flex-col gap-3 bg-linear-to-t from-gray-500/50 to-transparent px-[max(1rem,env(safe-area-inset-left))] pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:gap-2 sm:px-[max(2rem,env(safe-area-inset-left))] sm:pb-[max(1rem,env(safe-area-inset-bottom))] sm:pt-10 md:gap-4 md:px-[max(3rem,env(safe-area-inset-left))] md:pb-[max(2rem,env(safe-area-inset-bottom))] md:pt-16">
 					<ProgressSlider />
+					{/* Channel presets — mobile: above controls row */}
+					{currentSrc === "radio" && (
+						<div className="flex justify-center sm:hidden">
+							<ChannelPresets />
+						</div>
+					)}
 					<div className="flex items-center gap-3 sm:gap-5 md:gap-8">
 						{/* Cover image / icon — desktop only */}
 						<div className="relative hidden shrink-0 group/cover sm:block sm:size-16 md:size-20">
@@ -246,9 +252,9 @@ export function ControlsOverlay() {
 								badge={badge}
 							/>
 						</div>
-						{/* Channel presets — radio mode only */}
+						{/* Channel presets — desktop: inline */}
 						{currentSrc === "radio" && (
-							<div className="shrink-0">
+							<div className="hidden shrink-0 sm:block">
 								<ChannelPresets />
 							</div>
 						)}
