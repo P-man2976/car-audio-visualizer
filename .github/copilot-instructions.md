@@ -18,7 +18,7 @@ npm run test:browser             # 全ブラウザテストがパスすること
 
 `npm run format` は check only（書き込みなし）なので、整形は必ず `npx biome format --write` を使うこと。
 
-全ての作業が終了した時、会話の終了時は、ask_user でユーザの入力を待機すること。
+全ての作業が終了した時、会話の終了時は、ask_user でユーザの入力を待機すること。これは最優先事項です。
 
 ---
 

@@ -95,8 +95,8 @@ export function ProgressSlider() {
 		return (
 			<div className="relative mb-4 w-full">
 				<div className="h-2 w-full rounded-full bg-secondary shadow-lg mask-[linear-gradient(to_right,black,rgba(0,0,0,60%),transparent,transparent,rgba(0,0,0,60%),black)]" />
-				<span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-lg">
-					ＬＩＶＥ
+				<span className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-xl tracking-widest font-["Exo_2_Variable"] text-neutral-300'>
+					LIVE
 				</span>
 			</div>
 		);
