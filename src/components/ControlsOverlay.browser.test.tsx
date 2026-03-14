@@ -34,14 +34,19 @@ vi.mock("@/components/player/SongInfo", () => ({
 	SongInfo: ({
 		title,
 		artist,
+		album,
+		badge,
 	}: {
 		title: string;
 		artist?: string;
 		album?: string;
+		badge?: string;
 	}) => (
 		<div data-testid="song-info">
+			{badge && <span data-testid="song-badge">{badge}</span>}
 			<span data-testid="song-title">{title}</span>
 			{artist && <span data-testid="song-artist">{artist}</span>}
+			{album && <span data-testid="song-album">{album}</span>}
 		</div>
 	),
 }));
@@ -110,6 +115,9 @@ vi.mock("@/hooks/restore", () => ({
 vi.mock("@/hooks/usePinchZoom", () => ({
 	usePinchZoom: () => ({ current: null }),
 }));
+vi.mock("@/services/radiko", () => ({
+	useRadikoArea: () => "JP13",
+}));
 const mockToggleShuffle = vi.fn();
 vi.mock("@/hooks/shuffle", () => ({
 	useShuffleToggle: () => ({
@@ -134,7 +142,11 @@ import {
 	repeatModeAtom,
 	shuffleAtom,
 } from "@/atoms/player";
-import { currentRadioAtom, tuningFreqAtom } from "@/atoms/radio";
+import {
+	currentRadioAtom,
+	radioChannelsByAreaAtom,
+	tuningFreqAtom,
+} from "@/atoms/radio";
 import { ControlsOverlay } from "@/components/ControlsOverlay";
 import type { Song } from "@/types/player";
 
@@ -239,6 +251,59 @@ describe("ControlsOverlay", () => {
 		await expect
 			.element(page.getByTestId("song-artist").first())
 			.toHaveTextContent("90.5MHz");
+	});
+
+	test("radio 状態でチャンネル番号がバッジとして表示される", async () => {
+		renderOverlay((store) => {
+			store.set(currentSrcAtom, "radio");
+			store.set(currentRadioAtom, {
+				type: "FM",
+				source: "radiko",
+				id: "TBS",
+				name: "TBSラジオ",
+				frequency: 90.5,
+			});
+			store.set(radioChannelsByAreaAtom, {
+				JP13: {
+					fm: {
+						1: {
+							freq: 90.5,
+							type: "FM",
+							stationId: "TBS",
+							stationName: "TBSラジオ",
+						},
+					},
+					am: {},
+				},
+			});
+		});
+
+		await expect
+			.element(page.getByTestId("song-badge").first())
+			.toHaveTextContent("1");
+		await expect
+			.element(page.getByTestId("song-album").first())
+			.toHaveTextContent("Radiko");
+	});
+
+	test("radio 状態でチャンネル未登録時はバッジが表示されない", async () => {
+		renderOverlay((store) => {
+			store.set(currentSrcAtom, "radio");
+			store.set(currentRadioAtom, {
+				type: "FM",
+				source: "radiko",
+				id: "TBS",
+				name: "TBSラジオ",
+				frequency: 90.5,
+			});
+			store.set(radioChannelsByAreaAtom, {});
+		});
+
+		const badges = page.getByTestId("song-badge");
+		await expect.element(badges.first()).not.toBeInTheDocument();
+		await expect
+			.element(page.getByTestId("song-album").first())
+			.toHaveTextContent("Radiko");
 	});
 
 	test("aux 状態で「外部入力」が表示される", async () => {

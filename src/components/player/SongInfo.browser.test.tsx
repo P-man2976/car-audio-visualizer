@@ -39,4 +39,23 @@ describe("SongInfo", () => {
 			.element(page.getByRole("heading", { name: "曲名だけ" }))
 			.toBeInTheDocument();
 	});
+
+	test("badge を指定するとタイトルの左にバッジが表示される", async () => {
+		render(<SongInfo title="TBSラジオ" badge="1" />);
+		await expect.element(page.getByText("1")).toBeInTheDocument();
+		await expect
+			.element(page.getByRole("heading", { name: "TBSラジオ" }))
+			.toBeInTheDocument();
+	});
+
+	test("badge が未指定のときバッジ要素は描画されない", async () => {
+		render(<SongInfo title="テスト" />);
+		await expect
+			.element(page.getByRole("heading", { name: "テスト" }))
+			.toBeInTheDocument();
+		// badge 用の shrink-0 span が存在しないことを確認
+		const heading = page.getByRole("heading", { name: "テスト" });
+		const titleRow = heading.element().parentElement;
+		expect(titleRow?.querySelectorAll(".shrink-0").length ?? 0).toBe(0);
+	});
 });

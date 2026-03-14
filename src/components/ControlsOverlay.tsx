@@ -30,7 +30,11 @@ import {
 	repeatModeAtom,
 } from "@/atoms/player";
 import { settingsOpenAtom } from "@/atoms/hotkeys";
-import { currentRadioAtom, tuningFreqAtom } from "@/atoms/radio";
+import {
+	currentRadioAtom,
+	radioChannelsByAreaAtom,
+	tuningFreqAtom,
+} from "@/atoms/radio";
 import { Button } from "@/components/ui/button";
 import { useFilePlayer } from "@/hooks/file";
 import { useAppHotkeys } from "@/hooks/hotkeys";
@@ -39,6 +43,7 @@ import { useMediaSession } from "@/hooks/mediaSession";
 import { usePiP } from "@/hooks/pip";
 import { usePlayer } from "@/hooks/player";
 import { useBandToggle, useRadioPlayer } from "@/hooks/radio";
+import { useRadikoArea } from "@/services/radiko";
 import { useRestoreState } from "@/hooks/restore";
 import { useShuffleToggle } from "@/hooks/shuffle";
 import { usePinchZoom } from "@/hooks/usePinchZoom";
@@ -57,6 +62,8 @@ export function ControlsOverlay() {
 	// blob URL が未生成でもテキストメタデータは即利用可能。
 	const displaySong = currentSong;
 	const tuningFreq = useAtomValue(tuningFreqAtom);
+	const channelsByArea = useAtomValue(radioChannelsByAreaAtom);
+	const areaId = useRadikoArea();
 
 	const { shuffle, toggle: toggleShuffle } = useShuffleToggle();
 	const [repeat, setRepeat] = useAtom(repeatModeAtom);
@@ -71,6 +78,18 @@ export function ControlsOverlay() {
 	useLastfmScrobble();
 	useRestoreState();
 	const pinchRef = usePinchZoom();
+
+	const channelNum = useMemo(() => {
+		if (!areaId || !currentRadio?.frequency || tuningFreq != null) return null;
+		const areaChans = channelsByArea[areaId];
+		if (!areaChans) return null;
+		const bandKey = currentRadio.type === "FM" ? "fm" : "am";
+		const bandChans = areaChans[bandKey];
+		for (let i = 1; i <= 6; i++) {
+			if (bandChans[i as 1]?.freq === currentRadio.frequency) return i;
+		}
+		return null;
+	}, [areaId, currentRadio, tuningFreq, channelsByArea]);
 
 	const title = useMemo(() => {
 		switch (currentSrc) {
@@ -108,6 +127,11 @@ export function ControlsOverlay() {
 		}
 		return undefined;
 	}, [currentSrc, displaySong, currentRadio]);
+
+	const badge = useMemo(() => {
+		if (channelNum == null) return undefined;
+		return `${channelNum}`;
+	}, [channelNum]);
 
 	// artwork は blob URL のため復元完了（currentSong が存在）後のみ表示する
 	const coverSrc = currentSrc === "file" ? currentSong?.artwork : undefined;
@@ -155,7 +179,12 @@ export function ControlsOverlay() {
 								</button>
 							)}
 						</div>
-						<SongInfo title={title} artist={artist} album={album} />
+						<SongInfo
+							title={title}
+							artist={artist}
+							album={album}
+							badge={badge}
+						/>
 					</div>
 					<SourceSheet>
 						<Button
@@ -209,7 +238,12 @@ export function ControlsOverlay() {
 						</div>
 						{/* SongInfo — desktop only */}
 						<div className="hidden sm:flex sm:grow sm:overflow-hidden">
-							<SongInfo title={title} artist={artist} album={album} />
+							<SongInfo
+								title={title}
+								artist={artist}
+								album={album}
+								badge={badge}
+							/>
 						</div>
 						{/* Control buttons — full-width evenly spaced on mobile, right-aligned on desktop */}
 						<div className="flex w-full shrink-0 justify-evenly sm:ml-auto sm:w-auto sm:justify-start sm:gap-2">
