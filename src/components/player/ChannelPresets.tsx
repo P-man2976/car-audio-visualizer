@@ -60,19 +60,24 @@ export function ChannelPresets() {
 			const freq = currentRadio.frequency;
 			setChannelsByArea((prev) => {
 				const area = prev[areaId] ?? { fm: {}, am: {} };
+				const band = { ...area[bandKey] };
+				// 同じ局が別チャンネルに登録済みなら削除
+				for (const key of CHANNELS) {
+					if (key !== ch && band[key]?.stationId === currentRadio.id) {
+						delete band[key];
+					}
+				}
+				band[ch] = {
+					freq,
+					type: currentRadio.type,
+					stationId: currentRadio.id,
+					stationName: currentRadio.name,
+				} satisfies ChannelPreset;
 				return {
 					...prev,
 					[areaId]: {
 						...area,
-						[bandKey]: {
-							...area[bandKey],
-							[ch]: {
-								freq,
-								type: currentRadio.type,
-								stationId: currentRadio.id,
-								stationName: currentRadio.name,
-							} satisfies ChannelPreset,
-						},
+						[bandKey]: band,
 					},
 				};
 			});

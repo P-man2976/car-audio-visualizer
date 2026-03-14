@@ -147,4 +147,37 @@ describe("ChannelPresets", () => {
 		expect(btn.element().className).toContain("bg-gray-500/30");
 		expect(btn.element().className).toContain("border");
 	});
+
+	test("同じ局を別チャンネルに登録すると元のチャンネルから削除される", async () => {
+		const { store } = renderPresets((s) => {
+			s.set(radioChannelsByAreaAtom, {
+				JP13: {
+					fm: {
+						1: {
+							freq: 90.5,
+							type: "FM",
+							stationId: "TBS",
+							stationName: "TBSラジオ",
+						},
+					},
+					am: {},
+				},
+			});
+		});
+
+		// CH4 (未登録) をクリック → 現在の局(TBS)を CH4 に登録
+		const btn = page.getByRole("button", { name: /CH4/ });
+		await btn.click();
+
+		const channels = store.get(radioChannelsByAreaAtom);
+		// CH1 から削除されている
+		expect(channels.JP13?.fm[1]).toBeUndefined();
+		// CH4 に登録されている
+		expect(channels.JP13?.fm[4]).toEqual({
+			freq: 90.5,
+			type: "FM",
+			stationId: "TBS",
+			stationName: "TBSラジオ",
+		});
+	});
 });
