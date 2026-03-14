@@ -1,8 +1,7 @@
-import { useAtom, useAtomValue } from "jotai";
+import { useAtomValue } from "jotai";
 import { useMemo } from "react";
 import { currentSrcAtom } from "@/atoms/player";
 import {
-	type ChannelNum,
 	currentRadioAtom,
 	customFrequencyAreaAtom,
 	radioChannelsByAreaAtom,
@@ -11,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ContextMenu, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { useSelectRadio } from "@/hooks/radio";
-import { assignChannelPreset, CHANNEL_NUMS } from "@/lib/radio-presets";
+import { CHANNEL_NUMS } from "@/lib/radio-presets";
 import { cn } from "@/lib/utils";
 import { useRadikoArea } from "@/services/radiko";
 import { useRadioFrequencies } from "@/services/radio";
@@ -19,11 +18,11 @@ import type { RadikoStation, RadioType } from "@/types/radio";
 import { RadioStationContextMenuContent } from "./RadioStationContextMenuContent";
 
 export function RadioStation({ name, id, logo }: RadikoStation) {
-	const [currentRadio, setCurrentRadio] = useAtom(currentRadioAtom);
+	const currentRadio = useAtomValue(currentRadioAtom);
 	const currentSrc = useAtomValue(currentSrcAtom);
 	const size = useAtomValue(radioStationSizeAtom);
-	const [customFreqList, setCustomFreqList] = useAtom(customFrequencyAreaAtom);
-	const [channelsByArea, setChannelsByArea] = useAtom(radioChannelsByAreaAtom);
+	const customFreqList = useAtomValue(customFrequencyAreaAtom);
+	const channelsByArea = useAtomValue(radioChannelsByAreaAtom);
 	const areaId = useRadikoArea();
 	const { selectRadio } = useSelectRadio();
 
@@ -56,23 +55,6 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 		}
 		return result;
 	}, [areaId, channelsByArea, id]);
-
-	const assignChannel = (ch: ChannelNum) => {
-		if (!areaId || frequency == null) return;
-		setChannelsByArea((prev) => {
-			const area = prev[areaId] ?? { fm: {}, am: {} };
-			const bandKey = type === "AM" ? "am" : "fm";
-			return {
-				...prev,
-				[areaId]: assignChannelPreset(area, bandKey, ch, {
-					freq: frequency,
-					type,
-					stationId: id,
-					stationName: name,
-				}),
-			};
-		});
-	};
 
 	return (
 		<ContextMenu>
@@ -139,27 +121,10 @@ export function RadioStation({ name, id, logo }: RadikoStation) {
 			</ContextMenuTrigger>
 			<RadioStationContextMenuContent
 				stationId={id}
+				stationName={name}
 				type={type}
 				frequency={frequency}
-				areaId={areaId}
-				channelsByArea={channelsByArea}
 				station={station}
-				onFrequencyChange={(newType, freq) => {
-					setCustomFreqList((stations) =>
-						stations.find((s) => s.id === id)
-							? [
-									...stations.filter((s) => s.id !== id),
-									{ id, type: newType, freq },
-								]
-							: [...stations, { id, type: newType, freq }],
-					);
-					if (isSelected) {
-						setCurrentRadio((prev) =>
-							prev ? { ...prev, type: newType, frequency: freq } : prev,
-						);
-					}
-				}}
-				onAssignChannel={assignChannel}
 			/>
 		</ContextMenu>
 	);

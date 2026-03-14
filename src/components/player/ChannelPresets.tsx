@@ -1,9 +1,8 @@
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useMemo } from "react";
 import {
 	type ChannelNum,
 	currentRadioAtom,
-	customFrequencyAreaAtom,
 	radioChannelsByAreaAtom,
 	tuningFreqAtom,
 } from "@/atoms/radio";
@@ -19,12 +18,9 @@ import { useSelectRadio } from "@/hooks/radio";
 import { assignChannelPreset, CHANNEL_NUMS } from "@/lib/radio-presets";
 import { useRadikoArea } from "@/services/radiko";
 import { useRadioFrequencies } from "@/services/radio";
-import type { RadioType } from "@/types/radio";
 
 export function ChannelPresets() {
 	const currentRadio = useAtomValue(currentRadioAtom);
-	const setCurrentRadio = useSetAtom(currentRadioAtom);
-	const [, setCustomFreqList] = useAtom(customFrequencyAreaAtom);
 	const tuningFreq = useAtomValue(tuningFreqAtom);
 	const [channelsByArea, setChannelsByArea] = useAtom(radioChannelsByAreaAtom);
 	const areaId = useRadikoArea();
@@ -91,7 +87,7 @@ export function ChannelPresets() {
 	};
 
 	return (
-		<div className="flex gap-1 sm:gap-1.5">
+		<div className="flex w-full justify-evenly sm:w-auto sm:justify-start sm:gap-1.5">
 			{CHANNEL_NUMS.map((ch) => {
 				const preset = presets[ch];
 				const isActive = activeChannel === ch;
@@ -102,7 +98,7 @@ export function ChannelPresets() {
 								<ContextMenuTrigger asChild>
 									<Button
 										variant="ghost"
-										className={`h-8 w-8 p-0 font-mono text-sm font-bold sm:size-10 sm:text-base md:size-12 md:text-lg ${
+										className={`size-10 p-0 font-mono text-base font-bold sm:size-10 sm:text-base md:size-12 md:text-lg ${
 											preset
 												? isActive
 													? "bg-gray-500/30 border"
@@ -128,29 +124,10 @@ export function ChannelPresets() {
 							stationId={
 								currentRadio?.source === "radiko" ? currentRadio.id : ""
 							}
+							stationName={currentRadio?.name ?? ""}
 							type={currentRadio?.type ?? "FM"}
 							frequency={currentRadio?.frequency}
-							areaId={areaId}
-							channelsByArea={channelsByArea}
 							station={station}
-							onFrequencyChange={(nextType: RadioType, freq) => {
-								if (currentRadio?.source !== "radiko") return;
-								const id = currentRadio.id;
-								setCustomFreqList((stations) =>
-									stations.find((s) => s.id === id)
-										? [
-												...stations.filter((s) => s.id !== id),
-												{ id, type: nextType, freq },
-											]
-										: [...stations, { id, type: nextType, freq }],
-								);
-								setCurrentRadio((prev) => {
-									if (!prev || prev.source !== "radiko" || prev.id !== id)
-										return prev;
-									return { ...prev, type: nextType, frequency: freq };
-								});
-							}}
-							onAssignChannel={assignCurrentToChannel}
 						/>
 					</ContextMenu>
 				);
