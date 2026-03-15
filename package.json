@@ -57,8 +57,7 @@
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.0",
     "three": "^0.183.1",
-    "virtua": "^0.48.6",
-    "vite-tsconfig-paths": "^6.1.1"
+    "virtua": "^0.48.6"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.25.6",
