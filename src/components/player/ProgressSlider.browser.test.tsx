@@ -45,11 +45,11 @@ describe("ProgressSlider", () => {
 		// off 状態は bg-secondary の空バー div のみ
 		// slider は表示されない
 		await expect.element(page.getByRole("slider")).not.toBeInTheDocument();
-		// ＬＩＶＥ テキストも表示されない
-		await expect.element(page.getByText("ＬＩＶＥ")).not.toBeInTheDocument();
+		// LIVE テキストも表示されない
+		await expect.element(page.getByText("LIVE")).not.toBeInTheDocument();
 	});
 
-	test("currentSrc=radio で ＬＩＶＥ が表示される", async () => {
+	test("currentSrc=radio で LIVE が表示される", async () => {
 		const store = createStore();
 		store.set(currentSrcAtom, "radio");
 		store.set(progressAtom, 0);
@@ -62,7 +62,7 @@ describe("ProgressSlider", () => {
 			</Provider>,
 		);
 
-		await expect.element(page.getByText("ＬＩＶＥ")).toBeInTheDocument();
+		await expect.element(page.getByText("LIVE")).toBeInTheDocument();
 		await expect.element(page.getByRole("slider")).not.toBeInTheDocument();
 	});
 
@@ -87,7 +87,7 @@ describe("ProgressSlider", () => {
 		await expect.element(page.getByText("3:00")).toBeInTheDocument();
 	});
 
-	test("currentSrc=aux で ＬＩＶＥ が表示される", async () => {
+	test("currentSrc=aux で LIVE が表示される", async () => {
 		const store = createStore();
 		store.set(currentSrcAtom, "aux");
 		store.set(progressAtom, 0);
@@ -98,6 +98,6 @@ describe("ProgressSlider", () => {
 			</Provider>,
 		);
 
-		await expect.element(page.getByText("ＬＩＶＥ")).toBeInTheDocument();
+		await expect.element(page.getByText("LIVE")).toBeInTheDocument();
 	});
 });
