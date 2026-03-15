@@ -25,30 +25,39 @@ npm run test:browser             # 全ブラウザテストがパスすること
 ## Build, Test, and Lint
 
 ### Development Server
+
 ```bash
 npm run dev
 ```
+
 Starts Vite dev server with HMR (Hot Module Replacement) enabled.
 
 ### Build for Production
+
 ```bash
 npm run build
 ```
+
 Runs TypeScript compiler check (`tsc -b`) followed by Vite build. Outputs to `dist/` directory.
 
 ### Preview Production Build
+
 ```bash
 npm run preview
 ```
+
 Serves the production build locally for testing.
 
 ### Linting
+
 ```bash
 npm run lint
 ```
+
 Uses Biome 2.4.4 for code linting.
 
 ### Code Formatting
+
 ```bash
 npm run format     # check only
 npx biome format --write src/   # 実際に書き込み
@@ -69,9 +78,9 @@ npx biome format --write src/   # 実際に書き込み
 
 ### テスト構成
 
-| 種別 | コマンド | 設定ファイル | パターン | 環境 |
-|------|---------|-------------|---------|------|
-| ユニットテスト | `npm run test` | `vitest.config.ts` (project: unit) | `src/**/*.test.ts` | Node |
+| 種別           | コマンド               | 設定ファイル                          | パターン                    | 環境                  |
+| -------------- | ---------------------- | ------------------------------------- | --------------------------- | --------------------- |
+| ユニットテスト | `npm run test`         | `vitest.config.ts` (project: unit)    | `src/**/*.test.ts`          | Node                  |
 | ブラウザテスト | `npm run test:browser` | `vitest.config.ts` (project: browser) | `src/**/*.browser.test.tsx` | Chromium (Playwright) |
 
 ### ユニットテスト (`*.test.ts`)
@@ -81,6 +90,7 @@ npx biome format --write src/   # 実際に書き込み
 - テストファイルは実装ファイルと同じディレクトリに配置（例: `src/lib/utils.ts` → `src/lib/utils.test.ts`）
 
 **モックパターン:**
+
 ```typescript
 // fetch モック
 vi.stubGlobal("fetch", vi.fn());
@@ -106,6 +116,7 @@ expect(store.get(myAtom)).toBe(expected);
 - 実ブラウザ (Chromium) で実行
 
 **テスト作成パターン:**
+
 ```typescript
 import { render } from "vitest-browser-react";
 import { page, userEvent } from "@vitest/browser/context";
@@ -130,6 +141,7 @@ page.getByTestId("test-id");
 ```
 
 **注意事項:**
+
 - `@/atoms/audio` はモジュールスコープで AudioContext を生成するため、必ず `vi.mock` すること
 - `atomWithIDB` を使用する atom は DataCloneError を避けるためプレーンな `atom()` でモック
 - 重複 DOM 要素がある場合は `.first()` を使用
@@ -138,6 +150,7 @@ page.getByTestId("test-id");
 ## Architecture
 
 ### Technology Stack
+
 - **React 19** + **TypeScript 5.9**
 - **Vite 8** with `@vitejs/plugin-react` and `@tailwindcss/vite`
 - **shadcn/ui** (new-york style, neutral base, Tailwind v4 mode) — components in `src/components/ui/`
@@ -145,6 +158,7 @@ page.getByTestId("test-id");
 - **Vitest 4** — ユニットテスト (Node) + ブラウザテスト (Chromium via `vitest-browser-react` + `@vitest/browser-playwright`)
 
 ### Runtime and Build Flow
+
 1. TanStack Start (SSR) + Cloudflare Workers — `index.html` / `src/main.tsx` は存在しない。HTML シェルは `src/routes/__root.tsx` の `shellComponent` が生成する。
 2. エントリ: `@tanstack/react-start/server-entry` → `src/routes/__root.tsx` → `src/routes/index.tsx` → `src/pages/HomePage.tsx`。
 3. `src/index.css` を `?url` サフィックスで `__root.tsx` から読み込み。`@import "tailwindcss"` + shadcn CSS 変数を定義。
@@ -153,6 +167,7 @@ page.getByTestId("test-id");
 6. デプロイ: `wrangler deploy` → Cloudflare Workers (`gcp:asia-northeast1`)。
 
 ### UI Composition Pattern
+
 - Uses shadcn/ui flat exports: `CardHeader`, `CardContent`, `CardFooter`, `CardTitle`, `CardDescription`, `AvatarFallback`, `AvatarImage`, etc.
 - Import from `@/components/ui/<component>` (e.g. `import { Button } from "@/components/ui/button"`).
 - `@` alias resolves to `src/` (configured in `vite.config.ts` and `tsconfig.app.json`).
@@ -161,6 +176,7 @@ page.getByTestId("test-id");
 ## Key Conventions
 
 ### shadcn/ui ガイドライン
+
 - **HeroUI v3 は削除済み**。新規コンポーネントは shadcn/ui を使用すること。
 - コンポーネント追加は `npx shadcn@latest add <name>` で `src/components/ui/` に生成する。
 - `components.json` に設定済み: `style: "new-york"`, `baseColor: "neutral"`, Tailwind v4 モード (`"config": ""`)。
@@ -168,16 +184,19 @@ page.getByTestId("test-id");
 - shadcn ドキュメントには MCP (`mcp_shadcn`) を使用する。
 
 ### TypeScript and Module Rules
+
 - TypeScript is strict in both `tsconfig.app.json` and `tsconfig.node.json`.
 - ESM-only project (`"type": "module"`); avoid CommonJS patterns.
 - App code uses bundler-mode options (`moduleResolution: "bundler"`, `allowImportingTsExtensions: true`, `noEmit: true`).
 
 ### Linting/Formatting Expectations
+
 - Biome uses tab indentation and double quotes.
 - Key enforced rules include no `any`, no CommonJS, hooks at top level, and exhaustive deps warnings.
 - Import organization is enabled through Biome assist actions.
 
 ### Styling Convention
+
 - Use Tailwind CSS utility classes for layout/spacing/styling in React components.
 - Use shadcn/ui components for UI primitives and combine them with Tailwind class names when composing screens.
 - Color tokens follow 2din-spectrogram conventions: `bg-neutral-500/40` (default interactive), `bg-neutral-950/50 backdrop-blur-md` (overlays/sheets), status badges use `bg-green-600/60 text-green-100`, `bg-yellow-600/60 text-yellow-100`, etc.
@@ -203,6 +222,7 @@ page.getByTestId("test-id");
   - `frameloop="always"` では `useFrame` が毎フレーム自動実行されるため `invalidate()` は不要。
 
 ### PWA
+
 - `public/manifest.webmanifest` に Web App Manifest を配置。`display: "standalone"`, `orientation: "landscape"`。
 - `public/icon.svg` がアプリアイコン（SVG、any + maskable）。
 - `__root.tsx` の `head()` で `<link rel="manifest">`, `<meta name="theme-color">`, `apple-mobile-web-app-*` を設定済み。
@@ -216,6 +236,7 @@ page.getByTestId("test-id");
 Use `agent-browser` for web automation. Run `agent-browser --help` for all commands.
 
 ### Core Workflow
+
 1. `agent-browser open <url>` - Navigate to page
 2. `agent-browser snapshot -i` - Get interactive elements with refs (@e1, @e2)
 3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs (deterministic)
@@ -225,6 +246,7 @@ Use `agent-browser` for web automation. Run `agent-browser --help` for all comma
 ### Key Features
 
 **Element Interaction (ref-based):**
+
 - `snapshot -i` — Take accessibility tree snapshot with refs (`@e1`, `@e2`, etc)
 - `click @e1` / `dblclick` / `tap` — Click/double-click/tap (iOS)
 - `fill @e1 "text"` — Clear and fill input
@@ -233,18 +255,21 @@ Use `agent-browser` for web automation. Run `agent-browser --help` for all comma
 - `check/uncheck @e1` — Checkbox operations
 
 **Semantic Selectors (human-readable):**
+
 - `find role button click --name "Submit"` — Find by ARIA role + name
 - `find label "Email" fill "test@test.com"` — Find by label text
 - `find text "Welcome" hover` — Find by visible text
 - `find testid "my-input" fill "value"` — Find by data-testid
 
 **Verification (Diffing):**
+
 - `diff snapshot` — Line-level text diff against last snapshot
 - `diff snapshot --baseline baseline.txt` — Compare against saved file
 - `diff screenshot --baseline before.png` — Pixel-level visual diff (red = changed pixels)
 - `diff url URL1 URL2 --screenshot` — Compare two pages
 
 **Session & State Management:**
+
 - `--session-name <name>` — Auto-save/restore cookies & localStorage
 - `--profile <path>` — Persistent browser profile directory
 - `auth save <name> --url <url> --username <u> --password-stdin` — Vault credentials (encrypted)
@@ -252,6 +277,7 @@ Use `agent-browser` for web automation. Run `agent-browser --help` for all comma
 - `state save/load <path>` — Export/import session state
 
 **Performance & Debug:**
+
 - `profiler start` → `profiler stop trace.json` — Chrome DevTools trace (view in Perfetto UI)
 - `trace start/stop` — DevTools trace recording
 - `record start/stop video.webm` — Video recording
@@ -259,6 +285,7 @@ Use `agent-browser` for web automation. Run `agent-browser --help` for all comma
 - `screenshot [path]` / `--annotate` — Screenshot with element labels
 
 **Advanced:**
+
 - `--cdp 9222` / `--auto-connect` — Connect to existing Chrome via DevTools Protocol
 - `-p ios --device "iPhone 16 Pro"` — iOS Simulator Safari control (requires Appium)
 - `--allowed-domains "example.com,*.example.com"` — Domain allowlist (block data exfiltration)
@@ -270,11 +297,13 @@ Use `agent-browser` for web automation. Run `agent-browser --help` for all comma
 - `AGENT_BROWSER_STREAM_PORT=9223` — Stream viewport via WebSocket (live preview)
 
 ### Token Efficiency
+
 - **Text output ~200-400 tokens** vs DOM JSON ~3000-5000 tokens
 - **Refs eliminate element re-query** — snapshot captures state once, use refs for all actions
 - **Compact format** — Accessibility tree only, LLM-friendly parsing
 
 ### Command Chaining
+
 ```bash
 agent-browser open example.com && \
   agent-browser wait --load networkidle && \
@@ -284,6 +313,7 @@ agent-browser open example.com && \
 ```
 
 ### Security (Production-ready)
+
 - **Auth Vault** — Passwords encrypted AES-256-GCM, never passed to LLM context
 - **Content Boundaries** — Untrusted page output wrapped with nonce markers
 - **Domain Allowlist** — Block navigations & sub-resources to non-allowed domains
@@ -292,6 +322,7 @@ agent-browser open example.com && \
 - **Output Limits** — Cap page-sourced content to prevent context overflow
 
 ### Install
+
 ```bash
 npm install -g agent-browser    # All platforms (fastest)
 # or

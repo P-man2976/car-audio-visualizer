@@ -9,20 +9,20 @@ export type PresetBandKey = "fm" | "am";
  * on another channel in the same band.
  */
 export function assignChannelPreset(
-	area: AreaChannels,
-	bandKey: PresetBandKey,
-	channel: ChannelNum,
-	preset: ChannelPreset,
+  area: AreaChannels,
+  bandKey: PresetBandKey,
+  channel: ChannelNum,
+  preset: ChannelPreset,
 ): AreaChannels {
-	const band = { ...area[bandKey] };
-	for (const ch of CHANNEL_NUMS) {
-		if (ch !== channel && band[ch]?.stationId === preset.stationId) {
-			delete band[ch];
-		}
-	}
-	band[channel] = preset;
-	return {
-		...area,
-		[bandKey]: band,
-	};
+  const band = { ...area[bandKey] };
+  for (const ch of CHANNEL_NUMS) {
+    if (ch !== channel && band[ch]?.stationId === preset.stationId) {
+      delete band[ch];
+    }
+  }
+  band[channel] = preset;
+  return {
+    ...area,
+    [bandKey]: band,
+  };
 }

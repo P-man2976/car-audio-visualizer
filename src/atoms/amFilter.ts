@@ -12,10 +12,7 @@ import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
 /** AM フィルタの有効/無効設定（永続化）。デフォルト: 有効 */
-export const amFilterEnabledAtom = atomWithStorage(
-	"cav-am-filter-enabled",
-	true,
-);
+export const amFilterEnabledAtom = atomWithStorage("cav-am-filter-enabled", true);
 
 /** AM ローパスフィルタのカットオフ周波数 [Hz] */
 export const AM_FILTER_FREQ = 4500;
@@ -27,34 +24,34 @@ export const AM_HPF_FREQ = 30;
 
 /** AM フィルタの各ノードパラメーター */
 export interface AmFilterSettings {
-	/** LPF カットオフ周波数 [Hz] */
-	lpfFreq: number;
-	/** HPF カットオフ周波数 [Hz] */
-	hpfFreq: number;
-	/** 歪みの強さ (0 = なし、大きいほど歪む) */
-	distortionAmount: number;
-	/** コンプレッサー閾値 [dB] */
-	compThreshold: number;
-	/** コンプレッサーレシオ */
-	compRatio: number;
-	/** ブラウンノイズレベル (0 = なし、1 = 最大) */
-	noiseLevel: number;
-	/** スピーカー共振周波数 [Hz]。AM ラジオの小型スピーカーのピーキング EQ */
-	speakerResonanceFreq: number;
-	/** スピーカー共振ゲイン [dB]。0 = バイパス */
-	speakerResonanceGain: number;
+  /** LPF カットオフ周波数 [Hz] */
+  lpfFreq: number;
+  /** HPF カットオフ周波数 [Hz] */
+  hpfFreq: number;
+  /** 歪みの強さ (0 = なし、大きいほど歪む) */
+  distortionAmount: number;
+  /** コンプレッサー閾値 [dB] */
+  compThreshold: number;
+  /** コンプレッサーレシオ */
+  compRatio: number;
+  /** ブラウンノイズレベル (0 = なし、1 = 最大) */
+  noiseLevel: number;
+  /** スピーカー共振周波数 [Hz]。AM ラジオの小型スピーカーのピーキング EQ */
+  speakerResonanceFreq: number;
+  /** スピーカー共振ゲイン [dB]。0 = バイパス */
+  speakerResonanceGain: number;
 }
 
 /** デフォルトの AM フィルタ設定 */
 export const DEFAULT_AM_FILTER_SETTINGS: AmFilterSettings = {
-	lpfFreq: 4000,
-	hpfFreq: 100,
-	distortionAmount: 0.5,
-	compThreshold: -24,
-	compRatio: 8,
-	noiseLevel: 0.005,
-	speakerResonanceFreq: 1200,
-	speakerResonanceGain: 2,
+  lpfFreq: 4000,
+  hpfFreq: 100,
+  distortionAmount: 0.5,
+  compThreshold: -24,
+  compRatio: 8,
+  noiseLevel: 0.005,
+  speakerResonanceFreq: 1200,
+  speakerResonanceGain: 2,
 };
 
 /**
@@ -62,8 +59,8 @@ export const DEFAULT_AM_FILTER_SETTINGS: AmFilterSettings = {
  * 直接使わず、amFilterSettingsAtom を使用すること。
  */
 const rawAmFilterSettingsAtom = atomWithStorage<Partial<AmFilterSettings>>(
-	"cav-am-filter-settings",
-	DEFAULT_AM_FILTER_SETTINGS,
+  "cav-am-filter-settings",
+  DEFAULT_AM_FILTER_SETTINGS,
 );
 
 /**
@@ -73,25 +70,21 @@ const rawAmFilterSettingsAtom = atomWithStorage<Partial<AmFilterSettings>>(
  * 読み取り時にデフォルト値で補完する。
  */
 export const amFilterSettingsAtom = atom(
-	(get): AmFilterSettings => ({
-		...DEFAULT_AM_FILTER_SETTINGS,
-		...get(rawAmFilterSettingsAtom),
-	}),
-	(
-		_get,
-		set,
-		update: AmFilterSettings | ((prev: AmFilterSettings) => AmFilterSettings),
-	) => {
-		if (typeof update === "function") {
-			const prev = {
-				...DEFAULT_AM_FILTER_SETTINGS,
-				..._get(rawAmFilterSettingsAtom),
-			};
-			set(rawAmFilterSettingsAtom, update(prev));
-		} else {
-			set(rawAmFilterSettingsAtom, update);
-		}
-	},
+  (get): AmFilterSettings => ({
+    ...DEFAULT_AM_FILTER_SETTINGS,
+    ...get(rawAmFilterSettingsAtom),
+  }),
+  (_get, set, update: AmFilterSettings | ((prev: AmFilterSettings) => AmFilterSettings)) => {
+    if (typeof update === "function") {
+      const prev = {
+        ...DEFAULT_AM_FILTER_SETTINGS,
+        ..._get(rawAmFilterSettingsAtom),
+      };
+      set(rawAmFilterSettingsAtom, update(prev));
+    } else {
+      set(rawAmFilterSettingsAtom, update);
+    }
+  },
 );
 
 /**
@@ -105,8 +98,8 @@ export const amFilterSettingsAtom = atom(
  * @returns メイクアップゲイン [dB] (≥ 0)
  */
 export function calcMakeupGain(threshold: number, ratio: number): number {
-	if (threshold >= 0 || ratio <= 1) return 0;
-	return -threshold * (1 - 1 / ratio) * 0.5;
+  if (threshold >= 0 || ratio <= 1) return 0;
+  return -threshold * (1 - 1 / ratio) * 0.5;
 }
 
 /**
@@ -117,16 +110,13 @@ export function calcMakeupGain(threshold: number, ratio: number): number {
  * @param samples - カーブの解像度（サンプル数）
  * @returns -1.0〜+1.0 の範囲のソフトクリッピングカーブ（ピーク正規化済み）
  */
-export function makeDistortionCurve(
-	amount: number,
-	samples = 8192,
-): Float32Array<ArrayBuffer> {
-	const curve = new Float32Array(samples);
-	// tanh(amount) で正規化し、amount を変えてもピークレベルを ±1.0 に保つ
-	const norm = amount > 0 ? Math.tanh(amount) : 1;
-	for (let i = 0; i < samples; i++) {
-		const x = (2 * i) / (samples - 1) - 1; // -1.0 〜 +1.0
-		curve[i] = Math.tanh(amount * x) / norm;
-	}
-	return curve;
+export function makeDistortionCurve(amount: number, samples = 8192): Float32Array<ArrayBuffer> {
+  const curve = new Float32Array(samples);
+  // tanh(amount) で正規化し、amount を変えてもピークレベルを ±1.0 に保つ
+  const norm = amount > 0 ? Math.tanh(amount) : 1;
+  for (let i = 0; i < samples; i++) {
+    const x = (2 * i) / (samples - 1) - 1; // -1.0 〜 +1.0
+    curve[i] = Math.tanh(amount * x) / norm;
+  }
+  return curve;
 }

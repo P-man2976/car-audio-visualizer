@@ -23,17 +23,17 @@ npm run dev      # 開発サーバー起動
 
 ## Scripts
 
-| コマンド | 説明 |
-|---------|------|
-| `npm run dev` | Vite 開発サーバー (HMR) |
-| `npm run build` | プロダクションビルド |
-| `npm run preview` | ビルド済みアプリのプレビュー |
-| `npm run lint` | Biome lint |
-| `npm run format` | Biome format (check only) |
-| `npx biome format --write src/` | フォーマット適用 (書き込み) |
-| `npm run test` | ユニットテスト (`src/**/*.test.ts`) |
-| `npm run test:browser` | ブラウザテスト (`src/**/*.browser.test.tsx`) |
-| `npm run deploy` | ビルド + Cloudflare Workers デプロイ |
+| コマンド                        | 説明                                         |
+| ------------------------------- | -------------------------------------------- |
+| `npm run dev`                   | Vite 開発サーバー (HMR)                      |
+| `npm run build`                 | プロダクションビルド                         |
+| `npm run preview`               | ビルド済みアプリのプレビュー                 |
+| `npm run lint`                  | Biome lint                                   |
+| `npm run format`                | Biome format (check only)                    |
+| `npx biome format --write src/` | フォーマット適用 (書き込み)                  |
+| `npm run test`                  | ユニットテスト (`src/**/*.test.ts`)          |
+| `npm run test:browser`          | ブラウザテスト (`src/**/*.browser.test.tsx`) |
+| `npm run deploy`                | ビルド + Cloudflare Workers デプロイ         |
 
 ## Project Structure
 

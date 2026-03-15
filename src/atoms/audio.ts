@@ -6,21 +6,16 @@
  */
 import { atom } from "jotai";
 import {
-	analyzerInstance,
-	connectAudioSource,
-	safariVizBridge,
-	setAmFilterActive,
-	setOutputVolume,
-	sharedAudioElement,
+  analyzerInstance,
+  connectAudioSource,
+  safariVizBridge,
+  setAmFilterActive,
+  setOutputVolume,
+  sharedAudioElement,
 } from "@/lib/audioGraph";
 
 export const audioElementAtom = atom(sharedAudioElement);
 export const audioMotionAnalyzerAtom = atom(analyzerInstance);
 export const mediaStreamAtom = atom<MediaStream | null>(null);
 
-export {
-	connectAudioSource,
-	safariVizBridge,
-	setAmFilterActive,
-	setOutputVolume,
-};
+export { connectAudioSource, safariVizBridge, setAmFilterActive, setOutputVolume };

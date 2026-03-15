@@ -38,31 +38,31 @@ const require = createRequire(import.meta.url);
 // opentype.js を動的に探す
 let opentype;
 for (const candidate of [
-	"opentype.js", // プロジェクトの node_modules にある場合
-	"/tmp/font-convert/node_modules/opentype.js", // 一時インストール
+  "opentype.js", // プロジェクトの node_modules にある場合
+  "/tmp/font-convert/node_modules/opentype.js", // 一時インストール
 ]) {
-	try {
-		opentype = require(candidate);
-		break;
-	} catch {
-		// 次の候補へ
-	}
+  try {
+    opentype = require(candidate);
+    break;
+  } catch {
+    // 次の候補へ
+  }
 }
 if (!opentype) {
-	console.error(
-		"opentype.js が見つかりません。\n" +
-			"  npm install --prefix /tmp/font-convert opentype.js\n" +
-			"を実行してから再試行してください。",
-	);
-	process.exit(1);
+  console.error(
+    "opentype.js が見つかりません。\n" +
+      "  npm install --prefix /tmp/font-convert opentype.js\n" +
+      "を実行してから再試行してください。",
+  );
+  process.exit(1);
 }
 
 const fontPath = process.argv[2];
 const outPath = process.argv[3];
 
 if (!fontPath || !outPath) {
-	console.error("Usage: node scripts/convert-font.mjs <fontFile> <outputJson>");
-	process.exit(1);
+  console.error("Usage: node scripts/convert-font.mjs <fontFile> <outputJson>");
+  process.exit(1);
 }
 
 const font = opentype.loadSync(fontPath);
@@ -70,76 +70,69 @@ const resolution = 1000;
 const scale = resolution / font.unitsPerEm;
 
 const glyphChars =
-	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 
 const glyphs = {};
 for (const ch of glyphChars) {
-	const glyph = font.charToGlyph(ch);
-	if (!glyph) continue;
+  const glyph = font.charToGlyph(ch);
+  if (!glyph) continue;
 
-	const parts = [];
-	// glyph.path.commands は生フォントユニット座標（Y 上向き）。
-	// Three.js FontLoader は Y 上向き座標を期待するため Y を反転しない。
-	// これにより穴付きグリフ（0 / 6 / 8 等）のワインディング順序が正しく保たれる。
-	for (const cmd of glyph.path.commands) {
-		const f = (v) => (v * scale).toFixed(2);
-		switch (cmd.type) {
-			case "M":
-				parts.push(`m ${f(cmd.x)} ${f(cmd.y)} `);
-				break;
-			case "L":
-				parts.push(`l ${f(cmd.x)} ${f(cmd.y)} `);
-				break;
-			case "C":
-				parts.push(
-					`c ${f(cmd.x1)} ${f(cmd.y1)} ${f(cmd.x2)} ${f(cmd.y2)} ${f(cmd.x)} ${f(cmd.y)} `,
-				);
-				break;
-			case "Q":
-				parts.push(`q ${f(cmd.x1)} ${f(cmd.y1)} ${f(cmd.x)} ${f(cmd.y)} `);
-				break;
-			case "Z":
-				parts.push("z ");
-				break;
-		}
-	}
+  const parts = [];
+  // glyph.path.commands は生フォントユニット座標（Y 上向き）。
+  // Three.js FontLoader は Y 上向き座標を期待するため Y を反転しない。
+  // これにより穴付きグリフ（0 / 6 / 8 等）のワインディング順序が正しく保たれる。
+  for (const cmd of glyph.path.commands) {
+    const f = (v) => (v * scale).toFixed(2);
+    switch (cmd.type) {
+      case "M":
+        parts.push(`m ${f(cmd.x)} ${f(cmd.y)} `);
+        break;
+      case "L":
+        parts.push(`l ${f(cmd.x)} ${f(cmd.y)} `);
+        break;
+      case "C":
+        parts.push(
+          `c ${f(cmd.x1)} ${f(cmd.y1)} ${f(cmd.x2)} ${f(cmd.y2)} ${f(cmd.x)} ${f(cmd.y)} `,
+        );
+        break;
+      case "Q":
+        parts.push(`q ${f(cmd.x1)} ${f(cmd.y1)} ${f(cmd.x)} ${f(cmd.y)} `);
+        break;
+      case "Z":
+        parts.push("z ");
+        break;
+    }
+  }
 
-	const adv =
-		glyph.advanceWidth != null
-			? Math.round(glyph.advanceWidth * scale)
-			: resolution;
-	glyphs[ch] = {
-		ha: adv,
-		x_min: Math.round((glyph.xMin || 0) * scale),
-		x_max: Math.round((glyph.xMax || 0) * scale),
-		o: parts.join(""),
-	};
+  const adv = glyph.advanceWidth != null ? Math.round(glyph.advanceWidth * scale) : resolution;
+  glyphs[ch] = {
+    ha: adv,
+    x_min: Math.round((glyph.xMin || 0) * scale),
+    x_max: Math.round((glyph.xMax || 0) * scale),
+    o: parts.join(""),
+  };
 }
 
 const output = {
-	glyphs,
-	familyName: font.names.fontFamily?.en || "Unknown",
-	ascender: Math.round(font.ascender * scale),
-	descender: Math.round(font.descender * scale),
-	underlinePosition: Math.round(
-		(font.tables.post?.underlinePosition || -100) * scale,
-	),
-	underlineThickness: Math.round(
-		(font.tables.post?.underlineThickness || 50) * scale,
-	),
-	boundingBox: {
-		xMin: font.tables.head.xMin,
-		xMax: font.tables.head.xMax,
-		yMin: font.tables.head.yMin,
-		yMax: font.tables.head.yMax,
-	},
-	resolution,
-	original_font_information: {
-		family: font.names.fontFamily?.en,
-		subfamily: font.names.fontSubfamily?.en,
-	},
-	cssFontStyle: "normal",
-	cssFontWeight: "400",
+  glyphs,
+  familyName: font.names.fontFamily?.en || "Unknown",
+  ascender: Math.round(font.ascender * scale),
+  descender: Math.round(font.descender * scale),
+  underlinePosition: Math.round((font.tables.post?.underlinePosition || -100) * scale),
+  underlineThickness: Math.round((font.tables.post?.underlineThickness || 50) * scale),
+  boundingBox: {
+    xMin: font.tables.head.xMin,
+    xMax: font.tables.head.xMax,
+    yMin: font.tables.head.yMin,
+    yMax: font.tables.head.yMax,
+  },
+  resolution,
+  original_font_information: {
+    family: font.names.fontFamily?.en,
+    subfamily: font.names.fontSubfamily?.en,
+  },
+  cssFontStyle: "normal",
+  cssFontWeight: "400",
 };
 
 fs.writeFileSync(outPath, JSON.stringify(output));

@@ -23,22 +23,22 @@ const font = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
 // Grid X positions (column 0..4) — determined from the font's coordinate system
 const COL_XS = [42.84, 169.57, 296.29, 423.02, 549.74];
 // Grid Y positions (row 0=top..6=bottom) — Y in font is y-up, so highest Y = top row
-const ROW_YS = [760.35, 633.62, 506.90, 380.17, 253.45, 126.72, 0.0];
+const ROW_YS = [760.35, 633.62, 506.9, 380.17, 253.45, 126.72, 0.0];
 
 const TOLERANCE = 20; // matching tolerance
 
 function findCol(x) {
-	for (let c = 0; c < COL_XS.length; c++) {
-		if (Math.abs(x - COL_XS[c]) < TOLERANCE) return c;
-	}
-	return -1;
+  for (let c = 0; c < COL_XS.length; c++) {
+    if (Math.abs(x - COL_XS[c]) < TOLERANCE) return c;
+  }
+  return -1;
 }
 
 function findRow(y) {
-	for (let r = 0; r < ROW_YS.length; r++) {
-		if (Math.abs(y - ROW_YS[r]) < TOLERANCE) return r;
-	}
-	return -1;
+  for (let r = 0; r < ROW_YS.length; r++) {
+    if (Math.abs(y - ROW_YS[r]) < TOLERANCE) return r;
+  }
+  return -1;
 }
 
 /**
@@ -46,29 +46,29 @@ function findRow(y) {
  * as a 7-element array of 5-bit integers.
  */
 function parseBitmap(outline) {
-	const rows = [0, 0, 0, 0, 0, 0, 0];
-	if (!outline) return rows;
+  const rows = [0, 0, 0, 0, 0, 0, 0];
+  if (!outline) return rows;
 
-	// Each rectangle: "m x y l x2 y l x2 y2 l x y2 z"
-	// We extract the first "m x y" of each rectangle
-	const re = /m\s+([\d.]+)\s+([\d.]+)/g;
-	let match;
-	while ((match = re.exec(outline)) !== null) {
-		const x = parseFloat(match[1]);
-		const y = parseFloat(match[2]);
-		const col = findCol(x);
-		const row = findRow(y);
-		if (col >= 0 && row >= 0) {
-			rows[row] |= 1 << (4 - col); // MSB = left column
-		}
-	}
-	return rows;
+  // Each rectangle: "m x y l x2 y l x2 y2 l x y2 z"
+  // We extract the first "m x y" of each rectangle
+  const re = /m\s+([\d.]+)\s+([\d.]+)/g;
+  let match;
+  while ((match = re.exec(outline)) !== null) {
+    const x = parseFloat(match[1]);
+    const y = parseFloat(match[2]);
+    const col = findCol(x);
+    const row = findRow(y);
+    if (col >= 0 && row >= 0) {
+      rows[row] |= 1 << (4 - col); // MSB = left column
+    }
+  }
+  return rows;
 }
 
 // Build the bitmap map
 const bitmaps = {};
 for (const [ch, glyph] of Object.entries(font.glyphs)) {
-	bitmaps[ch] = parseBitmap(glyph.o);
+  bitmaps[ch] = parseBitmap(glyph.o);
 }
 
 // Generate TypeScript source
@@ -90,10 +90,10 @@ lines.push(`export const FONT_5X7: Record<string, number[]> = {`);
 const sortedKeys = Object.keys(bitmaps).sort((a, b) => a.charCodeAt(0) - b.charCodeAt(0));
 
 for (const ch of sortedKeys) {
-	const rows = bitmaps[ch];
-	const escaped = ch === '"' ? '\\"' : ch === "\\" ? "\\\\" : ch;
-	const rowsStr = rows.map((r) => `0b${r.toString(2).padStart(5, "0")}`).join(", ");
-	lines.push(`\t"${escaped}": [${rowsStr}],`);
+  const rows = bitmaps[ch];
+  const escaped = ch === '"' ? '\\"' : ch === "\\" ? "\\\\" : ch;
+  const rowsStr = rows.map((r) => `0b${r.toString(2).padStart(5, "0")}`).join(", ");
+  lines.push(`\t"${escaped}": [${rowsStr}],`);
 }
 
 lines.push(`};`);

@@ -50,75 +50,69 @@ const TOTAL_W = CHAR_COUNT * CHAR_W + (CHAR_COUNT - 1) * CHAR_GAP;
  *
  * @param y - ディスプレイの Y 座標（グループ配置）
  */
-export function DotMatrixArray({
-	y = 40,
-	scale = 1,
-}: {
-	y?: number;
-	scale?: number;
-}) {
-	const displayString = useAtomValue(displayStringAtom);
-	const meshRef = useRef<THREE.InstancedMesh>(null);
-	const tempMatrix = useMemo(() => new THREE.Matrix4(), []);
-	const tempColor = useMemo(() => new THREE.Color(), []);
+export function DotMatrixArray({ y = 40, scale = 1 }: { y?: number; scale?: number }) {
+  const displayString = useAtomValue(displayStringAtom);
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const tempMatrix = useMemo(() => new THREE.Matrix4(), []);
+  const tempColor = useMemo(() => new THREE.Color(), []);
 
-	// インスタンス位置を一度だけ設定する
-	useEffect(() => {
-		const mesh = meshRef.current;
-		if (!mesh) return;
+  // インスタンス位置を一度だけ設定する
+  useEffect(() => {
+    const mesh = meshRef.current;
+    if (!mesh) return;
 
-		const startX = -TOTAL_W / 2;
-		let idx = 0;
+    const startX = -TOTAL_W / 2;
+    let idx = 0;
 
-		for (let ci = 0; ci < CHAR_COUNT; ci++) {
-			const charX = startX + ci * (CHAR_W + CHAR_GAP);
-			for (let row = 0; row < DOT_ROWS; row++) {
-				for (let col = 0; col < DOT_COLS; col++) {
-					const x = charX + col * (DOT_SIZE + DOT_GAP);
-					// row 0 = 上端 → Y が大きい方に配置
-					const yPos = (DOT_ROWS - 1 - row) * (DOT_SIZE + DOT_GAP);
-					tempMatrix.makeTranslation(x, yPos, 0);
-					mesh.setMatrixAt(idx, tempMatrix);
-					mesh.setColorAt(idx, COLOR_INACTIVE);
-					idx++;
-				}
-			}
-		}
+    for (let ci = 0; ci < CHAR_COUNT; ci++) {
+      const charX = startX + ci * (CHAR_W + CHAR_GAP);
+      for (let row = 0; row < DOT_ROWS; row++) {
+        for (let col = 0; col < DOT_COLS; col++) {
+          const x = charX + col * (DOT_SIZE + DOT_GAP);
+          // row 0 = 上端 → Y が大きい方に配置
+          const yPos = (DOT_ROWS - 1 - row) * (DOT_SIZE + DOT_GAP);
+          tempMatrix.makeTranslation(x, yPos, 0);
+          mesh.setMatrixAt(idx, tempMatrix);
+          mesh.setColorAt(idx, COLOR_INACTIVE);
+          idx++;
+        }
+      }
+    }
 
-		mesh.instanceMatrix.needsUpdate = true;
-		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-	}, [tempMatrix]);
+    mesh.instanceMatrix.needsUpdate = true;
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  }, [tempMatrix]);
 
-	// displayString が変化したらドット色を更新する
-	useEffect(() => {
-		const mesh = meshRef.current;
-		if (!mesh) return;
+  // displayString が変化したらドット色を更新する
+  useEffect(() => {
+    const mesh = meshRef.current;
+    if (!mesh) return;
 
-		let idx = 0;
-		for (let ci = 0; ci < CHAR_COUNT; ci++) {
-			const ch = displayString[ci] ?? " ";
-			const bitmap = FONT_5X7[ch] ?? FONT_5X7[" "];
-			for (let row = 0; row < DOT_ROWS; row++) {
-				const rowBits = bitmap![row]!;
-				for (let col = 0; col < DOT_COLS; col++) {
-					const isOn = (rowBits >> (DOT_COLS - 1 - col)) & 1;
-					tempColor.copy(isOn ? COLOR_ACTIVE : COLOR_INACTIVE);
-					mesh.setColorAt(idx, tempColor);
-					idx++;
-				}
-			}
-		}
+    let idx = 0;
+    for (let ci = 0; ci < CHAR_COUNT; ci++) {
+      const ch = displayString[ci] ?? " ";
+      const bitmap = FONT_5X7[ch] ?? FONT_5X7[" "];
+      for (let row = 0; row < DOT_ROWS; row++) {
+        const rowBits = bitmap![row]!;
+        for (let col = 0; col < DOT_COLS; col++) {
+          const isOn = (rowBits >> (DOT_COLS - 1 - col)) & 1;
+          tempColor.copy(isOn ? COLOR_ACTIVE : COLOR_INACTIVE);
+          mesh.setColorAt(idx, tempColor);
+          idx++;
+        }
+      }
+    }
 
-		if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-	}, [displayString, tempColor]);
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  }, [displayString, tempColor]);
 
-	return (
-		<group position={[0, y, 0]} scale={scale}>
-			<instancedMesh
-				ref={meshRef}
-				args={[sharedGeometry, sharedMaterial, TOTAL_DOTS]}
-				frustumCulled={false}
-			/>
-		</group>
-	);
+  return (
+    <group position={[0, y, 0]} scale={scale}>
+      <instancedMesh
+        ref={meshRef}
+        args={[sharedGeometry, sharedMaterial, TOTAL_DOTS]}
+        frustumCulled={false}
+      />
+    </group>
+  );
 }

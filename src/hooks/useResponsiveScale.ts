@@ -21,8 +21,8 @@ const MIN_SCALE = 0.85;
 const MAX_SCALE = 2.0;
 
 export function useResponsiveScale(): number {
-	const vpWidth = useThree((s) => s.viewport.width);
-	const pinchZoom = useAtomValue(pinchZoomAtom);
-	const raw = vpWidth / REFERENCE_VP_WIDTH;
-	return Math.max(Math.min(raw, MAX_SCALE), MIN_SCALE) * pinchZoom;
+  const vpWidth = useThree((s) => s.viewport.width);
+  const pinchZoom = useAtomValue(pinchZoomAtom);
+  const raw = vpWidth / REFERENCE_VP_WIDTH;
+  return Math.max(Math.min(raw, MAX_SCALE), MIN_SCALE) * pinchZoom;
 }

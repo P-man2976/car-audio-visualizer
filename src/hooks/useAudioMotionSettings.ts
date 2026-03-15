@@ -10,33 +10,33 @@ import { audioMotionAnalyzerAtom } from "@/atoms/audio";
 import { audioMotionSettingsAtom } from "@/atoms/audioMotion";
 
 export function useAudioMotionSettings(): void {
-	const analyzer = useAtomValue(audioMotionAnalyzerAtom);
-	const settings = useAtomValue(audioMotionSettingsAtom);
+  const analyzer = useAtomValue(audioMotionAnalyzerAtom);
+  const settings = useAtomValue(audioMotionSettingsAtom);
 
-	useEffect(() => {
-		analyzer.setOptions({
-			fftSize: settings.fftSize,
-			minDecibels: settings.minDecibels,
-			maxDecibels: settings.maxDecibels,
-			minFreq: settings.minFreq,
-			maxFreq: settings.maxFreq,
-			mode: settings.mode,
-			weightingFilter: settings.weightingFilter,
-			peakFallSpeed: settings.peakFallSpeed,
-			smoothing: settings.smoothingTimeConstant,
-			ansiBands: settings.ansiBands,
-		});
-	}, [
-		analyzer,
-		settings.fftSize,
-		settings.minDecibels,
-		settings.maxDecibels,
-		settings.minFreq,
-		settings.maxFreq,
-		settings.mode,
-		settings.weightingFilter,
-		settings.peakFallSpeed,
-		settings.smoothingTimeConstant,
-		settings.ansiBands,
-	]);
+  useEffect(() => {
+    analyzer.setOptions({
+      fftSize: settings.fftSize,
+      minDecibels: settings.minDecibels,
+      maxDecibels: settings.maxDecibels,
+      minFreq: settings.minFreq,
+      maxFreq: settings.maxFreq,
+      mode: settings.mode,
+      weightingFilter: settings.weightingFilter,
+      peakFallSpeed: settings.peakFallSpeed,
+      smoothing: settings.smoothingTimeConstant,
+      ansiBands: settings.ansiBands,
+    });
+  }, [
+    analyzer,
+    settings.fftSize,
+    settings.minDecibels,
+    settings.maxDecibels,
+    settings.minFreq,
+    settings.maxFreq,
+    settings.mode,
+    settings.weightingFilter,
+    settings.peakFallSpeed,
+    settings.smoothingTimeConstant,
+    settings.ansiBands,
+  ]);
 }

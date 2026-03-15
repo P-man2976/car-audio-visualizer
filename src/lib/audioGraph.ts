@@ -8,10 +8,10 @@
 import AudioMotionAnalyzer from "audiomotion-analyzer";
 import { isMECSNBroken, SafariVizBridge } from "@/lib/safari-viz-bridge";
 import {
-	type AmFilterSettings,
-	calcMakeupGain,
-	DEFAULT_AM_FILTER_SETTINGS,
-	makeDistortionCurve,
+  type AmFilterSettings,
+  calcMakeupGain,
+  DEFAULT_AM_FILTER_SETTINGS,
+  makeDistortionCurve,
 } from "@/atoms/amFilter";
 
 // ─── 共有オーディオ要素 ──────────────────────────────────────────────────────
@@ -33,17 +33,17 @@ export const sharedAudioElement = new Audio();
  * を呼ぶと MECSN が無音になるバグがあるため。
  */
 export const analyzerInstance = new AudioMotionAnalyzer(undefined, {
-	useCanvas: false,
-	minDecibels: -70,
-	maxDecibels: -20,
-	minFreq: 20,
-	maxFreq: 22000,
-	mode: 6,
-	ansiBands: true,
-	fftSize: 8192,
-	weightingFilter: "A",
-	peakFallSpeed: 0.005,
-	connectSpeakers: false,
+  useCanvas: false,
+  minDecibels: -70,
+  maxDecibels: -20,
+  minFreq: 20,
+  maxFreq: 22000,
+  mode: 6,
+  ansiBands: true,
+  fftSize: 8192,
+  weightingFilter: "A",
+  peakFallSpeed: 0.005,
+  connectSpeakers: false,
 });
 
 // ─── 出力音量制御 (ビジュアライザーの後段) ─────────────────────────────────────
@@ -72,11 +72,11 @@ const _audioCtx = analyzerInstance.audioCtx;
 const AM_HPF_STAGES = 4;
 const amHighpassFilters: BiquadFilterNode[] = [];
 for (let i = 0; i < AM_HPF_STAGES; i++) {
-	const f = _audioCtx.createBiquadFilter();
-	f.type = "highpass";
-	f.frequency.value = 1; // 初期: バイパス（1Hz = 全帯域通過）
-	f.Q.value = 0.707;
-	amHighpassFilters.push(f);
+  const f = _audioCtx.createBiquadFilter();
+  f.type = "highpass";
+  f.frequency.value = 1; // 初期: バイパス（1Hz = 全帯域通過）
+  f.Q.value = 0.707;
+  amHighpassFilters.push(f);
 }
 
 // ── LPF (ローパスフィルタ): AM 帯域上限カット ──
@@ -85,11 +85,11 @@ for (let i = 0; i < AM_HPF_STAGES; i++) {
 const AM_LPF_STAGES = 4;
 const amLowpassFilters: BiquadFilterNode[] = [];
 for (let i = 0; i < AM_LPF_STAGES; i++) {
-	const f = _audioCtx.createBiquadFilter();
-	f.type = "lowpass";
-	f.frequency.value = _audioCtx.sampleRate / 2; // 初期: バイパス
-	f.Q.value = 0.707;
-	amLowpassFilters.push(f);
+  const f = _audioCtx.createBiquadFilter();
+  f.type = "lowpass";
+  f.frequency.value = _audioCtx.sampleRate / 2; // 初期: バイパス
+  f.Q.value = 0.707;
+  amLowpassFilters.push(f);
 }
 
 // ── 歪み (WaveShaper): AM 放送のソフトクリッピングを再現 ──
@@ -115,11 +115,11 @@ let _cachedDistortionCurve: Float32Array<ArrayBuffer> | null = null;
  * 指定 amount の歪みカーブを取得する。同じ値なら前回のキャッシュを返す。
  */
 function getDistortionCurve(amount: number): Float32Array<ArrayBuffer> {
-	if (amount !== _lastDistortionAmount || _cachedDistortionCurve === null) {
-		_cachedDistortionCurve = makeDistortionCurve(amount);
-		_lastDistortionAmount = amount;
-	}
-	return _cachedDistortionCurve;
+  if (amount !== _lastDistortionAmount || _cachedDistortionCurve === null) {
+    _cachedDistortionCurve = makeDistortionCurve(amount);
+    _lastDistortionAmount = amount;
+  }
+  return _cachedDistortionCurve;
 }
 
 // ── コンプレッサー (自動利得制御 / AGC) ──
@@ -158,31 +158,27 @@ noiseGain.connect(amHighpassFilters[0]); // HPF の前段に接続
 let _noiseLaunched = false;
 /** AM 有効化時に一度だけ呼ぶ。ノイズバッファ生成 + 再生開始。 */
 function ensureNoiseSource(): void {
-	if (_noiseLaunched) return;
-	_noiseLaunched = true;
-	const buf = _audioCtx.createBuffer(
-		1,
-		_audioCtx.sampleRate * 2,
-		_audioCtx.sampleRate,
-	);
-	const data = buf.getChannelData(0);
-	for (let i = 0; i < data.length; i++) {
-		data[i] = Math.random() * 2 - 1;
-	}
-	const src = _audioCtx.createBufferSource();
-	src.buffer = buf;
-	src.loop = true;
-	src.start();
-	src.connect(noiseGain);
+  if (_noiseLaunched) return;
+  _noiseLaunched = true;
+  const buf = _audioCtx.createBuffer(1, _audioCtx.sampleRate * 2, _audioCtx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) {
+    data[i] = Math.random() * 2 - 1;
+  }
+  const src = _audioCtx.createBufferSource();
+  src.buffer = buf;
+  src.loop = true;
+  src.start();
+  src.connect(noiseGain);
 }
 
 // チェーン接続: HPF×4 → LPF×4 → speaker → distortion → compressor → makeupGain → mono
 for (let i = 0; i < amHighpassFilters.length - 1; i++) {
-	amHighpassFilters[i].connect(amHighpassFilters[i + 1]);
+  amHighpassFilters[i].connect(amHighpassFilters[i + 1]);
 }
 amHighpassFilters[amHighpassFilters.length - 1].connect(amLowpassFilters[0]);
 for (let i = 0; i < amLowpassFilters.length - 1; i++) {
-	amLowpassFilters[i].connect(amLowpassFilters[i + 1]);
+  amLowpassFilters[i].connect(amLowpassFilters[i + 1]);
 }
 amLowpassFilters[amLowpassFilters.length - 1].connect(amSpeakerResonance);
 amSpeakerResonance.connect(amDistortion);
@@ -198,76 +194,62 @@ makeupGainNode.connect(monoNode);
  * @param settings - AM フィルタの各パラメーター（デフォルト値使用可）
  */
 export function setAmFilterActive(
-	active: boolean,
-	settings: AmFilterSettings = DEFAULT_AM_FILTER_SETTINGS,
+  active: boolean,
+  settings: AmFilterSettings = DEFAULT_AM_FILTER_SETTINGS,
 ): void {
-	// localStorage から読み込んだ旧形式の設定に新フィールドが欠けている場合に備え、
-	// デフォルト値とマージする
-	const s = { ...DEFAULT_AM_FILTER_SETTINGS, ...settings };
-	const now = _audioCtx.currentTime;
-	const smooth = 0.02; // 20ms スムーズ遷移
+  // localStorage から読み込んだ旧形式の設定に新フィールドが欠けている場合に備え、
+  // デフォルト値とマージする
+  const s = { ...DEFAULT_AM_FILTER_SETTINGS, ...settings };
+  const now = _audioCtx.currentTime;
+  const smooth = 0.02; // 20ms スムーズ遷移
 
-	// ハイパスフィルタ（4 段カスケード: 全段同一カットオフ）
-	const hpfTarget = active ? s.hpfFreq : 1;
-	for (const hpf of amHighpassFilters) {
-		hpf.frequency.setTargetAtTime(hpfTarget, now, smooth);
-	}
+  // ハイパスフィルタ（4 段カスケード: 全段同一カットオフ）
+  const hpfTarget = active ? s.hpfFreq : 1;
+  for (const hpf of amHighpassFilters) {
+    hpf.frequency.setTargetAtTime(hpfTarget, now, smooth);
+  }
 
-	// ローパスフィルタ（4 段カスケード: 全段同一カットオフ）
-	const lpfTarget = active ? s.lpfFreq : _audioCtx.sampleRate / 2;
-	for (const lpf of amLowpassFilters) {
-		lpf.frequency.setTargetAtTime(lpfTarget, now, smooth);
-	}
+  // ローパスフィルタ（4 段カスケード: 全段同一カットオフ）
+  const lpfTarget = active ? s.lpfFreq : _audioCtx.sampleRate / 2;
+  for (const lpf of amLowpassFilters) {
+    lpf.frequency.setTargetAtTime(lpfTarget, now, smooth);
+  }
 
-	// 歪み（amount=0 はバイパス）
-	amDistortion.curve =
-		active && s.distortionAmount > 0
-			? getDistortionCurve(s.distortionAmount)
-			: null;
+  // 歪み（amount=0 はバイパス）
+  amDistortion.curve =
+    active && s.distortionAmount > 0 ? getDistortionCurve(s.distortionAmount) : null;
 
-	// コンプレッサー (AGC)
-	amCompressor.threshold.setTargetAtTime(
-		active ? s.compThreshold : 0,
-		now,
-		smooth,
-	);
-	amCompressor.ratio.setTargetAtTime(active ? s.compRatio : 1, now, smooth);
+  // コンプレッサー (AGC)
+  amCompressor.threshold.setTargetAtTime(active ? s.compThreshold : 0, now, smooth);
+  amCompressor.ratio.setTargetAtTime(active ? s.compRatio : 1, now, smooth);
 
-	// メイクアップゲイン: デフォルト設定を基準 (0dB) として相対的に補正。
-	// 閾値を上げる（圧縮減）→ 負のゲイン（減衰）、下げる → 正のゲイン（ブースト）。
-	// AM_MAKEUP_OFFSET_DB で全体をさらに減衰させる。
-	// 無効時は 1.0 (0dB) でバイパス。
-	const AM_MAKEUP_OFFSET_DB = -6;
-	let makeupLinear = 1; // バイパス
-	if (active) {
-		const referenceDb = calcMakeupGain(
-			DEFAULT_AM_FILTER_SETTINGS.compThreshold,
-			DEFAULT_AM_FILTER_SETTINGS.compRatio,
-		);
-		const currentDb = calcMakeupGain(s.compThreshold, s.compRatio);
-		makeupLinear = 10 ** ((currentDb - referenceDb + AM_MAKEUP_OFFSET_DB) / 20);
-	}
-	makeupGainNode.gain.setTargetAtTime(makeupLinear, now, smooth);
+  // メイクアップゲイン: デフォルト設定を基準 (0dB) として相対的に補正。
+  // 閾値を上げる（圧縮減）→ 負のゲイン（減衰）、下げる → 正のゲイン（ブースト）。
+  // AM_MAKEUP_OFFSET_DB で全体をさらに減衰させる。
+  // 無効時は 1.0 (0dB) でバイパス。
+  const AM_MAKEUP_OFFSET_DB = -6;
+  let makeupLinear = 1; // バイパス
+  if (active) {
+    const referenceDb = calcMakeupGain(
+      DEFAULT_AM_FILTER_SETTINGS.compThreshold,
+      DEFAULT_AM_FILTER_SETTINGS.compRatio,
+    );
+    const currentDb = calcMakeupGain(s.compThreshold, s.compRatio);
+    makeupLinear = 10 ** ((currentDb - referenceDb + AM_MAKEUP_OFFSET_DB) / 20);
+  }
+  makeupGainNode.gain.setTargetAtTime(makeupLinear, now, smooth);
 
-	// ブラウンノイズ
-	if (active) ensureNoiseSource();
-	noiseGain.gain.setTargetAtTime(active ? s.noiseLevel : 0, now, smooth);
+  // ブラウンノイズ
+  if (active) ensureNoiseSource();
+  noiseGain.gain.setTargetAtTime(active ? s.noiseLevel : 0, now, smooth);
 
-	// スピーカーシミュレーション（ピーキング EQ）
-	amSpeakerResonance.frequency.setTargetAtTime(
-		active ? s.speakerResonanceFreq : 1200,
-		now,
-		smooth,
-	);
-	amSpeakerResonance.gain.setTargetAtTime(
-		active ? s.speakerResonanceGain : 0,
-		now,
-		smooth,
-	);
+  // スピーカーシミュレーション（ピーキング EQ）
+  amSpeakerResonance.frequency.setTargetAtTime(active ? s.speakerResonanceFreq : 1200, now, smooth);
+  amSpeakerResonance.gain.setTargetAtTime(active ? s.speakerResonanceGain : 0, now, smooth);
 
-	// モノラル化
-	monoNode.channelCount = active ? 1 : 2;
-	monoNode.channelCountMode = active ? "explicit" : "max";
+  // モノラル化
+  monoNode.channelCount = active ? 1 : 2;
+  monoNode.channelCountMode = active ? "explicit" : "max";
 }
 
 /**
@@ -281,12 +263,12 @@ export function setAmFilterActive(
  */
 let _audioSourceConnected = false;
 export function connectAudioSource(): void {
-	if (_audioSourceConnected) return;
-	_audioSourceConnected = true;
+  if (_audioSourceConnected) return;
+  _audioSourceConnected = true;
 
-	const mecsn = _audioCtx.createMediaElementSource(sharedAudioElement);
-	mecsn.connect(amHighpassFilters[0]);
-	analyzerInstance.connectInput(monoNode);
+  const mecsn = _audioCtx.createMediaElementSource(sharedAudioElement);
+  mecsn.connect(amHighpassFilters[0]);
+  analyzerInstance.connectInput(monoNode);
 }
 
 /**
@@ -294,7 +276,7 @@ export function connectAudioSource(): void {
  * volumeGainNode の gain を制御し、audioElement.volume は常に 1 のまま。
  */
 export function setOutputVolume(volume: number, mute: boolean): void {
-	volumeGainNode.gain.value = mute ? 0 : volume / 100;
+  volumeGainNode.gain.value = mute ? 0 : volume / 100;
 }
 
 // ─── Safari MECSN バグ回避ブリッジ ───────────────────────────────────────────
@@ -306,8 +288,8 @@ export function setOutputVolume(volume: number, mute: boolean): void {
  * fMP4 セグメントを横取りし decodeAudioData() 経由でアナライザーに流す。
  */
 export const safariVizBridge: SafariVizBridge | null = isMECSNBroken()
-	? new SafariVizBridge(analyzerInstance)
-	: null;
+  ? new SafariVizBridge(analyzerInstance)
+  : null;
 
 // ─── AudioContext 状態管理 ────────────────────────────────────────────────────
 /**
@@ -327,20 +309,20 @@ let _analyzerWasOn = false;
 
 // NOTE: モジュールスコープのリスナーはアプリ寿命と同一のため意図的にクリーンアップしない
 _audioCtx.addEventListener("statechange", () => {
-	const state = _audioCtx.state as string;
-	if (state === "interrupted") {
-		// interruption 発生時: 再生中フラグを保存
-		_wasInterrupted = true;
-		_analyzerWasOn = analyzerInstance.isOn;
-	} else if (state === "suspended" && _wasInterrupted) {
-		// interruption 解除後に suspended へ戻った場合、手動 resume が必要
-		// (iOS は interruption 後に自動で running へ戻らない)
-		_wasInterrupted = false;
-		if (_analyzerWasOn) {
-			// 再生中だった場合のみ自動 resume を試みる
-			void _audioCtx.resume().then(() => {
-				if (!analyzerInstance.isOn) analyzerInstance.start();
-			});
-		}
-	}
+  const state = _audioCtx.state as string;
+  if (state === "interrupted") {
+    // interruption 発生時: 再生中フラグを保存
+    _wasInterrupted = true;
+    _analyzerWasOn = analyzerInstance.isOn;
+  } else if (state === "suspended" && _wasInterrupted) {
+    // interruption 解除後に suspended へ戻った場合、手動 resume が必要
+    // (iOS は interruption 後に自動で running へ戻らない)
+    _wasInterrupted = false;
+    if (_analyzerWasOn) {
+      // 再生中だった場合のみ自動 resume を試みる
+      void _audioCtx.resume().then(() => {
+        if (!analyzerInstance.isOn) analyzerInstance.start();
+      });
+    }
+  }
 });

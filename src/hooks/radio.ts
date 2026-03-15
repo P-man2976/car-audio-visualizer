@@ -2,11 +2,7 @@ import { getDefaultStore, useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { audioMotionAnalyzerAtom } from "@/atoms/audio";
 import { currentSrcAtom, isPlayingAtom, queueAtom } from "@/atoms/player";
-import {
-	currentRadioAtom,
-	customFrequencyAreaAtom,
-	tuningFreqAtom,
-} from "@/atoms/radio";
+import { currentRadioAtom, customFrequencyAreaAtom, tuningFreqAtom } from "@/atoms/radio";
 import { useRadikoM3u8Url, useRadikoStationList } from "@/services/radiko";
 import { useRadioFrequencies } from "@/services/radio";
 import type { Radio, RadioType } from "@/types/radio";
@@ -22,11 +18,11 @@ const AM_MIN = 531;
 const AM_MAX = 1602;
 
 type TunableEntry = {
-	id: string;
-	name: string;
-	type: "AM" | "FM";
-	freq: number;
-	logo: string | undefined;
+  id: string;
+  name: string;
+  type: "AM" | "FM";
+  freq: number;
+  logo: string | undefined;
 };
 
 /**
@@ -34,93 +30,90 @@ type TunableEntry = {
  * useRadioPlayer と useBandToggle/チャンネルショートカットで共用する。
  */
 export function useTunableStations(): TunableEntry[] {
-	const customFreqList = useAtomValue(customFrequencyAreaAtom);
-	const { data: frequencies } = useRadioFrequencies();
-	const { data: radikoStationList } = useRadikoStationList();
+  const customFreqList = useAtomValue(customFrequencyAreaAtom);
+  const { data: frequencies } = useRadioFrequencies();
+  const { data: radikoStationList } = useRadikoStationList();
 
-	return useMemo(() => {
-		if (!frequencies || !radikoStationList) return [];
+  return useMemo(() => {
+    if (!frequencies || !radikoStationList) return [];
 
-		const entries: TunableEntry[] = [];
+    const entries: TunableEntry[] = [];
 
-		for (const station of radikoStationList) {
-			const freqData = frequencies[station.id];
-			if (!freqData) continue;
+    for (const station of radikoStationList) {
+      const freqData = frequencies[station.id];
+      if (!freqData) continue;
 
-			const customFreq = customFreqList.find((s) => s.id === station.id);
+      const customFreq = customFreqList.find((s) => s.id === station.id);
 
-			// ─── カスタム設定あり: その周波数 + primary バンドも追加 ───
-			if (customFreq) {
-				entries.push({
-					id: station.id,
-					name: station.name,
-					type: customFreq.type,
-					freq: customFreq.freq,
-					logo: station.logo?.[0],
-				});
+      // ─── カスタム設定あり: その周波数 + primary バンドも追加 ───
+      if (customFreq) {
+        entries.push({
+          id: station.id,
+          name: station.name,
+          type: customFreq.type,
+          freq: customFreq.freq,
+          logo: station.logo?.[0],
+        });
 
-				// カスタム周波数が局の primary type と異なるバンドの場合、
-				// primary バンドの周波数も追加して AM チューニングで見つかるようにする
-				if (customFreq.type !== freqData.type && freqData.type === "AM") {
-					const amArea =
-						freqData.frequencies_am.find((a) => a.primary) ??
-						freqData.frequencies_am[0];
-					entries.push({
-						id: station.id,
-						name: station.name,
-						type: "AM",
-						freq: amArea.frequency,
-						logo: station.logo?.[0],
-					});
-				}
+        // カスタム周波数が局の primary type と異なるバンドの場合、
+        // primary バンドの周波数も追加して AM チューニングで見つかるようにする
+        if (customFreq.type !== freqData.type && freqData.type === "AM") {
+          const amArea =
+            freqData.frequencies_am.find((a) => a.primary) ?? freqData.frequencies_am[0];
+          entries.push({
+            id: station.id,
+            name: station.name,
+            type: "AM",
+            freq: amArea.frequency,
+            logo: station.logo?.[0],
+          });
+        }
 
-				continue;
-			}
+        continue;
+      }
 
-			// ─── カスタム設定なし ───
-			const hasAM = freqData.type === "AM";
+      // ─── カスタム設定なし ───
+      const hasAM = freqData.type === "AM";
 
-			if (hasAM) {
-				const amArea =
-					freqData.frequencies_am!.find((a) => a.primary) ??
-					freqData.frequencies_am![0];
-				entries.push({
-					id: station.id,
-					name: station.name,
-					type: "AM",
-					freq: amArea.frequency,
-					logo: station.logo?.[0],
-				});
+      if (hasAM) {
+        const amArea =
+          freqData.frequencies_am!.find((a) => a.primary) ?? freqData.frequencies_am![0];
+        entries.push({
+          id: station.id,
+          name: station.name,
+          type: "AM",
+          freq: amArea.frequency,
+          logo: station.logo?.[0],
+        });
 
-				const primaryFmArea = freqData.frequencies_fm?.find((a) => a.primary);
-				if (primaryFmArea) {
-					entries.push({
-						id: station.id,
-						name: station.name,
-						type: "FM",
-						freq: primaryFmArea.frequency,
-						logo: station.logo?.[0],
-					});
-				}
-			} else {
-				const fmArea =
-					freqData.frequencies_fm!.find((a) => a.primary) ??
-					freqData.frequencies_fm![0];
-				entries.push({
-					id: station.id,
-					name: station.name,
-					type: "FM",
-					freq: fmArea.frequency,
-					logo: station.logo?.[0],
-				});
-			}
-		}
+        const primaryFmArea = freqData.frequencies_fm?.find((a) => a.primary);
+        if (primaryFmArea) {
+          entries.push({
+            id: station.id,
+            name: station.name,
+            type: "FM",
+            freq: primaryFmArea.frequency,
+            logo: station.logo?.[0],
+          });
+        }
+      } else {
+        const fmArea =
+          freqData.frequencies_fm!.find((a) => a.primary) ?? freqData.frequencies_fm![0];
+        entries.push({
+          id: station.id,
+          name: station.name,
+          type: "FM",
+          freq: fmArea.frequency,
+          logo: station.logo?.[0],
+        });
+      }
+    }
 
-		return entries.sort((a, b) => {
-			if (a.type !== b.type) return a.type === "FM" ? -1 : 1;
-			return a.freq - b.freq;
-		});
-	}, [frequencies, radikoStationList, customFreqList]);
+    return entries.sort((a, b) => {
+      if (a.type !== b.type) return a.type === "FM" ? -1 : 1;
+      return a.freq - b.freq;
+    });
+  }, [frequencies, radikoStationList, customFreqList]);
 }
 
 /**
@@ -128,34 +121,34 @@ export function useTunableStations(): TunableEntry[] {
  * キュー内の最新局を探してバンドを切り替える。なければ最初のチューナブル局へ。
  */
 export function useBandToggle() {
-	const currentRadio = useAtomValue(currentRadioAtom);
-	const queue = useAtomValue(queueAtom);
-	const tunableStations = useTunableStations();
-	const { selectRadio } = useSelectRadio();
+  const currentRadio = useAtomValue(currentRadioAtom);
+  const queue = useAtomValue(queueAtom);
+  const tunableStations = useTunableStations();
+  const { selectRadio } = useSelectRadio();
 
-	return useCallback(() => {
-		if (!currentRadio) return;
-		const targetBand: RadioType = currentRadio.type === "FM" ? "AM" : "FM";
+  return useCallback(() => {
+    if (!currentRadio) return;
+    const targetBand: RadioType = currentRadio.type === "FM" ? "AM" : "FM";
 
-		// キュー内の最新局を探す
-		const lastOfBand = queue.find((r) => r.type === targetBand);
-		if (lastOfBand) {
-			selectRadio(lastOfBand);
-			return;
-		}
-		// なければ最初のチューナブル局へ
-		const first = tunableStations.find((s) => s.type === targetBand);
-		if (first) {
-			selectRadio({
-				type: first.type,
-				source: "radiko",
-				id: first.id,
-				name: first.name,
-				logo: first.logo,
-				frequency: first.freq,
-			});
-		}
-	}, [currentRadio, queue, tunableStations, selectRadio]);
+    // キュー内の最新局を探す
+    const lastOfBand = queue.find((r) => r.type === targetBand);
+    if (lastOfBand) {
+      selectRadio(lastOfBand);
+      return;
+    }
+    // なければ最初のチューナブル局へ
+    const first = tunableStations.find((s) => s.type === targetBand);
+    if (first) {
+      selectRadio({
+        type: first.type,
+        source: "radiko",
+        id: first.id,
+        name: first.name,
+        logo: first.logo,
+        frequency: first.freq,
+      });
+    }
+  }, [currentRadio, queue, tunableStations, selectRadio]);
 }
 
 /**
@@ -163,51 +156,43 @@ export function useBandToggle() {
  * イベントハンドラー内で直接呼ぶことで effect の二重実行問題を回避する。
  */
 export function useSelectRadio() {
-	const setCurrentRadio = useSetAtom(currentRadioAtom);
-	const setCurrentSrc = useSetAtom(currentSrcAtom);
-	const setQueue = useSetAtom(queueAtom);
-	const { load, unLoad } = useHLS();
-	const { mutate, isPending } = useRadikoM3u8Url();
-	const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
+  const setCurrentRadio = useSetAtom(currentRadioAtom);
+  const setCurrentSrc = useSetAtom(currentSrcAtom);
+  const setQueue = useSetAtom(queueAtom);
+  const { load, unLoad } = useHLS();
+  const { mutate, isPending } = useRadikoM3u8Url();
+  const audioMotionAnalyzer = useAtomValue(audioMotionAnalyzerAtom);
 
-	const selectRadio = useCallback(
-		(radio: Radio) => {
-			// ユーザーインタラクション（クリック）の同期コンテキスト内で resume() を呼ぶ。
-			// radiko は mutate() の onSuccess コールバック内で load() が呼ばれるため
-			// ジェスチャーから切り離される。ここで先行して resume() することで
-			// Safari / WebKit の autoplay policy を満たす。
-			void audioMotionAnalyzer.audioCtx.resume();
-			setCurrentSrc("radio");
-			setCurrentRadio(radio);
-			unLoad();
-			if (radio.source === "radiko") {
-				mutate(radio.id, { onSuccess: (m3u8) => load(m3u8) });
-			} else if (radio.source === "radiru") {
-				load(radio.url);
-			}
-			setQueue((current) => {
-				const alreadyIn = current.some((r) =>
-					r.source === "radiko" && radio.source === "radiko"
-						? r.id === radio.id
-						: r.source === "radiru" && radio.source === "radiru"
-							? r.url === radio.url
-							: false,
-				);
-				return alreadyIn ? current : [radio, ...current].slice(0, 20);
-			});
-		},
-		[
-			setCurrentSrc,
-			setCurrentRadio,
-			unLoad,
-			mutate,
-			load,
-			setQueue,
-			audioMotionAnalyzer,
-		],
-	);
+  const selectRadio = useCallback(
+    (radio: Radio) => {
+      // ユーザーインタラクション（クリック）の同期コンテキスト内で resume() を呼ぶ。
+      // radiko は mutate() の onSuccess コールバック内で load() が呼ばれるため
+      // ジェスチャーから切り離される。ここで先行して resume() することで
+      // Safari / WebKit の autoplay policy を満たす。
+      void audioMotionAnalyzer.audioCtx.resume();
+      setCurrentSrc("radio");
+      setCurrentRadio(radio);
+      unLoad();
+      if (radio.source === "radiko") {
+        mutate(radio.id, { onSuccess: (m3u8) => load(m3u8) });
+      } else if (radio.source === "radiru") {
+        load(radio.url);
+      }
+      setQueue((current) => {
+        const alreadyIn = current.some((r) =>
+          r.source === "radiko" && radio.source === "radiko"
+            ? r.id === radio.id
+            : r.source === "radiru" && radio.source === "radiru"
+              ? r.url === radio.url
+              : false,
+        );
+        return alreadyIn ? current : [radio, ...current].slice(0, 20);
+      });
+    },
+    [setCurrentSrc, setCurrentRadio, unLoad, mutate, load, setQueue, audioMotionAnalyzer],
+  );
 
-	return { selectRadio, isPending };
+  return { selectRadio, isPending };
 }
 
 /**
@@ -216,160 +201,148 @@ export function useSelectRadio() {
  * tuningFreqAtom への書き込みを担う。
  */
 export function useRadioPlayer() {
-	const currentSrc = useAtomValue(currentSrcAtom);
-	const currentRadio = useAtomValue(currentRadioAtom);
-	const setTuningFreq = useSetAtom(tuningFreqAtom);
-	const { unLoad } = useHLS();
-	const tunableStations = useTunableStations();
-	const { selectRadio, isPending: isRadikoLoading } = useSelectRadio();
+  const currentSrc = useAtomValue(currentSrcAtom);
+  const currentRadio = useAtomValue(currentRadioAtom);
+  const setTuningFreq = useSetAtom(tuningFreqAtom);
+  const { unLoad } = useHLS();
+  const tunableStations = useTunableStations();
+  const { selectRadio, isPending: isRadikoLoading } = useSelectRadio();
 
-	const tuningTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-	const animFreqRef = useRef<number>(0);
-	/** 自動再生ガード: radio モードに入った際に同じ局を二重ロードしないための ID */
-	const prevSrcRef = useRef<string | null>(null);
+  const tuningTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const animFreqRef = useRef<number>(0);
+  /** 自動再生ガード: radio モードに入った際に同じ局を二重ロードしないための ID */
+  const prevSrcRef = useRef<string | null>(null);
 
-	// ラジオ以外のモードへ切り替わったら HLS を即停止して選局アニメーションをキャンセル
-	// file モードも含む（SourceBuffer が残るとファイル再生と競合するため）
-	useEffect(() => {
-		if (currentSrc !== "radio") {
-			unLoad();
-			if (tuningTimerRef.current) {
-				clearInterval(tuningTimerRef.current);
-				tuningTimerRef.current = null;
-			}
-			animFreqRef.current = 0;
-			prevSrcRef.current = null;
-			setTuningFreq(null);
-		}
-	}, [currentSrc, unLoad, setTuningFreq]);
+  // ラジオ以外のモードへ切り替わったら HLS を即停止して選局アニメーションをキャンセル
+  // file モードも含む（SourceBuffer が残るとファイル再生と競合するため）
+  useEffect(() => {
+    if (currentSrc !== "radio") {
+      unLoad();
+      if (tuningTimerRef.current) {
+        clearInterval(tuningTimerRef.current);
+        tuningTimerRef.current = null;
+      }
+      animFreqRef.current = 0;
+      prevSrcRef.current = null;
+      setTuningFreq(null);
+    }
+  }, [currentSrc, unLoad, setTuningFreq]);
 
-	// ラジオモードに切り替わったら、前回の局を自動再生する
-	// selectRadio の参照変更による二重ロードを prevSrcRef で防止
-	useEffect(() => {
-		const isPlaying = store.get(isPlayingAtom);
-		const radio = store.get(currentRadioAtom);
-		if (!isPlaying || currentSrc !== "radio" || !radio) return;
-		// 同じ局を二重ロードしない（selectRadio/playRadio の参照変更による effect 再実行対策）
-		if (prevSrcRef.current === "radio") return;
-		prevSrcRef.current = "radio";
-		selectRadio(radio);
-	}, [currentSrc, selectRadio]);
+  // ラジオモードに切り替わったら、前回の局を自動再生する
+  // selectRadio の参照変更による二重ロードを prevSrcRef で防止
+  useEffect(() => {
+    const isPlaying = store.get(isPlayingAtom);
+    const radio = store.get(currentRadioAtom);
+    if (!isPlaying || currentSrc !== "radio" || !radio) return;
+    // 同じ局を二重ロードしない（selectRadio/playRadio の参照変更による effect 再実行対策）
+    if (prevSrcRef.current === "radio") return;
+    prevSrcRef.current = "radio";
+    selectRadio(radio);
+  }, [currentSrc, selectRadio]);
 
-	// アンマウント時のクリーンアップ
-	useEffect(() => {
-		return () => {
-			if (tuningTimerRef.current) clearInterval(tuningTimerRef.current);
-		};
-	}, []);
+  // アンマウント時のクリーンアップ
+  useEffect(() => {
+    return () => {
+      if (tuningTimerRef.current) clearInterval(tuningTimerRef.current);
+    };
+  }, []);
 
-	/**
-	 * 停止中に現在局を再ロードして再生。
-	 * useSelectRadio に委譲することで resume / unLoad / load ロジックの重複を排除する。
-	 */
-	const playRadio = useCallback(() => {
-		if (!currentRadio) return;
-		selectRadio(currentRadio);
-	}, [currentRadio, selectRadio]);
+  /**
+   * 停止中に現在局を再ロードして再生。
+   * useSelectRadio に委譲することで resume / unLoad / load ロジックの重複を排除する。
+   */
+  const playRadio = useCallback(() => {
+    if (!currentRadio) return;
+    selectRadio(currentRadio);
+  }, [currentRadio, selectRadio]);
 
-	/** HLS をアンロードして停止 */
-	const stopRadio = useCallback(() => {
-		unLoad();
-	}, [unLoad]);
+  /** HLS をアンロードして停止 */
+  const stopRadio = useCallback(() => {
+    unLoad();
+  }, [unLoad]);
 
-	/**
-	 * 選局アニメーション (+1 = 周波数↑, -1 = 周波数↓)
-	 *
-	 * - FM: 76〜99 MHz の範囲内を巡回（端で折り返し）
-	 * - AM: 531〜1602 kHz の範囲内を巡回（端で折り返し）
-	 * - 100ms 間隔で tuningFreqAtom を更新し、ドットマトリクスに反映
-	 */
-	const tune = useCallback(
-		(direction: 1 | -1) => {
-			if (!currentRadio || currentSrc !== "radio") return;
-			const type = currentRadio.type;
-			const step = type === "FM" ? 0.1 : 9;
-			const bandMin = type === "FM" ? FM_MIN : AM_MIN;
-			const bandMax = type === "FM" ? FM_MAX : AM_MAX;
-			const bandSize = bandMax - bandMin;
+  /**
+   * 選局アニメーション (+1 = 周波数↑, -1 = 周波数↓)
+   *
+   * - FM: 76〜99 MHz の範囲内を巡回（端で折り返し）
+   * - AM: 531〜1602 kHz の範囲内を巡回（端で折り返し）
+   * - 100ms 間隔で tuningFreqAtom を更新し、ドットマトリクスに反映
+   */
+  const tune = useCallback(
+    (direction: 1 | -1) => {
+      if (!currentRadio || currentSrc !== "radio") return;
+      const type = currentRadio.type;
+      const step = type === "FM" ? 0.1 : 9;
+      const bandMin = type === "FM" ? FM_MIN : AM_MIN;
+      const bandMax = type === "FM" ? FM_MAX : AM_MAX;
+      const bandSize = bandMax - bandMin;
 
-			const stations = tunableStations.filter((s) => s.type === type);
-			if (!stations.length) return;
+      const stations = tunableStations.filter((s) => s.type === type);
+      if (!stations.length) return;
 
-			const baseFreq =
-				animFreqRef.current !== 0
-					? animFreqRef.current
-					: (currentRadio.frequency ?? stations[0].freq);
+      const baseFreq =
+        animFreqRef.current !== 0
+          ? animFreqRef.current
+          : (currentRadio.frequency ?? stations[0].freq);
 
-			// 進行方向に次の局を探す（端に達したら反対側の端へ折り返し）
-			let target: (typeof stations)[0] | undefined;
-			if (direction === 1) {
-				target = stations.find((s) => s.freq > baseFreq + step * 0.4);
-				if (!target) target = stations[0]; // バンド最上部で折り返し
-			} else {
-				target = [...stations]
-					.reverse()
-					.find((s) => s.freq < baseFreq - step * 0.4);
-				if (!target) target = stations[stations.length - 1]; // バンド最下部で折り返し
-			}
-			if (!target) return;
+      // 進行方向に次の局を探す（端に達したら反対側の端へ折り返し）
+      let target: (typeof stations)[0] | undefined;
+      if (direction === 1) {
+        target = stations.find((s) => s.freq > baseFreq + step * 0.4);
+        if (!target) target = stations[0]; // バンド最上部で折り返し
+      } else {
+        target = [...stations].reverse().find((s) => s.freq < baseFreq - step * 0.4);
+        if (!target) target = stations[stations.length - 1]; // バンド最下部で折り返し
+      }
+      if (!target) return;
 
-			if (tuningTimerRef.current) {
-				clearInterval(tuningTimerRef.current);
-				tuningTimerRef.current = null;
-			}
-			unLoad();
+      if (tuningTimerRef.current) {
+        clearInterval(tuningTimerRef.current);
+        tuningTimerRef.current = null;
+      }
+      unLoad();
 
-			const targetFreq = target.freq;
-			const targetStation: Radio = {
-				type: target.type,
-				source: "radiko",
-				id: target.id,
-				name: target.name,
-				logo: target.logo,
-				frequency: target.freq,
-			};
+      const targetFreq = target.freq;
+      const targetStation: Radio = {
+        type: target.type,
+        source: "radiko",
+        id: target.id,
+        name: target.name,
+        logo: target.logo,
+        frequency: target.freq,
+      };
 
-			// バンドを考慮した移動総距離（折り返しを含む）
-			const rawDiff = (targetFreq - baseFreq) * direction;
-			const totalDistance = rawDiff >= 0 ? rawDiff : rawDiff + bandSize;
+      // バンドを考慮した移動総距離（折り返しを含む）
+      const rawDiff = (targetFreq - baseFreq) * direction;
+      const totalDistance = rawDiff >= 0 ? rawDiff : rawDiff + bandSize;
 
-			animFreqRef.current = baseFreq;
-			let distanceTraveled = 0;
+      animFreqRef.current = baseFreq;
+      let distanceTraveled = 0;
 
-			// 100ms 間隔でバンド内を巡回しながら目標周波数へ近づく
-			tuningTimerRef.current = setInterval(() => {
-				distanceTraveled += step;
+      // 100ms 間隔でバンド内を巡回しながら目標周波数へ近づく
+      tuningTimerRef.current = setInterval(() => {
+        distanceTraveled += step;
 
-				if (distanceTraveled >= totalDistance - step * 0.45) {
-					// アニメーション完了 → 局を選択
-					clearInterval(tuningTimerRef.current!);
-					tuningTimerRef.current = null;
-					animFreqRef.current = 0;
-					setTuningFreq(null);
-					selectRadio(targetStation);
-				} else {
-					// バンド端での折り返しを考慮した現在周波数を算出
-					let curr = baseFreq + direction * distanceTraveled;
-					if (curr > bandMax) curr -= bandSize;
-					if (curr < bandMin) curr += bandSize;
-					const rounded =
-						type === "FM"
-							? Math.round(curr * 10) / 10
-							: Math.round(curr / 9) * 9;
-					animFreqRef.current = rounded;
-					setTuningFreq(rounded);
-				}
-			}, 100);
-		},
-		[
-			currentRadio,
-			currentSrc,
-			tunableStations,
-			unLoad,
-			selectRadio,
-			setTuningFreq,
-		],
-	);
+        if (distanceTraveled >= totalDistance - step * 0.45) {
+          // アニメーション完了 → 局を選択
+          clearInterval(tuningTimerRef.current!);
+          tuningTimerRef.current = null;
+          animFreqRef.current = 0;
+          setTuningFreq(null);
+          selectRadio(targetStation);
+        } else {
+          // バンド端での折り返しを考慮した現在周波数を算出
+          let curr = baseFreq + direction * distanceTraveled;
+          if (curr > bandMax) curr -= bandSize;
+          if (curr < bandMin) curr += bandSize;
+          const rounded = type === "FM" ? Math.round(curr * 10) / 10 : Math.round(curr / 9) * 9;
+          animFreqRef.current = rounded;
+          setTuningFreq(rounded);
+        }
+      }, 100);
+    },
+    [currentRadio, currentSrc, tunableStations, unLoad, selectRadio, setTuningFreq],
+  );
 
-	return { playRadio, stopRadio, tune, isRadikoLoading };
+  return { playRadio, stopRadio, tune, isRadikoLoading };
 }

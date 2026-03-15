@@ -14,23 +14,23 @@ import { VisualizerStandard } from "./visualizer/VisualizerStandard";
  *   standard-2d  → HomePage で PixiJS によりレンダー（R3F 外）
  */
 export function VisualizerSwitch() {
-	const style = useAtomValue(visualizerStyleAtom);
-	const scale = useResponsiveScale();
+  const style = useAtomValue(visualizerStyleAtom);
+  const scale = useResponsiveScale();
 
-	if (style === "dpx5021m") {
-		return (
-			<group scale={scale}>
-				<VisualizerKenwood />
-				<VisualizerKenwoodSub />
-				<DotMatrixArray y={-43} />
-			</group>
-		);
-	}
+  if (style === "dpx5021m") {
+    return (
+      <group scale={scale}>
+        <VisualizerKenwood />
+        <VisualizerKenwoodSub />
+        <DotMatrixArray y={-43} />
+      </group>
+    );
+  }
 
-	return (
-		<group scale={scale}>
-			<VisualizerStandard />
-			<DotMatrixArray y={50} scale={1.3} />
-		</group>
-	);
+  return (
+    <group scale={scale}>
+      <VisualizerStandard />
+      <DotMatrixArray y={50} scale={1.3} />
+    </group>
+  );
 }

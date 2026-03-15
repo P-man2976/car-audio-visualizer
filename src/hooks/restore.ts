@@ -14,40 +14,33 @@ import { useHLS } from "./hls";
  * restoredRef ガードにより複数回実行されることはない。
  */
 export function useRestoreState() {
-	const { load } = useHLS();
-	const { mutate } = useRadikoM3u8Url();
-	const restoredRef = useRef(false);
+  const { load } = useHLS();
+  const { mutate } = useRadikoM3u8Url();
+  const restoredRef = useRef(false);
 
-	const tryRestore = useAtomCallback(
-		useCallback(
-			(get) => {
-				if (restoredRef.current) return;
-				restoredRef.current = true;
+  const tryRestore = useAtomCallback(
+    useCallback(
+      (get) => {
+        if (restoredRef.current) return;
+        restoredRef.current = true;
 
-				const currentSrc = get(currentSrcAtom);
-				const currentRadio = get(currentRadioAtom);
+        const currentSrc = get(currentSrcAtom);
+        const currentRadio = get(currentRadioAtom);
 
-				if (currentSrc === "radio" && currentRadio) {
-					if (currentRadio.source === "radiko") {
-						mutate(currentRadio.id, { onSuccess: (m3u8) => load(m3u8) });
-					} else if (currentRadio.source === "radiru") {
-						// radiru は url プロパティを保持している
-						load(
-							(
-								currentRadio as Extract<
-									typeof currentRadio,
-									{ source: "radiru" }
-								>
-							).url,
-						);
-					}
-				}
-			},
-			[load, mutate],
-		),
-	);
+        if (currentSrc === "radio" && currentRadio) {
+          if (currentRadio.source === "radiko") {
+            mutate(currentRadio.id, { onSuccess: (m3u8) => load(m3u8) });
+          } else if (currentRadio.source === "radiru") {
+            // radiru は url プロパティを保持している
+            load((currentRadio as Extract<typeof currentRadio, { source: "radiru" }>).url);
+          }
+        }
+      },
+      [load, mutate],
+    ),
+  );
 
-	useEffect(() => {
-		tryRestore();
-	}, [tryRestore]);
+  useEffect(() => {
+    tryRestore();
+  }, [tryRestore]);
 }

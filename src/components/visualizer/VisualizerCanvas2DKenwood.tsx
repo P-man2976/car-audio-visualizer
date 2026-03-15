@@ -39,11 +39,7 @@ const MAIN_SIDE_GAP = 0.5;
 const MAIN_SIDE_UNIT = MAIN_SIDE_BAR_WIDTH + MAIN_SIDE_GAP; // 0.9
 const MAIN_BAND_GAP = 1.6;
 const MAIN_BAND_STRIDE =
-	MAIN_SIDE_UNIT +
-	MAIN_BAR_WIDTH +
-	MAIN_SIDE_GAP +
-	MAIN_SIDE_BAR_WIDTH +
-	MAIN_BAND_GAP; // 9.9
+  MAIN_SIDE_UNIT + MAIN_BAR_WIDTH + MAIN_SIDE_GAP + MAIN_SIDE_BAR_WIDTH + MAIN_BAND_GAP; // 9.9
 
 const MAIN_BAND_INDICES = [4, 7, 10, 13, 16, 19, 22, 24, 25, 27, 28] as const;
 
@@ -105,14 +101,12 @@ const SECTION_GAP_FRAC = 0.02;
 // Main design space
 const MAIN_DESIGN_W = MAIN_BAND_STRIDE * MAIN_FREQ_COUNT - MAIN_BAND_GAP; // last band has no trailing gap
 const MAIN_DESIGN_H =
-	MAIN_COL_CELL_COUNT * MAIN_CELL_HEIGHT +
-	(MAIN_COL_CELL_COUNT - 1) * MAIN_COL_CELL_GAP;
+  MAIN_COL_CELL_COUNT * MAIN_CELL_HEIGHT + (MAIN_COL_CELL_COUNT - 1) * MAIN_COL_CELL_GAP;
 
 // Sub design space
 const SUB_BARS_DESIGN_W = SUB_BAND_STRIDE * SUB_FREQ_COUNT - SUB_BAND_GAP;
 const SUB_DESIGN_H =
-	SUB_COL_CELL_COUNT * SUB_CELL_HEIGHT +
-	(SUB_COL_CELL_COUNT - 1) * SUB_COL_CELL_GAP;
+  SUB_COL_CELL_COUNT * SUB_CELL_HEIGHT + (SUB_COL_CELL_COUNT - 1) * SUB_COL_CELL_GAP;
 
 // Total design width is the maximum of main or sub+wings
 const SUB_TOTAL_W = SUB_BARS_DESIGN_W + 2 * (WING_GAP + WING_MAX_LOCAL_WIDTH);
@@ -131,84 +125,80 @@ const PERSPECTIVE_DIST = 50;
 // Layout calculator
 // ═══════════════════════════════════════════════════════════════════════════
 interface KenwoodLayout {
-	s: number;
-	// Main section
-	mainOffsetX: number;
-	mainOffsetY: number;
-	mainW: number;
-	mainH: number;
-	mainCellH: number;
-	// Sub section
-	subOffsetX: number;
-	subOffsetY: number;
-	subW: number;
-	subH: number;
-	subCellH: number;
-	// DotMatrix section
-	dotOffsetY: number;
-	dotAreaH: number;
-	// Screen dimensions
-	screenW: number;
-	screenH: number;
+  s: number;
+  // Main section
+  mainOffsetX: number;
+  mainOffsetY: number;
+  mainW: number;
+  mainH: number;
+  mainCellH: number;
+  // Sub section
+  subOffsetX: number;
+  subOffsetY: number;
+  subW: number;
+  subH: number;
+  subCellH: number;
+  // DotMatrix section
+  dotOffsetY: number;
+  dotAreaH: number;
+  // Screen dimensions
+  screenW: number;
+  screenH: number;
 }
 
-function computeKenwoodLayout(
-	w: number,
-	h: number,
-	zoom: number,
-): KenwoodLayout {
-	const usableW = w * (1 - PADDING_FRAC * 2);
-	const usableH = h * (1 - PADDING_FRAC * 2);
+function computeKenwoodLayout(w: number, h: number, zoom: number): KenwoodLayout {
+  const usableW = w * (1 - PADDING_FRAC * 2);
+  const usableH = h * (1 - PADDING_FRAC * 2);
 
-	// Overall design height = dot + gap + main + gap + sub
-	const designTotalH =
-		MAIN_DESIGN_H * (1 + DOT_FRAC / MAIN_FRAC + SUB_FRAC / MAIN_FRAC) +
-		2 * SECTION_GAP_FRAC * usableH;
+  // Overall design height = dot + gap + main + gap + sub
+  const designTotalH =
+    MAIN_DESIGN_H * (1 + DOT_FRAC / MAIN_FRAC + SUB_FRAC / MAIN_FRAC) +
+    2 * SECTION_GAP_FRAC * usableH;
 
-	// Uniform scale to fit
-	const sFromW = usableW / DESIGN_TOTAL_W;
-	const sFromH = usableH / designTotalH;
-	const s = Math.min(sFromW, sFromH) * zoom;
+  // Uniform scale to fit
+  const sFromW = usableW / DESIGN_TOTAL_W;
+  const sFromH = usableH / designTotalH;
+  const s = Math.min(sFromW, sFromH) * zoom;
 
-	const mainW = MAIN_DESIGN_W * s;
-	const mainH = MAIN_DESIGN_H * s;
-	const subW = SUB_BARS_DESIGN_W * s;
-	const subH = SUB_DESIGN_H * s;
-	const dotAreaH = mainH * (DOT_FRAC / MAIN_FRAC);
-	const sectionGap = SECTION_GAP_FRAC * usableH * zoom;
+  const mainW = MAIN_DESIGN_W * s;
+  const mainH = MAIN_DESIGN_H * s;
+  const subW = SUB_BARS_DESIGN_W * s;
+  const subH = SUB_DESIGN_H * s;
+  const dotAreaH = mainH * (DOT_FRAC / MAIN_FRAC);
+  const sectionGap = SECTION_GAP_FRAC * usableH * zoom;
 
-	const totalH = dotAreaH + sectionGap + mainH + sectionGap + subH;
-	const totalW = DESIGN_TOTAL_W * s;
+  const totalH = dotAreaH + sectionGap + mainH + sectionGap + subH;
+  const totalW = DESIGN_TOTAL_W * s;
 
-	const baseX = (w - totalW) / 2;
-	const baseY = (h - totalH) / 2;
+  const baseX = (w - totalW) / 2;
+  const baseY = (h - totalH) / 2;
 
-	// DotMatrix at top
-	const dotOffsetY = baseY;
-	// Main bars below dot
-	const mainOffsetY = baseY + dotAreaH + sectionGap;
-	const mainOffsetX = baseX + (totalW - mainW) / 2;
-	// Sub bars below main
-	const subOffsetY = mainOffsetY + mainH + sectionGap;
-	const subOffsetX = baseX + (totalW - subW) / 2;
+  // DotMatrix at top
+  const dotOffsetY = baseY;
+  // Main bars below dot
+  const mainOffsetY = baseY + dotAreaH + sectionGap;
+  const mainOffsetX = baseX + (totalW - mainW) / 2;
+  // Sub bars below main
+  const subOffsetY = mainOffsetY + mainH + sectionGap;
+  const subOffsetX = baseX + (totalW - subW) / 2;
 
-	return {
-		s,
-		mainOffsetX,
-		mainOffsetY,
-		mainW,
-		mainH,
-		mainCellH: MAIN_CELL_HEIGHT * s,
-		subOffsetX,
-		subOffsetY,
-		subW,
-		subH,
-		subCellH: SUB_CELL_HEIGHT * s,
-		dotOffsetY,
-		dotAreaH,
-		screenW: w,
-		screenH: h,
-	};
+  return {
+    s,
+    mainOffsetX,
+    mainOffsetY,
+    mainW,
+    mainH,
+    mainCellH: MAIN_CELL_HEIGHT * s,
+    subOffsetX,
+    subOffsetY,
+    subW,
+    subH,
+    subCellH: SUB_CELL_HEIGHT * s,
+    dotOffsetY,
+    dotAreaH,
+    screenW: w,
+    screenH: h,
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -220,355 +210,327 @@ const _polyBuf = new Float64Array(8);
 
 /** Project a point with given tilt parameters, writing to output buffer */
 function projectSectionTo(
-	out: Float64Array,
-	offset: number,
-	x: number,
-	y: number,
-	cx: number,
-	cy: number,
-	tiltSin: number,
-	tiltCos: number,
-	perspDist: number,
+  out: Float64Array,
+  offset: number,
+  x: number,
+  y: number,
+  cx: number,
+  cy: number,
+  tiltSin: number,
+  tiltCos: number,
+  perspDist: number,
 ): void {
-	const dy = y - cy;
-	const z = -dy * tiltSin;
-	const sc = perspDist / (perspDist + z);
-	out[offset] = cx + (x - cx) * sc;
-	out[offset + 1] = cy + dy * tiltCos * sc;
+  const dy = y - cy;
+  const z = -dy * tiltSin;
+  const sc = perspDist / (perspDist + z);
+  out[offset] = cx + (x - cx) * sc;
+  out[offset + 1] = cy + dy * tiltCos * sc;
 }
 
 /** Draw a perspective-projected quad */
 function drawPerspRectSection(
-	g: Graphics,
-	x: number,
-	y: number,
-	w: number,
-	h: number,
-	cx: number,
-	cy: number,
-	tiltSin: number,
-	tiltCos: number,
-	perspDist: number,
-	color: number,
+  g: Graphics,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  cx: number,
+  cy: number,
+  tiltSin: number,
+  tiltCos: number,
+  perspDist: number,
+  color: number,
 ): void {
-	projectSectionTo(_polyBuf, 0, x, y, cx, cy, tiltSin, tiltCos, perspDist);
-	projectSectionTo(_polyBuf, 2, x + w, y, cx, cy, tiltSin, tiltCos, perspDist);
-	projectSectionTo(
-		_polyBuf,
-		4,
-		x + w,
-		y + h,
-		cx,
-		cy,
-		tiltSin,
-		tiltCos,
-		perspDist,
-	);
-	projectSectionTo(_polyBuf, 6, x, y + h, cx, cy, tiltSin, tiltCos, perspDist);
-	g.moveTo(_polyBuf[0], _polyBuf[1]);
-	g.lineTo(_polyBuf[2], _polyBuf[3]);
-	g.lineTo(_polyBuf[4], _polyBuf[5]);
-	g.lineTo(_polyBuf[6], _polyBuf[7]);
-	g.closePath();
-	g.fill(color);
+  projectSectionTo(_polyBuf, 0, x, y, cx, cy, tiltSin, tiltCos, perspDist);
+  projectSectionTo(_polyBuf, 2, x + w, y, cx, cy, tiltSin, tiltCos, perspDist);
+  projectSectionTo(_polyBuf, 4, x + w, y + h, cx, cy, tiltSin, tiltCos, perspDist);
+  projectSectionTo(_polyBuf, 6, x, y + h, cx, cy, tiltSin, tiltCos, perspDist);
+  g.moveTo(_polyBuf[0], _polyBuf[1]);
+  g.lineTo(_polyBuf[2], _polyBuf[3]);
+  g.lineTo(_polyBuf[4], _polyBuf[5]);
+  g.lineTo(_polyBuf[6], _polyBuf[7]);
+  g.closePath();
+  g.fill(color);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Root wrapper (exported)
 // ═══════════════════════════════════════════════════════════════════════════
 export function VisualizerCanvas2DKenwood() {
-	const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-	return (
-		<div ref={containerRef} className="absolute inset-0 h-full w-full">
-			<Application
-				resizeTo={containerRef}
-				background={COLOR_BG}
-				antialias
-				autoDensity
-				resolution={window.devicePixelRatio || 1}
-			>
-				<KenwoodScene />
-			</Application>
-		</div>
-	);
+  return (
+    <div ref={containerRef} className="absolute inset-0 h-full w-full">
+      <Application
+        resizeTo={containerRef}
+        background={COLOR_BG}
+        antialias
+        autoDensity
+        resolution={window.devicePixelRatio || 1}
+      >
+        <KenwoodScene />
+      </Application>
+    </div>
+  );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Inner scene
 // ═══════════════════════════════════════════════════════════════════════════
 function KenwoodScene() {
-	const audioMotion = useAtomValue(audioMotionAnalyzerAtom);
-	const displayString = useAtomValue(displayStringAtom);
-	const pinchZoom = useAtomValue(pinchZoomAtom);
-	const processBars = useSteppedBars();
-	const displayRef = useRef(displayString);
-	displayRef.current = displayString;
+  const audioMotion = useAtomValue(audioMotionAnalyzerAtom);
+  const displayString = useAtomValue(displayStringAtom);
+  const pinchZoom = useAtomValue(pinchZoomAtom);
+  const processBars = useSteppedBars();
+  const displayRef = useRef(displayString);
+  displayRef.current = displayString;
 
-	const { app } = useApplication();
-	const barsRef = useRef<AnalyzerBarData[]>([]);
-	const gRef = useRef<Graphics | null>(null);
+  const { app } = useApplication();
+  const barsRef = useRef<AnalyzerBarData[]>([]);
+  const gRef = useRef<Graphics | null>(null);
 
-	useTick(() => {
-		if (audioMotion.isOn) {
-			const bars = processBars(
-				() => audioMotion.getBars() as AnalyzerBarData[],
-			);
-			if (bars) barsRef.current = bars;
-		}
+  useTick(() => {
+    if (audioMotion.isOn) {
+      const bars = processBars(() => audioMotion.getBars() as AnalyzerBarData[]);
+      if (bars) barsRef.current = bars;
+    }
 
-		const g = gRef.current;
-		if (!g) return;
+    const g = gRef.current;
+    if (!g) return;
 
-		g.clear();
-		const w = app.screen.width;
-		const h = app.screen.height;
-		if (w === 0 || h === 0) return;
+    g.clear();
+    const w = app.screen.width;
+    const h = app.screen.height;
+    if (w === 0 || h === 0) return;
 
-		const layout = computeKenwoodLayout(w, h, pinchZoom);
-		const bars = barsRef.current;
-		const pd = PERSPECTIVE_DIST * layout.s;
+    const layout = computeKenwoodLayout(w, h, pinchZoom);
+    const bars = barsRef.current;
+    const pd = PERSPECTIVE_DIST * layout.s;
 
-		// ─── Main bars section ────────────────────────────────────
-		const mainCX = layout.mainOffsetX + layout.mainW / 2;
-		const mainCY = layout.mainOffsetY + layout.mainH / 2;
+    // ─── Main bars section ────────────────────────────────────
+    const mainCX = layout.mainOffsetX + layout.mainW / 2;
+    const mainCY = layout.mainOffsetY + layout.mainH / 2;
 
-		for (let fi = 0; fi < MAIN_FREQ_COUNT; fi++) {
-			const freqLevel = bars?.[MAIN_BAND_INDICES[fi]];
-			const value = freqLevel?.value?.[0] ?? 0;
-			const peak = freqLevel?.peak?.[0] ?? 0;
+    for (let fi = 0; fi < MAIN_FREQ_COUNT; fi++) {
+      const freqLevel = bars?.[MAIN_BAND_INDICES[fi]];
+      const value = freqLevel?.value?.[0] ?? 0;
+      const peak = freqLevel?.peak?.[0] ?? 0;
 
-			// Band X positions within design space, then offset to screen
-			const bandBaseX = layout.mainOffsetX + MAIN_BAND_STRIDE * fi * layout.s;
-			const sideLeftX = bandBaseX;
-			const mainLeftX = bandBaseX + MAIN_SIDE_UNIT * layout.s;
-			const mainRightX =
-				mainLeftX + (MAIN_SUB_COL_WIDTH + MAIN_SUB_COL_GAP) * layout.s;
-			const sideRightX =
-				bandBaseX +
-				(MAIN_SIDE_UNIT + MAIN_BAR_WIDTH + MAIN_SIDE_GAP) * layout.s;
+      // Band X positions within design space, then offset to screen
+      const bandBaseX = layout.mainOffsetX + MAIN_BAND_STRIDE * fi * layout.s;
+      const sideLeftX = bandBaseX;
+      const mainLeftX = bandBaseX + MAIN_SIDE_UNIT * layout.s;
+      const mainRightX = mainLeftX + (MAIN_SUB_COL_WIDTH + MAIN_SUB_COL_GAP) * layout.s;
+      const sideRightX = bandBaseX + (MAIN_SIDE_UNIT + MAIN_BAR_WIDTH + MAIN_SIDE_GAP) * layout.s;
 
-			const mainColW = MAIN_SUB_COL_WIDTH * layout.s;
-			const sideW = MAIN_SIDE_BAR_WIDTH * layout.s;
-			const cellH = layout.mainCellH;
+      const mainColW = MAIN_SUB_COL_WIDTH * layout.s;
+      const sideW = MAIN_SIDE_BAR_WIDTH * layout.s;
+      const cellH = layout.mainCellH;
 
-			for (let ci = 0; ci < MAIN_COL_CELL_COUNT; ci++) {
-				const y =
-					layout.mainOffsetY +
-					layout.mainH -
-					(ci + 1) * cellH -
-					ci * MAIN_COL_CELL_GAP * layout.s;
+      for (let ci = 0; ci < MAIN_COL_CELL_COUNT; ci++) {
+        const y =
+          layout.mainOffsetY + layout.mainH - (ci + 1) * cellH - ci * MAIN_COL_CELL_GAP * layout.s;
 
-				const isPeak =
-					(ci < peak * MAIN_COL_CELL_COUNT &&
-						peak * MAIN_COL_CELL_COUNT < ci + 1) ||
-					(ci - 1 < peak * MAIN_COL_CELL_COUNT &&
-						peak * MAIN_COL_CELL_COUNT < ci);
+        const isPeak =
+          (ci < peak * MAIN_COL_CELL_COUNT && peak * MAIN_COL_CELL_COUNT < ci + 1) ||
+          (ci - 1 < peak * MAIN_COL_CELL_COUNT && peak * MAIN_COL_CELL_COUNT < ci);
 
-				// Main bars (left + right)
-				const mainColor = isPeak
-					? COLOR_PEAK
-					: value * MAIN_COL_CELL_COUNT > ci
-						? COLOR_LIT
-						: COLOR_DARK;
+        // Main bars (left + right)
+        const mainColor = isPeak
+          ? COLOR_PEAK
+          : value * MAIN_COL_CELL_COUNT > ci
+            ? COLOR_LIT
+            : COLOR_DARK;
 
-				drawPerspRectSection(
-					g,
-					mainLeftX,
-					y,
-					mainColW,
-					cellH,
-					mainCX,
-					mainCY,
-					MAIN_TILT_SIN,
-					MAIN_TILT_COS,
-					pd,
-					mainColor,
-				);
-				drawPerspRectSection(
-					g,
-					mainRightX,
-					y,
-					mainColW,
-					cellH,
-					mainCX,
-					mainCY,
-					MAIN_TILT_SIN,
-					MAIN_TILT_COS,
-					pd,
-					mainColor,
-				);
+        drawPerspRectSection(
+          g,
+          mainLeftX,
+          y,
+          mainColW,
+          cellH,
+          mainCX,
+          mainCY,
+          MAIN_TILT_SIN,
+          MAIN_TILT_COS,
+          pd,
+          mainColor,
+        );
+        drawPerspRectSection(
+          g,
+          mainRightX,
+          y,
+          mainColW,
+          cellH,
+          mainCX,
+          mainCY,
+          MAIN_TILT_SIN,
+          MAIN_TILT_COS,
+          pd,
+          mainColor,
+        );
 
-				// Side bars (inverted: unlit = cyan)
-				const sideColor =
-					value * MAIN_COL_CELL_COUNT > ci ? COLOR_DARK : COLOR_SIDE_OFF;
+        // Side bars (inverted: unlit = cyan)
+        const sideColor = value * MAIN_COL_CELL_COUNT > ci ? COLOR_DARK : COLOR_SIDE_OFF;
 
-				drawPerspRectSection(
-					g,
-					sideLeftX,
-					y,
-					sideW,
-					cellH,
-					mainCX,
-					mainCY,
-					MAIN_TILT_SIN,
-					MAIN_TILT_COS,
-					pd,
-					sideColor,
-				);
-				drawPerspRectSection(
-					g,
-					sideRightX,
-					y,
-					sideW,
-					cellH,
-					mainCX,
-					mainCY,
-					MAIN_TILT_SIN,
-					MAIN_TILT_COS,
-					pd,
-					sideColor,
-				);
-			}
-		}
+        drawPerspRectSection(
+          g,
+          sideLeftX,
+          y,
+          sideW,
+          cellH,
+          mainCX,
+          mainCY,
+          MAIN_TILT_SIN,
+          MAIN_TILT_COS,
+          pd,
+          sideColor,
+        );
+        drawPerspRectSection(
+          g,
+          sideRightX,
+          y,
+          sideW,
+          cellH,
+          mainCX,
+          mainCY,
+          MAIN_TILT_SIN,
+          MAIN_TILT_COS,
+          pd,
+          sideColor,
+        );
+      }
+    }
 
-		// ─── Sub bars section ─────────────────────────────────────
-		const subCX = layout.subOffsetX + layout.subW / 2;
-		const subCY = layout.subOffsetY + layout.subH / 2;
-		const subTotalW = SUB_BARS_DESIGN_W * layout.s;
+    // ─── Sub bars section ─────────────────────────────────────
+    const subCX = layout.subOffsetX + layout.subW / 2;
+    const subCY = layout.subOffsetY + layout.subH / 2;
+    const subTotalW = SUB_BARS_DESIGN_W * layout.s;
 
-		for (let fi = 0; fi < SUB_FREQ_COUNT; fi++) {
-			const freqLevel = bars?.[SUB_BAND_INDICES[fi]];
-			const value = freqLevel?.value?.[0] ?? 0;
+    for (let fi = 0; fi < SUB_FREQ_COUNT; fi++) {
+      const freqLevel = bars?.[SUB_BAND_INDICES[fi]];
+      const value = freqLevel?.value?.[0] ?? 0;
 
-			const bandBaseX = layout.subOffsetX + SUB_BAND_STRIDE * fi * layout.s;
-			const subLeftX = bandBaseX;
-			const subRightX = bandBaseX + (SUB_COL_WIDTH + SUB_COL_GAP) * layout.s;
-			const colW = SUB_COL_WIDTH * layout.s;
-			const cellH = layout.subCellH;
+      const bandBaseX = layout.subOffsetX + SUB_BAND_STRIDE * fi * layout.s;
+      const subLeftX = bandBaseX;
+      const subRightX = bandBaseX + (SUB_COL_WIDTH + SUB_COL_GAP) * layout.s;
+      const colW = SUB_COL_WIDTH * layout.s;
+      const cellH = layout.subCellH;
 
-			for (let ci = 0; ci < SUB_COL_CELL_COUNT; ci++) {
-				const y =
-					layout.subOffsetY +
-					layout.subH -
-					(ci + 1) * cellH -
-					ci * SUB_COL_CELL_GAP * layout.s;
+      for (let ci = 0; ci < SUB_COL_CELL_COUNT; ci++) {
+        const y =
+          layout.subOffsetY + layout.subH - (ci + 1) * cellH - ci * SUB_COL_CELL_GAP * layout.s;
 
-				const color = value * SUB_COL_CELL_COUNT > ci ? COLOR_LIT : COLOR_DARK;
+        const color = value * SUB_COL_CELL_COUNT > ci ? COLOR_LIT : COLOR_DARK;
 
-				drawPerspRectSection(
-					g,
-					subLeftX,
-					y,
-					colW,
-					cellH,
-					subCX,
-					subCY,
-					SUB_TILT_SIN,
-					SUB_TILT_COS,
-					pd,
-					color,
-				);
-				drawPerspRectSection(
-					g,
-					subRightX,
-					y,
-					colW,
-					cellH,
-					subCX,
-					subCY,
-					SUB_TILT_SIN,
-					SUB_TILT_COS,
-					pd,
-					color,
-				);
-			}
-		}
+        drawPerspRectSection(
+          g,
+          subLeftX,
+          y,
+          colW,
+          cellH,
+          subCX,
+          subCY,
+          SUB_TILT_SIN,
+          SUB_TILT_COS,
+          pd,
+          color,
+        );
+        drawPerspRectSection(
+          g,
+          subRightX,
+          y,
+          colW,
+          cellH,
+          subCX,
+          subCY,
+          SUB_TILT_SIN,
+          SUB_TILT_COS,
+          pd,
+          color,
+        );
+      }
+    }
 
-		// ─── Wing bars ────────────────────────────────────────────
-		for (let ci = 0; ci < SUB_COL_CELL_COUNT; ci++) {
-			const t = ci / (SUB_COL_CELL_COUNT - 1);
-			const wingW =
-				(WING_MIN_LOCAL_WIDTH * (1 - t) + WING_MAX_LOCAL_WIDTH * t) * layout.s;
-			const cellH = layout.subCellH;
-			const y =
-				layout.subOffsetY +
-				layout.subH -
-				(ci + 1) * cellH -
-				ci * SUB_COL_CELL_GAP * layout.s;
+    // ─── Wing bars ────────────────────────────────────────────
+    for (let ci = 0; ci < SUB_COL_CELL_COUNT; ci++) {
+      const t = ci / (SUB_COL_CELL_COUNT - 1);
+      const wingW = (WING_MIN_LOCAL_WIDTH * (1 - t) + WING_MAX_LOCAL_WIDTH * t) * layout.s;
+      const cellH = layout.subCellH;
+      const y =
+        layout.subOffsetY + layout.subH - (ci + 1) * cellH - ci * SUB_COL_CELL_GAP * layout.s;
 
-			// Left wing
-			const leftWingX = layout.subOffsetX - WING_GAP * layout.s - wingW;
-			drawPerspRectSection(
-				g,
-				leftWingX,
-				y,
-				wingW,
-				cellH,
-				subCX,
-				subCY,
-				SUB_TILT_SIN,
-				SUB_TILT_COS,
-				pd,
-				COLOR_WING,
-			);
+      // Left wing
+      const leftWingX = layout.subOffsetX - WING_GAP * layout.s - wingW;
+      drawPerspRectSection(
+        g,
+        leftWingX,
+        y,
+        wingW,
+        cellH,
+        subCX,
+        subCY,
+        SUB_TILT_SIN,
+        SUB_TILT_COS,
+        pd,
+        COLOR_WING,
+      );
 
-			// Right wing
-			const rightWingX = layout.subOffsetX + subTotalW + WING_GAP * layout.s;
-			drawPerspRectSection(
-				g,
-				rightWingX,
-				y,
-				wingW,
-				cellH,
-				subCX,
-				subCY,
-				SUB_TILT_SIN,
-				SUB_TILT_COS,
-				pd,
-				COLOR_WING,
-			);
-		}
+      // Right wing
+      const rightWingX = layout.subOffsetX + subTotalW + WING_GAP * layout.s;
+      drawPerspRectSection(
+        g,
+        rightWingX,
+        y,
+        wingW,
+        cellH,
+        subCX,
+        subCY,
+        SUB_TILT_SIN,
+        SUB_TILT_COS,
+        pd,
+        COLOR_WING,
+      );
+    }
 
-		// ─── DotMatrix（傾斜なし・縮小描画）──────────────────────
-		const text = displayRef.current;
-		const dotPadding = layout.dotAreaH * 0.1;
-		const dotAvailH = (layout.dotAreaH - dotPadding * 2) * DOT_SCALE;
-		const dotGapRatio = 0.3;
-		const dotSize = dotAvailH / (DOT_ROWS + (DOT_ROWS - 1) * dotGapRatio);
-		const dotGap = dotSize * dotGapRatio;
-		const charW = DOT_COLS * dotSize + (DOT_COLS - 1) * dotGap;
-		const charGap = dotSize * 1.5;
-		const totalDotW = DOT_CHAR_COUNT * charW + (DOT_CHAR_COUNT - 1) * charGap;
-		const dotOffX = (w - totalDotW) / 2;
-		const dotOffY = layout.dotOffsetY + (layout.dotAreaH - dotAvailH) / 2;
+    // ─── DotMatrix（傾斜なし・縮小描画）──────────────────────
+    const text = displayRef.current;
+    const dotPadding = layout.dotAreaH * 0.1;
+    const dotAvailH = (layout.dotAreaH - dotPadding * 2) * DOT_SCALE;
+    const dotGapRatio = 0.3;
+    const dotSize = dotAvailH / (DOT_ROWS + (DOT_ROWS - 1) * dotGapRatio);
+    const dotGap = dotSize * dotGapRatio;
+    const charW = DOT_COLS * dotSize + (DOT_COLS - 1) * dotGap;
+    const charGap = dotSize * 1.5;
+    const totalDotW = DOT_CHAR_COUNT * charW + (DOT_CHAR_COUNT - 1) * charGap;
+    const dotOffX = (w - totalDotW) / 2;
+    const dotOffY = layout.dotOffsetY + (layout.dotAreaH - dotAvailH) / 2;
 
-		for (let ci = 0; ci < DOT_CHAR_COUNT; ci++) {
-			const ch = text[ci] ?? " ";
-			const bitmap = FONT_5X7[ch] ?? FONT_5X7[" "];
-			const charX = dotOffX + ci * (charW + charGap);
+    for (let ci = 0; ci < DOT_CHAR_COUNT; ci++) {
+      const ch = text[ci] ?? " ";
+      const bitmap = FONT_5X7[ch] ?? FONT_5X7[" "];
+      const charX = dotOffX + ci * (charW + charGap);
 
-			for (let row = 0; row < DOT_ROWS; row++) {
-				const rowBits = bitmap![row]!;
-				for (let col = 0; col < DOT_COLS; col++) {
-					const isOn = (rowBits >> (DOT_COLS - 1 - col)) & 1;
-					const dx = charX + col * (dotSize + dotGap);
-					const dy = dotOffY + row * (dotSize + dotGap);
-					g.rect(dx, dy, dotSize, dotSize);
-					g.fill(isOn ? COLOR_DOT_ACTIVE : COLOR_DOT_INACTIVE);
-				}
-			}
-		}
-	});
+      for (let row = 0; row < DOT_ROWS; row++) {
+        const rowBits = bitmap![row]!;
+        for (let col = 0; col < DOT_COLS; col++) {
+          const isOn = (rowBits >> (DOT_COLS - 1 - col)) & 1;
+          const dx = charX + col * (dotSize + dotGap);
+          const dy = dotOffY + row * (dotSize + dotGap);
+          g.rect(dx, dy, dotSize, dotSize);
+          g.fill(isOn ? COLOR_DOT_ACTIVE : COLOR_DOT_INACTIVE);
+        }
+      }
+    }
+  });
 
-	return (
-		<pixiContainer>
-			<pixiGraphics
-				ref={gRef}
-				draw={() => {
-					/* imperative drawing in useTick */
-				}}
-			/>
-		</pixiContainer>
-	);
+  return (
+    <pixiContainer>
+      <pixiGraphics
+        ref={gRef}
+        draw={() => {
+          /* imperative drawing in useTick */
+        }}
+      />
+    </pixiContainer>
+  );
 }

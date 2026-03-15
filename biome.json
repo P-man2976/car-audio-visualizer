@@ -1,87 +1,87 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.4.4/schema.json",
-	"vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
-	"files": { "ignoreUnknown": false },
-	"formatter": { "enabled": true, "indentStyle": "tab" },
-	"css": { "parser": { "tailwindDirectives": true } },
-	"linter": {
-		"enabled": true,
-		"rules": { "recommended": false },
-		"includes": ["**", "!dist", "!src/routeTree.gen.ts"]
-	},
-	"javascript": { "formatter": { "quoteStyle": "double" } },
-	"overrides": [
-		{
-			"includes": ["**/*.{ts,tsx,mts,cts}"],
-			"linter": {
-				"rules": {
-					"complexity": {
-						"noAdjacentSpacesInRegex": "error",
-						"noArguments": "error",
-						"noExtraBooleanCast": "error",
-						"noUselessCatch": "error",
-						"noUselessEscapeInRegex": "error",
-						"noUselessTypeConstraint": "error"
-					},
-					"correctness": {
-						"noConstantCondition": "error",
-						"noEmptyCharacterClassInRegex": "error",
-						"noEmptyPattern": "error",
-						"noNonoctalDecimalEscape": "error",
-						"noPrecisionLoss": "error",
-						"noSelfAssign": "error",
-						"noSwitchDeclarations": "error",
-						"noUnsafeFinally": "error",
-						"noUnsafeOptionalChaining": "error",
-						"noUnusedLabels": "error",
-						"noUnusedPrivateClassMembers": "error",
-						"noUnusedVariables": "error",
-						"useExhaustiveDependencies": "warn",
-						"useHookAtTopLevel": "error",
-						"useIsNan": "error",
-						"useValidForDirection": "error",
-						"useValidTypeof": "error",
-						"useYield": "error"
-					},
-					"style": {
-						"noCommonJs": "error",
-						"noNamespace": "error",
-						"useArrayLiterals": "error",
-						"useAsConstAssertion": "error",
-						"useConst": "error"
-					},
-					"suspicious": {
-						"noAsyncPromiseExecutor": "error",
-						"noCatchAssign": "error",
-						"noCompareNegZero": "error",
-						"noConstantBinaryExpressions": "error",
-						"noControlCharactersInRegex": "error",
-						"noDebugger": "error",
-						"noDuplicateCase": "error",
-						"noDuplicateElseIf": "error",
-						"noEmptyBlockStatements": "error",
-						"noExplicitAny": "error",
-						"noExtraNonNullAssertion": "error",
-						"noFallthroughSwitchClause": "error",
-						"noGlobalAssign": "error",
-						"noIrregularWhitespace": "error",
-						"noMisleadingCharacterClass": "error",
-						"noMisleadingInstantiator": "error",
-						"noNonNullAssertedOptionalChain": "error",
-						"noPrototypeBuiltins": "error",
-						"noShadowRestrictedNames": "error",
-						"noSparseArray": "error",
-						"noUnsafeDeclarationMerging": "error",
-						"noUselessRegexBackrefs": "error",
-						"noVar": "error",
-						"useNamespaceKeyword": "error"
-					}
-				}
-			}
-		}
-	],
-	"assist": {
-		"enabled": true,
-		"actions": { "source": { "organizeImports": "on" } }
-	}
+  "$schema": "https://biomejs.dev/schemas/2.4.4/schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": { "ignoreUnknown": false },
+  "formatter": { "enabled": true, "indentStyle": "tab" },
+  "css": { "parser": { "tailwindDirectives": true } },
+  "linter": {
+    "enabled": true,
+    "rules": { "recommended": false },
+    "includes": ["**", "!dist", "!src/routeTree.gen.ts"]
+  },
+  "javascript": { "formatter": { "quoteStyle": "double" } },
+  "overrides": [
+    {
+      "includes": ["**/*.{ts,tsx,mts,cts}"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noAdjacentSpacesInRegex": "error",
+            "noArguments": "error",
+            "noExtraBooleanCast": "error",
+            "noUselessCatch": "error",
+            "noUselessEscapeInRegex": "error",
+            "noUselessTypeConstraint": "error"
+          },
+          "correctness": {
+            "noConstantCondition": "error",
+            "noEmptyCharacterClassInRegex": "error",
+            "noEmptyPattern": "error",
+            "noNonoctalDecimalEscape": "error",
+            "noPrecisionLoss": "error",
+            "noSelfAssign": "error",
+            "noSwitchDeclarations": "error",
+            "noUnsafeFinally": "error",
+            "noUnsafeOptionalChaining": "error",
+            "noUnusedLabels": "error",
+            "noUnusedPrivateClassMembers": "error",
+            "noUnusedVariables": "error",
+            "useExhaustiveDependencies": "warn",
+            "useHookAtTopLevel": "error",
+            "useIsNan": "error",
+            "useValidForDirection": "error",
+            "useValidTypeof": "error",
+            "useYield": "error"
+          },
+          "style": {
+            "noCommonJs": "error",
+            "noNamespace": "error",
+            "useArrayLiterals": "error",
+            "useAsConstAssertion": "error",
+            "useConst": "error"
+          },
+          "suspicious": {
+            "noAsyncPromiseExecutor": "error",
+            "noCatchAssign": "error",
+            "noCompareNegZero": "error",
+            "noConstantBinaryExpressions": "error",
+            "noControlCharactersInRegex": "error",
+            "noDebugger": "error",
+            "noDuplicateCase": "error",
+            "noDuplicateElseIf": "error",
+            "noEmptyBlockStatements": "error",
+            "noExplicitAny": "error",
+            "noExtraNonNullAssertion": "error",
+            "noFallthroughSwitchClause": "error",
+            "noGlobalAssign": "error",
+            "noIrregularWhitespace": "error",
+            "noMisleadingCharacterClass": "error",
+            "noMisleadingInstantiator": "error",
+            "noNonNullAssertedOptionalChain": "error",
+            "noPrototypeBuiltins": "error",
+            "noShadowRestrictedNames": "error",
+            "noSparseArray": "error",
+            "noUnsafeDeclarationMerging": "error",
+            "noUselessRegexBackrefs": "error",
+            "noVar": "error",
+            "useNamespaceKeyword": "error"
+          }
+        }
+      }
+    }
+  ],
+  "assist": {
+    "enabled": true,
+    "actions": { "source": { "organizeImports": "on" } }
+  }
 }

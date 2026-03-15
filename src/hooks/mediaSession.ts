@@ -12,86 +12,83 @@ import { useRadioPlayer } from "./radio";
  * - off / aux: ハンドラーを全解除
  */
 export function useMediaSession({
-	title,
-	artist,
-	album,
-	artwork,
+  title,
+  artist,
+  album,
+  artwork,
 }: {
-	title?: string;
-	artist?: string;
-	album?: string;
-	artwork?: string;
+  title?: string;
+  artist?: string;
+  album?: string;
+  artwork?: string;
 }) {
-	const audioElement = useAtomValue(audioElementAtom);
-	const isPlaying = useAtomValue(isPlayingAtom);
-	const progress = useAtomValue(progressAtom);
-	const currentSrc = useAtomValue(currentSrcAtom);
-	const { play, pause, next, prev } = usePlayer();
-	const { playRadio, stopRadio, tune } = useRadioPlayer();
+  const audioElement = useAtomValue(audioElementAtom);
+  const isPlaying = useAtomValue(isPlayingAtom);
+  const progress = useAtomValue(progressAtom);
+  const currentSrc = useAtomValue(currentSrcAtom);
+  const { play, pause, next, prev } = usePlayer();
+  const { playRadio, stopRadio, tune } = useRadioPlayer();
 
-	// ファイル再生時のみ position state を更新
-	useEffect(() => {
-		if (currentSrc !== "file") return;
-		if (
-			!Number.isNaN(audioElement.duration) &&
-			audioElement.duration !== Infinity
-		) {
-			navigator.mediaSession.setPositionState({
-				duration: audioElement.duration,
-				playbackRate: 1,
-				position: progress,
-			});
-		}
-	}, [audioElement, progress, currentSrc]);
+  // ファイル再生時のみ position state を更新
+  useEffect(() => {
+    if (currentSrc !== "file") return;
+    if (!Number.isNaN(audioElement.duration) && audioElement.duration !== Infinity) {
+      navigator.mediaSession.setPositionState({
+        duration: audioElement.duration,
+        playbackRate: 1,
+        position: progress,
+      });
+    }
+  }, [audioElement, progress, currentSrc]);
 
-	// ソースに応じてアクションハンドラーを登録
-	useEffect(() => {
-		if (currentSrc === "file") {
-			navigator.mediaSession.setActionHandler("play", async () => {
-				await play();
-			});
-			navigator.mediaSession.setActionHandler("pause", () => {
-				pause();
-			});
-			navigator.mediaSession.setActionHandler("nexttrack", () => next());
-			navigator.mediaSession.setActionHandler("previoustrack", () => prev());
-		} else if (currentSrc === "radio") {
-			navigator.mediaSession.setActionHandler("play", () => {
-				playRadio();
-			});
-			navigator.mediaSession.setActionHandler("pause", () => {
-				stopRadio();
-			});
-			navigator.mediaSession.setActionHandler("nexttrack", () => tune(1));
-			navigator.mediaSession.setActionHandler("previoustrack", () => tune(-1));
-		} else {
-			navigator.mediaSession.setActionHandler("play", null);
-			navigator.mediaSession.setActionHandler("pause", null);
-			navigator.mediaSession.setActionHandler("nexttrack", null);
-			navigator.mediaSession.setActionHandler("previoustrack", null);
-		}
+  // ソースに応じてアクションハンドラーを登録
+  useEffect(() => {
+    if (currentSrc === "file") {
+      navigator.mediaSession.setActionHandler("play", async () => {
+        await play();
+      });
+      navigator.mediaSession.setActionHandler("pause", () => {
+        pause();
+      });
+      navigator.mediaSession.setActionHandler("nexttrack", () => next());
+      navigator.mediaSession.setActionHandler("previoustrack", () => prev());
+    } else if (currentSrc === "radio") {
+      navigator.mediaSession.setActionHandler("play", () => {
+        playRadio();
+      });
+      navigator.mediaSession.setActionHandler("pause", () => {
+        stopRadio();
+      });
+      navigator.mediaSession.setActionHandler("nexttrack", () => tune(1));
+      navigator.mediaSession.setActionHandler("previoustrack", () => tune(-1));
+    } else {
+      navigator.mediaSession.setActionHandler("play", null);
+      navigator.mediaSession.setActionHandler("pause", null);
+      navigator.mediaSession.setActionHandler("nexttrack", null);
+      navigator.mediaSession.setActionHandler("previoustrack", null);
+    }
 
-		return () => {
-			navigator.mediaSession.playbackState = "none";
-			navigator.mediaSession.setActionHandler("play", null);
-			navigator.mediaSession.setActionHandler("pause", null);
-			navigator.mediaSession.setActionHandler("nexttrack", null);
-			navigator.mediaSession.setActionHandler("previoustrack", null);
-		};
-	}, [currentSrc, play, pause, next, prev, playRadio, stopRadio, tune]);
+    return () => {
+      navigator.mediaSession.playbackState = "none";
+      navigator.mediaSession.setActionHandler("play", null);
+      navigator.mediaSession.setActionHandler("pause", null);
+      navigator.mediaSession.setActionHandler("nexttrack", null);
+      navigator.mediaSession.setActionHandler("previoustrack", null);
+    };
+  }, [currentSrc, play, pause, next, prev, playRadio, stopRadio, tune]);
 
-	// 再生状態を同期
-	useEffect(() => {
-		navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
-	}, [isPlaying]);
+  // 再生状態を同期
+  useEffect(() => {
+    navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
+  }, [isPlaying]);
 
-	// メタデータを更新
-	useEffect(() => {
-		navigator.mediaSession.metadata = new MediaMetadata({
-			title,
-			artist,
-			album,
-			artwork: artwork ? [{ src: artwork }] : undefined,
-		});
-	}, [title, artist, album, artwork]);
+  // メタデータを更新
+  useEffect(() => {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title,
+      artist,
+      album,
+      artwork: artwork ? [{ src: artwork }] : undefined,
+    });
+  }, [title, artist, album, artwork]);
 }

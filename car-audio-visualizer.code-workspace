@@ -1,30 +1,30 @@
 {
-	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"path": "../2din-spectrogram"
-		}
-	],
-	"settings": {
-		"chat.tools.terminal.autoApprove": {
-			"npm run test": true,
-			"npm i": true,
-			"npx shadcn@latest": true,
-			"git add": true,
-			"git commit": true,
-			"mkdir": true,
-			"cp": true,
-			"npx biome": true,
-			"npx tsc": true,
-			"npx tsr": true,
-			"npx tsx": true,
-			"playwright-cli": true,
-			"npx playwright": true,
-			"agent-browser": true,
-			"npx -y @mizchi/readability": true,
-			"npx vitest": true
-		}
-	}
+  "folders": [
+    {
+      "path": ".",
+    },
+    {
+      "path": "../2din-spectrogram",
+    },
+  ],
+  "settings": {
+    "chat.tools.terminal.autoApprove": {
+      "npm run test": true,
+      "npm i": true,
+      "npx shadcn@latest": true,
+      "git add": true,
+      "git commit": true,
+      "mkdir": true,
+      "cp": true,
+      "npx biome": true,
+      "npx tsc": true,
+      "npx tsr": true,
+      "npx tsx": true,
+      "playwright-cli": true,
+      "npx playwright": true,
+      "agent-browser": true,
+      "npx -y @mizchi/readability": true,
+      "npx vitest": true,
+    },
+  },
 }

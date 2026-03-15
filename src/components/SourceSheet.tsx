@@ -6,12 +6,7 @@ import { currentSrcAtom } from "@/atoms/player";
 import { radioStationSizeAtom } from "@/atoms/radio";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import {
-	Sheet,
-	SheetContent,
-	SheetTitle,
-	SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMediaStream } from "@/hooks/mediastream";
 import { cn } from "@/lib/utils";
@@ -26,95 +21,91 @@ import { RadiruStation } from "./source/RadiruStation";
 import { ScreenShare } from "./source/ScreenShare";
 
 export function SourceSheet({ children }: { children: ReactNode }) {
-	const [currentSrc, setCurrentSrc] = useAtom(currentSrcAtom);
-	const [radioStationSize, setRadioStationSize] = useAtom(radioStationSizeAtom);
-	const [mediaStream] = useAtom(mediaStreamAtom);
-	const { disconnect } = useMediaStream();
-	const { data: radikoStationList } = useRadikoStationList();
-	const { data: radiruStationList } = useRadiruStationList();
+  const [currentSrc, setCurrentSrc] = useAtom(currentSrcAtom);
+  const [radioStationSize, setRadioStationSize] = useAtom(radioStationSizeAtom);
+  const [mediaStream] = useAtom(mediaStreamAtom);
+  const { disconnect } = useMediaStream();
+  const { data: radikoStationList } = useRadikoStationList();
+  const { data: radiruStationList } = useRadiruStationList();
 
-	return (
-		<Sheet>
-			<SheetTrigger asChild>{children}</SheetTrigger>
-			<SheetContent side="top" className="max-h-[70dvh] overflow-y-auto">
-				<SheetTitle className="sr-only">ソース選択</SheetTitle>
-				<Tabs
-					// currentSrc が "off" のときはどのタブも選択されていない状態にする
-					value={currentSrc === "off" ? "" : currentSrc}
-					onValueChange={(value) => {
-						// AUX 以外に切り替えるときは音声ルーティングをクリーンアップ
-						if (currentSrc === "aux") disconnect();
-						setCurrentSrc(value as "file" | "radio" | "aux");
-					}}
-				>
-					<TabsList className="grid grid-cols-3 w-full">
-						<TabsTrigger value="file">ファイル</TabsTrigger>
-						<TabsTrigger value="radio">ラジオ</TabsTrigger>
-						<TabsTrigger value="aux">外部入力</TabsTrigger>
-					</TabsList>
+  return (
+    <Sheet>
+      <SheetTrigger asChild>{children}</SheetTrigger>
+      <SheetContent side="top" className="max-h-[70dvh] overflow-y-auto">
+        <SheetTitle className="sr-only">ソース選択</SheetTitle>
+        <Tabs
+          // currentSrc が "off" のときはどのタブも選択されていない状態にする
+          value={currentSrc === "off" ? "" : currentSrc}
+          onValueChange={(value) => {
+            // AUX 以外に切り替えるときは音声ルーティングをクリーンアップ
+            if (currentSrc === "aux") disconnect();
+            setCurrentSrc(value as "file" | "radio" | "aux");
+          }}
+        >
+          <TabsList className="grid grid-cols-3 w-full">
+            <TabsTrigger value="file">ファイル</TabsTrigger>
+            <TabsTrigger value="radio">ラジオ</TabsTrigger>
+            <TabsTrigger value="aux">外部入力</TabsTrigger>
+          </TabsList>
 
-					<TabsContent className="py-4" value="file">
-						<div className="flex w-full flex-col gap-3">
-							<FilePicker />
-							{"showDirectoryPicker" in window && (
-								<ExplorerDialog>
-									<Button className="w-full">
-										組み込みのエクスプローラーから読み込み
-									</Button>
-								</ExplorerDialog>
-							)}
-						</div>
-					</TabsContent>
+          <TabsContent className="py-4" value="file">
+            <div className="flex w-full flex-col gap-3">
+              <FilePicker />
+              {"showDirectoryPicker" in window && (
+                <ExplorerDialog>
+                  <Button className="w-full">組み込みのエクスプローラーから読み込み</Button>
+                </ExplorerDialog>
+              )}
+            </div>
+          </TabsContent>
 
-					<TabsContent value="radio">
-						<div className="flex flex-col gap-4 py-4">
-							<div className="flex w-full justify-between items-center">
-								<h4 className="text-lg">Radiko</h4>
-								<Button
-									size="icon"
-									onClick={() =>
-										setRadioStationSize((size) => (size === "lg" ? "sm" : "lg"))
-									}
-								>
-									{radioStationSize === "lg" ? <LayoutGrid /> : <LayoutList />}
-								</Button>
-							</div>
-							<div
-								className={cn(
-									"grid gap-4",
-									radioStationSize === "lg"
-										? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
-										: "grid-cols-[repeat(auto-fit,minmax(100px,1fr))]",
-								)}
-							>
-								{radikoStationList?.map((station) => (
-									<RadioStation key={station.id} {...station} />
-								))}
-							</div>
-							<Separator />
-							<h4 className="text-lg">NHKラジオ らじる★らじる</h4>
-							<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-								{radiruStationList?.map((station) => (
-									<RadiruStation key={station.areakey} {...station} />
-								))}
-							</div>
-						</div>
-					</TabsContent>
+          <TabsContent value="radio">
+            <div className="flex flex-col gap-4 py-4">
+              <div className="flex w-full justify-between items-center">
+                <h4 className="text-lg">Radiko</h4>
+                <Button
+                  size="icon"
+                  onClick={() => setRadioStationSize((size) => (size === "lg" ? "sm" : "lg"))}
+                >
+                  {radioStationSize === "lg" ? <LayoutGrid /> : <LayoutList />}
+                </Button>
+              </div>
+              <div
+                className={cn(
+                  "grid gap-4",
+                  radioStationSize === "lg"
+                    ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+                    : "grid-cols-[repeat(auto-fit,minmax(100px,1fr))]",
+                )}
+              >
+                {radikoStationList?.map((station) => (
+                  <RadioStation key={station.id} {...station} />
+                ))}
+              </div>
+              <Separator />
+              <h4 className="text-lg">NHKラジオ らじる★らじる</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {radiruStationList?.map((station) => (
+                  <RadiruStation key={station.areakey} {...station} />
+                ))}
+              </div>
+            </div>
+          </TabsContent>
 
-					<TabsContent className="py-4" value="aux">
-						<div className="flex w-full flex-col gap-4">
-							{mediaStream ? (
-								<DisconnectInput />
-							) : (
-								<>
-									<ScreenShare />
-									<ExternalInput />
-								</>
-							)}
-						</div>
-					</TabsContent>
-				</Tabs>
-			</SheetContent>
-		</Sheet>
-	);
+          <TabsContent className="py-4" value="aux">
+            <div className="flex w-full flex-col gap-4">
+              {mediaStream ? (
+                <DisconnectInput />
+              ) : (
+                <>
+                  <ScreenShare />
+                  <ExternalInput />
+                </>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </SheetContent>
+    </Sheet>
+  );
 }

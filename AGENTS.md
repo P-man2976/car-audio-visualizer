@@ -17,12 +17,14 @@ npm run test:browser             # 全ブラウザテストがパスすること
 ---
 
 ## Code Style
+
 - TypeScript + React with strict settings; keep ESM-only imports/exports and avoid CommonJS.
 - Follow Biome 2.4.4 formatting/linting defaults: **tab indentation and double quotes**.
 - Use Tailwind utility classes for layout/styling.
 - Use **shadcn/ui** (new-york style, neutral base) for UI primitives — components live in `src/components/ui/`.
 
 ## Architecture
+
 - TanStack Start (SSR) + Cloudflare Workers。`index.html` / `src/main.tsx` は存在しない。
 - Entry flow: `@tanstack/react-start/server-entry` → `src/routes/__root.tsx` → `src/routes/index.tsx` → `src/pages/HomePage.tsx`.
 - Vite 8 uses React Compiler via Babel plugin in `vite.config.ts`; avoid patterns that conflict with it.
@@ -30,6 +32,7 @@ npm run test:browser             # 全ブラウザテストがパスすること
 - PWA: `public/manifest.webmanifest` + `public/icon.svg`。Service Worker は未導入。
 
 ## Build and Test
+
 - Install: `npm install`
 - Dev server: `npm run dev`
 - Build: `npm run build` (runs `tsc -b` then `vite build`)
@@ -50,6 +53,7 @@ npm run test:browser             # 全ブラウザテストがパスすること
 - 既存テストが壊れた場合 → 原因を調査し修正（テストを削除しない）
 
 ### ユニットテストのモックパターン
+
 ```typescript
 // fetch モック
 vi.stubGlobal("fetch", vi.fn());
@@ -69,6 +73,7 @@ expect(store.get(myAtom)).toBe(expected);
 ```
 
 ### ブラウザテストのパターン
+
 ```typescript
 import { render } from "vitest-browser-react";
 import { page, userEvent } from "@vitest/browser/context";
@@ -88,18 +93,21 @@ page.getByTestId("test-id");
 ```
 
 ### テストの注意事項
+
 - `@/atoms/audio` はモジュールスコープで AudioContext を生成するため、必ず `vi.mock` すること
 - `atomWithIDB` を使用する atom は DataCloneError を避けるためプレーンな `atom()` でモック
 - 重複 DOM 要素がある場合は `.first()` を使用
 - 空のモック関数ボディには `/* noop stub */` コメントを追加（Biome lint 対策）
 
 ## UI Conventions (shadcn/ui)
+
 - **HeroUI v3 は削除済み**。新規コンポーネントは `npx shadcn@latest add <name>` で `src/components/ui/` に生成する。
 - `components.json`: `style: "new-york"`, `baseColor: "neutral"`, Tailwind v4 モード。
 - スタイル変更は `src/components/ui/*.tsx` 内の `cva` バリアント定義を直接編集する。
 - shadcn ドキュメントには MCP (`mcp_shadcn`) を使用する。
 
 ## 3D Visualizer (React Three Fiber) ルール
+
 - `Canvas` は `frameloop="always"` を使うこと。`demand` は `invalidate()` の管理が複雑になり得策でない。
 - ビジュアライザーの実装は **`<instancedMesh>` per-band + `useFrame`** パターン。
   - 1 周波数バンドにつき 1 つの `<instancedMesh>` で左右 2 列 × 全セルをまとめて描画する（`ShaderMaterial` は使わない）。
@@ -113,6 +121,7 @@ page.getByTestId("test-id");
 - `<Line>` / `<Text>` などの drei コンポーネントは `<mesh>` の子に置かない。コンテナには `<group>` を使うこと。
 
 ## Integration Points
+
 - UI stack: **shadcn/ui** + `tailwindcss` + `@tailwindcss/vite`
 - Routing: **TanStack Router** (`src/router.tsx`)
 - State: **Jotai** atoms (`src/atoms/`)
@@ -122,6 +131,7 @@ page.getByTestId("test-id");
 - Deploy: Cloudflare Workers (`wrangler deploy`, region: `gcp:asia-northeast1`)
 
 ## Project Conventions
+
 - **コード変更時は対応するテストを必ず追加・更新すること。** テストなしのコード変更は許容しない。
 - For external library docs, prefer Context7 (`mcp_io`) and TanStack MCP before relying on memory.
 - `src/atoms/` — Jotai atoms and side effects  
@@ -131,6 +141,7 @@ page.getByTestId("test-id");
   `src/lib/` — ユーティリティ・純粋関数
 
 ## Security
+
 - No auth backend is present; avoid introducing secrets or credentials in client code.
 - If environment variables are added later, keep them in Vite env flow and never hardcode sensitive values in `src/`.
 

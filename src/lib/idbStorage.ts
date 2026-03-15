@@ -21,16 +21,16 @@ import type { Song } from "@/types/player";
 /** Lazy singleton — only created when running in the browser. */
 let _store: ReturnType<typeof createStore> | undefined;
 function getStore() {
-	if (!_store) {
-		_store = createStore("cav-atoms", "store");
-	}
-	return _store;
+  if (!_store) {
+    _store = createStore("cav-atoms", "store");
+  }
+  return _store;
 }
 
 /** Strip runtime-only blob URL fields before IDB persistence. */
 function stripEphemeral(song: Song): Omit<Song, "url" | "artwork"> {
-	const { url: _url, artwork: _artwork, ...rest } = song;
-	return rest;
+  const { url: _url, artwork: _artwork, ...rest } = song;
+  return rest;
 }
 
 // ─── Generic atomWithIDB ────────────────────────────────────────────────
@@ -46,9 +46,9 @@ function stripEphemeral(song: Song): Omit<Song, "url" | "artwork"> {
 // hydrated value, never becoming a Promise.
 
 interface IDBStorage<T> {
-	getItem: (key: string, initialValue: T) => Promise<T>;
-	setItem: (key: string, value: T) => Promise<void>;
-	removeItem: (key: string) => Promise<void>;
+  getItem: (key: string, initialValue: T) => Promise<T>;
+  setItem: (key: string, value: T) => Promise<void>;
+  removeItem: (key: string) => Promise<void>;
 }
 
 /**
@@ -56,32 +56,26 @@ interface IDBStorage<T> {
  * The Promise from getItem is resolved before calling setAtom,
  * so the base atom never holds a raw Promise.
  */
-export function atomWithIDB<T>(
-	key: string,
-	initialValue: T,
-	storage: IDBStorage<T>,
-) {
-	const baseAtom = atom(initialValue);
+export function atomWithIDB<T>(key: string, initialValue: T, storage: IDBStorage<T>) {
+  const baseAtom = atom(initialValue);
 
-	baseAtom.onMount = (setAtom) => {
-		// Resolve the Promise BEFORE calling setAtom.
-		// This ensures get(baseAtom) always returns T, never Promise<T>.
-		storage.getItem(key, initialValue).then(setAtom);
-	};
+  baseAtom.onMount = (setAtom) => {
+    // Resolve the Promise BEFORE calling setAtom.
+    // This ensures get(baseAtom) always returns T, never Promise<T>.
+    storage.getItem(key, initialValue).then(setAtom);
+  };
 
-	const wrapper = atom(
-		(get) => get(baseAtom),
-		(get, _set, update: SetStateAction<T>) => {
-			const nextValue =
-				typeof update === "function"
-					? (update as (prev: T) => T)(get(baseAtom))
-					: update;
-			_set(baseAtom, nextValue);
-			return storage.setItem(key, nextValue);
-		},
-	);
+  const wrapper = atom(
+    (get) => get(baseAtom),
+    (get, _set, update: SetStateAction<T>) => {
+      const nextValue =
+        typeof update === "function" ? (update as (prev: T) => T)(get(baseAtom)) : update;
+      _set(baseAtom, nextValue);
+      return storage.setItem(key, nextValue);
+    },
+  );
 
-	return wrapper;
+  return wrapper;
 }
 
 // ─── IDB storage factories ──────────────────────────────────────────────
@@ -91,19 +85,16 @@ export function atomWithIDB<T>(
  * Blob URLs are stripped on write; FileSystemFileHandle is preserved.
  */
 export function createSongStorage(): IDBStorage<Song | null> {
-	return {
-		getItem: async (key, initialValue) => {
-			const v = await get<Omit<Song, "url" | "artwork"> | null>(
-				key,
-				getStore(),
-			);
-			return v !== undefined ? (v as Song | null) : initialValue;
-		},
-		setItem: async (key, value) => {
-			await set(key, value ? stripEphemeral(value) : null, getStore());
-		},
-		removeItem: (key) => del(key, getStore()),
-	};
+  return {
+    getItem: async (key, initialValue) => {
+      const v = await get<Omit<Song, "url" | "artwork"> | null>(key, getStore());
+      return v !== undefined ? (v as Song | null) : initialValue;
+    },
+    setItem: async (key, value) => {
+      await set(key, value ? stripEphemeral(value) : null, getStore());
+    },
+    removeItem: (key) => del(key, getStore()),
+  };
 }
 
 /**
@@ -111,52 +102,44 @@ export function createSongStorage(): IDBStorage<Song | null> {
  * Blob URLs are stripped on write; FileSystemFileHandle is preserved.
  */
 export function createSongArrayStorage(): IDBStorage<Song[]> {
-	return {
-		getItem: async (key, initialValue) => {
-			const v = await get<Array<Omit<Song, "url" | "artwork">>>(
-				key,
-				getStore(),
-			);
-			return v !== undefined ? (v as Song[]) : initialValue;
-		},
-		setItem: async (key, value) => {
-			await set(
-				key,
-				value.map((s) => stripEphemeral(s)),
-				getStore(),
-			);
-		},
-		removeItem: (key) => del(key, getStore()),
-	};
+  return {
+    getItem: async (key, initialValue) => {
+      const v = await get<Array<Omit<Song, "url" | "artwork">>>(key, getStore());
+      return v !== undefined ? (v as Song[]) : initialValue;
+    },
+    setItem: async (key, value) => {
+      await set(
+        key,
+        value.map((s) => stripEphemeral(s)),
+        getStore(),
+      );
+    },
+    removeItem: (key) => del(key, getStore()),
+  };
 }
 
 /**
  * IDBStorage<FileSystemDirectoryHandle[]> for saved explorer directory handles.
  * Handles are structured-cloneable and stored natively in IDB.
  */
-export function createDirectoryHandleArrayStorage(): IDBStorage<
-	FileSystemDirectoryHandle[]
-> {
-	return {
-		getItem: async (key, initialValue) => {
-			const v = await get<FileSystemDirectoryHandle[]>(key, getStore());
-			if (v !== undefined) return v;
-			// Migrate from old single-handle key (cav-dir-handle-v1)
-			const legacy = await get<FileSystemDirectoryHandle | null>(
-				"cav-dir-handle-v1",
-				getStore(),
-			);
-			if (legacy) {
-				const migrated = [legacy];
-				await set(key, migrated, getStore());
-				await del("cav-dir-handle-v1", getStore());
-				return migrated;
-			}
-			return initialValue;
-		},
-		setItem: async (key, value) => {
-			await set(key, value, getStore());
-		},
-		removeItem: (key) => del(key, getStore()),
-	};
+export function createDirectoryHandleArrayStorage(): IDBStorage<FileSystemDirectoryHandle[]> {
+  return {
+    getItem: async (key, initialValue) => {
+      const v = await get<FileSystemDirectoryHandle[]>(key, getStore());
+      if (v !== undefined) return v;
+      // Migrate from old single-handle key (cav-dir-handle-v1)
+      const legacy = await get<FileSystemDirectoryHandle | null>("cav-dir-handle-v1", getStore());
+      if (legacy) {
+        const migrated = [legacy];
+        await set(key, migrated, getStore());
+        await del("cav-dir-handle-v1", getStore());
+        return migrated;
+      }
+      return initialValue;
+    },
+    setItem: async (key, value) => {
+      await set(key, value, getStore());
+    },
+    removeItem: (key) => del(key, getStore()),
+  };
 }

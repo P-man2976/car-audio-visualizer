@@ -14,13 +14,13 @@ import { currentSrcAtom } from "@/atoms/player";
 import { currentRadioAtom } from "@/atoms/radio";
 
 export function useAmFilter(): void {
-	const amFilterEnabled = useAtomValue(amFilterEnabledAtom);
-	const amFilterSettings = useAtomValue(amFilterSettingsAtom);
-	const currentRadio = useAtomValue(currentRadioAtom);
-	const currentSrc = useAtomValue(currentSrcAtom);
+  const amFilterEnabled = useAtomValue(amFilterEnabledAtom);
+  const amFilterSettings = useAtomValue(amFilterSettingsAtom);
+  const currentRadio = useAtomValue(currentRadioAtom);
+  const currentSrc = useAtomValue(currentSrcAtom);
 
-	useEffect(() => {
-		const isAm = currentSrc === "radio" && currentRadio?.type === "AM";
-		setAmFilterActive(isAm && amFilterEnabled, amFilterSettings);
-	}, [currentSrc, currentRadio, amFilterEnabled, amFilterSettings]);
+  useEffect(() => {
+    const isAm = currentSrc === "radio" && currentRadio?.type === "AM";
+    setAmFilterActive(isAm && amFilterEnabled, amFilterSettings);
+  }, [currentSrc, currentRadio, amFilterEnabled, amFilterSettings]);
 }
