@@ -206,7 +206,7 @@ function FrequencyLabel({
       setFont(_font);
       return;
     }
-    _fontReady.then(setFont);
+    void _fontReady.then(setFont);
   }, []);
 
   const geometry = useMemo(() => {

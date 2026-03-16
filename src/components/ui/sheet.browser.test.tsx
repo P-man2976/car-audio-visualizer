@@ -17,7 +17,7 @@ import {
 
 describe("Sheet", () => {
   test("トリガーをクリックするとシートが開く", async () => {
-    render(
+    void render(
       <Sheet>
         <SheetTrigger>開く</SheetTrigger>
         <SheetContent>
@@ -35,7 +35,7 @@ describe("Sheet", () => {
   });
 
   test("showCloseButton でクローズボタンが表示される", async () => {
-    render(
+    void render(
       <Sheet>
         <SheetTrigger>開く</SheetTrigger>
         <SheetContent showCloseButton>
@@ -52,7 +52,7 @@ describe("Sheet", () => {
   });
 
   test("showCloseButton=false（デフォルト）でクローズボタンが非表示", async () => {
-    render(
+    void render(
       <Sheet>
         <SheetTrigger>開く</SheetTrigger>
         <SheetContent>
@@ -67,7 +67,7 @@ describe("Sheet", () => {
   });
 
   test("SheetClose で明示的にシートを閉じられる", async () => {
-    render(
+    void render(
       <Sheet>
         <SheetTrigger>開く</SheetTrigger>
         <SheetContent>
@@ -85,7 +85,7 @@ describe("Sheet", () => {
   });
 
   test("open prop で制御モードで動作する", async () => {
-    render(
+    void render(
       <Sheet open>
         <SheetContent side="top">
           <SheetTitle>制御モードシート</SheetTitle>

@@ -36,7 +36,7 @@ describe("ProgressSlider", () => {
     store.set(currentSrcAtom, "off");
     store.set(progressAtom, 0);
 
-    render(
+    void render(
       <Provider store={store}>
         <ProgressSlider />
       </Provider>,
@@ -56,7 +56,7 @@ describe("ProgressSlider", () => {
     store.set(currentRadioAtom, null);
     store.set(tuningFreqAtom, null);
 
-    render(
+    void render(
       <Provider store={store}>
         <ProgressSlider />
       </Provider>,
@@ -71,7 +71,7 @@ describe("ProgressSlider", () => {
     store.set(currentSrcAtom, "file");
     store.set(progressAtom, 30);
 
-    render(
+    void render(
       <Provider store={store}>
         <ProgressSlider />
       </Provider>,
@@ -92,7 +92,7 @@ describe("ProgressSlider", () => {
     store.set(currentSrcAtom, "aux");
     store.set(progressAtom, 0);
 
-    render(
+    void render(
       <Provider store={store}>
         <ProgressSlider />
       </Provider>,

@@ -50,11 +50,11 @@ export function FilePicker() {
     if (!songs.length) return;
     setDisplayString("CD-01   LOAD");
     if (currentSong) {
-      setQueue((prev) => [...prev, ...songs]);
+      void setQueue((prev) => [...prev, ...songs]);
     } else {
       const [current, ...queue] = songs;
-      setCurrentSong(current);
-      setQueue(queue);
+      void setCurrentSong(current);
+      void setQueue(queue);
     }
     setCurrentSrc("file");
   };

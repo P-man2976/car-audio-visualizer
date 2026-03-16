@@ -29,7 +29,7 @@ import { ScreenShare } from "@/components/source/ScreenShare";
 
 describe("ScreenShare", () => {
   test("「PC上の音声を共有」ボタンが表示される", async () => {
-    render(<ScreenShare />);
+    void render(<ScreenShare />);
     await expect
       .element(page.getByRole("button", { name: "PC上の音声を共有" }))
       .toBeInTheDocument();
@@ -37,7 +37,7 @@ describe("ScreenShare", () => {
 
   test("クリックで connect が呼ばれる", async () => {
     mockConnect.mockClear();
-    render(<ScreenShare />);
+    void render(<ScreenShare />);
 
     await page.getByRole("button", { name: "PC上の音声を共有" }).click();
     // getDisplayMedia は非同期なので少し待つ

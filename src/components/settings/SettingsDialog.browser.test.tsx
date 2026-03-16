@@ -18,30 +18,30 @@ import { lastfmSessionAtom } from "@/atoms/lastfm";
 import { visualizerStyleAtom } from "@/atoms/visualizer";
 import { SettingsDialog } from "@/components/settings/SettingsDialog";
 
-function renderDialog(overrides?: (store: ReturnType<typeof createStore>) => void) {
+async function renderDialog(overrides?: (store: ReturnType<typeof createStore>) => void) {
   const store = createStore();
   store.set(settingsOpenAtom, true);
   overrides?.(store);
 
   return {
     store,
-    ...render(
+    ...(await render(
       <Provider store={store}>
         <SettingsDialog />
       </Provider>,
-    ),
+    )),
   };
 }
 
 describe("SettingsDialog", () => {
   test("ダイアログが開いて「設定」タイトルが表示される", async () => {
-    renderDialog();
+    void renderDialog();
 
     await expect.element(page.getByText("設定")).toBeInTheDocument();
   });
 
   test("4 つのナビゲーションタブが表示される", async () => {
-    renderDialog();
+    void renderDialog();
 
     await expect.element(page.getByRole("tab", { name: "ビジュアライザー" })).toBeInTheDocument();
     await expect.element(page.getByRole("tab", { name: "オーディオ解析" })).toBeInTheDocument();
@@ -50,7 +50,7 @@ describe("SettingsDialog", () => {
   });
 
   test("ビジュアライザーペインでスタイル選択カードが表示される", async () => {
-    renderDialog();
+    void renderDialog();
 
     // デフォルトで visualizer タブが表示される
     // aria-pressed ボタンでスタイルカードを確認
@@ -71,7 +71,7 @@ describe("SettingsDialog", () => {
   });
 
   test("ビジュアライザーのカードをクリックでスタイルが変更される", async () => {
-    const { store } = renderDialog();
+    const { store } = await renderDialog();
 
     // DPX-5021M（Kenwood）カードを選択
     await page.getByRole("button", { name: /DPX-5021M（Kenwood）/ }).click();
@@ -80,7 +80,7 @@ describe("SettingsDialog", () => {
   });
 
   test("DPX-5021M（2D）カードをクリックでスタイルが変更される", async () => {
-    const { store } = renderDialog();
+    const { store } = await renderDialog();
 
     // DPX-5021M（2D）カードを選択
     await page.getByRole("button", { name: /DPX-5021M（2D）/ }).click();
@@ -89,7 +89,7 @@ describe("SettingsDialog", () => {
   });
 
   test("オーディオ解析タブに切り替えると FFT サイズ等の設定が表示される", async () => {
-    renderDialog();
+    void renderDialog();
 
     await page.getByRole("tab", { name: "オーディオ解析" }).click();
 
@@ -97,7 +97,7 @@ describe("SettingsDialog", () => {
   });
 
   test("Last.fm タブ: 未連携状態で連携ボタンが表示される", async () => {
-    renderDialog();
+    void renderDialog();
 
     await page.getByRole("tab", { name: "Last.fm" }).click();
 
@@ -107,7 +107,7 @@ describe("SettingsDialog", () => {
   });
 
   test("Last.fm タブ: 連携状態でユーザー名と解除ボタンが表示される", async () => {
-    renderDialog((store) => {
+    void renderDialog((store) => {
       store.set(lastfmSessionAtom, {
         name: "testuser",
         key: "abc123",
@@ -123,7 +123,7 @@ describe("SettingsDialog", () => {
   });
 
   test("Last.fm 連携解除ボタンでセッションがクリアされる", async () => {
-    const { store } = renderDialog((store) => {
+    const { store } = await renderDialog((store) => {
       store.set(lastfmSessionAtom, {
         name: "testuser",
         key: "abc123",
@@ -138,7 +138,7 @@ describe("SettingsDialog", () => {
   });
 
   test("ショートカットタブに切り替えるとキー割り当てが表示される", async () => {
-    renderDialog();
+    void renderDialog();
 
     await page.getByRole("tab", { name: "ショートカット" }).click();
 

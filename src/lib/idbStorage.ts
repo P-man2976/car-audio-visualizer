@@ -62,7 +62,7 @@ export function atomWithIDB<T>(key: string, initialValue: T, storage: IDBStorage
   baseAtom.onMount = (setAtom) => {
     // Resolve the Promise BEFORE calling setAtom.
     // This ensures get(baseAtom) always returns T, never Promise<T>.
-    storage.getItem(key, initialValue).then(setAtom);
+    void storage.getItem(key, initialValue).then(setAtom);
   };
 
   const wrapper = atom(

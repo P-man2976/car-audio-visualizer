@@ -14,7 +14,7 @@ function LastfmCallbackPage() {
       return;
     }
 
-    getSession(token)
+    void getSession(token)
       .then((session) => {
         setStatus("ok");
         if (window.opener && !window.opener.closed) {
@@ -28,7 +28,7 @@ function LastfmCallbackPage() {
           } catch {
             // localStorage が使えない場合は無視
           }
-          navigate({ to: "/" });
+          void navigate({ to: "/" });
         }
       })
       .catch((err) => {
@@ -37,7 +37,7 @@ function LastfmCallbackPage() {
         if (window.opener && !window.opener.closed) {
           window.close();
         } else {
-          navigate({ to: "/" });
+          void navigate({ to: "/" });
         }
       });
   }, [navigate]);

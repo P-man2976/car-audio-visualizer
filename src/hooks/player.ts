@@ -60,22 +60,22 @@ export const usePlayer = () => {
       if (repeat === "all" && newHistory.length > 0) {
         const allSongs = shuffle ? shuffleArray(newHistory) : [...newHistory];
         const [first, ...rest] = allSongs;
-        setSongHistory([]);
-        setCurrentSong(first);
-        setSongQueue(rest);
+        void setSongHistory([]);
+        void setCurrentSong(first);
+        void setSongQueue(rest);
         // repeat-all でキューが再構成されるため preShuffleQueue は無効化
         setPreShuffleQueue(null);
       } else {
         // 全曲再生完了: currentSong をクリアして停止
-        setSongHistory(newHistory);
-        setCurrentSong(null);
+        void setSongHistory(newHistory);
+        void setCurrentSong(null);
         stop();
       }
       return;
     }
-    setSongHistory(newHistory);
-    setCurrentSong(nextSong);
-    setSongQueue(newQueue);
+    void setSongHistory(newHistory);
+    void setCurrentSong(nextSong);
+    void setSongQueue(newQueue);
   }, [
     currentSong,
     songQueue,
@@ -92,10 +92,10 @@ export const usePlayer = () => {
   const prev = useCallback(() => {
     const lastSong = songHistory.at(-1);
     const newHistory = songHistory.slice(0, -1);
-    setSongHistory(newHistory);
+    void setSongHistory(newHistory);
     const newQueue = currentSong ? [currentSong, ...songQueue] : songQueue;
-    setSongQueue(newQueue);
-    setCurrentSong(lastSong ?? null);
+    void setSongQueue(newQueue);
+    void setCurrentSong(lastSong ?? null);
   }, [currentSong, songQueue, songHistory, setSongHistory, setCurrentSong, setSongQueue]);
 
   const skipTo = useCallback(
@@ -104,9 +104,9 @@ export const usePlayer = () => {
       if (targetIndex === -1) throw new Error("Target song not found");
       const [target, ...newQueue] = songQueue.slice(targetIndex);
       const newHistory = currentSong ? [...songHistory, currentSong] : songHistory;
-      setSongHistory(newHistory);
-      setCurrentSong(target);
-      setSongQueue(newQueue);
+      void setSongHistory(newHistory);
+      void setCurrentSong(target);
+      void setSongQueue(newQueue);
     },
     [currentSong, songQueue, songHistory, setSongHistory, setCurrentSong, setSongQueue],
   );

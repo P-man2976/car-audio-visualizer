@@ -58,7 +58,7 @@ function Wrapper({ children }: { children: React.ReactNode }) {
 
 describe("ExternalInput", () => {
   test("「マイク入力」Badge が表示される", async () => {
-    render(
+    void render(
       <Wrapper>
         <ExternalInput />
       </Wrapper>,
@@ -67,7 +67,7 @@ describe("ExternalInput", () => {
   });
 
   test("デバイス一覧が表示される", async () => {
-    render(
+    void render(
       <Wrapper>
         <ExternalInput />
       </Wrapper>,
@@ -80,7 +80,7 @@ describe("ExternalInput", () => {
 
   test("デバイスクリックで connect が呼ばれる", async () => {
     mockConnect.mockClear();
-    render(
+    void render(
       <Wrapper>
         <ExternalInput />
       </Wrapper>,

@@ -10,7 +10,7 @@ export function ScreenShare() {
       className="w-full"
       onClick={async () => {
         const stream = await navigator.mediaDevices.getDisplayMedia(getDisplayMediaConstraints());
-        connect(stream);
+        void connect(stream);
       }}
     >
       PC上の音声を共有

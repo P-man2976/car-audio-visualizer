@@ -22,29 +22,29 @@ vi.mock("@/atoms/audio", async () => {
 
 import { FilePicker } from "@/components/FilePicker";
 
-function renderPicker(overrides?: (store: ReturnType<typeof createStore>) => void) {
+async function renderPicker(overrides?: (store: ReturnType<typeof createStore>) => void) {
   const store = createStore();
   overrides?.(store);
 
   return {
     store,
-    ...render(
+    ...(await render(
       <Provider store={store}>
         <FilePicker />
       </Provider>,
-    ),
+    )),
   };
 }
 
 describe("FilePicker", () => {
   test("ボタンが表示される", async () => {
-    renderPicker();
+    void renderPicker();
 
     await expect.element(page.getByText("ファイルポップアップから読み込み")).toBeInTheDocument();
   });
 
   test("ボタンがクリック可能", async () => {
-    renderPicker();
+    void renderPicker();
 
     const button = page.getByRole("button", {
       name: /ファイルポップアップから読み込み/,
@@ -53,7 +53,7 @@ describe("FilePicker", () => {
   });
 
   test("FSA 対応ブラウザでは hidden input が表示されない", async () => {
-    renderPicker();
+    void renderPicker();
 
     // showOpenFilePicker が使える環境では input[type=file] は描画されない
     const inputs = page.getByRole("textbox");

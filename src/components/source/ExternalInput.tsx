@@ -27,7 +27,7 @@ export function ExternalInput() {
               const stream = await navigator.mediaDevices.getUserMedia(
                 getUserMediaConstraints(device.deviceId),
               );
-              connect(stream);
+              void connect(stream);
             }}
           >
             {getInputDeviceLabel(device, index)}

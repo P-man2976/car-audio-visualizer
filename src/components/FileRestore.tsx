@@ -95,9 +95,9 @@ export function FileRestore() {
   }, [dirHandles, allSongs]);
 
   const clearAll = useCallback(() => {
-    setCurrentSong(null);
-    setQueue([]);
-    setHistory([]);
+    void setCurrentSong(null);
+    void setQueue([]);
+    void setHistory([]);
     clearLegacySessionStore().catch(() => undefined);
   }, [setCurrentSong, setQueue, setHistory]);
 
@@ -141,9 +141,9 @@ export function FileRestore() {
       };
     },
     onSuccess: ({ current, queue: q, history: h }) => {
-      if (current) setCurrentSong(current);
-      if (q.length > 0) setQueue(q);
-      if (h.length > 0) setHistory(h);
+      if (current) void setCurrentSong(current);
+      if (q.length > 0) void setQueue(q);
+      if (h.length > 0) void setHistory(h);
 
       if (restoringToastId.current) {
         toast.dismiss(restoringToastId.current);

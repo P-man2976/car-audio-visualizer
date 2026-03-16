@@ -34,14 +34,14 @@ function SampleTabs({
 
 describe("Tabs", () => {
   test("defaultValue に一致するタブが active になる", async () => {
-    render(<SampleTabs defaultValue="a" />);
+    void render(<SampleTabs defaultValue="a" />);
     const tabA = page.getByRole("tab", { name: "タブA" });
     await expect.element(tabA).toHaveAttribute("data-state", "active");
     await expect.element(page.getByText("コンテンツA")).toBeInTheDocument();
   });
 
   test("タブをクリックするとコンテンツが切り替わる", async () => {
-    render(<SampleTabs />);
+    void render(<SampleTabs />);
 
     await page.getByRole("tab", { name: "タブB" }).click();
 
@@ -52,19 +52,19 @@ describe("Tabs", () => {
   });
 
   test("disabled のタブはクリックできない", async () => {
-    render(<SampleTabs />);
+    void render(<SampleTabs />);
     const tabC = page.getByRole("tab", { name: "タブC" });
     await expect.element(tabC).toBeDisabled();
   });
 
   test("orientation=vertical が data-orientation に反映される", async () => {
-    render(<SampleTabs orientation="vertical" />);
+    void render(<SampleTabs orientation="vertical" />);
     const tabgroup = page.getByRole("tablist");
     await expect.element(tabgroup).toHaveAttribute("aria-orientation", "vertical");
   });
 
   test("variant=line が TabsList の data-variant に反映される", async () => {
-    render(<SampleTabs variant="line" />);
+    void render(<SampleTabs variant="line" />);
     const tablist = page.getByRole("tablist");
     await expect.element(tablist).toHaveAttribute("data-variant", "line");
   });

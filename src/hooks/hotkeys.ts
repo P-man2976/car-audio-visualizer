@@ -128,9 +128,17 @@ export function useAppHotkeys(opts: AppHotkeysOptions = {}) {
     [bindings.playPause, "k"],
     () => {
       if (currentSrc === "radio") {
-        isPlaying ? stopRadio() : playRadio();
+        if (isPlaying) {
+          stopRadio();
+        } else {
+          playRadio();
+        }
       } else if (currentSrc === "file") {
-        isPlaying ? pause() : void play();
+        if (isPlaying) {
+          pause();
+        } else {
+          void play();
+        }
       }
     },
     { preventDefault: true, enabled },
@@ -283,7 +291,7 @@ export function useAppHotkeys(opts: AppHotkeysOptions = {}) {
   useHotkeys(
     bindings.modeScreen,
     () => {
-      navigator.mediaDevices
+      void navigator.mediaDevices
         .getDisplayMedia(getDisplayMediaConstraints())
         .then((stream) => connect(stream))
         .catch((e) => console.warn("[hotkeys] Screen capture failed:", e));
@@ -296,7 +304,7 @@ export function useAppHotkeys(opts: AppHotkeysOptions = {}) {
   useHotkeys(
     bindings.modeAux,
     () => {
-      navigator.mediaDevices
+      void navigator.mediaDevices
         .getUserMedia({ audio: true, video: false })
         .then((stream) => connect(stream))
         .catch((e) => console.warn("[hotkeys] Mic/AUX capture failed:", e));

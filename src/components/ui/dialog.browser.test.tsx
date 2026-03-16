@@ -17,7 +17,7 @@ import {
 
 describe("Dialog", () => {
   test("トリガーをクリックするとダイアログが開く", async () => {
-    render(
+    void render(
       <Dialog>
         <DialogTrigger>開く</DialogTrigger>
         <DialogContent>
@@ -35,7 +35,7 @@ describe("Dialog", () => {
   });
 
   test("Close ボタンでダイアログが閉じる", async () => {
-    render(
+    void render(
       <Dialog>
         <DialogTrigger>開く</DialogTrigger>
         <DialogContent showCloseButton>
@@ -52,7 +52,7 @@ describe("Dialog", () => {
   });
 
   test("showCloseButton=false で Close ボタンが表示されない", async () => {
-    render(
+    void render(
       <Dialog>
         <DialogTrigger>開く</DialogTrigger>
         <DialogContent showCloseButton={false}>
@@ -67,7 +67,7 @@ describe("Dialog", () => {
   });
 
   test("DialogFooter の showCloseButton で Close ボタンを追加できる", async () => {
-    render(
+    void render(
       <Dialog>
         <DialogTrigger>開く</DialogTrigger>
         <DialogContent showCloseButton={false}>
@@ -85,7 +85,7 @@ describe("Dialog", () => {
   });
 
   test("open prop で制御モードで動作する", async () => {
-    render(
+    void render(
       <Dialog open>
         <DialogContent>
           <DialogTitle>制御モード</DialogTitle>

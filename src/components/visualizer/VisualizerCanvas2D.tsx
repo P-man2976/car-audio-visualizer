@@ -246,7 +246,7 @@ function VisualizerScene() {
   // Montserrat フォントロード → Text オブジェクト生成
   useEffect(() => {
     let cancelled = false;
-    montserratReady.then(() => {
+    void montserratReady.then(() => {
       if (cancelled) return;
       const container = labelContainerRef.current;
       if (!container) return;

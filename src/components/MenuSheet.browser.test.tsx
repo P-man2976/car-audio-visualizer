@@ -23,7 +23,7 @@ import { MenuSheet } from "@/components/MenuSheet";
 
 describe("MenuSheet", () => {
   test("トリガーをクリックするとシートが開く", async () => {
-    render(
+    void render(
       <MenuSheet>
         <button type="button">メニュー</button>
       </MenuSheet>,
@@ -37,7 +37,7 @@ describe("MenuSheet", () => {
 
   test("設定ボタンで setSettingsOpen(true) が呼ばれる", async () => {
     mockSetSettingsOpen.mockClear();
-    render(
+    void render(
       <MenuSheet>
         <button type="button">メニュー</button>
       </MenuSheet>,
@@ -50,7 +50,7 @@ describe("MenuSheet", () => {
   });
 
   test("スライダーが表示される", async () => {
-    render(
+    void render(
       <MenuSheet>
         <button type="button">メニュー</button>
       </MenuSheet>,

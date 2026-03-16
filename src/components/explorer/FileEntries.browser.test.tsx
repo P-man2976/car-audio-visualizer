@@ -78,7 +78,7 @@ function makeFakeDirHandle(
   } as unknown as FileSystemDirectoryHandle;
 }
 
-function renderEntries(overrides?: (store: ReturnType<typeof createStore>) => void) {
+async function renderEntries(overrides?: (store: ReturnType<typeof createStore>) => void) {
   const store = createStore();
   overrides?.(store);
 
@@ -88,7 +88,7 @@ function renderEntries(overrides?: (store: ReturnType<typeof createStore>) => vo
 
   return {
     store,
-    ...render(
+    ...(await render(
       <QueryClientProvider client={queryClient}>
         <Provider store={store}>
           <div style={{ height: 600 }}>
@@ -96,13 +96,13 @@ function renderEntries(overrides?: (store: ReturnType<typeof createStore>) => vo
           </div>
         </Provider>
       </QueryClientProvider>,
-    ),
+    )),
   };
 }
 
 describe("FileEntries", () => {
   test("currentDir が null の場合「フォルダが選択されていません」が表示される", async () => {
-    renderEntries();
+    void renderEntries();
 
     await expect.element(page.getByText("フォルダが選択されていません")).toBeInTheDocument();
   });
@@ -115,7 +115,7 @@ describe("FileEntries", () => {
       ["song.mp3", mp3File],
     ]);
 
-    renderEntries((store) => {
+    void renderEntries((store) => {
       store.set(explorerNavigationStackAtom, [dir]);
     });
 
@@ -128,7 +128,7 @@ describe("FileEntries", () => {
     const mp3File = makeFakeFileHandle("test.mp3");
     const dir = makeFakeDirHandle("Music", [["test.mp3", mp3File]]);
 
-    const { store } = renderEntries((store) => {
+    const { store } = await renderEntries((store) => {
       store.set(explorerNavigationStackAtom, [dir]);
     });
 
@@ -148,7 +148,7 @@ describe("FileEntries", () => {
     const subDir = makeFakeDirHandle("Albums", []);
     const dir = makeFakeDirHandle("Music", [["Albums", subDir]]);
 
-    renderEntries((store) => {
+    void renderEntries((store) => {
       store.set(explorerNavigationStackAtom, [dir]);
     });
 

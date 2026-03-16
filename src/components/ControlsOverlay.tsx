@@ -276,9 +276,17 @@ export function ControlsOverlay() {
                 disabled={isRadikoLoading}
                 onClick={async () => {
                   if (currentSrc === "radio") {
-                    isPlaying ? stopRadio() : playRadio();
+                    if (isPlaying) {
+                      stopRadio();
+                    } else {
+                      playRadio();
+                    }
                   } else {
-                    isPlaying ? pause() : await play();
+                    if (isPlaying) {
+                      pause();
+                    } else {
+                      await play();
+                    }
                   }
                 }}
               >

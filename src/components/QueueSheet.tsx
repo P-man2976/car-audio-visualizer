@@ -108,7 +108,7 @@ function SongQueueList() {
     (event: DragEndEvent) => {
       const { active, over } = event;
       if (!over || active.id === over.id) return;
-      setSongQueue((prev) => {
+      void setSongQueue((prev) => {
         const oldIndex = prev.findIndex((s) => s.id === active.id);
         const newIndex = prev.findIndex((s) => s.id === over.id);
         if (oldIndex === -1 || newIndex === -1) return prev;
@@ -222,7 +222,7 @@ function QueueSongCard({ song, context }: { song: Song; context: "queue" | "hist
           } else {
             // 履歴からはキューの先頭に新IDで追加して再生
             const newId = crypto.randomUUID();
-            setSongQueue((prev) => [{ ...song, id: newId }, ...prev]);
+            void setSongQueue((prev) => [{ ...song, id: newId }, ...prev]);
             queueMicrotask(() => skipTo(newId));
           }
         }}
@@ -295,7 +295,7 @@ function QueueContextMenuItems({ song }: { song: Song }) {
       </ContextMenuItem>
       <ContextMenuItem
         onClick={() => {
-          setSongQueue((prev) => {
+          void setSongQueue((prev) => {
             const filtered = prev.filter((s) => s.id !== song.id);
             return [song, ...filtered];
           });
@@ -308,7 +308,7 @@ function QueueContextMenuItems({ song }: { song: Song }) {
       <ContextMenuSeparator />
       <ContextMenuItem
         onClick={() => {
-          setSongQueue((prev) => prev.filter((s) => s.id !== song.id));
+          void setSongQueue((prev) => prev.filter((s) => s.id !== song.id));
         }}
         className="gap-2 text-red-400 focus:text-red-400"
       >
@@ -328,7 +328,7 @@ function HistoryContextMenuItems({ song }: { song: Song }) {
     <>
       <ContextMenuItem
         onClick={() => {
-          setSongQueue((prev) => [{ ...song, id: crypto.randomUUID() }, ...prev]);
+          void setSongQueue((prev) => [{ ...song, id: crypto.randomUUID() }, ...prev]);
         }}
         className="gap-2"
       >
@@ -337,7 +337,7 @@ function HistoryContextMenuItems({ song }: { song: Song }) {
       </ContextMenuItem>
       <ContextMenuItem
         onClick={() => {
-          setSongQueue((prev) => [...prev, { ...song, id: crypto.randomUUID() }]);
+          void setSongQueue((prev) => [...prev, { ...song, id: crypto.randomUUID() }]);
         }}
         className="gap-2"
       >

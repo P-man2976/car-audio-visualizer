@@ -17,7 +17,7 @@ export function useShuffleToggle() {
     if (!shuffle) {
       // ON: 現在の順序を保存してからシャッフル
       setPreShuffleQueue([...songQueue]);
-      setSongQueue(shuffleArray(songQueue));
+      void setSongQueue(shuffleArray(songQueue));
       setShuffle(true);
     } else {
       // OFF: キューが変更されていなければ元の順序に復元
@@ -25,7 +25,7 @@ export function useShuffleToggle() {
         const currentIds = new Set(songQueue.map((s) => s.id));
         const savedIds = new Set(preShuffleQueue.map((s) => s.id));
         if (currentIds.size === savedIds.size && [...currentIds].every((id) => savedIds.has(id))) {
-          setSongQueue(preShuffleQueue);
+          void setSongQueue(preShuffleQueue);
         }
       }
       setPreShuffleQueue(null);
