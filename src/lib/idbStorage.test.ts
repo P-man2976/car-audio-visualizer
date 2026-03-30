@@ -189,7 +189,7 @@ describe("atomWithIDB", () => {
 
     const { createStore } = await import("jotai");
     const store = createStore();
-    const testAtom = atomWithIDB("test-key", "default", mockStorage);
+    const testAtom = atomWithIDB<string>("test-key", "default", mockStorage);
 
     // setter は void を返す（Promise ではない）
     const result = store.set(testAtom, "new-value");
@@ -214,7 +214,7 @@ describe("atomWithIDB", () => {
 
     const { createStore } = await import("jotai");
     const store = createStore();
-    const testAtom = atomWithIDB("err-key", "default", mockStorage);
+    const testAtom = atomWithIDB<string>("err-key", "default", mockStorage);
 
     store.set(testAtom, "bad-value");
 
