@@ -4,7 +4,16 @@
  *
  * CF Cache API を利用して同一 PoP 内で 8 分間キャッシュする (cross-isolate)。
  * 同時リクエストの重複呼び出しも pendingAuth で排除する。
+ *
+ * targetArea を指定するとモバイル認証 (aSmartPhone7a + GPS) を使い
+ * 任意エリアのトークンを取得できる。省略時は Web 認証 (pc_html5)。
  */
+
+import {
+  computeMobilePartialKey,
+  generateMobileDeviceHeaders,
+  getAreaCoords,
+} from "@/lib/radiko-mobile-auth";
 
 export const RADIKO_BASE = "https://radiko.jp";
 const AUTH_KEY = "bcd151073c03b352e1ef2fd66c32209da9ca0afa";
@@ -12,14 +21,23 @@ const AUTH_KEY = "bcd151073c03b352e1ef2fd66c32209da9ca0afa";
 /** 認証キャッシュの有効期間 (8 分) */
 export const AUTH_CACHE_TTL = 1000 * 60 * 8;
 
-let _pendingAuth: Promise<{ authToken: string }> | null = null;
+export interface RadikoAuthResult {
+  authToken: string;
+  areaId: string;
+}
+
+/** エリアごとの dedup 用 Map */
+const _pendingAuth = new Map<string, Promise<RadikoAuthResult>>();
 
 // ---------------------------------------------------------------------------
 // CF Cache API layer (cross-isolate, same PoP)
 // ---------------------------------------------------------------------------
 
-/** CF Cache に使う内部キー URL */
-const CF_CACHE_KEY_URL = "https://internal.cav/radiko-auth-token";
+/** CF Cache に使う内部キー URL (エリアごと) */
+function cfCacheKeyUrl(targetArea?: string): string {
+  const suffix = targetArea ?? "default";
+  return `https://internal.cav/radiko-auth-token/${suffix}`;
+}
 
 /**
  * caches.default が利用可能かどうか。
@@ -30,35 +48,34 @@ function hasCFCache(): boolean {
 }
 
 /**
- * CF Cache から authToken を取得する。キャッシュミス/非対応環境では undefined。
+ * CF Cache から認証結果を取得する。キャッシュミス/非対応環境では undefined。
  */
-async function getCFCachedToken(): Promise<string | undefined> {
+async function getCFCachedAuth(targetArea?: string): Promise<RadikoAuthResult | undefined> {
   if (!hasCFCache()) return undefined;
   try {
     const cache = (caches as unknown as { default: Cache }).default;
-    const res = await cache.match(new Request(CF_CACHE_KEY_URL));
+    const res = await cache.match(new Request(cfCacheKeyUrl(targetArea)));
     if (!res) return undefined;
-    const { authToken } = (await res.json()) as { authToken: string };
-    return authToken;
+    return (await res.json()) as RadikoAuthResult;
   } catch {
     return undefined;
   }
 }
 
 /**
- * CF Cache に authToken を保存する (max-age = AUTH_CACHE_TTL 秒)。
+ * CF Cache に認証結果を保存する (max-age = AUTH_CACHE_TTL 秒)。
  */
-async function setCFCachedToken(authToken: string): Promise<void> {
+async function setCFCachedAuth(result: RadikoAuthResult, targetArea?: string): Promise<void> {
   if (!hasCFCache()) return;
   try {
     const cache = (caches as unknown as { default: Cache }).default;
-    const res = new Response(JSON.stringify({ authToken }), {
+    const res = new Response(JSON.stringify(result), {
       headers: {
         "Content-Type": "application/json",
         "Cache-Control": `public, max-age=${AUTH_CACHE_TTL / 1000}`,
       },
     });
-    await cache.put(new Request(CF_CACHE_KEY_URL), res);
+    await cache.put(new Request(cfCacheKeyUrl(targetArea)), res);
   } catch {
     // キャッシュ書き込み失敗は無視
   }
@@ -69,41 +86,50 @@ async function setCFCachedToken(authToken: string): Promise<void> {
 // ---------------------------------------------------------------------------
 
 /**
- * auth1 → auth2 を実行し authToken を返す。
+ * auth1 → auth2 を実行し authToken + areaId を返す。
+ *
+ * @param targetArea 取得したいエリア (例: "JP20")。
+ *   指定時: モバイル認証 (aSmartPhone7a + GPS) で任意エリアのトークンを取得。
+ *   省略時: Web 認証 (pc_html5) で IP ベースのエリアを使用。
  *
  * キャッシュ確認順:
  *   1. CF Cache API (同一 PoP, cross-isolate, ~1ms)
  *   2. upstream auth1/auth2 fetch
  *
- * 同時呼び出しは 1 つの実行に集約される (dedup)。
+ * 同時呼び出しは同一エリアで 1 つの実行に集約される (dedup)。
  * 失敗時は Response を throw する（呼び出し側で catch して返す）。
  */
-export async function performRadikoAuth(): Promise<{ authToken: string }> {
+export async function performRadikoAuth(targetArea?: string): Promise<RadikoAuthResult> {
+  const cacheKey = targetArea ?? "__default__";
+
   // 1. CF Cache (cross-isolate)
-  const cfCached = await getCFCachedToken();
-  if (cfCached) return { authToken: cfCached };
+  const cached = await getCFCachedAuth(targetArea);
+  if (cached) return cached;
 
   // 2. 他のリクエストが既に auth 中なら同じ Promise を返す (dedup)
-  if (_pendingAuth) return _pendingAuth;
+  const pending = _pendingAuth.get(cacheKey);
+  if (pending) return pending;
 
-  _pendingAuth = doRadikoAuth()
+  const promise = (targetArea ? doMobileAuth(targetArea) : doWebAuth())
     .then(async (result) => {
-      _pendingAuth = null;
-      await setCFCachedToken(result.authToken);
+      _pendingAuth.delete(cacheKey);
+      await setCFCachedAuth(result, targetArea);
       return result;
     })
-    .catch((err) => {
-      _pendingAuth = null;
+    .catch((err: unknown) => {
+      _pendingAuth.delete(cacheKey);
       throw err;
     });
 
-  return _pendingAuth;
+  _pendingAuth.set(cacheKey, promise);
+  return promise;
 }
 
-/**
- * 実際の auth1 → auth2 通信を行う内部関数。
- */
-async function doRadikoAuth(): Promise<{ authToken: string }> {
+// ---------------------------------------------------------------------------
+// Web 認証 (pc_html5) — IP ベースのエリア判定
+// ---------------------------------------------------------------------------
+
+async function doWebAuth(): Promise<RadikoAuthResult> {
   // --- auth1 ---
   const resAuth1 = await fetch(`${RADIKO_BASE}/v2/api/auth1`, {
     headers: {
@@ -142,10 +168,58 @@ async function doRadikoAuth(): Promise<{ authToken: string }> {
     throw errorResponse("Auth2 failed", 502, { status: resAuth2.status });
   }
 
-  // auth2 のレスポンスボディは破棄
-  await resAuth2.text();
+  const auth2Body = await resAuth2.text();
+  const areaId = auth2Body.split(",")[0]?.trim() || "JP13";
 
-  return { authToken };
+  return { authToken, areaId };
+}
+
+// ---------------------------------------------------------------------------
+// モバイル認証 (aSmartPhone7a) — GPS 座標で任意エリア指定
+// ---------------------------------------------------------------------------
+
+async function doMobileAuth(targetArea: string): Promise<RadikoAuthResult> {
+  const deviceHeaders = generateMobileDeviceHeaders();
+
+  // --- auth1 ---
+  const resAuth1 = await fetch(`${RADIKO_BASE}/v2/api/auth1`, {
+    headers: deviceHeaders,
+  });
+
+  if (!resAuth1.ok) {
+    throw errorResponse("Auth1 failed (mobile)", 502, { status: resAuth1.status });
+  }
+
+  const authToken = resAuth1.headers.get("x-radiko-authtoken");
+  const keyLength = Number(resAuth1.headers.get("x-radiko-keylength"));
+  const keyOffset = Number(resAuth1.headers.get("x-radiko-keyoffset"));
+
+  if (!authToken) {
+    throw errorResponse("No X-Radiko-AuthToken in auth1 response (mobile)", 502);
+  }
+
+  const partialKey = computeMobilePartialKey(keyOffset, keyLength);
+  const location = getAreaCoords(targetArea);
+
+  // --- auth2 (GPS 座標付き) ---
+  const resAuth2 = await fetch(`${RADIKO_BASE}/v2/api/auth2`, {
+    headers: {
+      ...deviceHeaders,
+      "X-Radiko-AuthToken": authToken,
+      "X-Radiko-PartialKey": partialKey,
+      "X-Radiko-Location": location,
+      "X-Radiko-Connection": "wifi",
+    },
+  });
+
+  if (!resAuth2.ok) {
+    throw errorResponse("Auth2 failed (mobile)", 502, { status: resAuth2.status });
+  }
+
+  const auth2Body = await resAuth2.text();
+  const areaId = auth2Body.split(",")[0]?.trim() || targetArea;
+
+  return { authToken, areaId };
 }
 
 /** JSON レスポンスを生成するヘルパー */

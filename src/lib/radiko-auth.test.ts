@@ -10,6 +10,19 @@ import {
   RADIKO_BASE,
 } from "@/lib/radiko-auth";
 
+// モバイル認証で使うモジュールをモック
+vi.mock("@/lib/radiko-mobile-auth", () => ({
+  computeMobilePartialKey: vi.fn(() => "bW9ja1BhcnRpYWxLZXk="),
+  generateMobileDeviceHeaders: vi.fn(() => ({
+    "X-Radiko-App": "aSmartPhone7a",
+    "X-Radiko-App-Version": "7.5.0",
+    "X-Radiko-Device": "29.SM-G960F",
+    "X-Radiko-User": "deadbeef",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 10.0.0;SM-G960F/NRD90M)",
+  })),
+  getAreaCoords: vi.fn(() => "36.651299,138.180956,gps"),
+}));
+
 describe("jsonResponse", () => {
   test("JSON Content-Type と CORS ヘッダー付きのレスポンスを返す", async () => {
     const res = jsonResponse({ ok: true });
@@ -65,8 +78,7 @@ describe("performRadikoAuth", () => {
     vi.unstubAllGlobals();
   });
 
-  test("auth1 → auth2 成功時に authToken を返す", async () => {
-    // auth1 レスポンス
+  test("Web 認証: auth1 → auth2 成功時に authToken と areaId を返す", async () => {
     const auth1Headers = new Headers({
       "x-radiko-authtoken": "test-auth-token",
       "x-radiko-keylength": "16",
@@ -77,23 +89,51 @@ describe("performRadikoAuth", () => {
         ok: true,
         headers: auth1Headers,
       } as Response)
-      // auth2 レスポンス
       .mockResolvedValueOnce({
         ok: true,
-        text: () => Promise.resolve("JP13,東京都,..."),
+        text: () => Promise.resolve("JP13,東京都,tokyo Japan"),
       } as Response);
 
     const result = await performRadikoAuth();
     expect(result.authToken).toBe("test-auth-token");
+    expect(result.areaId).toBe("JP13");
     expect(fetch).toHaveBeenCalledTimes(2);
 
-    // auth1 URL の検証
     const auth1Url = vi.mocked(fetch).mock.calls[0][0];
     expect(auth1Url).toBe(`${RADIKO_BASE}/v2/api/auth1`);
 
-    // auth2 URL の検証
     const auth2Url = vi.mocked(fetch).mock.calls[1][0];
     expect(auth2Url).toBe(`${RADIKO_BASE}/v2/api/auth2`);
+  });
+
+  test("モバイル認証: targetArea 指定時に aSmartPhone7a + GPS で認証する", async () => {
+    const auth1Headers = new Headers({
+      "x-radiko-authtoken": "mobile-token-123",
+      "x-radiko-keylength": "16",
+      "x-radiko-keyoffset": "100",
+    });
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        headers: auth1Headers,
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve("JP20,長野県,nagano Japan"),
+      } as Response);
+
+    const result = await performRadikoAuth("JP20");
+    expect(result.authToken).toBe("mobile-token-123");
+    expect(result.areaId).toBe("JP20");
+
+    const auth1Init = vi.mocked(fetch).mock.calls[0][1] as RequestInit;
+    const auth1Headers2 = auth1Init.headers as Record<string, string>;
+    expect(auth1Headers2["X-Radiko-App"]).toBe("aSmartPhone7a");
+
+    const auth2Init = vi.mocked(fetch).mock.calls[1][1] as RequestInit;
+    const auth2Headers = auth2Init.headers as Record<string, string>;
+    expect(auth2Headers["X-Radiko-Location"]).toBe("36.651299,138.180956,gps");
+    expect(auth2Headers["X-Radiko-Connection"]).toBe("wifi");
   });
 
   test("auth1 失敗時に Response を throw する", async () => {

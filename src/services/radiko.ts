@@ -63,9 +63,12 @@ export function useRadikoStationList(areaId?: string) {
 }
 
 export function useRadikoM3u8Url() {
+  const area = useRadikoArea();
   return useMutation<string, Error, string>({
     mutationFn: async (stationId: string) => {
-      const res = await fetch(`/api/radiko/stream?station_id=${stationId}`);
+      const params = new URLSearchParams({ station_id: stationId });
+      if (area) params.set("area", area);
+      const res = await fetch(`/api/radiko/stream?${params.toString()}`);
       if (!res.ok) {
         const { error } = (await res.json()) as { error: string };
         throw new Error(`[Error] Radiko stream failed: ${error}`);

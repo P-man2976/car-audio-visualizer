@@ -22,7 +22,9 @@ export const Route = createFileRoute("/api/radiko/stream")({
         }
 
         try {
-          const { authToken } = await performRadikoAuth();
+          // area が指定されていればモバイル認証で対象エリアのトークンを取得
+          const area = new URL(request.url).searchParams.get("area") ?? undefined;
+          const { authToken } = await performRadikoAuth(area);
 
           // --- playlist.m3u8 (auth と同一 outbound IP から fetch) ---
           const playlistUrl = new URL(PLAYLIST_BASE);
@@ -55,7 +57,13 @@ export const Route = createFileRoute("/api/radiko/stream")({
           // SSRF 防止: HTTPS URL かつ既知の Radiko CDN ドメインのみ許可
           try {
             const parsed = new URL(streamUri);
-            if (parsed.protocol !== "https:" || !parsed.hostname.endsWith(".smartstream.ne.jp")) {
+            if (
+              parsed.protocol !== "https:" ||
+              !(
+                parsed.hostname.endsWith(".smartstream.ne.jp") ||
+                parsed.hostname.endsWith(".radiko-cf.com")
+              )
+            ) {
               return errorResponse("Unexpected stream URI origin", 502);
             }
           } catch {

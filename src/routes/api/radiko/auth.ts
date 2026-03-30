@@ -10,14 +10,14 @@ export const Route = createFileRoute("/api/radiko/auth")({
       // 振り分けられて 400 になることがある。
       GET: async ({ request }) => {
         // Cloudflare Workers の request.cf からクライアントの地域を取得
-        // auth2 の戻り値はエッジ(Worker)の地域になるため使わない
+        // モバイル認証 (GPS) でこのエリアのトークンを取得する
         type CfProps = { country?: string; regionCode?: string };
         const cf = (request as Request & { cf?: CfProps }).cf;
-        const areaId =
-          cf?.country === "JP" && cf?.regionCode ? `JP${Number(cf.regionCode)}` : "JP13"; // デフォルト: 東京
+        const targetArea =
+          cf?.country === "JP" && cf?.regionCode ? `JP${Number(cf.regionCode)}` : undefined;
 
         try {
-          const { authToken } = await performRadikoAuth();
+          const { authToken, areaId } = await performRadikoAuth(targetArea);
           return jsonResponse(
             { authToken, areaId },
             200,
