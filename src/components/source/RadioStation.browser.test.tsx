@@ -92,7 +92,7 @@ function renderWithStore(overrides?: (store: ReturnType<typeof createStore>) => 
 
 describe("RadioStation", () => {
   test("局名とロゴが表示される（size=lg）", async () => {
-    void renderWithStore();
+    renderWithStore();
 
     await expect.element(page.getByText("TBSラジオ")).toBeInTheDocument();
 
@@ -103,7 +103,7 @@ describe("RadioStation", () => {
   });
 
   test("FM 局の周波数が MHz 表示される（size=lg）", async () => {
-    void renderWithStore();
+    renderWithStore();
 
     // 90.5MHz が表示される（FM は小数点 1 桁）
     await expect.element(page.getByText("90.5MHz")).toBeInTheDocument();
@@ -111,7 +111,7 @@ describe("RadioStation", () => {
 
   test("クリックで selectRadio が呼ばれる", async () => {
     mockSelectRadio.mockClear();
-    void renderWithStore();
+    renderWithStore();
 
     await page.getByText("TBSラジオ").click();
 
@@ -126,7 +126,7 @@ describe("RadioStation", () => {
   });
 
   test("選択中の局に border スタイルが付与される", async () => {
-    void renderWithStore((store) => {
+    renderWithStore((store) => {
       store.set(currentRadioAtom, {
         type: "FM",
         source: "radiko",
@@ -141,7 +141,7 @@ describe("RadioStation", () => {
   });
 
   test("size=sm ではロゴのみ表示され名前・周波数は非表示", async () => {
-    void renderWithStore((store) => {
+    renderWithStore((store) => {
       store.set(radioStationSizeAtom, "sm");
     });
 
@@ -155,7 +155,7 @@ describe("RadioStation", () => {
   });
 
   test("チャンネル割り当てバッジが表示される", async () => {
-    void renderWithStore((store) => {
+    renderWithStore((store) => {
       store.set(radioChannelsByAreaAtom, {
         JP13: {
           fm: {

@@ -29,7 +29,7 @@ describe("ContextMenu", () => {
   test("右クリックでメニュー表示、onSelect、disabled、Label/Separator、variant を検証", async () => {
     const handleSelect = vi.fn();
 
-    void render(
+    render(
       <ContextMenu>
         <ContextMenuTrigger>右クリック対象</ContextMenuTrigger>
         <ContextMenuContent>

@@ -81,9 +81,9 @@ describe("QueueSheet", () => {
   test("ファイルモード: 曲キューが空のとき「キューは空です」", async () => {
     const store = createStore();
     store.set(currentSrcAtom, "file");
-    void store.set(songQueueAtom, []);
+    store.set(songQueueAtom, []);
 
-    void render(
+    render(
       <Provider store={store}>
         <QueueSheet>
           <button type="button">キュー</button>
@@ -99,12 +99,12 @@ describe("QueueSheet", () => {
   test("ファイルモード: 曲が表示される", async () => {
     const store = createStore();
     store.set(currentSrcAtom, "file");
-    void store.set(songQueueAtom, [
+    store.set(songQueueAtom, [
       makeSong({ id: "s1", title: "曲A", album: "アルバムX" }),
       makeSong({ id: "s2", title: "曲B", filename: "song-b.flac" }),
     ]);
 
-    void render(
+    render(
       <Provider store={store}>
         <QueueSheet>
           <button type="button">キュー</button>
@@ -121,13 +121,13 @@ describe("QueueSheet", () => {
   test("ファイルモード: 履歴タブに切り替えると履歴が表示される", async () => {
     const store = createStore();
     store.set(currentSrcAtom, "file");
-    void store.set(songQueueAtom, []);
-    void store.set(songHistoryAtom, [
+    store.set(songQueueAtom, []);
+    store.set(songHistoryAtom, [
       makeSong({ id: "h1", title: "履歴曲A", album: "アルバムH" }),
       makeSong({ id: "h2", title: "履歴曲B" }),
     ]);
 
-    void render(
+    render(
       <Provider store={store}>
         <QueueSheet>
           <button type="button">キュー</button>
@@ -145,10 +145,10 @@ describe("QueueSheet", () => {
   test("ファイルモード: 履歴が空のとき「履歴はありません」", async () => {
     const store = createStore();
     store.set(currentSrcAtom, "file");
-    void store.set(songQueueAtom, []);
-    void store.set(songHistoryAtom, []);
+    store.set(songQueueAtom, []);
+    store.set(songHistoryAtom, []);
 
-    void render(
+    render(
       <Provider store={store}>
         <QueueSheet>
           <button type="button">キュー</button>
@@ -164,9 +164,9 @@ describe("QueueSheet", () => {
   test("ファイルモード: キュー曲のコンテキストメニュートリガーが存在する", async () => {
     const store = createStore();
     store.set(currentSrcAtom, "file");
-    void store.set(songQueueAtom, [makeSong({ id: "s1", title: "右クリック曲" })]);
+    store.set(songQueueAtom, [makeSong({ id: "s1", title: "右クリック曲" })]);
 
-    void render(
+    render(
       <Provider store={store}>
         <QueueSheet>
           <button type="button">キュー</button>
@@ -184,10 +184,10 @@ describe("QueueSheet", () => {
   test("ファイルモード: 履歴曲のコンテキストメニュートリガーが存在する", async () => {
     const store = createStore();
     store.set(currentSrcAtom, "file");
-    void store.set(songQueueAtom, []);
-    void store.set(songHistoryAtom, [makeSong({ id: "h1", title: "履歴右クリック曲" })]);
+    store.set(songQueueAtom, []);
+    store.set(songHistoryAtom, [makeSong({ id: "h1", title: "履歴右クリック曲" })]);
 
-    void render(
+    render(
       <Provider store={store}>
         <QueueSheet>
           <button type="button">キュー</button>
@@ -206,7 +206,7 @@ describe("QueueSheet", () => {
     store.set(currentSrcAtom, "radio");
     store.set(queueAtom, []);
 
-    void render(
+    render(
       <Provider store={store}>
         <QueueSheet>
           <button type="button">キュー</button>
@@ -232,7 +232,7 @@ describe("QueueSheet", () => {
       },
     ]);
 
-    void render(
+    render(
       <Provider store={store}>
         <QueueSheet>
           <button type="button">キュー</button>
@@ -248,10 +248,10 @@ describe("QueueSheet", () => {
   test("all off モード: ファイルキュータブが表示される", async () => {
     const store = createStore();
     store.set(currentSrcAtom, "off");
-    void store.set(songQueueAtom, []);
-    void store.set(songHistoryAtom, [makeSong({ id: "h1", title: "オフ時の履歴曲" })]);
+    store.set(songQueueAtom, []);
+    store.set(songHistoryAtom, [makeSong({ id: "h1", title: "オフ時の履歴曲" })]);
 
-    void render(
+    render(
       <Provider store={store}>
         <QueueSheet>
           <button type="button">キュー</button>
@@ -270,14 +270,14 @@ describe("QueueSheet", () => {
     const store = createStore();
     store.set(currentSrcAtom, "file");
     store.set(repeatModeAtom, "all");
-    void store.set(currentSongAtom, makeSong({ id: "current", title: "再生中" }));
-    void store.set(songQueueAtom, [
+    store.set(currentSongAtom, makeSong({ id: "current", title: "再生中" }));
+    store.set(songQueueAtom, [
       makeSong({ id: "q1", title: "キュー曲1" }),
       makeSong({ id: "q2", title: "キュー曲2" }),
     ]);
-    void store.set(songHistoryAtom, [makeSong({ id: "h1", title: "履歴曲" })]);
+    store.set(songHistoryAtom, [makeSong({ id: "h1", title: "履歴曲" })]);
 
-    void render(
+    render(
       <Provider store={store}>
         <QueueSheet>
           <button type="button">キュー</button>
@@ -294,9 +294,9 @@ describe("QueueSheet", () => {
     const store = createStore();
     store.set(currentSrcAtom, "file");
     store.set(repeatModeAtom, "off");
-    void store.set(songQueueAtom, [makeSong({ id: "q1", title: "キュー曲" })]);
+    store.set(songQueueAtom, [makeSong({ id: "q1", title: "キュー曲" })]);
 
-    void render(
+    render(
       <Provider store={store}>
         <QueueSheet>
           <button type="button">キュー</button>

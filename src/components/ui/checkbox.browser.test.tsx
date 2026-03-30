@@ -9,13 +9,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 describe("Checkbox", () => {
   test("初期状態は未チェック (data-state=unchecked)", async () => {
-    void render(<Checkbox aria-label="同意" />);
+    render(<Checkbox aria-label="同意" />);
     const checkbox = page.getByRole("checkbox", { name: "同意" });
     await expect.element(checkbox).toHaveAttribute("data-state", "unchecked");
   });
 
   test("クリックでチェック状態がトグルする", async () => {
-    void render(<Checkbox aria-label="同意" />);
+    render(<Checkbox aria-label="同意" />);
     const checkbox = page.getByRole("checkbox", { name: "同意" });
 
     await checkbox.click();
@@ -27,20 +27,20 @@ describe("Checkbox", () => {
 
   test("onCheckedChange コールバックが呼ばれる", async () => {
     const handleChange = vi.fn();
-    void render(<Checkbox aria-label="通知" onCheckedChange={handleChange} />);
+    render(<Checkbox aria-label="通知" onCheckedChange={handleChange} />);
 
     await page.getByRole("checkbox", { name: "通知" }).click();
     expect(handleChange).toHaveBeenCalledWith(true);
   });
 
   test("disabled のときクリックできない", async () => {
-    void render(<Checkbox aria-label="無効" disabled />);
+    render(<Checkbox aria-label="無効" disabled />);
     const checkbox = page.getByRole("checkbox", { name: "無効" });
     await expect.element(checkbox).toBeDisabled();
   });
 
   test("defaultChecked で初期チェック状態にできる", async () => {
-    void render(<Checkbox aria-label="既チェック" defaultChecked />);
+    render(<Checkbox aria-label="既チェック" defaultChecked />);
     const checkbox = page.getByRole("checkbox", { name: "既チェック" });
     await expect.element(checkbox).toHaveAttribute("data-state", "checked");
   });

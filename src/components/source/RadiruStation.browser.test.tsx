@@ -33,21 +33,21 @@ const props = {
 
 describe("RadiruStation", () => {
   test("3 チャンネル（第一/第二/FM）のカードが表示される", async () => {
-    void render(<RadiruStation {...props} />);
+    render(<RadiruStation {...props} />);
     await expect.element(page.getByText("第一")).toBeInTheDocument();
     await expect.element(page.getByText("第二")).toBeInTheDocument();
     await expect.element(page.getByText("ＦＭ")).toBeInTheDocument();
   });
 
   test("地域名が表示される", async () => {
-    void render(<RadiruStation {...props} />);
+    render(<RadiruStation {...props} />);
     // areajp が各カードに表示される
     await expect.element(page.getByText("東京").first()).toBeInTheDocument();
   });
 
   test("第一をクリックで selectRadio が AM / radiru で呼ばれる", async () => {
     mockSelectRadio.mockClear();
-    void render(<RadiruStation {...props} />);
+    render(<RadiruStation {...props} />);
 
     await page.getByText("第一").click();
     expect(mockSelectRadio).toHaveBeenCalledWith({
@@ -60,7 +60,7 @@ describe("RadiruStation", () => {
 
   test("FM をクリックで selectRadio が FM / radiru で呼ばれる", async () => {
     mockSelectRadio.mockClear();
-    void render(<RadiruStation {...props} />);
+    render(<RadiruStation {...props} />);
 
     await page.getByText("ＦＭ").click();
     expect(mockSelectRadio).toHaveBeenCalledWith({

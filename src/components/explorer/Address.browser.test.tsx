@@ -28,14 +28,14 @@ import { Address } from "@/components/explorer/Address";
 
 describe("Address", () => {
   test("パンくずリストに現在のスタックが表示される", async () => {
-    void render(<Address />);
+    render(<Address />);
     await expect.element(page.getByText("root")).toBeInTheDocument();
     await expect.element(page.getByText("Music")).toBeInTheDocument();
     await expect.element(page.getByText("Album")).toBeInTheDocument();
   });
 
   test("戻る・進む・上へボタンが有効", async () => {
-    void render(<Address />);
+    render(<Address />);
     // stack.length > 1 なので canGoBack=true, canGoUp=true
     // forwardStack.length > 0 なので canGoForward=true
     await expect.element(page.getByRole("button").nth(0)).not.toBeDisabled();
@@ -45,21 +45,21 @@ describe("Address", () => {
 
   test("戻るボタンクリックで back() が呼ばれる", async () => {
     mockBack.mockClear();
-    void render(<Address />);
+    render(<Address />);
     await page.getByRole("button").nth(0).click();
     expect(mockBack).toHaveBeenCalledOnce();
   });
 
   test("進むボタンクリックで advance() が呼ばれる", async () => {
     mockAdvance.mockClear();
-    void render(<Address />);
+    render(<Address />);
     await page.getByRole("button").nth(1).click();
     expect(mockAdvance).toHaveBeenCalledOnce();
   });
 
   test("上へボタンクリックで goUp() が呼ばれる", async () => {
     mockGoUp.mockClear();
-    void render(<Address />);
+    render(<Address />);
     await page.getByRole("button").nth(2).click();
     expect(mockGoUp).toHaveBeenCalledOnce();
   });

@@ -62,7 +62,10 @@ export function atomWithIDB<T>(key: string, initialValue: T, storage: IDBStorage
   baseAtom.onMount = (setAtom) => {
     // Resolve the Promise BEFORE calling setAtom.
     // This ensures get(baseAtom) always returns T, never Promise<T>.
-    void storage.getItem(key, initialValue).then(setAtom);
+    storage
+      .getItem(key, initialValue)
+      .then(setAtom)
+      .catch((e) => console.error(`[atomWithIDB] Failed to read "${key}":`, e));
   };
 
   const wrapper = atom(
@@ -71,7 +74,9 @@ export function atomWithIDB<T>(key: string, initialValue: T, storage: IDBStorage
       const nextValue =
         typeof update === "function" ? (update as (prev: T) => T)(get(baseAtom)) : update;
       _set(baseAtom, nextValue);
-      return storage.setItem(key, nextValue);
+      storage
+        .setItem(key, nextValue)
+        .catch((e) => console.error(`[atomWithIDB] Failed to write "${key}":`, e));
     },
   );
 

@@ -103,7 +103,7 @@ import { radioStationSizeAtom } from "@/atoms/radio";
 import { SourceSheet } from "@/components/SourceSheet";
 import { Button } from "@/components/ui/button";
 
-async function renderSheet(overrides?: (store: ReturnType<typeof createStore>) => void) {
+function renderSheet(overrides?: (store: ReturnType<typeof createStore>) => void) {
   const store = createStore();
   store.set(currentSrcAtom, "off");
   store.set(radioStationSizeAtom, "lg");
@@ -111,19 +111,19 @@ async function renderSheet(overrides?: (store: ReturnType<typeof createStore>) =
 
   return {
     store,
-    ...(await render(
+    ...render(
       <Provider store={store}>
         <SourceSheet>
           <Button>開く</Button>
         </SourceSheet>
       </Provider>,
-    )),
+    ),
   };
 }
 
 describe("SourceSheet", () => {
   test("Sheet を開くと 3 つのタブ（ファイル/ラジオ/外部入力）が表示される", async () => {
-    void renderSheet();
+    renderSheet();
 
     await page.getByText("開く").click();
     await new Promise((r) => setTimeout(r, 200));
@@ -134,7 +134,7 @@ describe("SourceSheet", () => {
   });
 
   test("ラジオタブを選択すると Radiko/らじる 局リストが表示される", async () => {
-    const { store } = await renderSheet();
+    const { store } = renderSheet();
 
     await page.getByText("開く").click();
     await new Promise((r) => setTimeout(r, 200));
@@ -152,7 +152,7 @@ describe("SourceSheet", () => {
   });
 
   test("外部入力タブで mediaStream なしの場合 ScreenShare と ExternalInput が表示される", async () => {
-    void renderSheet();
+    renderSheet();
 
     await page.getByText("開く").click();
     await new Promise((r) => setTimeout(r, 200));
@@ -164,7 +164,7 @@ describe("SourceSheet", () => {
   });
 
   test("外部入力タブで mediaStream ありの場合 DisconnectInput が表示される", async () => {
-    void renderSheet((store) => {
+    renderSheet((store) => {
       store.set(mediaStreamAtom, {} as unknown as MediaStream);
     });
 
@@ -178,7 +178,7 @@ describe("SourceSheet", () => {
 
   test("aux から別タブに切り替えると disconnect が呼ばれる", async () => {
     mockDisconnect.mockClear();
-    void renderSheet((store) => {
+    renderSheet((store) => {
       store.set(currentSrcAtom, "aux");
     });
 
@@ -192,7 +192,7 @@ describe("SourceSheet", () => {
   });
 
   test("ファイルタブに FilePicker が表示される", async () => {
-    void renderSheet((store) => {
+    renderSheet((store) => {
       store.set(currentSrcAtom, "file");
     });
 

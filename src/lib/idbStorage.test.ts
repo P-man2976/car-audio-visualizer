@@ -179,4 +179,52 @@ describe("atomWithIDB", () => {
     expect(result.read).toBeDefined();
     expect(result.write).toBeDefined();
   });
+
+  test("setter は IDB 書き込みを fire-and-forget で実行する", async () => {
+    const mockStorage = {
+      getItem: vi.fn().mockResolvedValue("stored-value"),
+      setItem: vi.fn().mockResolvedValue(undefined),
+      removeItem: vi.fn().mockResolvedValue(undefined),
+    };
+
+    const { createStore } = await import("jotai");
+    const store = createStore();
+    const testAtom = atomWithIDB("test-key", "default", mockStorage);
+
+    // setter は void を返す（Promise ではない）
+    const result = store.set(testAtom, "new-value");
+    expect(result).toBeUndefined();
+
+    // IDB write がスケジュールされている
+    await vi.waitFor(() => {
+      expect(mockStorage.setItem).toHaveBeenCalledWith("test-key", "new-value");
+    });
+  });
+
+  test("setter は IDB 書き込みエラーを console.error でログする", async () => {
+    const mockStorage = {
+      getItem: vi.fn().mockResolvedValue("stored-value"),
+      setItem: vi.fn().mockRejectedValue(new Error("IDB write failed")),
+      removeItem: vi.fn().mockResolvedValue(undefined),
+    };
+
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {
+      /* noop stub */
+    });
+
+    const { createStore } = await import("jotai");
+    const store = createStore();
+    const testAtom = atomWithIDB("err-key", "default", mockStorage);
+
+    store.set(testAtom, "bad-value");
+
+    await vi.waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        '[atomWithIDB] Failed to write "err-key":',
+        expect.any(Error),
+      );
+    });
+
+    consoleErrorSpy.mockRestore();
+  });
 });

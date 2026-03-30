@@ -144,11 +144,11 @@ import { currentRadioAtom, radioChannelsByAreaAtom, tuningFreqAtom } from "@/ato
 import { ControlsOverlay } from "@/components/ControlsOverlay";
 import type { Song } from "@/types/player";
 
-async function renderOverlay(overrides?: (store: ReturnType<typeof createStore>) => void) {
+function renderOverlay(overrides?: (store: ReturnType<typeof createStore>) => void) {
   const store = createStore();
   store.set(currentSrcAtom, "off");
   store.set(currentRadioAtom, null);
-  void store.set(currentSongAtom, null);
+  store.set(currentSongAtom, null);
   store.set(tuningFreqAtom, null);
   store.set(shuffleAtom, false);
   store.set(repeatModeAtom, "off");
@@ -156,25 +156,25 @@ async function renderOverlay(overrides?: (store: ReturnType<typeof createStore>)
 
   return {
     store,
-    ...(await render(
+    ...render(
       <Provider store={store}>
         <ControlsOverlay />
       </Provider>,
-    )),
+    ),
   };
 }
 
 describe("ControlsOverlay", () => {
   test("off 状態で「再生停止中」タイトルが表示される", async () => {
-    void renderOverlay();
+    renderOverlay();
 
     await expect.element(page.getByTestId("song-title").first()).toHaveTextContent("再生停止中");
   });
 
   test("file 状態で曲タイトルとアーティストが表示される", async () => {
-    void renderOverlay((store) => {
+    renderOverlay((store) => {
       store.set(currentSrcAtom, "file");
-      void store.set(currentSongAtom, {
+      store.set(currentSongAtom, {
         id: "1",
         filename: "song.mp3",
         url: "blob:test",
@@ -192,7 +192,7 @@ describe("ControlsOverlay", () => {
   });
 
   test("file 状態で prev/next/シャッフル/リピートボタンが表示される", async () => {
-    void renderOverlay((store) => {
+    renderOverlay((store) => {
       store.set(currentSrcAtom, "file");
     });
 
@@ -204,7 +204,7 @@ describe("ControlsOverlay", () => {
   });
 
   test("radio 状態で局名と FM/AM ボタンが表示される", async () => {
-    void renderOverlay((store) => {
+    renderOverlay((store) => {
       store.set(currentSrcAtom, "radio");
       store.set(currentRadioAtom, {
         type: "FM",
@@ -223,7 +223,7 @@ describe("ControlsOverlay", () => {
   });
 
   test("radio 状態で周波数がアーティスト欄に表示される", async () => {
-    void renderOverlay((store) => {
+    renderOverlay((store) => {
       store.set(currentSrcAtom, "radio");
       store.set(currentRadioAtom, {
         type: "FM",
@@ -238,7 +238,7 @@ describe("ControlsOverlay", () => {
   });
 
   test("radio 状態でチャンネル番号がバッジとして表示される", async () => {
-    void renderOverlay((store) => {
+    renderOverlay((store) => {
       store.set(currentSrcAtom, "radio");
       store.set(currentRadioAtom, {
         type: "FM",
@@ -267,7 +267,7 @@ describe("ControlsOverlay", () => {
   });
 
   test("radio 状態でチャンネル未登録時はバッジが表示されない", async () => {
-    void renderOverlay((store) => {
+    renderOverlay((store) => {
       store.set(currentSrcAtom, "radio");
       store.set(currentRadioAtom, {
         type: "FM",
@@ -285,7 +285,7 @@ describe("ControlsOverlay", () => {
   });
 
   test("aux 状態で「外部入力」が表示される", async () => {
-    void renderOverlay((store) => {
+    renderOverlay((store) => {
       store.set(currentSrcAtom, "aux");
     });
 
@@ -293,7 +293,7 @@ describe("ControlsOverlay", () => {
   });
 
   test("ProgressSlider と主要子コンポーネントが描画される", async () => {
-    void renderOverlay();
+    renderOverlay();
 
     await expect.element(page.getByTestId("progress-slider")).toBeInTheDocument();
     await expect.element(page.getByTestId("settings-dialog")).toBeInTheDocument();

@@ -28,7 +28,7 @@ import { DisconnectInput } from "@/components/source/DisconnectInput";
 
 describe("DisconnectInput", () => {
   test("「接続解除」ボタンが表示される", async () => {
-    void render(<DisconnectInput />);
+    render(<DisconnectInput />);
     await expect.element(page.getByRole("button", { name: "接続解除" })).toBeInTheDocument();
   });
 
@@ -36,7 +36,7 @@ describe("DisconnectInput", () => {
     mockDisconnect.mockClear();
     mockSetCurrentSrc.mockClear();
 
-    void render(<DisconnectInput />);
+    render(<DisconnectInput />);
     await page.getByRole("button", { name: "接続解除" }).click();
 
     expect(mockDisconnect).toHaveBeenCalledOnce();

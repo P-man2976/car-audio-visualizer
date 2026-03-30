@@ -79,7 +79,7 @@ function makeFakeDirHandle(name: string): FileSystemDirectoryHandle {
   } as unknown as FileSystemDirectoryHandle;
 }
 
-async function renderDialog(overrides?: (store: ReturnType<typeof createStore>) => void) {
+function renderDialog(overrides?: (store: ReturnType<typeof createStore>) => void) {
   const store = createStore();
   overrides?.(store);
 
@@ -89,7 +89,7 @@ async function renderDialog(overrides?: (store: ReturnType<typeof createStore>) 
 
   return {
     store,
-    ...(await render(
+    ...render(
       <QueryClientProvider client={queryClient}>
         <Provider store={store}>
           <ExplorerDialog>
@@ -97,7 +97,7 @@ async function renderDialog(overrides?: (store: ReturnType<typeof createStore>) 
           </ExplorerDialog>
         </Provider>
       </QueryClientProvider>,
-    )),
+    ),
   };
 }
 
@@ -107,7 +107,7 @@ beforeEach(() => {
 
 describe("ExplorerDialog", () => {
   test("トリガーをクリックするとダイアログが開く", async () => {
-    void renderDialog();
+    renderDialog();
 
     await page.getByTestId("trigger").click();
 
@@ -116,7 +116,7 @@ describe("ExplorerDialog", () => {
   });
 
   test("ファイル未選択時は送信ボタンが無効", async () => {
-    void renderDialog();
+    renderDialog();
 
     await page.getByTestId("trigger").click();
 
@@ -132,7 +132,7 @@ describe("ExplorerDialog", () => {
       name: "song.mp3",
     } as FileSystemFileHandle;
 
-    void renderDialog((store) => {
+    renderDialog((store) => {
       store.set(explorerSelectedFilesAtom, [fakeFile]);
     });
 
@@ -145,8 +145,8 @@ describe("ExplorerDialog", () => {
     const dir1 = makeFakeDirHandle("MyMusic");
     const dir2 = makeFakeDirHandle("Podcasts");
 
-    void renderDialog((store) => {
-      void store.set(savedDirectoryHandlesAtom, [dir1, dir2]);
+    renderDialog((store) => {
+      store.set(savedDirectoryHandlesAtom, [dir1, dir2]);
     });
 
     await page.getByTestId("trigger").click();
@@ -157,7 +157,7 @@ describe("ExplorerDialog", () => {
   });
 
   test("Address と FileEntries がダイアログ内に表示される", async () => {
-    void renderDialog();
+    renderDialog();
 
     await page.getByTestId("trigger").click();
 
@@ -168,8 +168,8 @@ describe("ExplorerDialog", () => {
   test("保存済みフォルダをクリックすると push が呼ばれる", async () => {
     const dir = makeFakeDirHandle("Albums");
 
-    void renderDialog((store) => {
-      void store.set(savedDirectoryHandlesAtom, [dir]);
+    renderDialog((store) => {
+      store.set(savedDirectoryHandlesAtom, [dir]);
     });
 
     await page.getByTestId("trigger").click();

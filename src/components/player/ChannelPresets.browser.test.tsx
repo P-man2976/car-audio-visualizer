@@ -42,7 +42,7 @@ import { currentRadioAtom, radioChannelsByAreaAtom, tuningFreqAtom } from "@/ato
 import { ChannelPresets } from "@/components/player/ChannelPresets";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-async function renderPresets(overrides?: (store: ReturnType<typeof createStore>) => void) {
+function renderPresets(overrides?: (store: ReturnType<typeof createStore>) => void) {
   const store = createStore();
   store.set(currentRadioAtom, {
     type: "FM",
@@ -57,19 +57,19 @@ async function renderPresets(overrides?: (store: ReturnType<typeof createStore>)
 
   return {
     store,
-    ...(await render(
+    ...render(
       <Provider store={store}>
         <TooltipProvider>
           <ChannelPresets />
         </TooltipProvider>
       </Provider>,
-    )),
+    ),
   };
 }
 
 describe("ChannelPresets", () => {
   test("1〜6 のボタンが表示される", async () => {
-    void renderPresets();
+    renderPresets();
 
     for (let i = 1; i <= 6; i++) {
       await expect
@@ -80,7 +80,7 @@ describe("ChannelPresets", () => {
 
   test("登録済みチャンネルをクリックすると selectRadio が呼ばれる", async () => {
     mockSelectRadio.mockClear();
-    void renderPresets((store) => {
+    renderPresets((store) => {
       store.set(radioChannelsByAreaAtom, {
         JP13: {
           fm: {
@@ -109,7 +109,7 @@ describe("ChannelPresets", () => {
   });
 
   test("未登録チャンネルをクリックすると現在の局が登録される", async () => {
-    const { store } = await renderPresets();
+    const { store } = renderPresets();
 
     const btn = page.getByRole("button", { name: /CH3/ });
     await btn.click();
@@ -124,7 +124,7 @@ describe("ChannelPresets", () => {
   });
 
   test("未登録チャンネルは薄く表示される", async () => {
-    void renderPresets();
+    renderPresets();
 
     const btn = page.getByRole("button", { name: /CH1/ });
     await expect.element(btn).toBeInTheDocument();
@@ -132,7 +132,7 @@ describe("ChannelPresets", () => {
   });
 
   test("登録済みで選局中のチャンネルにはアクティブスタイルが適用される", async () => {
-    void renderPresets((store) => {
+    renderPresets((store) => {
       store.set(radioChannelsByAreaAtom, {
         JP13: {
           fm: {
@@ -155,7 +155,7 @@ describe("ChannelPresets", () => {
   });
 
   test("同じ局を別チャンネルに登録すると元のチャンネルから削除される", async () => {
-    const { store } = await renderPresets((s) => {
+    const { store } = renderPresets((s) => {
       s.set(radioChannelsByAreaAtom, {
         JP13: {
           fm: {

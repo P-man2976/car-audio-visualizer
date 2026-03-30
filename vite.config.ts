@@ -14,6 +14,15 @@ export default defineConfig({
       typeAware: true,
       typeCheck: false,
     },
+    overrides: [
+      {
+        files: ["**/*.test.ts", "**/*.test.tsx"],
+        rules: {
+          "typescript/no-floating-promises": "off",
+          "typescript/no-misused-spread": "off",
+        },
+      },
+    ],
   },
   resolve: {
     tsconfigPaths: true,

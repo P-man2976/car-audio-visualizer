@@ -89,7 +89,7 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
     const handle = await showDirectoryPicker({ mode: "read" }).catch(() => null);
     if (!handle) return;
     // 重複チェック: 同名フォルダがなければ追加
-    void setSavedHandles((prev) => {
+    setSavedHandles((prev) => {
       if (prev.some((h) => h.name === handle.name)) return prev;
       return [...prev, handle];
     });
@@ -105,7 +105,7 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
   /** 保存済みフォルダを削除 */
   const handleRemoveSavedFolder = (e: React.MouseEvent, handle: FileSystemDirectoryHandle) => {
     e.stopPropagation();
-    void setSavedHandles((prev) => prev.filter((h) => h.name !== handle.name));
+    setSavedHandles((prev) => prev.filter((h) => h.name !== handle.name));
   };
 
   /** Recursively collect all FileSystemFileHandles from a selection */
@@ -176,10 +176,10 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
     );
     if (!currentSong && songs.length > 0) {
       const [first, ...rest] = songs;
-      void setCurrentSong(first);
-      void setQueue((prev) => [...prev, ...rest]);
+      setCurrentSong(first);
+      setQueue((prev) => [...prev, ...rest]);
     } else {
-      void setQueue((prev) => [...prev, ...songs]);
+      setQueue((prev) => [...prev, ...songs]);
     }
     setCurrentSrc("file");
     e.target.value = "";
@@ -192,17 +192,17 @@ export function ExplorerDialog({ children }: { children: ReactNode }) {
 
       if (!currentSong && songs.length > 0) {
         const [first, ...rest] = songs;
-        void setCurrentSong(first);
-        void setQueue((prev) => [...prev, ...rest]);
+        setCurrentSong(first);
+        setQueue((prev) => [...prev, ...rest]);
       } else {
-        void setQueue((prev) => [...prev, ...songs]);
+        setQueue((prev) => [...prev, ...songs]);
       }
       setCurrentSrc("file");
 
       // Persist directory handle for bulk permission on reload
       const rootHandle = stack[0];
       if (rootHandle) {
-        void setSavedHandles((prev) => {
+        setSavedHandles((prev) => {
           if (prev.some((h) => h.name === rootHandle.name)) return prev;
           return [...prev, rootHandle];
         });
