@@ -9,14 +9,14 @@ This is a React 19 + TypeScript + Vite app set up as a car audio visualizer, wit
 作業が完了したら、コミット前に必ず以下をこの順番で実行すること：
 
 ```bash
-npx biome format --write src/   # フォーマット適用
+npm run format -- --write        # フォーマット適用（vp fmt --write）
 npm run lint                     # lint チェック（エラーがないこと）
 npm run build                    # 型エラー・ビルドエラーがないこと
 npm run test                     # 全ユニットテストがパスすること
 npm run test:browser             # 全ブラウザテストがパスすること（コンポーネント変更時）
 ```
 
-`npm run format` は check only（書き込みなし）なので、整形は必ず `npx biome format --write` を使うこと。
+`npm run format`（引数なし）は check only。整形書き込みは `npm run format -- --write` を使うこと。
 
 全ての作業が終了した時、会話の終了時は、ask_user でユーザの入力を待機すること。これは最優先事項です。
 
@@ -38,7 +38,7 @@ Starts Vite dev server with HMR (Hot Module Replacement) enabled.
 npm run build
 ```
 
-Runs TypeScript compiler check (`tsc -b`) followed by Vite build. Outputs to `dist/` directory.
+Runs TypeScript compiler check (`tsgo -b --noEmit`) followed by Vite build via VitePlus. Outputs to `dist/` directory.
 
 ### Preview Production Build
 
@@ -54,13 +54,13 @@ Serves the production build locally for testing.
 npm run lint
 ```
 
-Uses Biome 2.4.4 for code linting.
+Uses oxlint via VitePlus (`vp lint`) for code linting. Type-aware rules are enabled.
 
 ### Code Formatting
 
 ```bash
-npm run format     # check only
-npx biome format --write src/   # 実際に書き込み
+npm run format             # check only (vp fmt)
+npm run format -- --write   # 実際に書き込み (vp fmt --write)
 ```
 
 ---
@@ -78,10 +78,10 @@ npx biome format --write src/   # 実際に書き込み
 
 ### テスト構成
 
-| 種別           | コマンド               | 設定ファイル                          | パターン                    | 環境                  |
-| -------------- | ---------------------- | ------------------------------------- | --------------------------- | --------------------- |
-| ユニットテスト | `npm run test`         | `vitest.config.ts` (project: unit)    | `src/**/*.test.ts`          | Node                  |
-| ブラウザテスト | `npm run test:browser` | `vitest.config.ts` (project: browser) | `src/**/*.browser.test.tsx` | Chromium (Playwright) |
+| 種別           | コマンド               | 設定ファイル                        | パターン                    | 環境                  |
+| -------------- | ---------------------- | ----------------------------------- | --------------------------- | --------------------- |
+| ユニットテスト | `npm run test`         | `vite.config.ts` (project: unit)    | `src/**/*.test.ts`          | Node                  |
+| ブラウザテスト | `npm run test:browser` | `vite.config.ts` (project: browser) | `src/**/*.browser.test.tsx` | Chromium (Playwright) |
 
 ### ユニットテスト (`*.test.ts`)
 
@@ -145,17 +145,17 @@ page.getByTestId("test-id");
 - `@/atoms/audio` はモジュールスコープで AudioContext を生成するため、必ず `vi.mock` すること
 - `atomWithIDB` を使用する atom は DataCloneError を避けるためプレーンな `atom()` でモック
 - 重複 DOM 要素がある場合は `.first()` を使用
-- 空のモック関数ボディには `/* noop stub */` コメントを追加（Biome lint 対策）
+- 空のモック関数ボディには `/* noop stub */` コメントを追加（oxlint noEmptyBlockStatements 対策）
 
 ## Architecture
 
 ### Technology Stack
 
 - **React 19** + **TypeScript 5.9**
-- **Vite 8** with `@vitejs/plugin-react` and `@tailwindcss/vite`
+- **VitePlus** (Vite 8) 統合ツールチェーン — `@vitejs/plugin-react` + `@tailwindcss/vite`
 - **shadcn/ui** (new-york style, neutral base, Tailwind v4 mode) — components in `src/components/ui/`
-- **Biome 2.4.4** as primary formatter/linter, with ESLint flat config also present
-- **Vitest 4** — ユニットテスト (Node) + ブラウザテスト (Chromium via `vitest-browser-react` + `@vitest/browser-playwright`)
+- **oxlint** (type-aware) as linter, **oxfmt** as formatter — both managed via VitePlus
+- **Vitest 4** via VitePlus — ユニットテスト (Node) + ブラウザテスト (Chromium via `vitest-browser-react` + `@vitest/browser-playwright`)
 
 ### Runtime and Build Flow
 
@@ -163,7 +163,7 @@ page.getByTestId("test-id");
 2. エントリ: `@tanstack/react-start/server-entry` → `src/routes/__root.tsx` → `src/routes/index.tsx` → `src/pages/HomePage.tsx`。
 3. `src/index.css` を `?url` サフィックスで `__root.tsx` から読み込み。`@import "tailwindcss"` + shadcn CSS 変数を定義。
 4. `vite.config.ts` で React Compiler (`babel-plugin-react-compiler`) を有効化。Cloudflare Workers SSR は `@cloudflare/vite-plugin` で設定。
-5. `npm run build` は `vite build` のみ（TanStack Start が tsc チェックを統合）。
+5. `npm run build` は `tsgo -b --noEmit` + `vp build`（VitePlus が Vite build を統合）。
 6. デプロイ: `wrangler deploy` → Cloudflare Workers (`gcp:asia-northeast1`)。
 
 ### UI Composition Pattern
@@ -191,9 +191,10 @@ page.getByTestId("test-id");
 
 ### Linting/Formatting Expectations
 
-- Biome uses tab indentation and double quotes.
+- oxfmt uses tab indentation and double quotes.
+- oxlint with type-aware rules enabled (`typeAware: true` in `vite.config.ts`).
 - Key enforced rules include no `any`, no CommonJS, hooks at top level, and exhaustive deps warnings.
-- Import organization is enabled through Biome assist actions.
+- Test files (`**/*.test.ts`, `**/*.test.tsx`) have `no-floating-promises` and `no-misused-spread` disabled via `lint.overrides` in `vite.config.ts`.
 
 ### Styling Convention
 

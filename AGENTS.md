@@ -5,21 +5,22 @@
 作業が完了したら、コミット前に必ず以下をこの順番で実行すること：
 
 ```bash
-npx biome format --write src/   # フォーマット適用
+npm run format -- --write        # フォーマット適用（vp fmt --write）
 npm run lint                     # lint チェック（エラーがないこと）
 npm run build                    # 型エラー・ビルドエラーがないこと
 npm run test                     # 全ユニットテストがパスすること
 npm run test:browser             # 全ブラウザテストがパスすること（コンポーネント変更時）
 ```
 
-`npm run format` は check only（書き込みなし）なので、整形は必ず `npx biome format --write` を使うこと。
+`npm run format`（引数なし）は check only。整形書き込みは `npm run format -- --write` を使うこと。
 
 ---
 
 ## Code Style
 
 - TypeScript + React with strict settings; keep ESM-only imports/exports and avoid CommonJS.
-- Follow Biome 2.4.4 formatting/linting defaults: **tab indentation and double quotes**.
+- **VitePlus** (`vp`) 統合ツールチェーンを使用。フォーマッタ: oxfmt、リンタ: oxlint (type-aware 有効)。
+- タブインデント、ダブルクォートを使用。
 - Use Tailwind utility classes for layout/styling.
 - Use **shadcn/ui** (new-york style, neutral base) for UI primitives — components live in `src/components/ui/`.
 
@@ -34,14 +35,18 @@ npm run test:browser             # 全ブラウザテストがパスすること
 ## Build and Test
 
 - Install: `npm install`
-- Dev server: `npm run dev`
-- Build: `npm run build` (runs `tsc -b` then `vite build`)
-- Preview: `npm run preview`
-- Lint: `npm run lint`
-- Format (check only): `npm run format`
-- Format (write): `npx biome format --write src/`
-- Unit test: `npm run test` (Vitest, Node 環境, `src/**/*.test.ts`)
-- Browser test: `npm run test:browser` (Vitest, Chromium via Playwright, `src/**/*.browser.test.tsx`)
+- Dev server: `npm run dev` (`vp dev`)
+- Build: `npm run build` (runs `tsgo -b --noEmit` then `vp build`)
+- Preview: `npm run preview` (`vp preview`)
+- Lint: `npm run lint` (`vp lint` — oxlint, type-aware 有効)
+- Format (check only): `npm run format` (`vp fmt`)
+- Format (write): `npm run format -- --write` (`vp fmt --write`)
+- Unit test: `npm run test` (Vitest via vp, Node 環境, `src/**/*.test.ts`)
+- Browser test: `npm run test:browser` (Vitest via vp, Chromium via Playwright, `src/**/*.browser.test.tsx`)
+
+### Lint overrides
+
+`vite.config.ts` の `lint.overrides` でテストファイル (`**/*.test.ts`, `**/*.test.tsx`) の `no-floating-promises` と `no-misused-spread` を off に設定済み。テストでは `render()` や atom setter の戻り値を await/void する必要なし。
 
 ## テスト必須ルール
 
@@ -97,7 +102,7 @@ page.getByTestId("test-id");
 - `@/atoms/audio` はモジュールスコープで AudioContext を生成するため、必ず `vi.mock` すること
 - `atomWithIDB` を使用する atom は DataCloneError を避けるためプレーンな `atom()` でモック
 - 重複 DOM 要素がある場合は `.first()` を使用
-- 空のモック関数ボディには `/* noop stub */` コメントを追加（Biome lint 対策）
+- 空のモック関数ボディには `/* noop stub */` コメントを追加（oxlint noEmptyBlockStatements 対策）
 
 ## UI Conventions (shadcn/ui)
 
@@ -127,7 +132,7 @@ page.getByTestId("test-id");
 - State: **Jotai** atoms (`src/atoms/`)
 - Audio: **audiomotion-analyzer** (`src/atoms/audio.ts`)
 - 3D rendering: **@react-three/fiber** + **@react-three/drei** (`src/components/visualizer/`)
-- Build/runtime stack: Vite 8 + React 19 + TypeScript 5.9
+- Build/runtime stack: **VitePlus** (Vite 8) + React 19 + TypeScript 5.9 (tsgo)
 - Deploy: Cloudflare Workers (`wrangler deploy`, region: `gcp:asia-northeast1`)
 
 ## Project Conventions
