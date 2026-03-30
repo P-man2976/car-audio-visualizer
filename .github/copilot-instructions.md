@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is a React 19 + TypeScript + Vite app set up as a car audio visualizer, with React Compiler enabled. UI components use **shadcn/ui** (migrated from HeroUI v3) with styles matching the `2din-spectrogram` project. Tailwind CSS v4 is used for utility-first styling.
+React 19 + TypeScript + Vite app — car audio visualizer with React Compiler enabled. **shadcn/ui** for UI, Tailwind CSS v4 for styling.
 
 ## 作業終了後のチェックリスト（必須）
 
@@ -24,80 +24,33 @@ npm run test:browser             # 全ブラウザテストがパスすること
 
 ## Build, Test, and Lint
 
-### Development Server
-
-```bash
-npm run dev
-```
-
-Starts Vite dev server with HMR (Hot Module Replacement) enabled.
-
-### Build for Production
-
-```bash
-npm run build
-```
-
-Runs TypeScript compiler check (`tsgo -b --noEmit`) followed by Vite build via VitePlus. Outputs to `dist/` directory.
-
-### Preview Production Build
-
-```bash
-npm run preview
-```
-
-Serves the production build locally for testing.
-
-### Linting
-
-```bash
-npm run lint
-```
-
-Uses oxlint via VitePlus (`vp lint`) for code linting. Type-aware rules are enabled.
-
-### Code Formatting
-
-```bash
-npm run format             # check only (vp fmt)
-npm run format -- --write   # 実際に書き込み (vp fmt --write)
-```
+| 操作           | コマンド                    | 説明                                                      |
+| -------------- | --------------------------- | --------------------------------------------------------- |
+| Dev server     | `npm run dev`               | Vite HMR dev server                                       |
+| Build          | `npm run build`             | `tsgo -b --noEmit` + `vp build` → `dist/`                 |
+| Preview        | `npm run preview`           | Production build をローカルで確認                         |
+| Lint           | `npm run lint`              | oxlint (type-aware) via VitePlus                          |
+| Format (check) | `npm run format`            | oxfmt check only                                          |
+| Format (write) | `npm run format -- --write` | oxfmt 書き込み                                            |
+| Unit test      | `npm run test`              | Vitest (Node), `src/**/*.test.ts`                         |
+| Browser test   | `npm run test:browser`      | Vitest (Chromium/Playwright), `src/**/*.browser.test.tsx` |
 
 ---
 
 ## テスト（必須）
 
-### テスト必須ルール
-
 **コード変更時は、対応するテストを必ず追加・更新すること。**
 
-- `src/lib/` や `src/atoms/` のロジック変更 → **ユニットテスト** (`*.test.ts`) を追加・更新
-- `src/components/` のコンポーネント変更 → **ブラウザテスト** (`*.browser.test.tsx`) を追加・更新
-- 新規ファイル作成時 → 対応するテストファイルも必ず作成
-- 既存テストが壊れた場合 → 原因を調査し修正（テストを削除しない）
+- `src/lib/` や `src/atoms/` → ユニットテスト (`*.test.ts`)
+- `src/components/` → ブラウザテスト (`*.browser.test.tsx`)
+- 新規ファイル → 対応テストも必ず作成。既存テスト破損 → 調査・修正（削除禁止）
 
-### テスト構成
-
-| 種別           | コマンド               | 設定ファイル                        | パターン                    | 環境                  |
-| -------------- | ---------------------- | ----------------------------------- | --------------------------- | --------------------- |
-| ユニットテスト | `npm run test`         | `vite.config.ts` (project: unit)    | `src/**/*.test.ts`          | Node                  |
-| ブラウザテスト | `npm run test:browser` | `vite.config.ts` (project: browser) | `src/**/*.browser.test.tsx` | Chromium (Playwright) |
-
-### ユニットテスト (`*.test.ts`)
-
-- 純粋関数・ユーティリティ・atom ロジックの検証
-- `vitest` の `describe` / `test` / `expect` を使用
-- テストファイルは実装ファイルと同じディレクトリに配置（例: `src/lib/utils.ts` → `src/lib/utils.test.ts`）
-
-**モックパターン:**
+### モックパターン
 
 ```typescript
 // fetch モック
 vi.stubGlobal("fetch", vi.fn());
 afterEach(() => vi.unstubAllGlobals());
-
-// 環境変数モック
-vi.stubEnv("VITE_API_KEY", "test-key");
 
 // モジュールモック
 vi.mock("idb-keyval", () => ({ get: vi.fn(), set: vi.fn(), del: vi.fn() }));
@@ -107,40 +60,16 @@ import { createStore } from "jotai";
 const store = createStore();
 store.set(myAtom, value);
 expect(store.get(myAtom)).toBe(expected);
-```
 
-### ブラウザテスト (`*.browser.test.tsx`)
-
-- React コンポーネントの描画・操作・表示の検証
-- `vitest-browser-react` の `render` + `@vitest/browser/context` の `page` / `userEvent` を使用
-- 実ブラウザ (Chromium) で実行
-
-**テスト作成パターン:**
-
-```typescript
+// ブラウザテスト
 import { render } from "vitest-browser-react";
 import { page, userEvent } from "@vitest/browser/context";
-
-// 副作用のあるモジュールは vi.mock で完全モック
 vi.mock("@/atoms/audio", () => ({ audioAtom: atom(null) }));
-
-// 子コンポーネントのスタブ
-vi.mock("@/components/ChildComponent", () => ({
-  ChildComponent: () => <div data-testid="child-stub" />,
-}));
-
-// Jotai Provider でラップ
-import { Provider, createStore } from "jotai";
-const store = createStore();
 render(<Provider store={store}><MyComponent /></Provider>);
-
-// ロケーター
 page.getByRole("button", { name: /submit/i });
-page.getByText("テキスト");
-page.getByTestId("test-id");
 ```
 
-**注意事項:**
+### テストの注意事項
 
 - `@/atoms/audio` はモジュールスコープで AudioContext を生成するため、必ず `vi.mock` すること
 - `atomWithIDB` を使用する atom は DataCloneError を避けるためプレーンな `atom()` でモック
@@ -149,66 +78,20 @@ page.getByTestId("test-id");
 
 ## Architecture
 
-### Technology Stack
-
-- **React 19** + **TypeScript 5.9**
-- **VitePlus** (Vite 8) 統合ツールチェーン — `@vitejs/plugin-react` + `@tailwindcss/vite`
-- **shadcn/ui** (new-york style, neutral base, Tailwind v4 mode) — components in `src/components/ui/`
-- **oxlint** (type-aware) as linter, **oxfmt** as formatter — both managed via VitePlus
-- **Vitest 4** via VitePlus — ユニットテスト (Node) + ブラウザテスト (Chromium via `vitest-browser-react` + `@vitest/browser-playwright`)
-
-### Runtime and Build Flow
-
-1. TanStack Start (SSR) + Cloudflare Workers — `index.html` / `src/main.tsx` は存在しない。HTML シェルは `src/routes/__root.tsx` の `shellComponent` が生成する。
-2. エントリ: `@tanstack/react-start/server-entry` → `src/routes/__root.tsx` → `src/routes/index.tsx` → `src/pages/HomePage.tsx`。
-3. `src/index.css` を `?url` サフィックスで `__root.tsx` から読み込み。`@import "tailwindcss"` + shadcn CSS 変数を定義。
-4. `vite.config.ts` で React Compiler (`babel-plugin-react-compiler`) を有効化。Cloudflare Workers SSR は `@cloudflare/vite-plugin` で設定。
-5. `npm run build` は `tsgo -b --noEmit` + `vp build`（VitePlus が Vite build を統合）。
-6. デプロイ: `wrangler deploy` → Cloudflare Workers (`gcp:asia-northeast1`)。
-
-### UI Composition Pattern
-
-- Uses shadcn/ui flat exports: `CardHeader`, `CardContent`, `CardFooter`, `CardTitle`, `CardDescription`, `AvatarFallback`, `AvatarImage`, etc.
-- Import from `@/components/ui/<component>` (e.g. `import { Button } from "@/components/ui/button"`).
-- `@` alias resolves to `src/` (configured in `vite.config.ts` and `tsconfig.app.json`).
-- Styles are tuned to match `2din-spectrogram`: default button `bg-neutral-500/40`, sheet overlay `bg-neutral-950/30`, sheet content `bg-neutral-950/50 backdrop-blur-md`, slider thumb hidden until hover.
+- **React 19** + **TypeScript** (strict, ESM-only) + **VitePlus** (Vite 8, oxlint, oxfmt, Vitest 4)
+- **shadcn/ui** (new-york, neutral, Tailwind v4) — `src/components/ui/`
+- **React Compiler** (`babel-plugin-react-compiler`) 有効
+- TanStack Start (SSR) + Cloudflare Workers — エントリ: `__root.tsx` → `index.tsx` → `HomePage.tsx`
+- `src/index.css` を `?url` で `__root.tsx` から読み込み。`@import "tailwindcss"` + shadcn CSS 変数
+- Build: `tsgo -b --noEmit` + `vp build`。Deploy: `wrangler deploy` → Cloudflare Workers (`gcp:asia-northeast1`)
 
 ## Key Conventions
 
-### shadcn/ui ガイドライン
-
-- **HeroUI v3 は削除済み**。新規コンポーネントは shadcn/ui を使用すること。
-- コンポーネント追加は `npx shadcn@latest add <name>` で `src/components/ui/` に生成する。
-- `components.json` に設定済み: `style: "new-york"`, `baseColor: "neutral"`, Tailwind v4 モード (`"config": ""`)。
-- スタイル変更は `src/components/ui/*.tsx` 内の `cva` バリアント定義を直接編集する。
-- shadcn ドキュメントには MCP (`mcp_shadcn`) を使用する。
-
-### TypeScript and Module Rules
-
-- TypeScript is strict in both `tsconfig.app.json` and `tsconfig.node.json`.
-- ESM-only project (`"type": "module"`); avoid CommonJS patterns.
-- App code uses bundler-mode options (`moduleResolution: "bundler"`, `allowImportingTsExtensions: true`, `noEmit: true`).
-
-### Linting/Formatting Expectations
-
-- oxfmt uses tab indentation and double quotes.
-- oxlint with type-aware rules enabled (`typeAware: true` in `vite.config.ts`).
-- Key enforced rules include no `any`, no CommonJS, hooks at top level, and exhaustive deps warnings.
-- Test files (`**/*.test.ts`, `**/*.test.tsx`) have `no-floating-promises` and `no-misused-spread` disabled via `lint.overrides` in `vite.config.ts`.
-
-### Styling Convention
-
-- Use Tailwind CSS utility classes for layout/spacing/styling in React components.
-- Use shadcn/ui components for UI primitives and combine them with Tailwind class names when composing screens.
-- Color tokens follow 2din-spectrogram conventions: `bg-neutral-500/40` (default interactive), `bg-neutral-950/50 backdrop-blur-md` (overlays/sheets), status badges use `bg-green-600/60 text-green-100`, `bg-yellow-600/60 text-yellow-100`, etc.
-
-### MCP servers
-
-- You can access the MCP servers to get more information about the library and its usage. Here is a list of MCP supported libraries:
-- **shadcn/ui** (`mcp_shadcn`) — preferred UI library for this project
-- tanstack
-- Context7 (`mcp_io`) for up-to-date external library docs when needed.
-- HeroUI v3 MCP は参照不要（削除済み）。
+- **shadcn/ui**: `npx shadcn@latest add <name>` で追加。`components.json` に設定済み (new-york, neutral, Tailwind v4)。HeroUI v3 は削除済み。
+- **TypeScript**: strict, ESM-only (`"type": "module"`)。bundler-mode (`moduleResolution: "bundler"`)。
+- **Lint/Format**: oxfmt (tab, double quotes)。oxlint (type-aware)。テストファイルは `lint.overrides` で `no-floating-promises` / `no-misused-spread` off。
+- **Styling**: Tailwind utility classes + shadcn/ui。カラートークン: `bg-neutral-500/40` (interactive), `bg-neutral-950/50 backdrop-blur-md` (overlays)。
+- **MCP**: `mcp_shadcn` (shadcn/ui), TanStack MCP, `mcp_io` (Context7 — 外部ライブラリドキュメント)。
 
 ### 3D Visualizer (React Three Fiber) ルール
 
@@ -224,108 +107,8 @@ page.getByTestId("test-id");
 
 ### PWA
 
-- `public/manifest.webmanifest` に Web App Manifest を配置。`display: "standalone"`, `orientation: "landscape"`。
-- `public/icon.svg` がアプリアイコン（SVG、any + maskable）。
-- `__root.tsx` の `head()` で `<link rel="manifest">`, `<meta name="theme-color">`, `apple-mobile-web-app-*` を設定済み。
-- Service Worker は未導入（Cloudflare Workers SSR ではオフラインキャッシュの実益が薄いため）。必要に応じて `vite-plugin-pwa` または手動 SW を追加可能。
+- `public/manifest.webmanifest` (`display: "standalone"`, `orientation: "landscape"`) + `public/icon.svg`。
+- Service Worker は未導入。必要に応じて `vite-plugin-pwa` を追加可能。
 
 あなたはURLが与えられた時、以下のコマンドでそのURLの内容をmardownで取得できる
 `npx -y @mizchi/readability --format=md <url>`
-
-## Browser Automation
-
-Use `agent-browser` for web automation. Run `agent-browser --help` for all commands.
-
-### Core Workflow
-
-1. `agent-browser open <url>` - Navigate to page
-2. `agent-browser snapshot -i` - Get interactive elements with refs (@e1, @e2)
-3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs (deterministic)
-4. `agent-browser diff snapshot` - Verify actions changed page state
-5. Re-snapshot after page changes
-
-### Key Features
-
-**Element Interaction (ref-based):**
-
-- `snapshot -i` — Take accessibility tree snapshot with refs (`@e1`, `@e2`, etc)
-- `click @e1` / `dblclick` / `tap` — Click/double-click/tap (iOS)
-- `fill @e1 "text"` — Clear and fill input
-- `press Enter` — Press key
-- `hover @e1` / `focus @e1` — Hover/focus
-- `check/uncheck @e1` — Checkbox operations
-
-**Semantic Selectors (human-readable):**
-
-- `find role button click --name "Submit"` — Find by ARIA role + name
-- `find label "Email" fill "test@test.com"` — Find by label text
-- `find text "Welcome" hover` — Find by visible text
-- `find testid "my-input" fill "value"` — Find by data-testid
-
-**Verification (Diffing):**
-
-- `diff snapshot` — Line-level text diff against last snapshot
-- `diff snapshot --baseline baseline.txt` — Compare against saved file
-- `diff screenshot --baseline before.png` — Pixel-level visual diff (red = changed pixels)
-- `diff url URL1 URL2 --screenshot` — Compare two pages
-
-**Session & State Management:**
-
-- `--session-name <name>` — Auto-save/restore cookies & localStorage
-- `--profile <path>` — Persistent browser profile directory
-- `auth save <name> --url <url> --username <u> --password-stdin` — Vault credentials (encrypted)
-- `auth login <name>` — Use saved credentials
-- `state save/load <path>` — Export/import session state
-
-**Performance & Debug:**
-
-- `profiler start` → `profiler stop trace.json` — Chrome DevTools trace (view in Perfetto UI)
-- `trace start/stop` — DevTools trace recording
-- `record start/stop video.webm` — Video recording
-- `console` / `errors` — View console logs & errors
-- `screenshot [path]` / `--annotate` — Screenshot with element labels
-
-**Advanced:**
-
-- `--cdp 9222` / `--auto-connect` — Connect to existing Chrome via DevTools Protocol
-- `-p ios --device "iPhone 16 Pro"` — iOS Simulator Safari control (requires Appium)
-- `--allowed-domains "example.com,*.example.com"` — Domain allowlist (block data exfiltration)
-- `--action-policy policy.json` — Gate dangerous actions (eval, download, upload)
-- `--confirm-actions eval,download` — Require manual approval for actions
-- `--content-boundaries` — Mark untrusted page output with nonce boundaries
-- `--max-output 50000` — Truncate large page outputs to prevent context flooding
-- `--headers '{"Authorization": "Bearer <token>"}'` — Add HTTP headers scoped to origin
-- `AGENT_BROWSER_STREAM_PORT=9223` — Stream viewport via WebSocket (live preview)
-
-### Token Efficiency
-
-- **Text output ~200-400 tokens** vs DOM JSON ~3000-5000 tokens
-- **Refs eliminate element re-query** — snapshot captures state once, use refs for all actions
-- **Compact format** — Accessibility tree only, LLM-friendly parsing
-
-### Command Chaining
-
-```bash
-agent-browser open example.com && \
-  agent-browser wait --load networkidle && \
-  agent-browser snapshot -i && \
-  agent-browser fill @e1 "text" && \
-  agent-browser diff snapshot
-```
-
-### Security (Production-ready)
-
-- **Auth Vault** — Passwords encrypted AES-256-GCM, never passed to LLM context
-- **Content Boundaries** — Untrusted page output wrapped with nonce markers
-- **Domain Allowlist** — Block navigations & sub-resources to non-allowed domains
-- **Action Policy** — Restrict dangerous operations (eval, download, upload)
-- **Confirmation Gating** — Require explicit approval for high-risk actions
-- **Output Limits** — Cap page-sourced content to prevent context overflow
-
-### Install
-
-```bash
-npm install -g agent-browser    # All platforms (fastest)
-# or
-npx agent-browser open example.com
-```

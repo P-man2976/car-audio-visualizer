@@ -18,145 +18,67 @@ npm run test:browser             # 全ブラウザテストがパスすること
 
 ## Code Style
 
-- TypeScript + React with strict settings; keep ESM-only imports/exports and avoid CommonJS.
-- **VitePlus** (`vp`) 統合ツールチェーンを使用。フォーマッタ: oxfmt、リンタ: oxlint (type-aware 有効)。
-- タブインデント、ダブルクォートを使用。
-- Use Tailwind utility classes for layout/styling.
-- Use **shadcn/ui** (new-york style, neutral base) for UI primitives — components live in `src/components/ui/`.
+- TypeScript strict, ESM-only。**VitePlus** (`vp`): oxfmt (tab, double quotes), oxlint (type-aware)。
+- Tailwind utility classes + **shadcn/ui** (new-york, neutral) — `src/components/ui/`。
 
 ## Architecture
 
-- TanStack Start (SSR) + Cloudflare Workers。`index.html` / `src/main.tsx` は存在しない。
-- Entry flow: `@tanstack/react-start/server-entry` → `src/routes/__root.tsx` → `src/routes/index.tsx` → `src/pages/HomePage.tsx`.
-- Vite 8 uses React Compiler via Babel plugin in `vite.config.ts`; avoid patterns that conflict with it.
-- `@` alias resolves to `src/` (configured in `vite.config.ts` and `tsconfig.app.json`).
-- PWA: `public/manifest.webmanifest` + `public/icon.svg`。Service Worker は未導入。
+- TanStack Start (SSR) + Cloudflare Workers。エントリ: `__root.tsx` → `index.tsx` → `HomePage.tsx`。
+- Vite 8 + React Compiler (`babel-plugin-react-compiler`)。`@` → `src/`。
+- PWA: `public/manifest.webmanifest` + `public/icon.svg`。Service Worker 未導入。
 
 ## Build and Test
 
-- Install: `npm install`
-- Dev server: `npm run dev` (`vp dev`)
-- Build: `npm run build` (runs `tsgo -b --noEmit` then `vp build`)
-- Preview: `npm run preview` (`vp preview`)
-- Lint: `npm run lint` (`vp lint` — oxlint, type-aware 有効)
-- Format (check only): `npm run format` (`vp fmt`)
-- Format (write): `npm run format -- --write` (`vp fmt --write`)
-- Unit test: `npm run test` (Vitest via vp, Node 環境, `src/**/*.test.ts`)
-- Browser test: `npm run test:browser` (Vitest via vp, Chromium via Playwright, `src/**/*.browser.test.tsx`)
+| 操作           | コマンド                    | 説明                                                      |
+| -------------- | --------------------------- | --------------------------------------------------------- |
+| Dev server     | `npm run dev`               | Vite HMR dev server                                       |
+| Build          | `npm run build`             | `tsgo -b --noEmit` + `vp build`                           |
+| Lint           | `npm run lint`              | oxlint (type-aware)                                       |
+| Format (write) | `npm run format -- --write` | oxfmt 書き込み                                            |
+| Unit test      | `npm run test`              | Vitest (Node), `src/**/*.test.ts`                         |
+| Browser test   | `npm run test:browser`      | Vitest (Chromium/Playwright), `src/**/*.browser.test.tsx` |
 
 ### Lint overrides
 
-`vite.config.ts` の `lint.overrides` でテストファイル (`**/*.test.ts`, `**/*.test.tsx`) の `no-floating-promises` と `no-misused-spread` を off に設定済み。テストでは `render()` や atom setter の戻り値を await/void する必要なし。
+テストファイル (`**/*.test.ts`, `**/*.test.tsx`) は `lint.overrides` で `no-floating-promises` / `no-misused-spread` off。
 
 ## テスト必須ルール
 
 **コード変更時は、対応するテストを必ず追加・更新すること。**
 
-- `src/lib/` や `src/atoms/` のロジック変更 → **ユニットテスト** (`*.test.ts`) を追加・更新
-- `src/components/` のコンポーネント変更 → **ブラウザテスト** (`*.browser.test.tsx`) を追加・更新
-- 新規ファイル作成時 → 対応するテストファイルも必ず作成
-- 既存テストが壊れた場合 → 原因を調査し修正（テストを削除しない）
-
-### ユニットテストのモックパターン
-
-```typescript
-// fetch モック
-vi.stubGlobal("fetch", vi.fn());
-afterEach(() => vi.unstubAllGlobals());
-
-// 環境変数モック
-vi.stubEnv("VITE_API_KEY", "test-key");
-
-// モジュールモック
-vi.mock("idb-keyval", () => ({ get: vi.fn(), set: vi.fn(), del: vi.fn() }));
-
-// Jotai atom テスト
-import { createStore } from "jotai";
-const store = createStore();
-store.set(myAtom, value);
-expect(store.get(myAtom)).toBe(expected);
-```
-
-### ブラウザテストのパターン
-
-```typescript
-import { render } from "vitest-browser-react";
-import { page, userEvent } from "@vitest/browser/context";
-
-// 副作用のあるモジュールは vi.mock で完全モック
-vi.mock("@/atoms/audio", () => ({ audioAtom: atom(null) }));
-
-// Jotai Provider でラップ
-import { Provider, createStore } from "jotai";
-const store = createStore();
-render(<Provider store={store}><MyComponent /></Provider>);
-
-// ロケーター
-page.getByRole("button", { name: /submit/i });
-page.getByText("テキスト");
-page.getByTestId("test-id");
-```
+- `src/lib/` や `src/atoms/` → ユニットテスト (`*.test.ts`)
+- `src/components/` → ブラウザテスト (`*.browser.test.tsx`)
+- 新規ファイル → 対応テストも必ず作成。既存テスト破損 → 調査・修正（削除禁止）
 
 ### テストの注意事項
 
-- `@/atoms/audio` はモジュールスコープで AudioContext を生成するため、必ず `vi.mock` すること
-- `atomWithIDB` を使用する atom は DataCloneError を避けるためプレーンな `atom()` でモック
-- 重複 DOM 要素がある場合は `.first()` を使用
-- 空のモック関数ボディには `/* noop stub */` コメントを追加（oxlint noEmptyBlockStatements 対策）
-
-## UI Conventions (shadcn/ui)
-
-- **HeroUI v3 は削除済み**。新規コンポーネントは `npx shadcn@latest add <name>` で `src/components/ui/` に生成する。
-- `components.json`: `style: "new-york"`, `baseColor: "neutral"`, Tailwind v4 モード。
-- スタイル変更は `src/components/ui/*.tsx` 内の `cva` バリアント定義を直接編集する。
-- shadcn ドキュメントには MCP (`mcp_shadcn`) を使用する。
-
-## 3D Visualizer (React Three Fiber) ルール
-
-- `Canvas` は `frameloop="always"` を使うこと。`demand` は `invalidate()` の管理が複雑になり得策でない。
-- ビジュアライザーの実装は **`<instancedMesh>` per-band + `useFrame`** パターン。
-  - 1 周波数バンドにつき 1 つの `<instancedMesh>` で左右 2 列 × 全セルをまとめて描画する（`ShaderMaterial` は使わない）。
-  - 共有ジオメトリ (`THREE.PlaneGeometry`) はモジュールスコープで生成し、全バンドで再利用する。
-  - `useEffect` でインスタンスの位置（`setMatrixAt`）と初期色（`setColorAt`）を設定する。
-  - `useFrame` 内では `store.get(spectrogramAtom)` で値を読み、`setColorAt` で各インスタンスの色を更新する。
-  - ルートコンポーネントの `useFrame` で `store.set(spectrogramAtom, getBars())` を呼ぶ。
-  - `useMemo(() => new THREE.Color(), [])` でカラーオブジェクトをキャッシュする。
-- ビジュアライザーの周波数バンドは `audioMotionAnalyzer.getBars()` で取得し、  
-  `BAND_INDICES` で目的の帯域を選択する。`mode: 6`（ANSI 1/3 オクターブ）時は約 30 本返る。
-- `<Line>` / `<Text>` などの drei コンポーネントは `<mesh>` の子に置かない。コンテナには `<group>` を使うこと。
+- `@/atoms/audio` はモジュールスコープで AudioContext を生成 → 必ず `vi.mock` する
+- `atomWithIDB` atom は DataCloneError 回避のためプレーンな `atom()` でモック
+- 重複 DOM 要素 → `.first()` 使用
+- 空モック関数 → `/* noop stub */` コメント追加（oxlint noEmptyBlockStatements 対策）
+- モックパターンの詳細は `.github/copilot-instructions.md` を参照
 
 ## Integration Points
 
-- UI stack: **shadcn/ui** + `tailwindcss` + `@tailwindcss/vite`
+- UI: **shadcn/ui** (`npx shadcn@latest add <name>`) + Tailwind CSS v4
 - Routing: **TanStack Router** (`src/router.tsx`)
-- State: **Jotai** atoms (`src/atoms/`)
+- State: **Jotai** (`src/atoms/`)
 - Audio: **audiomotion-analyzer** (`src/atoms/audio.ts`)
-- 3D rendering: **@react-three/fiber** + **@react-three/drei** (`src/components/visualizer/`)
-- Build/runtime stack: **VitePlus** (Vite 8) + React 19 + TypeScript 5.9 (tsgo)
-- Deploy: Cloudflare Workers (`wrangler deploy`, region: `gcp:asia-northeast1`)
+- 3D: **@react-three/fiber** + **@react-three/drei** (`src/components/visualizer/`)
+- Build: **VitePlus** (Vite 8) + React 19 + TypeScript (tsgo)
+- Deploy: Cloudflare Workers (`wrangler deploy`, `gcp:asia-northeast1`)
 
 ## Project Conventions
 
-- **コード変更時は対応するテストを必ず追加・更新すること。** テストなしのコード変更は許容しない。
-- For external library docs, prefer Context7 (`mcp_io`) and TanStack MCP before relying on memory.
-- `src/atoms/` — Jotai atoms and side effects  
-  `src/components/` — React コンポーネント  
-  `src/hooks/` — カスタムフック  
-  `src/services/` — API / データ取得  
-  `src/lib/` — ユーティリティ・純粋関数
+- **コード変更時は対応するテストを必ず追加・更新すること。**
+- MCP: `mcp_shadcn` (shadcn/ui), TanStack MCP, `mcp_io` (Context7 — 外部ライブラリドキュメント)
+- `src/atoms/` Jotai atoms | `src/components/` React | `src/hooks/` hooks | `src/services/` API | `src/lib/` utils
 
-## Security
+## 3D Visualizer ルール
 
-- No auth backend is present; avoid introducing secrets or credentials in client code.
-- If environment variables are added later, keep them in Vite env flow and never hardcode sensitive values in `src/`.
+- `Canvas` は `frameloop="always"`。`<instancedMesh>` per-band + `useFrame` パターン。
+- 詳細は `.github/copilot-instructions.md` を参照。
 
 ## Browser Automation
 
-Use `agent-browser` for web automation. Run `agent-browser --help` for all commands.
-
-Core workflow:
-
-1. `agent-browser open <url>` - Navigate to page
-2. `agent-browser snapshot -i` - Get interactive elements with refs (@e1, @e2)
-3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs
-4. Re-snapshot after page changes
+`agent-browser` で Web 自動操作: `open <url>` → `snapshot -i` → `click @e1` / `fill @e2 "text"` → re-snapshot。
